@@ -1,0 +1,195 @@
+You are an expert Flutter engineer.
+Your task is to generate a complete, production-ready Flutter project for the following app idea:
+#
+APP CONCEPT
+
+A location-based travel app where users receive recommendations (places & activities) based on their location and preferences.
+Users swipe through places Tinder-style (right = like, left = skip).
+They can save favorites, create shared groups with friends, and see which places the group mutually likes.
+Users can tap a place → click “Route” → and open Apple Maps or Google Maps via deep linking.
+
+This project's code must be simple, scalable, and easy to extend.
+#
+TECH REQUIREMENTS
+- Framework:
+- Flutter (latest stable)
+- Null-safety enforced
+- Riverpod for state management
+- GoRouter for navigation
+- Firebase (Auth + Firestore + Storage)
+- Deep linking to Apple Maps / Google Maps
+
+Packages:
+- flutter_riverpod
+- go_router
+- cloud_firestore
+- firebase_auth
+- firebase_core
+- geolocator
+- url_launcher
+- google_maps_flutter
+- cached_network_image
+- tcard or similar for swipe UI
+#
+Create the project with this exact folder layout:
+lib/
+  main.dart
+  app/
+    app.dart
+    routes.dart
+    theme.dart
+  core/
+    config/
+      env.dart
+      app_config.dart
+    constants/
+      colors.dart
+      typography.dart
+      sizes.dart
+    errors/
+      exceptions.dart
+      failure.dart
+    services/
+      location_service.dart
+      maps_launcher.dart
+      firestore_service.dart
+      auth_service.dart
+  common/
+    widgets/
+      primary_button.dart
+      place_card.dart
+      loading_spinner.dart
+      error_view.dart
+    utils/
+      validators.dart
+      formatters.dart
+      geo_utils.dart
+    models/
+      user_model.dart
+      place_model.dart
+      group_model.dart
+      swipe_result_model.dart
+  features/
+    auth/
+      data/auth_repository.dart
+      logic/auth_controller.dart
+      ui/login_screen.dart
+      ui/register_screen.dart
+    onboarding/
+      ui/onboarding_screen.dart
+    home/
+      ui/home_screen.dart
+    swipe/
+      ui/swipe_screen.dart
+      widgets/swipe_card.dart
+      widgets/swipe_buttons.dart
+      logic/swipe_controller.dart
+      data/places_repository.dart
+    places/
+      ui/place_detail_screen.dart
+    group/
+      ui/group_screen.dart
+      ui/group_matches_screen.dart
+      logic/group_controller.dart
+      data/group_repository.dart
+    profile/
+      ui/profile_screen.dart
+      logic/profile_controller.dart
+      data/profile_repository.dart
+  main_providers.dart
+#
+CORE DESIGN PRINCIPLES
+Architecture:
+Feature-based modular structure
+Clean architecture separation:
+ui → presentation
+logic → state management (Riverpod)
+data → repositories + Firebase calls
+Strict linting (prefer flutter_lints)
+Code Style:
+Use Riverpod AsyncNotifier / Notifier where appropriate
+Make all models immutable using const constructors + copyWith
+Use GoRouter for navigation with typed routes
+All screens must be responsive
+#
+1- Create the entire folder structure with empty files
+Populate each file with minimal boilerplate (class ... {}).
+#
+2- 2. Implement:
+a) main.dart
+Initialize Firebase
+Register providers
+Run App()
+b) app/app.dart
+MaterialApp setup
+Theme
+GoRouter integration
+c) routes.dart
+Route definitions for:
+Onboarding
+Login
+Register
+Home
+Swipe
+PlaceDetail
+Group
+GroupMatches
+Profile
+#
+3- Implement Models
+UserModel
+PlaceModel (id, name, description, lat, lng, images, tags)
+GroupModel (groupId, members, sharedFavorites)
+SwipeResultModel
+Use fromJson / toJson in all.
+#
+4- Implement Services
+location_service.dart
+request permission
+get current location
+maps_launcher.dart
+function openInMaps(lat, lng, name):
+if iOS → Apple Maps URL
+if Android → Google Maps URL
+firestore_service.dart
+generic helpers for read/write
+auth_service.dart
+Firebase Auth wrapper
+#
+5-Implement Repositories
+auth_repository.dart: login, signup, logout
+places_repository.dart: load nearby places, filtered by radius & preferences
+group_repository.dart: create group, join group, sync favorites
+profile_repository.dart
+#
+6- Implement Controllers (logic)
+Use Riverpod:
+auth_controller.dart
+swipe_controller.dart
+group_controller.dart
+profile_controller.dart
+Swipe controller logic:
+load places
+present next card
+record swipes
+save right-swipes as favorites
+detect group matches
+#
+7- Implement UI Screens
+Generate minimal but functional screens:
+swipe_screen.dart
+Tinder-style swipe cards
+Buttons for Like / Skip
+Live data from swipe_controller
+place_detail_screen.dart
+Show images, description, tags
+CTA: “Open in Maps”
+Use maps_launcher.openInMaps()
+group_matches_screen.dart
+List of places where >1 group member swiped right
+Next:
+Login/Register UI
+Onboarding
+Home screen with bottom nav
+#
+Until Firebase is connected, add mock places to test swiping
