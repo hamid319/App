@@ -7,15 +7,8 @@ import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    debugPrint('✅ Firebase erfolgreich initialisiert');
-  } catch (e, stackTrace) {
-    debugPrint('❌ Firebase Initialisierungsfehler: $e');
-    debugPrint('Stack Trace: $stackTrace');
-    // App trotzdem starten, damit der Fehler sichtbar ist
-  }
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const ProviderScope(child: MobileApp()));
 }
