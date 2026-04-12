@@ -18,10 +18,12 @@ migrate_working_dir/
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# IDE folders
+.vscode/
+.cursor/
+
+# Local configuration
+android/local.properties
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -43,3 +45,29 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# =========================
+# iOS / Mac Safety Net (Crucial for Teammate)
+# =========================
+
+# CocoaPods (The iOS equivalent of pub-cache)
+# We do not want to commit the actual libraries, just the lockfile.
+ios/Pods/
+ios/.symlinks/
+
+# Flutter wrappers for iOS
+# These are generated binaries. Never commit them.
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Generated.xcconfig
+ios/ServiceDefinitions.json
+ios/Runner/GeneratedPluginRegistrant.*
+
+# Xcode temporary build files
+**/ios/**/xcshareddata/
+**/ios/**/xcuserdata/
+ios/*.mode1v3
+ios/*.mode2v3
+ios/*.moved-aside
+ios/*.pbxuser
+ios/*.perspectivev3

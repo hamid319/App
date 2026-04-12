@@ -39,10 +39,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ref.listen<AsyncValue>(authControllerProvider, (previous, next) {
       next.whenData((user) {
         if (user != null && mounted) {
-          debugPrint('✅ Login erfolgreich! Navigiere zu /home');
           context.go('/home');
-        } else if (user == null && previous?.value != null) {
-          debugPrint('⚠️ User wurde auf null gesetzt');
         }
       });
     });
@@ -126,12 +123,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   String _getErrorMessage(Object error) {
-    debugPrint('🔍 Fehler beim Login: $error');
     final errorString = error.toString().toLowerCase();
     
     // Firebase Auth Exception Codes
     if (error is FirebaseAuthException) {
-      debugPrint('🔍 Firebase Auth Exception Code: ${error.code}');
       switch (error.code) {
         case 'user-not-found':
           return 'Kein Benutzer mit dieser E-Mail gefunden';

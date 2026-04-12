@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/services/preferences_service.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -39,19 +40,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.dispose();
   }
 
-  void _nextPage() {
+  void _nextPage() async {
     if (_currentPage < _pages.length - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     } else {
+      await _completeOnboarding();
+      if (mounted) {
+        context.go('/login');
+      }
+    }
+  }
+
+  void _skip() async {
+    await _completeOnboarding();
+    if (mounted) {
       context.go('/login');
     }
   }
 
-  void _skip() {
-    context.go('/login');
+  Future<void> _completeOnboarding() async {
+    await PreferencesService.setOnboardingShown();
   }
 
   @override
