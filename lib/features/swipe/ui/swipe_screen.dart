@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../common/models/place_model.dart';
 import '../logic/swipe_controller.dart';
+import 'dart:math' as math;
 
+/// Main Swipe Screen - displays the card stack and handles state
 class SwipeScreen extends ConsumerWidget {
   const SwipeScreen({super.key});
 
@@ -14,7 +16,7 @@ class SwipeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Orte entdecken'),
+        title: const Text('Discover Places'),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
@@ -35,11 +37,11 @@ class SwipeScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Fehler: $e'),
+              Text('Error: $e'),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => ref.refresh(swipeControllerProvider),
-                child: const Text('Erneut versuchen'),
+                child: const Text('Try again'),
               ),
             ],
           ),
@@ -47,6 +49,7 @@ class SwipeScreen extends ConsumerWidget {
         data: (places) {
           final current = ctrl.currentPlace;
           if (current == null) {
+            // No more places to show
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -54,12 +57,12 @@ class SwipeScreen extends ConsumerWidget {
                   const Icon(Icons.check_circle_outline, size: 80, color: Colors.green),
                   const SizedBox(height: 24),
                   Text(
-                    'Keine Orte mehr!',
+                    'No more places!',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Du hast alle Orte durchgesehen',
+                    'You have viewed all places',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[600],
                         ),
@@ -68,20 +71,23 @@ class SwipeScreen extends ConsumerWidget {
                   ElevatedButton.icon(
                     onPressed: () => ref.refresh(swipeControllerProvider),
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Neu laden'),
+                    label: const Text('Reload'),
                   ),
                 ],
               ),
             );
           }
-          return _SwipeCardStack(
+          
+          // Build the swipeable card stack
+          return TinderSwipeCardStack(
             place: current,
             onLike: () {
               ctrl.like();
-              _showSnackBar(context, 'Zu Favoriten hinzugefügt!', Colors.green);
+              _showSnackBar(context, 'Added to favorites!', Colors.green);
             },
             onSkip: () {
               ctrl.skip();
+              _showSnackBar(context, 'Skipped', Colors.orange);
             },
             onDetail: () {
               context.push('/place/${current.id}');
@@ -93,23 +99,31 @@ class SwipeScreen extends ConsumerWidget {
   }
 
   void _showSnackBar(BuildContext context, String message, Color color) {
+    ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: color,
         duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
       ),
     );
   }
 }
 
-class _SwipeCardStack extends StatefulWidget {
+// =============================================================================
+// TINDER SWIPE CARD STACK - The main swipeable component
+// =============================================================================
+
+class TinderSwipeCardStack extends StatefulWidget {
   final PlaceModel place;
   final VoidCallback onLike;
   final VoidCallback onSkip;
   final VoidCallback onDetail;
 
-  const _SwipeCardStack({
+  const TinderSwipeCardStack({
+    super.key,
     required this.place,
     required this.onLike,
     required this.onSkip,
@@ -117,200 +131,516 @@ class _SwipeCardStack extends StatefulWidget {
   });
 
   @override
-  State<_SwipeCardStack> createState() => _SwipeCardStackState();
+  State<TinderSwipeCardStack> createState() => _TinderSwipeCardStackState();
 }
 
-class _SwipeCardStackState extends State<_SwipeCardStack>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
+class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
+    with TickerProviderStateMixin {
+  
+  // ============ ANIMATION CONTROLLERS ============
+  
+  /// Controls the card's position during drag and fly-off animation
+  late AnimationController _swipeController;
+  
+  /// Controls the button press animation
+  late AnimationController _buttonController;
+  
+  // ============ POSITION & ROTATION STATE ============
+  
+  /// Current horizontal offset of the card (updated during drag)
+  double _dragX = 0;
+  
+  /// Current vertical offset of the card (updated during drag)
+  double _dragY = 0;
+  
+  /// Tracks if we're currently animating a swipe-off
+  bool _isAnimating = false;
+  
+  // ============ SWIPE THRESHOLDS ============
+  
+  /// How far the card must be dragged to trigger a swipe (as fraction of screen width)
+  static const double _swipeThreshold = 0.3;
+  
+  /// Maximum rotation angle in radians when card is at edge
+  static const double _maxRotation = 0.3;
+  
+  // ============ ANIMATIONS ============
+  
+  /// Animation for flying the card off screen
+  Animation<Offset>? _flyOffAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 200),
+    
+    // Swipe animation controller - controls the fly-off effect
+    _swipeController = AnimationController(
+      duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    
+    // Button animation controller - for button press feedback
+    _buttonController = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
     );
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _swipeController.dispose();
+    _buttonController.dispose();
     super.dispose();
   }
-
-  void _handleLike() {
-    _controller.forward().then((_) {
-      widget.onLike();
-      _controller.reverse();
-    });
+  
+  /// Reset card position when a new place is shown
+  @override
+  void didUpdateWidget(TinderSwipeCardStack oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.place.id != widget.place.id) {
+      // New card - reset position
+      setState(() {
+        _dragX = 0;
+        _dragY = 0;
+        _isAnimating = false;
+      });
+      _swipeController.reset();
+    }
   }
 
-  void _handleSkip() {
-    _controller.forward().then((_) {
-      widget.onSkip();
-      _controller.reverse();
+  // ============ GESTURE HANDLERS ============
+  
+  /// Called when user starts dragging the card
+  void _onPanStart(DragStartDetails details) {
+    if (_isAnimating) return;
+  }
+  
+  /// Called continuously as user drags the card
+  void _onPanUpdate(DragUpdateDetails details) {
+    if (_isAnimating) return;
+    
+    setState(() {
+      // Update card position based on finger movement
+      _dragX += details.delta.dx;
+      _dragY += details.delta.dy;
     });
   }
+  
+  /// Called when user releases the card
+  void _onPanEnd(DragEndDetails details) {
+    if (_isAnimating) return;
+    
+    final screenWidth = MediaQuery.of(context).size.width;
+    final threshold = screenWidth * _swipeThreshold;
+    
+    // Check if card was dragged past the threshold
+    if (_dragX.abs() > threshold) {
+      // Swipe detected - fly card off screen
+      _animateCardOff(_dragX > 0);
+    } else {
+      // Threshold not met - snap back to center
+      _snapBack();
+    }
+  }
+  
+  // ============ ANIMATION METHODS ============
+  
+  /// Animate the card flying off the screen
+  void _animateCardOff(bool toRight) {
+    _isAnimating = true;
+    
+    final screenWidth = MediaQuery.of(context).size.width;
+    
+    // Calculate the end position (off-screen)
+    // Card flies in the direction it was swiped, with some vertical motion
+    final endX = toRight ? screenWidth * 1.5 : -screenWidth * 1.5;
+    final endY = _dragY + (toRight ? 100 : -100);
+    
+    // Create the fly-off animation
+    _flyOffAnimation = Tween<Offset>(
+      begin: Offset(_dragX, _dragY),
+      end: Offset(endX, endY),
+    ).animate(CurvedAnimation(
+      parent: _swipeController,
+      curve: Curves.easeOut,
+    ));
+    
+    // Listen for animation updates to rebuild
+    _swipeController.addListener(_onSwipeAnimationUpdate);
+    
+    // When animation completes, trigger the callback
+    _swipeController.forward().then((_) {
+      _swipeController.removeListener(_onSwipeAnimationUpdate);
+      
+      // Call the appropriate callback
+      if (toRight) {
+        widget.onLike();
+      } else {
+        widget.onSkip();
+      }
+      
+      // Reset state for next card
+      setState(() {
+        _dragX = 0;
+        _dragY = 0;
+        _isAnimating = false;
+      });
+      _swipeController.reset();
+    });
+  }
+  
+  /// Callback for animation updates
+  void _onSwipeAnimationUpdate() {
+    if (_flyOffAnimation != null) {
+      setState(() {
+        _dragX = _flyOffAnimation!.value.dx;
+        _dragY = _flyOffAnimation!.value.dy;
+      });
+    }
+  }
+  
+  /// Animate card back to center position
+  void _snapBack() {
+    final startX = _dragX;
+    final startY = _dragY;
+    
+    // Create snap-back animation
+    final animation = Tween<Offset>(
+      begin: Offset(startX, startY),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _swipeController,
+      curve: Curves.elasticOut,
+    ));
+    
+    void listener() {
+      setState(() {
+        _dragX = animation.value.dx;
+        _dragY = animation.value.dy;
+      });
+    }
+    
+    _swipeController.addListener(listener);
+    _swipeController.forward().then((_) {
+      _swipeController.removeListener(listener);
+      _swipeController.reset();
+    });
+  }
+  
+  /// Handle button-triggered like (right swipe)
+  void _handleButtonLike() {
+    if (_isAnimating) return;
+    _animateCardOff(true);
+  }
+  
+  /// Handle button-triggered skip (left swipe)
+  void _handleButtonSkip() {
+    if (_isAnimating) return;
+    _animateCardOff(false);
+  }
+  
+  // ============ BUILD METHOD ============
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    
+    // Calculate rotation based on horizontal drag
+    // Card rotates slightly in the direction of the swipe
+    final rotationAngle = (_dragX / screenWidth) * _maxRotation;
+    
+    // Calculate opacity for like/skip indicators
+    final likeOpacity = (_dragX / (screenWidth * _swipeThreshold)).clamp(0.0, 1.0);
+    final skipOpacity = (-_dragX / (screenWidth * _swipeThreshold)).clamp(0.0, 1.0);
+    
     return Column(
       children: [
+        // ============ CARD STACK AREA ============
         Expanded(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: GestureDetector(
-              onTap: widget.onDetail,
-              child: ScaleTransition(
-                scale: _scaleAnimation,
-                child: Card(
-                  elevation: 8,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Background placeholder card (creates depth effect)
+                Positioned.fill(
+                  child: Transform.scale(
+                    scale: 0.95,
+                    child: Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      color: Colors.grey[200],
+                      child: const Center(
+                        child: Icon(Icons.place, size: 60, color: Colors.grey),
+                      ),
+                    ),
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
+                ),
+                
+                // ============ TOP SWIPEABLE CARD ============
+                GestureDetector(
+                  onPanStart: _onPanStart,
+                  onPanUpdate: _onPanUpdate,
+                  onPanEnd: _onPanEnd,
+                  onTap: widget.onDetail,
+                  child: Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.identity()
+                      ..setTranslationRaw(_dragX, _dragY, 0)
+                      ..rotateZ(rotationAngle),
                     child: Stack(
                       children: [
-                        // Placeholder für Bild oder Farbverlauf
-                        Container(
-                          width: double.infinity,
-                          height: double.infinity,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Colors.blue.shade400,
-                                Colors.purple.shade400,
-                              ],
-                            ),
-                          ),
-                          child: widget.place.images.isNotEmpty
-                              ? Image.network(
-                                  widget.place.images.first,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      _buildPlaceholder(),
-                                )
-                              : _buildPlaceholder(),
-                        ),
-                        // Gradient Overlay
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.transparent,
-                                  Colors.black.withValues(alpha: 0.8),
-                                ],
+                        // The actual card
+                        _buildPlaceCard(),
+                        
+                        // ============ LIKE INDICATOR (Green) ============
+                        if (likeOpacity > 0)
+                          Positioned(
+                            top: 40,
+                            left: 30,
+                            child: Opacity(
+                              opacity: likeOpacity,
+                              child: Transform.rotate(
+                                angle: -math.pi / 12,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors.green,
+                                      width: 3,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Text(
+                                    'LIKE',
+                                    style: TextStyle(
+                                      color: Colors.green,
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                            padding: const EdgeInsets.all(24.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.place.name,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
+                          ),
+                        
+                        // ============ SKIP INDICATOR (Red) ============
+                        if (skipOpacity > 0)
+                          Positioned(
+                            top: 40,
+                            right: 30,
+                            child: Opacity(
+                              opacity: skipOpacity,
+                              child: Transform.rotate(
+                                angle: math.pi / 12,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors.red,
+                                      width: 3,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Text(
+                                    'NOPE',
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  widget.place.description,
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.9),
-                                    fontSize: 16,
-                                  ),
-                                  maxLines: 3,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if (widget.place.tags.isNotEmpty) ...[
-                                  const SizedBox(height: 12),
-                                  Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: widget.place.tags
-                                        .map(
-                                          (tag) => Chip(
-                                            label: Text(
-                                              tag,
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                            backgroundColor:
-                                                Colors.white.withValues(alpha: 0.2),
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 4,
-                                            ),
-                                          ),
-                                        )
-                                        .toList(),
-                                  ),
-                                ],
-                              ],
+                              ),
                             ),
                           ),
-                        ),
-                        // Info Icon
-                        Positioned(
-                          top: 16,
-                          right: 16,
-                          child: IconButton(
-                            icon: const Icon(Icons.info_outline,
-                                color: Colors.white),
-                            onPressed: widget.onDetail,
-                          ),
-                        ),
                       ],
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
         ),
-        // Action Buttons
+        
+        // ============ ACTION BUTTONS ============
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              // Skip Button
+              // Skip Button (X)
               _ActionButton(
                 icon: Icons.close,
                 color: Colors.red,
-                onPressed: _handleSkip,
-                label: 'Überspringen',
+                onPressed: _handleButtonSkip,
+                label: 'Skip',
               ),
               const SizedBox(width: 24),
-              // Like Button
+              // Like Button (Heart)
               _ActionButton(
                 icon: Icons.favorite,
                 color: Colors.green,
-                onPressed: _handleLike,
-                label: 'Favorit',
+                onPressed: _handleButtonLike,
+                label: 'Like',
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+  
+  /// Builds the main place card with image and content
+  Widget _buildPlaceCard() {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width - 32,
+      height: double.infinity,
+      child: Card(
+        elevation: 8,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            children: [
+              // Background image or gradient
+              Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.blue.shade400,
+                      Colors.purple.shade400,
+                    ],
+                  ),
+                ),
+                child: widget.place.images.isNotEmpty
+                    ? Image.network(
+                        widget.place.images.first,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            _buildPlaceholder(),
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          );
+                        },
+                      )
+                    : _buildPlaceholder(),
+              ),
+              
+              // Gradient overlay for text readability
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.8),
+                      ],
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Place name
+                      Text(
+                        widget.place.name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      // Place description
+                      Text(
+                        widget.place.description,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          fontSize: 16,
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      // Tags
+                      if (widget.place.tags.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: widget.place.tags
+                              .map(
+                                (tag) => Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.2),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Text(
+                                    tag,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              
+              // Info button
+              Positioned(
+                top: 16,
+                right: 16,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.info_outline, color: Colors.white),
+                    onPressed: widget.onDetail,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -328,7 +658,11 @@ class _SwipeCardStackState extends State<_SwipeCardStack>
   }
 }
 
-class _ActionButton extends StatelessWidget {
+// =============================================================================
+// ACTION BUTTON WIDGET
+// =============================================================================
+
+class _ActionButton extends StatefulWidget {
   final IconData icon;
   final Color color;
   final VoidCallback onPressed;
@@ -342,34 +676,76 @@ class _ActionButton extends StatelessWidget {
   });
 
   @override
+  State<_ActionButton> createState() => _ActionButtonState();
+}
+
+class _ActionButtonState extends State<_ActionButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.9).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleTap() {
+    _controller.forward().then((_) {
+      _controller.reverse();
+      widget.onPressed();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: IconButton(
-            icon: Icon(icon, color: color),
-            iconSize: 32,
-            onPressed: onPressed,
-            style: IconButton.styleFrom(
-              padding: const EdgeInsets.all(16),
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: _handleTap,
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: widget.color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: widget.color.withValues(alpha: 0.3),
+                  width: 2,
+                ),
+              ),
+              child: Icon(
+                widget.icon,
+                color: widget.color,
+                size: 32,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: TextStyle(
-            color: color,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
+          const SizedBox(height: 8),
+          Text(
+            widget.label,
+            style: TextStyle(
+              color: widget.color,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

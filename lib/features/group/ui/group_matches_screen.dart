@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../common/models/place_model.dart';
+import '../../../common/widgets/loading_spinner.dart';
+import '../../../common/widgets/error_view.dart';
 import '../logic/group_controller.dart';
 import '../../swipe/data/places_repository.dart';
 
@@ -14,7 +16,6 @@ final groupMatchesProvider = FutureProvider<List<PlaceModel>>((ref) async {
       if (group == null || group.sharedFavorites.isEmpty) {
         return [];
       }
-      // Lade alle Places und filtere nach sharedFavorites
       final allPlaces = await repo.loadNearbyPlaces(0, 0, useMock: true);
       return allPlaces
           .where((place) => group.sharedFavorites.contains(place.id))
@@ -35,69 +36,39 @@ class GroupMatchesScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gruppen-Matches'),
+        title: const Text('Group Matches'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () {
-              ref.invalidate(groupControllerProvider);
+            onPressed: () async {
+              await ref.read(groupControllerProvider.notifier).refreshGroupMatches();
               ref.invalidate(groupMatchesProvider);
             },
           ),
         ],
       ),
       body: groupState.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
-              Text('Fehler: $error'),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => context.go('/group'),
-                child: const Text('Zur Gruppe zurück'),
-              ),
-            ],
-          ),
+        loading: () => const LoadingSpinner(message: 'Loading group...'),
+        error: (error, stack) => ErrorView(
+          message: 'Error: $error',
+          title: 'Failed to load group',
+          onRetry: () => ref.invalidate(groupControllerProvider),
         ),
         data: (group) {
           if (group == null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.group_off, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  const Text('Keine Gruppe gefunden'),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Erstelle oder trete einer Gruppe bei',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () => context.go('/group'),
-                    child: const Text('Zur Gruppe'),
-                  ),
-                ],
-              ),
+            return ErrorView(
+              message: 'Create or join a group first',
+              title: 'No Group',
+              icon: Icons.group_off,
+              onRetry: () => context.go('/home'),
             );
           }
 
           return matchesAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stack) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text('Fehler beim Laden: $error'),
-                ],
-              ),
+            loading: () => const LoadingSpinner(message: 'Loading matches...'),
+            error: (error, stack) => ErrorView(
+              message: 'Error loading matches: $error',
+              onRetry: () => ref.invalidate(groupMatchesProvider),
             ),
             data: (matches) {
               if (matches.isEmpty) {
@@ -112,20 +83,20 @@ class GroupMatchesScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'Noch keine Matches',
+                        'No Matches Yet',
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Wenn alle Gruppenmitglieder einen Ort liken,\nerscheint er hier als Match.',
+                        'When all group members like a place,\nit will appear here as a match.',
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.grey[600]),
                       ),
                       const SizedBox(height: 32),
                       ElevatedButton.icon(
-                        onPressed: () => context.go('/swipe'),
+                        onPressed: () => context.go('/home'),
                         icon: const Icon(Icons.explore),
-                        label: const Text('Orte entdecken'),
+                        label: const Text('Discover Places'),
                       ),
                     ],
                   ),
@@ -134,7 +105,6 @@ class GroupMatchesScreen extends ConsumerWidget {
 
               return Column(
                 children: [
-                  // Header mit Match-Count
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16.0),
@@ -149,7 +119,7 @@ class GroupMatchesScreen extends ConsumerWidget {
                         Icon(Icons.favorite, color: Colors.green.shade700),
                         const SizedBox(width: 12),
                         Text(
-                          '${matches.length} ${matches.length == 1 ? 'Match' : 'Matches'} gefunden',
+                          '${matches.length} ${matches.length == 1 ? 'Match' : 'Matches'} found',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -159,7 +129,6 @@ class GroupMatchesScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  // Matches Liste
                   Expanded(
                     child: ListView.builder(
                       padding: const EdgeInsets.all(16.0),
@@ -311,7 +280,7 @@ class _MatchCard extends StatelessWidget {
                     child: OutlinedButton.icon(
                       onPressed: () => context.push('/place/${place.id}'),
                       icon: const Icon(Icons.arrow_forward),
-                      label: const Text('Details anzeigen'),
+                      label: const Text('View Details'),
                     ),
                   ),
                 ],
