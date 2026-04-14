@@ -23,16 +23,19 @@ class AuthController extends AsyncNotifier<UserModel?> {
     });
 
     _authSubscription = _authRepo.authStateChanges().listen((firebaseUser) async {
-      if (firebaseUser != null) {
-        final userModel = await _profileRepo.getUserProfile(firebaseUser.uid);
-        final hydratedUser = userModel.copyWith(
-          email: firebaseUser.email ?? userModel.email,
-          displayName: firebaseUser.displayName ?? userModel.displayName,
-        );
-        state = AsyncData(hydratedUser);
-      } else {
-        state = const AsyncData(null);
-      }
+      // Delay state update to avoid modifying provider during widget build
+      Future.microtask(() async {
+        if (firebaseUser != null) {
+          final userModel = await _profileRepo.getUserProfile(firebaseUser.uid);
+          final hydratedUser = userModel.copyWith(
+            email: firebaseUser.email ?? userModel.email,
+            displayName: firebaseUser.displayName ?? userModel.displayName,
+          );
+          state = AsyncData(hydratedUser);
+        } else {
+          state = const AsyncData(null);
+        }
+      });
     });
 
     final currentUser = _authRepo.firebaseUser;

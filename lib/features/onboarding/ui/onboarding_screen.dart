@@ -49,7 +49,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     } else {
       await _completeOnboarding();
       if (mounted) {
-        context.go('/login');
+        context.go('/home');
       }
     }
   }
@@ -57,7 +57,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _skip() async {
     await _completeOnboarding();
     if (mounted) {
-      context.go('/login');
+      context.go('/home');
     }
   }
 

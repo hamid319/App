@@ -10,9 +10,9 @@ import '../../../main_providers.dart';
 final swipeControllerProvider = AsyncNotifierProvider<SwipeController, List<PlaceModel>>(SwipeController.new);
 
 class SwipeController extends AsyncNotifier<List<PlaceModel>> {
-  late final PlacesRepository _placesRepo;
-  late final ProfileRepository _profileRepo;
-  late final LocationService _locationService;
+  late PlacesRepository _placesRepo;
+  late ProfileRepository _profileRepo;
+  late LocationService _locationService;
   int _currentIndex = 0;
   final List<String> _favorites = [];
   Set<String> _swipedPlaceIds = {};
@@ -97,9 +97,16 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     final place = currentPlace;
     if (place == null) return;
     
+    // Advance immediately so the UI doesn't freeze waiting for network
+    nextPlace();
+    
     final authState = ref.read(authControllerProvider);
     if (authState.value != null) {
       final userId = authState.value!.uid;
+      
+      if (!_favorites.contains(place.id)) {
+        _favorites.add(place.id);
+      }
       
       try {
         await _placesRepo.recordSwipe(
@@ -107,24 +114,20 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
           placeId: place.id,
           liked: true,
         );
-        
-        if (!_favorites.contains(place.id)) {
-          _favorites.add(place.id);
-        }
-        
         await _profileRepo.updateUserProfile(userId, {'favorites': _favorites});
         await _syncFavoritesWithGroup(userId);
       } catch (e) {
         // Continue even on error
       }
     }
-    
-    nextPlace();
   }
 
   Future<void> skip() async {
     final place = currentPlace;
     if (place == null) return;
+    
+    // Advance immediately so the UI doesn't freeze waiting for network
+    nextPlace();
     
     final authState = ref.read(authControllerProvider);
     if (authState.value != null) {
@@ -138,8 +141,6 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
         // Continue even on error
       }
     }
-    
-    nextPlace();
   }
 
   void nextPlace() {
@@ -154,6 +155,23 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
   }
 
   List<String> get favoritesList => List.unmodifiable(_favorites);
+
+  Future<void> resetAll() async {
+    _currentIndex = 0;
+    _favorites.clear();
+    _swipedPlaceIds = {};
+
+    final authState = ref.read(authControllerProvider);
+    if (authState.value != null) {
+      final userId = authState.value!.uid;
+      try {
+        await _profileRepo.updateUserProfile(userId, {'favorites': []});
+        await _placesRepo.clearSwipedPlaces(userId);
+      } catch (_) {}
+    }
+
+    ref.invalidateSelf();
+  }
 
   Future<void> _syncFavoritesWithGroup(String userId) async {
     try {

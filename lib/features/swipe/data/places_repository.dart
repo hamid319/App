@@ -81,6 +81,18 @@ class PlacesRepository {
     return swipes.map((s) => s.placeId).toSet();
   }
 
+  Future<void> clearSwipedPlaces(String userId) async {
+    final query = await _db
+        .collection('swipeResults')
+        .where('userId', isEqualTo: userId)
+        .get();
+    final batch = _db.batch();
+    for (final doc in query.docs) {
+      batch.delete(doc.reference);
+    }
+    await batch.commit();
+  }
+
   Future<List<String>> getUserLikedPlaceIds(String userId) async {
     final query = await _db
         .collection('swipeResults')
