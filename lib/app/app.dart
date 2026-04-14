@@ -14,8 +14,3 @@ class MobileApp extends StatelessWidget {
     );
   }
 }
-
-void main() {
-  runApp(const MobileApp());
-}
-

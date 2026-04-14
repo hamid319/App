@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -9,39 +8,19 @@ class AuthService {
   Stream<User?> authStateChanges() => _auth.authStateChanges();
 
   Future<User?> signInWithEmail(String email, String password) async {
-    try {
-      debugPrint('🔐 Versuche Login mit Email: $email');
-      final cred = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      debugPrint('✅ Login erfolgreich: ${cred.user?.email}');
-      return cred.user;
-    } on FirebaseAuthException catch (e) {
-      debugPrint('❌ Firebase Auth Fehler: ${e.code} - ${e.message}');
-      rethrow;
-    } catch (e) {
-      debugPrint('❌ Unerwarteter Fehler beim Login: $e');
-      rethrow;
-    }
+    final cred = await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    return cred.user;
   }
 
   Future<User?> registerWithEmail(String email, String password) async {
-    try {
-      debugPrint('📝 Versuche Registrierung mit Email: $email');
-      final cred = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      debugPrint('✅ Registrierung erfolgreich: ${cred.user?.email}');
-      return cred.user;
-    } on FirebaseAuthException catch (e) {
-      debugPrint('❌ Firebase Auth Fehler: ${e.code} - ${e.message}');
-      rethrow;
-    } catch (e) {
-      debugPrint('❌ Unerwarteter Fehler bei Registrierung: $e');
-      rethrow;
-    }
+    final cred = await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    return cred.user;
   }
 
   Future<void> signOut() async {

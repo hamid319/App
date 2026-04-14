@@ -9,8 +9,8 @@ import '../../../common/widgets/loading_spinner.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../../common/widgets/place_card.dart';
 
-class ProfileScreen extends ConsumerWidget {
-  const ProfileScreen({super.key});
+class SimplifiedProfileScreen extends ConsumerWidget {
+  const SimplifiedProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -51,15 +51,7 @@ class ProfileScreen extends ConsumerWidget {
             );
           }
 
-          // Load user profile from Firestore as a side effect
-          ref.listen<String?>(
-            authControllerProvider.select((state) => state.value?.uid),
-            (previous, next) {
-              if (next != null && next != previous) {
-                ref.read(profileControllerProvider.notifier).loadProfile(next);
-              }
-            },
-          );
+          ref.read(profileControllerProvider.notifier).loadProfile(user.uid);
           final profileState = ref.watch(profileControllerProvider);
 
           return profileState.when(
@@ -84,7 +76,6 @@ class ProfileScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Profile Header
           Center(
             child: Column(
               children: [
@@ -121,8 +112,30 @@ class ProfileScreen extends ConsumerWidget {
               ],
             ),
           ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _showEditProfileDialog(context, ref, user),
+                  icon: const Icon(Icons.edit),
+                  label: const Text('Edit Profile'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _showLogoutDialog(context, ref),
+                  icon: const Icon(Icons.logout, color: Colors.red),
+                  label: const Text('Logout', style: TextStyle(color: Colors.red)),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.red),
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 32),
-          // Favorites Section
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -176,7 +189,6 @@ class ProfileScreen extends ConsumerWidget {
       );
     }
 
-    // Load favorite places
     return FutureBuilder<List<PlaceModel>>(
       future: _loadFavoritePlaces(favoriteIds),
       builder: (context, snapshot) {
@@ -193,9 +205,7 @@ class ProfileScreen extends ConsumerWidget {
 
         final places = snapshot.data ?? [];
         if (places.isEmpty) {
-          return const Center(
-            child: Text('No favorite places found'),
-          );
+          return const Center(child: Text('No favorite places found'));
         }
 
         return ListView.builder(
@@ -223,30 +233,25 @@ class ProfileScreen extends ConsumerWidget {
     return allPlaces.where((place) => favoriteIds.contains(place.id)).toList();
   }
 
-  static void _showEditProfileDialog(BuildContext context, WidgetRef ref, user) {
+  void _showEditProfileDialog(BuildContext context, WidgetRef ref, user) {
     final nameController = TextEditingController(text: user.displayName ?? '');
-    
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Edit Profile'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Display Name',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
+        content: TextField(
+          controller: nameController,
+          decoration: const InputDecoration(
+            labelText: 'Display Name',
+            border: OutlineInputBorder(),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () {
               nameController.dispose();
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
             },
             child: const Text('Cancel'),
           ),
@@ -258,22 +263,16 @@ class ProfileScreen extends ConsumerWidget {
                   {'displayName': nameController.text.trim()},
                 );
                 nameController.dispose();
-                if (context.mounted) {
-                  Navigator.pop(context);
+                if (dialogContext.mounted) {
+                  Navigator.pop(dialogContext);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Profile updated!'),
-                      backgroundColor: Colors.green,
-                    ),
+                    const SnackBar(content: Text('Profile updated!'), backgroundColor: Colors.green),
                   );
                 }
               } catch (e) {
-                if (context.mounted) {
+                if (dialogContext.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Error updating profile: $e'),
-                      backgroundColor: Colors.red,
-                    ),
+                    SnackBar(content: Text('Error updating profile: $e'), backgroundColor: Colors.red),
                   );
                 }
               }
@@ -288,17 +287,17 @@ class ProfileScreen extends ConsumerWidget {
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Logout'),
         content: const Text('Are you sure you want to logout?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               await ref.read(authControllerProvider.notifier).logout();
               if (context.mounted) {
                 context.go('/login');

@@ -6,6 +6,9 @@ project(mobileapp LANGUAGES CXX)
 # the on-disk name of your application.
 set(BINARY_NAME "mobileapp")
 
+# Fix for Firebase C++ SDK CMake compatibility issue
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5 CACHE STRING "Minimum CMake policy version")
+
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
 cmake_policy(VERSION 3.14...3.25)

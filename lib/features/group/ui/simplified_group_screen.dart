@@ -8,14 +8,14 @@ import '../../../common/widgets/loading_spinner.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../auth/logic/auth_controller.dart';
 
-class GroupScreen extends ConsumerStatefulWidget {
-  const GroupScreen({super.key});
+class SimplifiedGroupScreen extends ConsumerStatefulWidget {
+  const SimplifiedGroupScreen({super.key});
 
   @override
-  ConsumerState<GroupScreen> createState() => _GroupScreenState();
+  ConsumerState<SimplifiedGroupScreen> createState() => _SimplifiedGroupScreenState();
 }
 
-class _GroupScreenState extends ConsumerState<GroupScreen> {
+class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
   final TextEditingController _groupIdController = TextEditingController();
   bool _showCreateGroup = false;
   final TextEditingController _groupNameController = TextEditingController();
@@ -86,11 +86,7 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(height: 40),
-          Icon(
-            Icons.group_add,
-            size: 80,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.group_add, size: 80, color: Colors.grey[400]),
           const SizedBox(height: 24),
           Text(
             'No Group Yet',
@@ -112,11 +108,7 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
               label: 'Create Group',
               icon: Icons.add,
               width: double.infinity,
-              onPressed: () {
-                setState(() {
-                  _showCreateGroup = true;
-                });
-              },
+              onPressed: () => setState(() => _showCreateGroup = true),
             ),
             const SizedBox(height: 16),
             PrimaryButton(
@@ -125,9 +117,7 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
               width: double.infinity,
               backgroundColor: Colors.blue.shade50,
               textColor: Colors.blue,
-              onPressed: () {
-                _showJoinGroupDialog();
-              },
+              onPressed: _showJoinGroupDialog,
             ),
           ] else ...[
             Card(
@@ -169,7 +159,7 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
                         Expanded(
                           child: PrimaryButton(
                             label: 'Create',
-                            onPressed: () => _createGroup(),
+                            onPressed: _createGroup,
                             isLoading: ref.watch(groupControllerProvider).isLoading,
                           ),
                         ),
@@ -188,7 +178,6 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
   Widget _buildGroupView(GroupModel group, String userId) {
     return Column(
       children: [
-        // Group Info Card
         Card(
           margin: const EdgeInsets.all(16),
           child: Padding(
@@ -208,10 +197,7 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
                     ),
                     IconButton(
                       icon: const Icon(Icons.copy),
-                      onPressed: () {
-                        // Copy group ID to clipboard
-                        // You can add clipboard functionality here
-                      },
+                      onPressed: () {},
                     ),
                   ],
                 ),
@@ -241,7 +227,6 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
             ),
           ),
         ),
-        // Members List
         if (group.members.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -270,7 +255,6 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
             ),
           ),
         ],
-        // Action Buttons
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -309,13 +293,13 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
       return;
     }
 
-    final authState = ref.read(authControllerProvider);
-    final userId = authState.value?.uid;
+    final userId = ref.read(authControllerProvider).value?.uid;
     if (userId == null) return;
 
-    final groupId = _generateGroupId();
+    final groupId = DateTime.now().millisecondsSinceEpoch.toString();
     final group = GroupModel(
       groupId: groupId,
+      groupName: groupName,
       members: [userId],
       sharedFavorites: [],
     );
@@ -337,10 +321,7 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error creating group: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Error creating group: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -388,8 +369,7 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
       return;
     }
 
-    final authState = ref.read(authControllerProvider);
-    final userId = authState.value?.uid;
+    final userId = ref.read(authControllerProvider).value?.uid;
     if (userId == null) return;
 
     try {
@@ -397,25 +377,22 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
       if (mounted) {
         _groupIdController.clear();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Successfully joined group!'),
-            backgroundColor: Colors.green,
-          ),
+          const SnackBar(content: Text('Successfully joined group!'), backgroundColor: Colors.green),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error joining group: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Error joining group: $e'), backgroundColor: Colors.red),
         );
       }
     }
   }
 
   void _leaveGroup(String groupId) {
+    final userId = ref.read(authControllerProvider).value?.uid;
+    if (userId == null) return;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -429,8 +406,7 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              // Reset group state by invalidating
-              ref.invalidate(groupControllerProvider);
+              await ref.read(groupControllerProvider.notifier).leaveGroup(groupId, userId);
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Left group')),
@@ -443,9 +419,5 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
         ],
       ),
     );
-  }
-
-  String _generateGroupId() {
-    return DateTime.now().millisecondsSinceEpoch.toString();
   }
 }

@@ -1,41 +1,70 @@
+import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/foundation.dart';
 import '../../../common/models/user_model.dart';
+import '../../../features/profile/data/profile_repository.dart';
 import '../data/auth_repository.dart';
 import '../../../main_providers.dart';
 
 final authControllerProvider = AsyncNotifierProvider<AuthController, UserModel?>(AuthController.new);
 
 class AuthController extends AsyncNotifier<UserModel?> {
-  late final AuthRepository _repo;
+  late final AuthRepository _authRepo;
+  late final ProfileRepository _profileRepo;
+  StreamSubscription<User?>? _authSubscription;
 
   @override
   Future<UserModel?> build() async {
-    _repo = AuthRepository(ref.read(authServiceProvider));
-    // Listen to auth changes, could implement logic, but return null for startup
+    _authRepo = AuthRepository(ref.read(authServiceProvider));
+    _profileRepo = ref.read(profileRepositoryProvider);
+
+    ref.onDispose(() {
+      _authSubscription?.cancel();
+    });
+
+    _authSubscription = _authRepo.authStateChanges().listen((firebaseUser) async {
+      // Delay state update to avoid modifying provider during widget build
+      Future.microtask(() async {
+        if (firebaseUser != null) {
+          final userModel = await _profileRepo.getUserProfile(firebaseUser.uid);
+          final hydratedUser = userModel.copyWith(
+            email: firebaseUser.email ?? userModel.email,
+            displayName: firebaseUser.displayName ?? userModel.displayName,
+          );
+          state = AsyncData(hydratedUser);
+        } else {
+          state = const AsyncData(null);
+        }
+      });
+    });
+
+    final currentUser = _authRepo.firebaseUser;
+    if (currentUser != null) {
+      final userModel = await _profileRepo.getUserProfile(currentUser.uid);
+      return userModel.copyWith(
+        email: currentUser.email ?? userModel.email,
+        displayName: currentUser.displayName ?? userModel.displayName,
+      );
+    }
+
     return null;
   }
 
   Future<void> login(String email, String password) async {
     state = const AsyncLoading();
     try {
-      debugPrint('🔐 AuthController: Starte Login für $email');
-      final user = await _repo.login(email, password);
+      final user = await _authRepo.login(email, password);
       if (user != null) {
-        final userModel = UserModel(
-          uid: user.uid,
-          email: user.email ?? '',
-          displayName: user.displayName,
+        final userModel = await _profileRepo.getUserProfile(user.uid);
+        final hydratedUser = userModel.copyWith(
+          email: user.email ?? userModel.email,
+          displayName: user.displayName ?? userModel.displayName,
         );
-        debugPrint('✅ AuthController: Login erfolgreich, User: ${userModel.email}');
-        state = AsyncData(userModel);
+        state = AsyncData(hydratedUser);
       } else {
-        debugPrint('⚠️ AuthController: Login zurückgegeben, aber user ist null');
         state = const AsyncData(null);
       }
     } catch (e, st) {
-      debugPrint('❌ AuthController: Login Fehler: $e');
-      debugPrint('Stack Trace: $st');
       state = AsyncError(e, st);
     }
   }
@@ -43,15 +72,27 @@ class AuthController extends AsyncNotifier<UserModel?> {
   Future<void> signup(String email, String password) async {
     state = const AsyncLoading();
     try {
-      final user = await _repo.signup(email, password);
-      state = AsyncData(user == null ? null : UserModel(uid: user.uid, email: user.email ?? '', displayName: user.displayName));
+      final user = await _authRepo.signup(email, password);
+      if (user != null) {
+        final newUserModel = UserModel(
+          uid: user.uid,
+          email: user.email ?? '',
+          displayName: user.displayName,
+          favorites: [],
+          groups: [],
+        );
+        await _profileRepo.createUserProfile(newUserModel);
+        state = AsyncData(newUserModel);
+      } else {
+        state = const AsyncData(null);
+      }
     } catch (e, st) {
       state = AsyncError(e, st);
     }
   }
 
   Future<void> logout() async {
-    await _repo.logout();
+    await _authRepo.logout();
     state = const AsyncData(null);
   }
 }
