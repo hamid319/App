@@ -80,6 +80,7 @@ class AuthController extends AsyncNotifier<UserModel?> {
           displayName: user.displayName,
           favorites: [],
           groups: [],
+          createdAt: DateTime.now(),
         );
         await _profileRepo.createUserProfile(newUserModel);
         state = AsyncData(newUserModel);

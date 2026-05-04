@@ -11,10 +11,10 @@ class ProfileRepository {
       if (doc.exists && doc.data() != null) {
         return UserModel.fromJson(doc.data()!);
       } else {
-        return UserModel(uid: uid, email: '', favorites: [], groups: []);
+        return UserModel(uid: uid, email: '', favorites: [], groups: [], createdAt: DateTime.now());
       }
     } catch (e) {
-      return UserModel(uid: uid, email: '', favorites: [], groups: []);
+      return UserModel(uid: uid, email: '', favorites: [], groups: [], createdAt: DateTime.now());
     }
   }
 

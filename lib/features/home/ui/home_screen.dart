@@ -38,6 +38,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: Center(
                 child: Consumer(
                   builder: (context, ref, _) {
+                    // Watch the state so badge rebuilds when favorites change
+                    ref.watch(swipeControllerProvider);
                     final favoritesCount = ref.read(swipeControllerProvider.notifier).favoritesList.length;
                     return GestureDetector(
                       onTap: () => _showFavoritesDialog(context, ref),
@@ -90,7 +92,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         return ListTile(
                           leading: const Icon(Icons.place),
                           title: Text(place.name),
-                          subtitle: Text(place.description, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          subtitle: Text(place.description ?? '', maxLines: 1, overflow: TextOverflow.ellipsis),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete_outline, color: Colors.red),
+                            tooltip: 'Remove from favorites',
+                            onPressed: () {
+                              ref.read(swipeControllerProvider.notifier).removeFavorite(place.id);
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('${place.name} removed from favorites'),
+                                  backgroundColor: Colors.orange,
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                          ),
                           onTap: () {
                             Navigator.pop(context);
                             context.push('/place/${place.id}');
@@ -660,7 +677,10 @@ class _ProfileContent extends ConsumerWidget {
           );
         }
 
-        ref.read(profileControllerProvider.notifier).loadProfile(user.uid);
+        // Schedule profile load outside of build to avoid Riverpod error
+        Future.microtask(() {
+          ref.read(profileControllerProvider.notifier).loadProfile(user.uid);
+        });
         final profileState = ref.watch(profileControllerProvider);
 
         return profileState.when(
@@ -1121,9 +1141,9 @@ class _SwipeCardStackState extends State<_SwipeCardStack>
                               ],
                             ),
                           ),
-                          child: widget.place.images.isNotEmpty
+                          child: widget.place.imageUrls.isNotEmpty
                               ? Image.network(
-                                  widget.place.images.first,
+                                  widget.place.imageUrls.first,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) =>
                                       _buildPlaceholder(),
@@ -1159,7 +1179,7 @@ class _SwipeCardStackState extends State<_SwipeCardStack>
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  widget.place.description,
+                                  widget.place.description ?? '',
                                   style: TextStyle(
                                     color: Colors.white.withValues(alpha: 0.9),
                                     fontSize: 16,
@@ -1167,12 +1187,12 @@ class _SwipeCardStackState extends State<_SwipeCardStack>
                                   maxLines: 3,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                if (widget.place.tags.isNotEmpty) ...[
+                                if (widget.place.types.isNotEmpty) ...[
                                   const SizedBox(height: 12),
                                   Wrap(
                                     spacing: 8,
                                     runSpacing: 8,
-                                    children: widget.place.tags
+                                    children: widget.place.types
                                         .map(
                                           (tag) => Chip(
                                             label: Text(

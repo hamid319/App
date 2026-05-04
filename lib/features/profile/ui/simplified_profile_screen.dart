@@ -8,6 +8,7 @@ import '../../../common/models/place_model.dart';
 import '../../../common/widgets/loading_spinner.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../../common/widgets/place_card.dart';
+import '../../swipe/logic/swipe_controller.dart';
 
 class SimplifiedProfileScreen extends ConsumerWidget {
   const SimplifiedProfileScreen({super.key});
@@ -51,7 +52,10 @@ class SimplifiedProfileScreen extends ConsumerWidget {
             );
           }
 
-          ref.read(profileControllerProvider.notifier).loadProfile(user.uid);
+          // Schedule profile load outside of build to avoid Riverpod error
+          Future.microtask(() {
+            ref.read(profileControllerProvider.notifier).loadProfile(user.uid);
+          });
           final profileState = ref.watch(profileControllerProvider);
 
           return profileState.when(
@@ -216,9 +220,39 @@ class SimplifiedProfileScreen extends ConsumerWidget {
             final place = places[index];
             return Padding(
               padding: const EdgeInsets.only(bottom: 16.0),
-              child: PlaceCard(
-                place: place,
-                onTap: () => context.push('/place/${place.id}'),
+              child: Stack(
+                children: [
+                  PlaceCard(
+                    place: place,
+                    onTap: () => context.push('/place/${place.id}'),
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Consumer(
+                      builder: (context, ref, _) {
+                        return Material(
+                          color: Colors.black.withValues(alpha: 0.5),
+                          shape: const CircleBorder(),
+                          child: IconButton(
+                            icon: const Icon(Icons.favorite, color: Colors.red),
+                            tooltip: 'Remove from favorites',
+                            onPressed: () {
+                              ref.read(swipeControllerProvider.notifier).removeFavorite(place.id);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('${place.name} removed from favorites'),
+                                  backgroundColor: Colors.orange,
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             );
           },
