@@ -4,20 +4,24 @@ import 'package:meta/meta.dart';
 class PlaceModel {
   final String id;
   final String name;
-  final String description;
+  final String? description;
   final double lat;
   final double lng;
-  final List<String> images;
-  final List<String> tags;
+  final String? address;
+  final List<String> imageUrls;
+  final double? averageRating;
+  final List<String> types;
 
   const PlaceModel({
     required this.id,
     required this.name,
-    required this.description,
+    this.description,
     required this.lat,
     required this.lng,
-    this.images = const [],
-    this.tags = const [],
+    this.address,
+    this.imageUrls = const [],
+    this.averageRating,
+    this.types = const [],
   });
 
   PlaceModel copyWith({
@@ -26,8 +30,10 @@ class PlaceModel {
     String? description,
     double? lat,
     double? lng,
-    List<String>? images,
-    List<String>? tags,
+    String? address,
+    List<String>? imageUrls,
+    double? averageRating,
+    List<String>? types,
   }) {
     return PlaceModel(
       id: id ?? this.id,
@@ -35,19 +41,23 @@ class PlaceModel {
       description: description ?? this.description,
       lat: lat ?? this.lat,
       lng: lng ?? this.lng,
-      images: images ?? this.images,
-      tags: tags ?? this.tags,
+      address: address ?? this.address,
+      imageUrls: imageUrls ?? this.imageUrls,
+      averageRating: averageRating ?? this.averageRating,
+      types: types ?? this.types,
     );
   }
 
   factory PlaceModel.fromJson(Map<String, dynamic> json) => PlaceModel(
         id: json['id'] as String,
         name: json['name'] as String,
-        description: json['description'] as String,
+        description: json['description'] as String?,
         lat: (json['lat'] as num).toDouble(),
         lng: (json['lng'] as num).toDouble(),
-        images: List<String>.from(json['images'] ?? []),
-        tags: List<String>.from(json['tags'] ?? []),
+        address: json['address'] as String?,
+        imageUrls: List<String>.from(json['imageUrls'] ?? (json['images'] ?? [])),
+        averageRating: json['averageRating'] != null ? (json['averageRating'] as num).toDouble() : null,
+        types: List<String>.from(json['types'] ?? (json['tags'] ?? [])),
       );
 
   Map<String, dynamic> toJson() => {
@@ -56,7 +66,9 @@ class PlaceModel {
         'description': description,
         'lat': lat,
         'lng': lng,
-        'images': images,
-        'tags': tags,
+        'address': address,
+        'imageUrls': imageUrls,
+        'averageRating': averageRating,
+        'types': types,
       };
 }

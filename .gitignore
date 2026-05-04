@@ -71,3 +71,5 @@ ios/*.mode2v3
 ios/*.moved-aside
 ios/*.pbxuser
 ios/*.perspectivev3
+# Gemini/AI working files
+implementation_plan.md

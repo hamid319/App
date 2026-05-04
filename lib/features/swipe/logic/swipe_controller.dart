@@ -151,10 +151,33 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     } else {
       _currentIndex = data.length;
     }
-    state = AsyncData(data);
+    // Emit a new list so Riverpod detects the state change
+    state = AsyncData(List.of(data));
   }
 
   List<String> get favoritesList => List.unmodifiable(_favorites);
+
+  bool isFavorite(String placeId) => _favorites.contains(placeId);
+
+  Future<void> removeFavorite(String placeId) async {
+    _favorites.remove(placeId);
+    // Emit a new list so Riverpod detects the state change
+    final data = state.value;
+    if (data != null) {
+      state = AsyncData(List.of(data));
+    }
+
+    final authState = ref.read(authControllerProvider);
+    if (authState.value != null) {
+      final userId = authState.value!.uid;
+      try {
+        await _profileRepo.updateUserProfile(userId, {'favorites': _favorites});
+        await _syncFavoritesWithGroup(userId);
+      } catch (e) {
+        // Continue even on error
+      }
+    }
+  }
 
   Future<void> resetAll() async {
     _currentIndex = 0;

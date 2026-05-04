@@ -186,9 +186,9 @@ class _MatchCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                child: place.images.isNotEmpty
+                child: place.imageUrls.isNotEmpty
                     ? Image.network(
-                        place.images.first,
+                        place.imageUrls.first,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) =>
                             _buildImagePlaceholder(),
@@ -245,19 +245,19 @@ class _MatchCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    place.description,
+                    place.description ?? '',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[600],
                         ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (place.tags.isNotEmpty) ...[
+                  if (place.types.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     Wrap(
                       spacing: 6,
                       runSpacing: 6,
-                      children: place.tags
+                      children: place.types
                           .take(3)
                           .map(
                             (tag) => Chip(

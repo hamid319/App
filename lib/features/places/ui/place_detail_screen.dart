@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/services/maps_launcher.dart';
 import '../../../common/models/place_model.dart';
 import '../../swipe/data/places_repository.dart';
+import '../../swipe/logic/swipe_controller.dart';
 
 final placeDetailProvider = FutureProvider.family<PlaceModel?, String>((ref, placeId) async {
   final repo = PlacesRepository();
@@ -61,13 +62,17 @@ class PlaceDetailScreen extends ConsumerWidget {
   }
 }
 
-class _PlaceDetailContent extends StatelessWidget {
+class _PlaceDetailContent extends ConsumerWidget {
   final PlaceModel place;
 
   const _PlaceDetailContent({required this.place});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watch the swipe controller to get reactive updates on favorite status
+    ref.watch(swipeControllerProvider);
+    final swipeCtrl = ref.read(swipeControllerProvider.notifier);
+    final isFav = swipeCtrl.isFavorite(place.id);
     return CustomScrollView(
       slivers: [
         // App Bar mit Bild
@@ -93,9 +98,9 @@ class _PlaceDetailContent extends StatelessWidget {
               fit: StackFit.expand,
               children: [
                 // Bild oder Placeholder
-                place.images.isNotEmpty
+                place.imageUrls.isNotEmpty
                     ? Image.network(
-                        place.images.first,
+                        place.imageUrls.first,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) =>
                             _buildImagePlaceholder(),
@@ -127,7 +132,7 @@ class _PlaceDetailContent extends StatelessWidget {
               children: [
                 // Beschreibung
                 Text(
-                  place.description,
+                  place.description ?? '',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         height: 1.6,
                         color: Colors.grey[700],
@@ -135,7 +140,7 @@ class _PlaceDetailContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 // Tags
-                if (place.tags.isNotEmpty) ...[
+                if (place.types.isNotEmpty) ...[
                   Text(
                     'Tags',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -146,7 +151,7 @@ class _PlaceDetailContent extends StatelessWidget {
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: place.tags
+                    children: place.types
                         .map(
                           (tag) => Chip(
                             label: Text(tag),
@@ -222,22 +227,41 @@ class _PlaceDetailContent extends StatelessWidget {
                 const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      // TODO: Zu Favoriten hinzufügen
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Zu Favoriten hinzugefügt!'),
-                          backgroundColor: Colors.green,
+                  child: isFav
+                      ? ElevatedButton.icon(
+                          onPressed: () {
+                            ref.read(swipeControllerProvider.notifier).removeFavorite(place.id);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${place.name} removed from favorites'),
+                                backgroundColor: Colors.orange,
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.favorite, color: Colors.white),
+                          label: const Text('Remove from Favorites'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                        )
+                      : OutlinedButton.icon(
+                          onPressed: () {
+                            ref.read(swipeControllerProvider.notifier).like();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${place.name} added to favorites!'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.favorite_border),
+                          label: const Text('Add to Favorites'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
                         ),
-                      );
-                    },
-                    icon: const Icon(Icons.favorite_border),
-                    label: const Text('Zu Favoriten hinzufügen'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 32),
               ],

@@ -527,9 +527,9 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
                     ],
                   ),
                 ),
-                child: widget.place.images.isNotEmpty
+                child: widget.place.imageUrls.isNotEmpty
                     ? Image.network(
-                        widget.place.images.first,
+                        widget.place.imageUrls.first,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) =>
                             _buildPlaceholder(),
@@ -580,7 +580,7 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
                       const SizedBox(height: 8),
                       // Place description
                       Text(
-                        widget.place.description,
+                        widget.place.description ?? '',
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 16,
@@ -589,12 +589,12 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
                         overflow: TextOverflow.ellipsis,
                       ),
                       // Tags
-                      if (widget.place.tags.isNotEmpty) ...[
+                      if (widget.place.types.isNotEmpty) ...[
                         const SizedBox(height: 12),
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
-                          children: widget.place.tags
+                          children: widget.place.types
                               .map(
                                 (tag) => Container(
                                   padding: const EdgeInsets.symmetric(
