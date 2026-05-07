@@ -14,6 +14,9 @@ class GroupSessionModel {
     required this.createdAt,
     this.endedAt,
     this.endedByUid,
+    this.swipeLimit,
+    this.placePool = const [],
+    this.progressByUser,
   });
 
   final String sessionId;
@@ -27,15 +30,23 @@ class GroupSessionModel {
   final DateTime? endedAt; // Set on session close
   final String? endedByUid; // null = auto-end, uid = manual end
 
+  // New fields from plan
+  final int? swipeLimit;
+  final List<String> placePool;
+  final Map<String, int>? progressByUser;
+
   bool get isCompleted => status == 'completed';
 
   /// Auto-end check: every participant has swiped every card
-  bool get allMembersDone =>
-      participants.isNotEmpty &&
-      totalPlacesToSwipe > 0 &&
-      participants.every(
-        (uid) => (swipeProgress[uid] ?? 0) >= totalPlacesToSwipe,
-      );
+  bool get allMembersDone {
+    final effectiveLimit = swipeLimit ?? totalPlacesToSwipe;
+    final effectiveProgress = progressByUser ?? swipeProgress;
+    return participants.isNotEmpty &&
+        effectiveLimit > 0 &&
+        participants.every(
+          (uid) => (effectiveProgress[uid] ?? 0) >= effectiveLimit,
+        );
+  }
 
   GroupSessionModel copyWith({
     String? sessionId,
@@ -48,6 +59,9 @@ class GroupSessionModel {
     DateTime? createdAt,
     DateTime? endedAt,
     String? endedByUid,
+    int? swipeLimit,
+    List<String>? placePool,
+    Map<String, int>? progressByUser,
   }) {
     return GroupSessionModel(
       sessionId: sessionId ?? this.sessionId,
@@ -60,6 +74,9 @@ class GroupSessionModel {
       createdAt: createdAt ?? this.createdAt,
       endedAt: endedAt ?? this.endedAt,
       endedByUid: endedByUid ?? this.endedByUid,
+      swipeLimit: swipeLimit ?? this.swipeLimit,
+      placePool: placePool ?? this.placePool,
+      progressByUser: progressByUser ?? this.progressByUser,
     );
   }
 
@@ -80,6 +97,9 @@ class GroupSessionModel {
       createdAt: createdAt,
       endedAt: _parseDateTime(json['endedAt']),
       endedByUid: json['endedByUid'] as String?,
+      swipeLimit: _parseInt(json['swipeLimit'] ?? json['totalPlacesToSwipe']),
+      placePool: _stringList(json['placePool']),
+      progressByUser: _intMap(json['progressByUser'] ?? json['swipeProgress']),
     );
   }
 
@@ -94,6 +114,9 @@ class GroupSessionModel {
         'createdAt': Timestamp.fromDate(createdAt),
         if (endedAt != null) 'endedAt': Timestamp.fromDate(endedAt!),
         if (endedByUid != null) 'endedByUid': endedByUid,
+        'swipeLimit': swipeLimit ?? totalPlacesToSwipe,
+        'placePool': placePool,
+        'progressByUser': progressByUser ?? swipeProgress,
       };
 }
 

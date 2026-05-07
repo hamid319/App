@@ -30,6 +30,12 @@ class GroupRepository {
       sharedFavorites: group.sharedFavorites,
       createdAt: group.createdAt ?? DateTime.now(),
       activeSessionId: null,
+      hasCompletedSession: group.hasCompletedSession,
+      ownerUid: group.ownerUid,
+      location: group.location,
+      likeThreshold: group.likeThreshold,
+      joinEnabled: true,
+      invite: group.invite,
     );
 
     await _firestoreService.setDocument(
@@ -37,6 +43,32 @@ class GroupRepository {
       group.groupId,
       normalizedGroup.toJson(),
     );
+  }
+
+  Future<void> joinGroupByInvite(
+      String groupId, String code, String userId) async {
+    final groupRef = _db.collection('groups').doc(groupId);
+    await _db.runTransaction((transaction) async {
+      final snap = await transaction.get(groupRef);
+      if (!snap.exists || snap.data() == null) {
+        throw Exception('Group not found');
+      }
+
+      final group = GroupModel.fromJson(snap.data()!);
+      if (group.invite?.code != code) {
+        throw Exception('Invalid invite code');
+      }
+      if (group.joinEnabled != true) {
+        throw Exception('Joining is currently disabled for this group');
+      }
+      if (group.members.contains(userId)) {
+        return;
+      }
+
+      transaction.update(groupRef, {
+        'members': FieldValue.arrayUnion([userId]),
+      });
+    });
   }
 
   Future<void> joinGroup(String groupId, String userId) async {
@@ -56,6 +88,55 @@ class GroupRepository {
         'members': FieldValue.arrayUnion([userId]),
       });
     });
+  }
+
+  Future<String> joinGroupByCodeOnly(String code, String userId) async {
+    final normalizedCode = code.toUpperCase();
+    final query = await _db
+        .collection('groups')
+        .where('invite.code', isEqualTo: normalizedCode)
+        .limit(1)
+        .get();
+
+    if (query.docs.isEmpty) {
+      throw Exception('Invalid invite code');
+    }
+
+    final groupId = query.docs.first.id;
+    final groupRef = _db.collection('groups').doc(groupId);
+
+    await _db.runTransaction((transaction) async {
+      final snap = await transaction.get(groupRef);
+      if (!snap.exists || snap.data() == null) {
+        throw Exception('Group not found');
+      }
+
+      final group = GroupModel.fromJson(snap.data()!);
+      if (group.invite?.code != normalizedCode) {
+        throw Exception('Invalid invite code');
+      }
+      if (group.joinEnabled != true) {
+        throw Exception('Joining is currently disabled for this group');
+      }
+      if (group.members.contains(userId)) {
+        return;
+      }
+
+      transaction.update(groupRef, {
+        'members': FieldValue.arrayUnion([userId]),
+      });
+    });
+
+    return groupId;
+  }
+
+  Stream<List<GroupModel>> streamUserGroups(String userId) {
+    return _db
+        .collection('groups')
+        .where('members', arrayContains: userId)
+        .snapshots()
+        .map((snap) =>
+            snap.docs.map((doc) => GroupModel.fromJson(doc.data())).toList());
   }
 
   Future<void> leaveGroup(String groupId, String userId) async {
@@ -91,7 +172,8 @@ class GroupRepository {
     required String destination,
     required int threshold,
     required List<String> participantUids,
-    required int totalPlaces,
+    required int swipeLimit,
+    required List<String> placePool,
   }) async {
     final group = await getGroup(groupId);
     if (group == null) {
@@ -105,7 +187,7 @@ class GroupRepository {
     if (invalidUids.isNotEmpty) {
       throw Exception('Participants must be group members');
     }
-    if (totalPlaces <= 0) {
+    if (swipeLimit <= 0) {
       throw Exception('Session must include at least one place');
     }
 
@@ -116,10 +198,13 @@ class GroupRepository {
       sessionId: sessionId,
       destination: destination,
       status: 'in_progress',
-      totalPlacesToSwipe: totalPlaces,
+      totalPlacesToSwipe: swipeLimit,
+      swipeLimit: swipeLimit,
+      placePool: placePool,
       participants: participantUids,
       threshold: threshold,
       swipeProgress: {for (final uid in participantUids) uid: 0},
+      progressByUser: {for (final uid in participantUids) uid: 0},
       createdAt: DateTime.now(),
     );
 
@@ -133,6 +218,7 @@ class GroupRepository {
     batch.set(sessionRef, session.toJson());
     batch.update(_db.collection('groups').doc(groupId), {
       'activeSessionId': sessionId,
+      'joinEnabled': false, // Prevent joining once session starts
     });
 
     await batch.commit();
@@ -178,16 +264,11 @@ class GroupRepository {
         throw Exception('User is not a participant in this session');
       }
 
-      final updatedProgress = Map<String, int>.from(session.swipeProgress);
-      updatedProgress[userId] = (updatedProgress[userId] ?? 0) + 1;
-
-      final updatedSession = session.copyWith(
-        swipeProgress: updatedProgress,
-      );
-
+      var updatedSession = session;
       final voteSnap = await transaction.get(voteRef);
       final likedBy = <String>{};
       final dislikedBy = <String>{};
+      bool alreadyVoted = false;
 
       if (voteSnap.exists && voteSnap.data() != null) {
         final data = voteSnap.data()!;
@@ -196,6 +277,20 @@ class GroupRepository {
         );
         dislikedBy.addAll(
           (data['dislikedBy'] as List? ?? []).map((item) => item.toString()),
+        );
+        if (likedBy.contains(userId) || dislikedBy.contains(userId)) {
+          alreadyVoted = true;
+        }
+      }
+
+      if (!alreadyVoted) {
+        final currentProgress = session.progressByUser ?? session.swipeProgress;
+        final updatedProgress = Map<String, int>.from(currentProgress);
+        updatedProgress[userId] = (updatedProgress[userId] ?? 0) + 1;
+
+        updatedSession = session.copyWith(
+          swipeProgress: updatedProgress,
+          progressByUser: updatedProgress,
         );
       }
 
@@ -237,8 +332,9 @@ class GroupRepository {
         });
         transaction.update(groupRef, {
           'activeSessionId': null,
+          'hasCompletedSession': true,
         });
-      } else {
+      } else if (!alreadyVoted) {
         transaction.update(sessionRef, updatedSession.toJson());
       }
     });
@@ -306,6 +402,7 @@ class GroupRepository {
 
     batch.update(groupRef, {
       'activeSessionId': null,
+      'hasCompletedSession': true,
     });
 
     await batch.commit();
@@ -328,6 +425,20 @@ class GroupRepository {
         .get();
 
     return snap.docs.map((doc) => doc.data()).toList();
+  }
+
+  Future<List<GroupSessionModel>> getCompletedSessions(String groupId) async {
+    final snap = await _db
+        .collection('groups')
+        .doc(groupId)
+        .collection('sessions')
+        .where('status', isEqualTo: 'completed')
+        .orderBy('endedAt', descending: true)
+        .get();
+
+    return snap.docs
+        .map((doc) => GroupSessionModel.fromJson(doc.data()))
+        .toList();
   }
 
   /// Real-time stream of the active session -- drives UI reactivity.

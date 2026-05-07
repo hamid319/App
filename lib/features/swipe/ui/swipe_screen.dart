@@ -8,11 +8,25 @@ import '../logic/swipe_controller.dart';
 import 'dart:math' as math;
 
 /// Main Swipe Screen - displays the card stack and handles state
-class SwipeScreen extends ConsumerWidget {
-  const SwipeScreen({super.key});
+class SwipeScreen extends ConsumerStatefulWidget {
+  final String groupId;
+  const SwipeScreen({super.key, required this.groupId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SwipeScreen> createState() => _SwipeScreenState();
+}
+
+class _SwipeScreenState extends ConsumerState<SwipeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(selectedGroupIdProvider.notifier).updateState(widget.groupId);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(swipeControllerProvider);
     final ctrl = ref.read(swipeControllerProvider.notifier);
     final session = ref.watch(activeSessionProvider);
@@ -23,7 +37,7 @@ class SwipeScreen extends ConsumerWidget {
 
     ref.listen(activeSessionProvider, (_, next) {
       if (next.value?.isCompleted == true) {
-        context.go('/group-results');
+        context.go('/group-matches/${widget.groupId}');
       }
     });
 

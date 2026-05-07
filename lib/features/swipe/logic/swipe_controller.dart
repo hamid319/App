@@ -51,6 +51,22 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
       }
     }
     
+    final groupState = ref.read(groupControllerProvider).value;
+    final sessionId = groupState?.activeSessionId;
+
+    if (groupState != null && sessionId != null) {
+      final groupRepo = ref.read(groupRepositoryProvider);
+      final session = await groupRepo.getSession(groupId: groupState.groupId, sessionId: sessionId);
+      if (session != null) {
+        List<PlaceModel> sessionPlaces = [];
+        for (var pid in session.placePool) {
+          final p = await _placesRepo.getPlaceById(pid, useMock: true);
+          if (p != null) sessionPlaces.add(p);
+        }
+        return sessionPlaces.where((p) => !_swipedPlaceIds.contains(p.id)).toList();
+      }
+    }
+
     try {
       final allPlaces = await _placesRepo.loadNearbyPlaces(
         _userLat, 
@@ -114,6 +130,14 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
           placeId: place.id,
           liked: true,
         );
+
+        final groupState = ref.read(groupControllerProvider).value;
+        if (groupState?.activeSessionId != null) {
+          try {
+            await ref.read(groupControllerProvider.notifier).castVote(placeId: place.id, liked: true);
+          } catch (_) {}
+        }
+
         await _profileRepo.updateUserProfile(userId, {'favorites': _favorites});
         await _syncFavoritesWithGroup(userId);
       } catch (e) {
@@ -137,6 +161,13 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
           placeId: place.id,
           liked: false,
         );
+
+        final groupState = ref.read(groupControllerProvider).value;
+        if (groupState?.activeSessionId != null) {
+          try {
+            await ref.read(groupControllerProvider.notifier).castVote(placeId: place.id, liked: false);
+          } catch (_) {}
+        }
       } catch (e) {
         // Continue even on error
       }

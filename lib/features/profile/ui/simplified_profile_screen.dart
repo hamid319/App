@@ -106,13 +106,15 @@ class SimplifiedProfileScreen extends ConsumerWidget {
                         fontWeight: FontWeight.bold,
                       ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  user.email,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                ),
+                if (user.email != null && user.email.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    user.email,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -140,6 +142,21 @@ class SimplifiedProfileScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 32),
+          Text(
+            'Account Info',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 16),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.email_outlined),
+            title: const Text('Email'),
+            subtitle: Text(user.email?.isNotEmpty == true ? user.email! : 'No email provided'),
+          ),
+          const Divider(),
+          const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

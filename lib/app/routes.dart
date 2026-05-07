@@ -56,16 +56,24 @@ GoRouter createRouter() {
             builder: (ctx, state) => const RegisterScreen(),
           ),
           GoRoute(
-            path: '/swipe',
-            builder: (ctx, state) => const SwipeScreen(),
+            path: '/swipe/:groupId',
+            builder: (ctx, state) => SwipeScreen(groupId: state.pathParameters['groupId']!),
           ),
           GoRoute(
             path: '/group',
             builder: (ctx, state) => const SimplifiedGroupScreen(),
           ),
           GoRoute(
-            path: '/group-matches',
-            builder: (ctx, state) => const GroupMatchesScreen(),
+            path: '/group/join',
+            builder: (ctx, state) {
+              final groupId = state.uri.queryParameters['groupId'] ?? '';
+              final code = state.uri.queryParameters['code'] ?? '';
+              return GroupJoinScreen(groupId: groupId, code: code);
+            },
+          ),
+          GoRoute(
+            path: '/group-matches/:groupId',
+            builder: (ctx, state) => GroupMatchesScreen(groupId: state.pathParameters['groupId']!),
           ),
           GoRoute(
             path: '/profile',

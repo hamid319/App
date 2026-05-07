@@ -537,7 +537,19 @@ class _GroupContentState extends ConsumerState<_GroupContent> {
     );
 
     try {
-      await ref.read(groupControllerProvider.notifier).createGroup(group);
+      // Use dummy values to satisfy the compiler for this deprecated screen
+      await ref.read(groupControllerProvider.notifier).createGroupWithSettings(
+        groupName: groupName,
+        location: GroupLocation(
+          countryCode: 'US',
+          countryName: 'United States',
+          cityId: '1',
+          cityName: 'Dummy City',
+          lat: 0.0,
+          lng: 0.0,
+        ),
+        likeThreshold: 1,
+      );
       if (mounted) {
         setState(() {
           _showCreateGroup = false;

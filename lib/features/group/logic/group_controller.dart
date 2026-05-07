@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../common/models/group_model.dart';
 import '../../../common/models/group_session_model.dart';
@@ -11,64 +13,159 @@ final groupRepositoryProvider = Provider<GroupRepository>(
   (ref) => GroupRepository(ref.read(firestoreServiceProvider)),
 );
 
+class SelectedGroupIdNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+  void updateState(String? value) => state = value;
+}
+
+final selectedGroupIdProvider =
+    NotifierProvider<SelectedGroupIdNotifier, String?>(
+        SelectedGroupIdNotifier.new);
+
+final userGroupsProvider = StreamProvider<List<GroupModel>>((ref) {
+  final user = ref.watch(authControllerProvider).value;
+  if (user == null) return Stream.value([]);
+  return ref.watch(groupRepositoryProvider).streamUserGroups(user.uid);
+});
+
 final groupControllerProvider =
     AsyncNotifierProvider<GroupController, GroupModel?>(GroupController.new);
 
 class GroupController extends AsyncNotifier<GroupModel?> {
-  late final GroupRepository _repo;
-  late final ProfileRepository _profileRepo;
-  late final PlacesRepository _placesRepo;
+  String? _lastMembersSignature;
+  List<String>? _lastSharedFavorites;
+
+  GroupRepository get _repo => ref.read(groupRepositoryProvider);
+  ProfileRepository get _profileRepo =>
+      ProfileRepository(ref.read(firestoreServiceProvider));
+  PlacesRepository get _placesRepo => PlacesRepository();
 
   @override
   Future<GroupModel?> build() async {
-    _repo = GroupRepository(ref.read(firestoreServiceProvider));
-    _profileRepo = ProfileRepository(ref.read(firestoreServiceProvider));
-    _placesRepo = PlacesRepository();
-    return null;
-  }
+    final selectedId = ref.watch(selectedGroupIdProvider);
+    if (selectedId == null) return null;
 
-  Future<void> loadGroup(String groupId) async {
-    state = const AsyncLoading();
+    final userGroupsAsync = ref.watch(userGroupsProvider);
+    final cached = state.value;
+    if (userGroupsAsync.asData?.value == null &&
+        cached != null &&
+        cached.groupId == selectedId) {
+      return cached;
+    }
+
+    final List<GroupModel> userGroups = userGroupsAsync.asData?.value ??
+        await ref.watch(userGroupsProvider.future);
+
     try {
-      final group = await _repo.getGroup(groupId);
-      if (group != null) {
-        var resolvedGroup = group;
-        final sessionId = group.activeSessionId;
-        if (sessionId != null) {
-          final session = await _repo.getSession(
+      final group = userGroups.firstWhere((g) => g.groupId == selectedId);
+
+      var resolvedGroup = group;
+      final sessionId = group.activeSessionId;
+      if (sessionId != null) {
+        final session = await _repo.getSession(
+          groupId: group.groupId,
+          sessionId: sessionId,
+        );
+        if (session == null) {
+          await _repo.clearActiveSessionIfMatch(
             groupId: group.groupId,
             sessionId: sessionId,
           );
-          if (session == null) {
-            await _repo.clearActiveSessionIfMatch(
-              groupId: group.groupId,
-              sessionId: sessionId,
-            );
-            resolvedGroup = group.copyWith(activeSessionId: null);
-          }
+          resolvedGroup = group.copyWith(activeSessionId: null);
         }
-
-        try {
-          final updatedMatches = await calculateGroupMatches(resolvedGroup);
-          final updatedGroup =
-              resolvedGroup.copyWith(sharedFavorites: updatedMatches);
-          state = AsyncData(updatedGroup);
-        } catch (_) {
-          state = AsyncData(resolvedGroup);
-        }
-      } else {
-        state = const AsyncData(null);
       }
+
+      final membersSignature = _buildMembersSignature(
+        resolvedGroup.groupId,
+        resolvedGroup.members,
+      );
+      if (_lastMembersSignature != membersSignature ||
+          _lastSharedFavorites == null) {
+        _lastSharedFavorites = await calculateGroupMatches(resolvedGroup);
+        _lastMembersSignature = membersSignature;
+      }
+      return resolvedGroup.copyWith(
+          sharedFavorites: _lastSharedFavorites ?? const []);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _buildMembersSignature(String groupId, List<String> members) {
+    final sortedMembers = List<String>.from(members)..sort();
+    return '$groupId:${sortedMembers.join('|')}';
+  }
+
+  bool get isAdmin {
+    final currentUser = ref.read(authControllerProvider).value;
+    final group = state.value;
+    if (currentUser == null || group == null) return false;
+    return group.ownerUid == currentUser.uid;
+  }
+
+  bool get canJoin {
+    return state.value?.joinEnabled ?? false;
+  }
+
+  String _generateInviteCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final rnd = math.Random();
+    return String.fromCharCodes(Iterable.generate(
+        6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
+  }
+
+  Future<void> createGroupWithSettings({
+    required String groupName,
+    required GroupLocation location,
+    required int likeThreshold,
+  }) async {
+    final currentUser = ref.read(authControllerProvider).value;
+    if (currentUser == null) throw StateError('Not authenticated');
+
+    state = const AsyncLoading();
+    try {
+      final groupId = FirebaseFirestore.instance.collection('groups').doc().id;
+      final group = GroupModel(
+        groupId: groupId,
+        groupName: groupName,
+        members: [currentUser.uid],
+        ownerUid: currentUser.uid,
+        location: location,
+        likeThreshold: likeThreshold,
+        joinEnabled: true,
+        invite:
+            GroupInvite(code: _generateInviteCode(), createdAt: DateTime.now()),
+        createdAt: DateTime.now(),
+      );
+      await _repo.createGroup(group);
+      ref.read(selectedGroupIdProvider.notifier).updateState(group.groupId);
     } catch (e, st) {
       state = AsyncError(e, st);
     }
   }
 
-  Future<void> createGroup(GroupModel group) async {
+  Future<void> joinByInviteCodeOnly(String code) async {
+    final currentUser = ref.read(authControllerProvider).value;
+    if (currentUser == null) throw StateError('Not authenticated');
+
     state = const AsyncLoading();
     try {
-      await _repo.createGroup(group);
-      state = AsyncData(group);
+      final groupId = await _repo.joinGroupByCodeOnly(code, currentUser.uid);
+      ref.read(selectedGroupIdProvider.notifier).updateState(groupId);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+
+  Future<void> joinByInviteLink(String groupId, String code) async {
+    final currentUser = ref.read(authControllerProvider).value;
+    if (currentUser == null) throw StateError('Not authenticated');
+
+    state = const AsyncLoading();
+    try {
+      await _repo.joinGroupByInvite(groupId, code, currentUser.uid);
+      ref.read(selectedGroupIdProvider.notifier).updateState(groupId);
     } catch (e, st) {
       state = AsyncError(e, st);
     }
@@ -78,15 +175,7 @@ class GroupController extends AsyncNotifier<GroupModel?> {
     state = const AsyncLoading();
     try {
       await _repo.joinGroup(groupId, userId);
-      final group = await _repo.getGroup(groupId);
-      if (group != null) {
-        final updatedMatches = await calculateGroupMatches(group);
-        await _repo.syncFavorites(groupId, updatedMatches);
-        final updatedGroup = group.copyWith(sharedFavorites: updatedMatches);
-        state = AsyncData(updatedGroup);
-      } else {
-        state = AsyncError(Exception('Group not found'), StackTrace.current);
-      }
+      ref.read(selectedGroupIdProvider.notifier).updateState(groupId);
     } catch (e, st) {
       state = AsyncError(e, st);
     }
@@ -119,13 +208,10 @@ class GroupController extends AsyncNotifier<GroupModel?> {
     final currentGroup = state.value;
     if (currentGroup == null) return;
 
-    state = const AsyncLoading();
     try {
       final updatedMatches = await calculateGroupMatches(currentGroup);
       await _repo.syncFavorites(currentGroup.groupId, updatedMatches);
-      final updatedGroup =
-          currentGroup.copyWith(sharedFavorites: updatedMatches);
-      state = AsyncData(updatedGroup);
+      // We don't need to manually update state, the snapshot will trigger a rebuild!
     } catch (e, st) {
       state = AsyncError(e, st);
     }
@@ -133,12 +219,8 @@ class GroupController extends AsyncNotifier<GroupModel?> {
 
   Future<void> syncFavorites(
       String groupId, List<String> sharedFavorites) async {
-    if (state.value == null) return;
     try {
       await _repo.syncFavorites(groupId, sharedFavorites);
-      final gm = state.value!;
-      final updated = gm.copyWith(sharedFavorites: sharedFavorites);
-      state = AsyncData(updated);
     } catch (e, st) {
       state = AsyncError(e, st);
     }
@@ -148,20 +230,58 @@ class GroupController extends AsyncNotifier<GroupModel?> {
     state = const AsyncLoading();
     try {
       await _repo.leaveGroup(groupId, userId);
-      state = const AsyncData(null);
+      if (ref.read(selectedGroupIdProvider) == groupId) {
+        ref.read(selectedGroupIdProvider.notifier).updateState(null);
+      }
     } catch (e, st) {
       state = AsyncError(e, st);
     }
   }
 
-  /// Admin starts a new session. Fetches places for [destination] first,
-  /// then writes the session to Firestore.
+  Future<void> startSessionWithLimit({required int swipeLimit}) async {
+    final group = state.value;
+    if (group == null) return;
+
+    if (!isAdmin) {
+      throw StateError('Only the admin can start the session');
+    }
+
+    state = const AsyncLoading();
+    try {
+      final destination =
+          group.location?.cityName ?? group.location?.countryName ?? 'Unknown';
+      final places = await _placesRepo.fetchPlacesFromGoogleAPI(destination,
+          limit: swipeLimit);
+
+      if (places.isEmpty) {
+        throw StateError('No places found for this destination');
+      }
+
+      final placePool = places.map((p) => p.id).toList();
+
+      await _repo.startSwipeSession(
+        groupId: group.groupId,
+        destination: destination,
+        threshold: group.likeThreshold ?? 1,
+        participantUids: group.members,
+        swipeLimit: swipeLimit,
+        placePool: placePool,
+      );
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+
   Future<void> startSession({
     required String destination,
     required int threshold,
   }) async {
     final group = state.value;
     if (group == null) return;
+
+    if (!isAdmin) {
+      throw StateError('Only the admin can start the session');
+    }
 
     state = const AsyncLoading();
     try {
@@ -176,17 +296,14 @@ class GroupController extends AsyncNotifier<GroupModel?> {
         destination: destination,
         threshold: threshold,
         participantUids: group.members,
-        totalPlaces: places.length,
+        swipeLimit: places.length,
+        placePool: places.map((p) => p.id).toList(),
       );
-
-      final updated = await _repo.getGroup(group.groupId);
-      state = AsyncData(updated);
     } catch (e, st) {
       state = AsyncError(e, st);
     }
   }
 
-  /// Called after every swipe during a session.
   Future<void> castVote({
     required String placeId,
     required bool liked,
@@ -209,35 +326,26 @@ class GroupController extends AsyncNotifier<GroupModel?> {
       placeId: placeId,
       liked: liked,
     );
-
-    final refreshedGroup = await _repo.getGroup(group.groupId);
-    if (refreshedGroup != null) {
-      state = AsyncData(refreshedGroup);
-    }
   }
 
-  /// Admin manually ends the session.
   Future<void> endSession() async {
     final group = state.value;
     final sessionId = group?.activeSessionId;
     final currentUser = ref.read(authControllerProvider).value;
     if (group == null || sessionId == null || currentUser == null) return;
 
+    if (!isAdmin) {
+      throw StateError('Only the admin can end the session');
+    }
+
     await _repo.endSessionManually(
       groupId: group.groupId,
       sessionId: sessionId,
       adminUid: currentUser.uid,
     );
-
-    final refreshedGroup = await _repo.getGroup(group.groupId);
-    if (refreshedGroup != null) {
-      state = AsyncData(refreshedGroup);
-    }
   }
 }
 
-/// Separate StreamNotifier -- watches the active session doc in real-time.
-/// The swipe UI and results screen both watch this.
 final activeSessionProvider =
     StreamNotifierProvider<ActiveSessionNotifier, GroupSessionModel?>(
   ActiveSessionNotifier.new,

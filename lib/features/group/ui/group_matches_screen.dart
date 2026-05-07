@@ -26,11 +26,25 @@ final groupMatchesProvider = FutureProvider<List<PlaceModel>>((ref) async {
   );
 });
 
-class GroupMatchesScreen extends ConsumerWidget {
-  const GroupMatchesScreen({super.key});
+class GroupMatchesScreen extends ConsumerStatefulWidget {
+  final String groupId;
+  const GroupMatchesScreen({super.key, required this.groupId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<GroupMatchesScreen> createState() => _GroupMatchesScreenState();
+}
+
+class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(selectedGroupIdProvider.notifier).updateState(widget.groupId);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final groupState = ref.watch(groupControllerProvider);
     final matchesAsync = ref.watch(groupMatchesProvider);
 
