@@ -170,7 +170,8 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
                           child: PrimaryButton(
                             label: 'Create',
                             onPressed: () => _createGroup(),
-                            isLoading: ref.watch(groupControllerProvider).isLoading,
+                            isLoading:
+                                ref.watch(groupControllerProvider).isLoading,
                           ),
                         ),
                       ],
@@ -263,7 +264,8 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
                   leading: CircleAvatar(
                     child: Text(memberId.substring(0, 1).toUpperCase()),
                   ),
-                  title: Text(memberId == userId ? 'You' : 'Member ${index + 1}'),
+                  title:
+                      Text(memberId == userId ? 'You' : 'Member ${index + 1}'),
                   subtitle: Text(memberId),
                 );
               },
@@ -316,12 +318,24 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
     final groupId = _generateGroupId();
     final group = GroupModel(
       groupId: groupId,
+      groupName: groupName,
       members: [userId],
       sharedFavorites: [],
     );
 
     try {
-      await ref.read(groupControllerProvider.notifier).createGroup(group);
+      await ref.read(groupControllerProvider.notifier).createGroupWithSettings(
+        groupName: groupName,
+        location: GroupLocation(
+          countryCode: 'US',
+          countryName: 'United States',
+          cityId: '1',
+          cityName: 'Dummy City',
+          lat: 0.0,
+          lng: 0.0,
+        ),
+        likeThreshold: 1,
+      );
       if (mounted) {
         setState(() {
           _showCreateGroup = false;
@@ -393,7 +407,9 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
     if (userId == null) return;
 
     try {
-      await ref.read(groupControllerProvider.notifier).joinGroup(groupId, userId);
+      await ref
+          .read(groupControllerProvider.notifier)
+          .joinGroup(groupId, userId);
       if (mounted) {
         _groupIdController.clear();
         ScaffoldMessenger.of(context).showSnackBar(

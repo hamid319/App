@@ -11,6 +11,7 @@ class RegisterScreen extends ConsumerStatefulWidget {
 }
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+  final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -37,6 +38,25 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              TextFormField(
+                controller: nameController,
+                textCapitalization: TextCapitalization.words,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(
+                  labelText: 'Name / Benutzername',
+                  hintText: 'Wie sollen andere dich nennen?',
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Bitte geben Sie einen Namen ein';
+                  }
+                  if (value.trim().length < 2) {
+                    return 'Der Name muss mindestens 2 Zeichen lang sein';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -118,6 +138,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       await ref.read(authControllerProvider.notifier).signup(
             emailController.text.trim(),
             passwordController.text,
+            displayName: nameController.text.trim(),
           );
     } catch (e) {
       // Fehler wird durch den AsyncValue-State behandelt
@@ -140,6 +161,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   void dispose() {
+    nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     super.dispose();

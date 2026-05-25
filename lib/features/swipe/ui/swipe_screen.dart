@@ -2,22 +2,78 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../common/models/place_model.dart';
+import '../../group/logic/group_controller.dart';
+import '../../auth/logic/auth_controller.dart';
 import '../logic/swipe_controller.dart';
 import 'dart:math' as math;
 
 /// Main Swipe Screen - displays the card stack and handles state
-class SwipeScreen extends ConsumerWidget {
-  const SwipeScreen({super.key});
+class SwipeScreen extends ConsumerStatefulWidget {
+  final String groupId;
+  const SwipeScreen({super.key, required this.groupId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SwipeScreen> createState() => _SwipeScreenState();
+}
+
+class _SwipeScreenState extends ConsumerState<SwipeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(selectedGroupIdProvider.notifier).updateState(widget.groupId);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(swipeControllerProvider);
     final ctrl = ref.read(swipeControllerProvider.notifier);
+    final session = ref.watch(activeSessionProvider);
+    final sessionValue = session.value;
+    final currentUser = ref.watch(authControllerProvider).value;
+    final isAdmin = sessionValue?.participants.isNotEmpty == true &&
+        sessionValue!.participants.first == currentUser?.uid;
+
+    ref.listen(activeSessionProvider, (_, next) {
+      if (next.value?.isCompleted == true) {
+        context.go('/group-matches/${widget.groupId}');
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Discover Places'),
+        title: Text(sessionValue?.destination ?? 'Discover Places'),
         actions: [
+          if (isAdmin)
+            TextButton(
+              onPressed: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (dialogContext) => AlertDialog(
+                    title: const Text('End session?'),
+                    content: const Text(
+                      'This will end the session for all participants.',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(false),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(true),
+                        child: const Text('End'),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirm == true) {
+                  await ref.read(groupControllerProvider.notifier).endSession();
+                }
+              },
+              child: const Text('End session'),
+            ),
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: Center(
@@ -54,7 +110,8 @@ class SwipeScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.check_circle_outline, size: 80, color: Colors.green),
+                  const Icon(Icons.check_circle_outline,
+                      size: 80, color: Colors.green),
                   const SizedBox(height: 24),
                   Text(
                     'No more places!',
@@ -77,7 +134,7 @@ class SwipeScreen extends ConsumerWidget {
               ),
             );
           }
-          
+
           // Build the swipeable card stack
           return TinderSwipeCardStack(
             place: current,
@@ -136,49 +193,48 @@ class TinderSwipeCardStack extends StatefulWidget {
 
 class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
     with TickerProviderStateMixin {
-  
   // ============ ANIMATION CONTROLLERS ============
-  
+
   /// Controls the card's position during drag and fly-off animation
   late AnimationController _swipeController;
-  
+
   /// Controls the button press animation
   late AnimationController _buttonController;
-  
+
   // ============ POSITION & ROTATION STATE ============
-  
+
   /// Current horizontal offset of the card (updated during drag)
   double _dragX = 0;
-  
+
   /// Current vertical offset of the card (updated during drag)
   double _dragY = 0;
-  
+
   /// Tracks if we're currently animating a swipe-off
   bool _isAnimating = false;
-  
+
   // ============ SWIPE THRESHOLDS ============
-  
+
   /// How far the card must be dragged to trigger a swipe (as fraction of screen width)
   static const double _swipeThreshold = 0.3;
-  
+
   /// Maximum rotation angle in radians when card is at edge
   static const double _maxRotation = 0.3;
-  
+
   // ============ ANIMATIONS ============
-  
+
   /// Animation for flying the card off screen
   Animation<Offset>? _flyOffAnimation;
 
   @override
   void initState() {
     super.initState();
-    
+
     // Swipe animation controller - controls the fly-off effect
     _swipeController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     // Button animation controller - for button press feedback
     _buttonController = AnimationController(
       duration: const Duration(milliseconds: 150),
@@ -192,7 +248,7 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
     _buttonController.dispose();
     super.dispose();
   }
-  
+
   /// Reset card position when a new place is shown
   @override
   void didUpdateWidget(TinderSwipeCardStack oldWidget) {
@@ -209,30 +265,30 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
   }
 
   // ============ GESTURE HANDLERS ============
-  
+
   /// Called when user starts dragging the card
   void _onPanStart(DragStartDetails details) {
     if (_isAnimating) return;
   }
-  
+
   /// Called continuously as user drags the card
   void _onPanUpdate(DragUpdateDetails details) {
     if (_isAnimating) return;
-    
+
     setState(() {
       // Update card position based on finger movement
       _dragX += details.delta.dx;
       _dragY += details.delta.dy;
     });
   }
-  
+
   /// Called when user releases the card
   void _onPanEnd(DragEndDetails details) {
     if (_isAnimating) return;
-    
+
     final screenWidth = MediaQuery.of(context).size.width;
     final threshold = screenWidth * _swipeThreshold;
-    
+
     // Check if card was dragged past the threshold
     if (_dragX.abs() > threshold) {
       // Swipe detected - fly card off screen
@@ -242,20 +298,20 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
       _snapBack();
     }
   }
-  
+
   // ============ ANIMATION METHODS ============
-  
+
   /// Animate the card flying off the screen
   void _animateCardOff(bool toRight) {
     _isAnimating = true;
-    
+
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     // Calculate the end position (off-screen)
     // Card flies in the direction it was swiped, with some vertical motion
     final endX = toRight ? screenWidth * 1.5 : -screenWidth * 1.5;
     final endY = _dragY + (toRight ? 100 : -100);
-    
+
     // Create the fly-off animation
     _flyOffAnimation = Tween<Offset>(
       begin: Offset(_dragX, _dragY),
@@ -264,21 +320,21 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
       parent: _swipeController,
       curve: Curves.easeOut,
     ));
-    
+
     // Listen for animation updates to rebuild
     _swipeController.addListener(_onSwipeAnimationUpdate);
-    
+
     // When animation completes, trigger the callback
     _swipeController.forward().then((_) {
       _swipeController.removeListener(_onSwipeAnimationUpdate);
-      
+
       // Call the appropriate callback
       if (toRight) {
         widget.onLike();
       } else {
         widget.onSkip();
       }
-      
+
       // Reset state for next card
       setState(() {
         _dragX = 0;
@@ -288,7 +344,7 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
       _swipeController.reset();
     });
   }
-  
+
   /// Callback for animation updates
   void _onSwipeAnimationUpdate() {
     if (_flyOffAnimation != null) {
@@ -298,12 +354,12 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
       });
     }
   }
-  
+
   /// Animate card back to center position
   void _snapBack() {
     final startX = _dragX;
     final startY = _dragY;
-    
+
     // Create snap-back animation
     final animation = Tween<Offset>(
       begin: Offset(startX, startY),
@@ -312,47 +368,49 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
       parent: _swipeController,
       curve: Curves.elasticOut,
     ));
-    
+
     void listener() {
       setState(() {
         _dragX = animation.value.dx;
         _dragY = animation.value.dy;
       });
     }
-    
+
     _swipeController.addListener(listener);
     _swipeController.forward().then((_) {
       _swipeController.removeListener(listener);
       _swipeController.reset();
     });
   }
-  
+
   /// Handle button-triggered like (right swipe)
   void _handleButtonLike() {
     if (_isAnimating) return;
     _animateCardOff(true);
   }
-  
+
   /// Handle button-triggered skip (left swipe)
   void _handleButtonSkip() {
     if (_isAnimating) return;
     _animateCardOff(false);
   }
-  
+
   // ============ BUILD METHOD ============
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     // Calculate rotation based on horizontal drag
     // Card rotates slightly in the direction of the swipe
     final rotationAngle = (_dragX / screenWidth) * _maxRotation;
-    
+
     // Calculate opacity for like/skip indicators
-    final likeOpacity = (_dragX / (screenWidth * _swipeThreshold)).clamp(0.0, 1.0);
-    final skipOpacity = (-_dragX / (screenWidth * _swipeThreshold)).clamp(0.0, 1.0);
-    
+    final likeOpacity =
+        (_dragX / (screenWidth * _swipeThreshold)).clamp(0.0, 1.0);
+    final skipOpacity =
+        (-_dragX / (screenWidth * _swipeThreshold)).clamp(0.0, 1.0);
+
     return Column(
       children: [
         // ============ CARD STACK AREA ============
@@ -378,7 +436,7 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
                     ),
                   ),
                 ),
-                
+
                 // ============ TOP SWIPEABLE CARD ============
                 GestureDetector(
                   onPanStart: _onPanStart,
@@ -394,7 +452,7 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
                       children: [
                         // The actual card
                         _buildPlaceCard(),
-                        
+
                         // ============ LIKE INDICATOR (Green) ============
                         if (likeOpacity > 0)
                           Positioned(
@@ -428,7 +486,7 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
                               ),
                             ),
                           ),
-                        
+
                         // ============ SKIP INDICATOR (Red) ============
                         if (skipOpacity > 0)
                           Positioned(
@@ -470,7 +528,7 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
             ),
           ),
         ),
-        
+
         // ============ ACTION BUTTONS ============
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
@@ -498,7 +556,7 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
       ],
     );
   }
-  
+
   /// Builds the main place card with image and content
   Widget _buildPlaceCard() {
     return SizedBox(
@@ -547,7 +605,7 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
                       )
                     : _buildPlaceholder(),
               ),
-              
+
               // Gradient overlay for text readability
               Positioned(
                 bottom: 0,
@@ -621,7 +679,7 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
                   ),
                 ),
               ),
-              
+
               // Info button
               Positioned(
                 top: 16,
