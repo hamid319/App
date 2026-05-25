@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../common/models/place_model.dart';
 import '../../swipe/logic/swipe_controller.dart';
-import '../../swipe/data/places_repository.dart';
 
 class SimplifiedHomeScreen extends ConsumerWidget {
   const SimplifiedHomeScreen({super.key});
@@ -27,9 +26,9 @@ class SimplifiedHomeScreen extends ConsumerWidget {
                   // Watch the state so badge rebuilds when favorites change
                   ref.watch(swipeControllerProvider);
                   final favoritesCount = ref.read(swipeControllerProvider.notifier).favoritesList.length;
-                  return GestureDetector(
-                    onTap: () => _showFavoritesDialog(context, ref),
-                    child: Badge(
+                  return IconButton(
+                    onPressed: () => context.push('/favorites'),
+                    icon: Badge(
                       label: Text('$favoritesCount'),
                       child: const Icon(Icons.favorite),
                     ),
@@ -76,70 +75,6 @@ class SimplifiedHomeScreen extends ConsumerWidget {
     );
   }
 
-  void _showFavoritesDialog(BuildContext context, WidgetRef ref) {
-    final favorites = ref.read(swipeControllerProvider.notifier).favoritesList;
-    final repo = PlacesRepository();
-    
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Your Favorites'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: favorites.isEmpty
-              ? const Text('No favorites yet. Start swiping to add places!')
-              : FutureBuilder<List<PlaceModel>>(
-                  future: repo.loadNearbyPlaces(0, 0, useMock: true),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    final allPlaces = snapshot.data ?? [];
-                    final favoritePlaces = allPlaces.where((p) => favorites.contains(p.id)).toList();
-                    
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: favoritePlaces.length,
-                      itemBuilder: (context, index) {
-                        final place = favoritePlaces[index];
-                        return ListTile(
-                          leading: const Icon(Icons.place),
-                          title: Text(place.name),
-                          subtitle: Text(place.description ?? '', maxLines: 1, overflow: TextOverflow.ellipsis),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete_outline, color: Colors.red),
-                            tooltip: 'Remove from favorites',
-                            onPressed: () {
-                              ref.read(swipeControllerProvider.notifier).removeFavorite(place.id);
-                              Navigator.pop(context);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('${place.name} removed from favorites'),
-                                  backgroundColor: Colors.orange,
-                                  duration: const Duration(seconds: 2),
-                                ),
-                              );
-                            },
-                          ),
-                          onTap: () {
-                            Navigator.pop(context);
-                            context.push('/place/${place.id}');
-                          },
-                        );
-                      },
-                    );
-                  },
-                ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _SwipeContent extends ConsumerWidget {

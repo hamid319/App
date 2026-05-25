@@ -1,14 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../common/models/user_model.dart';
 import '../data/profile_repository.dart';
+import '../data/image_service.dart';
 import '../../../main_providers.dart';
 
 final profileControllerProvider =
     AsyncNotifierProvider<ProfileController, UserModel?>(ProfileController.new);
 
+final imageServiceProvider = Provider<ImageService>((ref) => ImageService());
+
 class ProfileController extends AsyncNotifier<UserModel?> {
   ProfileRepository get _repo =>
       ProfileRepository(ref.read(firestoreServiceProvider));
+  
+  ImageService get _imageService => ref.read(imageServiceProvider);
 
   @override
   Future<UserModel?> build() async {
@@ -68,5 +74,38 @@ class ProfileController extends AsyncNotifier<UserModel?> {
     final newFavorites = List<String>.from(currentUser.favorites)
       ..remove(placeId);
     await updateProfile(uid, {'favorites': newFavorites});
+  }
+
+  Future<String?> pickAndUploadProfileImage(String uid, ImageSource source) async {
+    try {
+      final XFile? imageFile;
+      if (source == ImageSource.gallery) {
+        imageFile = await _imageService.pickImageFromGallery();
+      } else {
+        imageFile = await _imageService.pickImageFromCamera();
+      }
+
+      if (imageFile == null) return null;
+
+      final String imageUrl = await _imageService.uploadProfileImage(uid, imageFile);
+      
+      await updateProfile(uid, {'photoUrl': imageUrl});
+      
+      return imageUrl;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> removeProfileImage(String uid) async {
+    final currentUser = state.value;
+    if (currentUser == null || currentUser.photoUrl == null) return;
+
+    try {
+      await _imageService.deleteProfileImage(currentUser.photoUrl!);
+      await updateProfile(uid, {'photoUrl': null});
+    } catch (e) {
+      rethrow;
+    }
   }
 }

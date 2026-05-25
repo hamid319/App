@@ -19,7 +19,16 @@ class PlaceDetailScreen extends ConsumerWidget {
     final placeId = GoRouterState.of(context).pathParameters['id'] ?? '';
     final placeAsync = ref.watch(placeDetailProvider(placeId));
 
+    final appBarTitle = placeAsync.when(
+      data: (place) => place?.name ?? 'Ort',
+      loading: () => 'Ort',
+      error: (_, __) => 'Ort',
+    );
+
     return Scaffold(
+      appBar: AppBar(
+        title: Text(appBarTitle),
+      ),
       body: placeAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
@@ -73,32 +82,17 @@ class _PlaceDetailContent extends ConsumerWidget {
     ref.watch(swipeControllerProvider);
     final swipeCtrl = ref.read(swipeControllerProvider.notifier);
     final isFav = swipeCtrl.isFavorite(place.id);
-    return CustomScrollView(
-      slivers: [
-        // App Bar mit Bild
-        SliverAppBar(
-          expandedHeight: 300,
-          pinned: true,
-          flexibleSpace: FlexibleSpaceBar(
-            title: Text(
-              place.name,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                shadows: [
-                  Shadow(
-                    offset: Offset(1, 1),
-                    blurRadius: 3,
-                    color: Colors.black54,
-                  ),
-                ],
-              ),
-            ),
-            background: Stack(
-              fit: StackFit.expand,
-              children: [
-                // Bild oder Placeholder
-                place.imageUrls.isNotEmpty
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: place.imageUrls.isNotEmpty
                     ? Image.network(
                         place.imageUrls.first,
                         fit: BoxFit.cover,
@@ -106,31 +100,14 @@ class _PlaceDetailContent extends ConsumerWidget {
                             _buildImagePlaceholder(),
                       )
                     : _buildImagePlaceholder(),
-                // Gradient Overlay
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.7),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-        // Content
-        SliverToBoxAdapter(
-          child: Padding(
+          Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Beschreibung
                 Text(
                   place.description ?? '',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -267,8 +244,8 @@ class _PlaceDetailContent extends ConsumerWidget {
               ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

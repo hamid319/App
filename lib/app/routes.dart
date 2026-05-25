@@ -3,11 +3,13 @@ import '../features/onboarding/ui/onboarding_screen.dart';
 import '../features/auth/ui/login_screen.dart';
 import '../features/auth/ui/register_screen.dart';
 import '../features/home/ui/simplified_home_screen.dart';
+import '../features/home/ui/favorites_screen.dart';
 import '../features/swipe/ui/swipe_screen.dart';
 import '../features/places/ui/place_detail_screen.dart';
 import '../features/group/ui/simplified_group_screen.dart';
 import '../features/group/ui/group_matches_screen.dart';
 import '../features/profile/ui/simplified_profile_screen.dart';
+import '../features/profile/ui/settings_screen.dart';
 import '../core/services/preferences_service.dart';
 import 'shell_navigation.dart';
 
@@ -78,6 +80,14 @@ GoRouter createRouter() {
           GoRoute(
             path: '/profile',
             builder: (ctx, state) => const SimplifiedProfileScreen(),
+          ),
+          GoRoute(
+            path: '/settings',
+            builder: (ctx, state) => const SettingsScreen(),
+          ),
+          GoRoute(
+            path: '/favorites',
+            builder: (ctx, state) => const FavoritesScreen(),
           ),
           GoRoute(
             path: '/place/:id',
