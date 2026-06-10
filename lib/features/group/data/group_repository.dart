@@ -33,7 +33,6 @@ class GroupRepository {
       hasCompletedSession: group.hasCompletedSession,
       ownerUid: group.ownerUid,
       location: group.location,
-      likeThreshold: group.likeThreshold,
       joinEnabled: true,
       invite: group.invite,
     );
@@ -156,6 +155,10 @@ class GroupRepository {
     }
   }
 
+  Future<void> deleteGroup(String groupId) async {
+    await _firestoreService.deleteDocument('groups', groupId);
+  }
+
   Future<void> syncFavorites(
       String groupId, List<String> sharedFavorites) async {
     await _firestoreService.updateDocument('groups', groupId, {
@@ -170,7 +173,6 @@ class GroupRepository {
   Future<String> startSwipeSession({
     required String groupId,
     required String destination,
-    required int threshold,
     required List<String> participantUids,
     required int swipeLimit,
     required List<String> placePool,
@@ -202,7 +204,6 @@ class GroupRepository {
       swipeLimit: swipeLimit,
       placePool: placePool,
       participants: participantUids,
-      threshold: threshold,
       swipeProgress: {for (final uid in participantUids) uid: 0},
       progressByUser: {for (final uid in participantUids) uid: 0},
       createdAt: DateTime.now(),
@@ -237,6 +238,7 @@ class GroupRepository {
     final groupRef = _db.collection('groups').doc(groupId);
     final sessionRef = groupRef.collection('sessions').doc(sessionId);
     final voteRef = sessionRef.collection('votes').doc(placeId);
+    final userSwipeRef = sessionRef.collection('userSwipes').doc(userId);
 
     final sessionSnap = await sessionRef.get();
     if (!sessionSnap.exists || sessionSnap.data() == null) {
@@ -320,6 +322,18 @@ class GroupRepository {
         });
       }
 
+      transaction.set(
+        userSwipeRef,
+        {
+          'swipedPlaceIds': FieldValue.arrayUnion([placeId]),
+          'likedPlaceIds': liked
+              ? FieldValue.arrayUnion([placeId])
+              : FieldValue.arrayRemove([placeId]),
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
+
       if (updatedSession.allMembersDone) {
         final completedSession = updatedSession.copyWith(
           status: 'completed',
@@ -338,6 +352,29 @@ class GroupRepository {
         transaction.update(sessionRef, updatedSession.toJson());
       }
     });
+  }
+
+  Future<Set<String>> getUserSwipedPlaceIds({
+    required String groupId,
+    required String sessionId,
+    required String userId,
+  }) async {
+    final snap = await _db
+        .collection('groups')
+        .doc(groupId)
+        .collection('sessions')
+        .doc(sessionId)
+        .collection('userSwipes')
+        .doc(userId)
+        .get();
+
+    if (!snap.exists || snap.data() == null) {
+      return <String>{};
+    }
+
+    final data = snap.data()!;
+    final swiped = List<String>.from(data['swipedPlaceIds'] ?? const []);
+    return swiped.toSet();
   }
 
   Future<GroupSessionModel?> getSession({
@@ -408,11 +445,10 @@ class GroupRepository {
     await batch.commit();
   }
 
-  /// Returns only places that reached the threshold.
+  /// Returns only places that reached at least 1 like.
   Future<List<Map<String, dynamic>>> getQualifiedPlaces({
     required String groupId,
     required String sessionId,
-    required int threshold,
   }) async {
     final snap = await _db
         .collection('groups')
@@ -420,7 +456,7 @@ class GroupRepository {
         .collection('sessions')
         .doc(sessionId)
         .collection('votes')
-        .where('likes', isGreaterThanOrEqualTo: threshold)
+        .where('likes', isGreaterThanOrEqualTo: 1)
         .orderBy('likes', descending: true)
         .get();
 
@@ -433,12 +469,32 @@ class GroupRepository {
         .doc(groupId)
         .collection('sessions')
         .where('status', isEqualTo: 'completed')
-        .orderBy('endedAt', descending: true)
         .get();
 
-    return snap.docs
+    final sessions = snap.docs
         .map((doc) => GroupSessionModel.fromJson(doc.data()))
         .toList();
+
+    // Sort locally to avoid needing a Firestore composite index
+    sessions.sort((a, b) {
+      final aTime = a.endedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final bTime = b.endedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      return bTime.compareTo(aTime);
+    });
+
+    return sessions;
+  }
+
+  Future<void> updateSessionOrder(
+      String groupId, String sessionId, List<String> orderedPlaceIds) async {
+    await _db
+        .collection('groups')
+        .doc(groupId)
+        .collection('sessions')
+        .doc(sessionId)
+        .update({
+      'orderedPlaceIds': orderedPlaceIds,
+    });
   }
 
   /// Real-time stream of the active session -- drives UI reactivity.

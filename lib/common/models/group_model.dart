@@ -84,7 +84,6 @@ class GroupModel {
   // New fields from plan
   final String? ownerUid;
   final GroupLocation? location;
-  final int? likeThreshold;
   final bool? joinEnabled;
   final GroupInvite? invite;
 
@@ -98,7 +97,6 @@ class GroupModel {
     this.hasCompletedSession = false,
     this.ownerUid,
     this.location,
-    this.likeThreshold,
     this.joinEnabled,
     this.invite,
   });
@@ -113,7 +111,6 @@ class GroupModel {
     bool? hasCompletedSession,
     String? ownerUid,
     GroupLocation? location,
-    int? likeThreshold,
     bool? joinEnabled,
     GroupInvite? invite,
   }) {
@@ -127,7 +124,6 @@ class GroupModel {
       hasCompletedSession: hasCompletedSession ?? this.hasCompletedSession,
       ownerUid: ownerUid ?? this.ownerUid,
       location: location ?? this.location,
-      likeThreshold: likeThreshold ?? this.likeThreshold,
       joinEnabled: joinEnabled ?? this.joinEnabled,
       invite: invite ?? this.invite,
     );
@@ -155,7 +151,6 @@ class GroupModel {
       location: json['location'] != null
           ? GroupLocation.fromJson(Map<String, dynamic>.from(json['location']))
           : null,
-      likeThreshold: json['likeThreshold'] as int?,
       joinEnabled: json['joinEnabled'] as bool?,
       invite: json['invite'] != null
           ? GroupInvite.fromJson(Map<String, dynamic>.from(json['invite']))
@@ -173,7 +168,6 @@ class GroupModel {
         'hasCompletedSession': hasCompletedSession,
         'ownerUid': ownerUid,
         if (location != null) 'location': location!.toJson(),
-        if (likeThreshold != null) 'likeThreshold': likeThreshold,
         if (joinEnabled != null) 'joinEnabled': joinEnabled,
         if (invite != null) 'invite': invite!.toJson(),
       };

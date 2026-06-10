@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/onboarding/ui/onboarding_screen.dart';
 import '../features/auth/ui/login_screen.dart';
 import '../features/auth/ui/register_screen.dart';
@@ -9,25 +11,44 @@ import '../features/group/ui/simplified_group_screen.dart';
 import '../features/group/ui/group_matches_screen.dart';
 import '../features/profile/ui/simplified_profile_screen.dart';
 import '../core/services/preferences_service.dart';
+import '../features/group/logic/group_controller.dart';
+import '../common/models/group_model.dart';
 import 'shell_navigation.dart';
 
-GoRouter createRouter() {
+final routerProvider = Provider<GoRouter>((ref) => createRouter(ref));
+
+GoRouter createRouter(Ref ref) {
+  final refreshNotifier = ValueNotifier<int>(0);
+  ref.listen(userGroupsProvider, (_, __) => refreshNotifier.value++);
+
   return GoRouter(
     initialLocation: '/',
+    refreshListenable: refreshNotifier,
     redirect: (context, state) async {
       final currentPath = state.matchedLocation;
       final hasSeenOnboarding = await PreferencesService.hasSeenOnboarding();
-      
+
       // First time users see onboarding
       if (!hasSeenOnboarding && currentPath != '/onboarding') {
         return '/onboarding';
       }
-      
+
       // After onboarding, redirect root to home
       if (hasSeenOnboarding && currentPath == '/') {
         return '/home';
       }
-      
+
+      final List<GroupModel> groupsSnapshot = ref.read(userGroupsProvider).value ??
+          await ref.read(userGroupsProvider.future);
+      final activeGroup = _pickActiveSessionGroup(groupsSnapshot);
+      if (activeGroup != null) {
+        final onSwipe = currentPath.startsWith('/swipe');
+        final onMatches = currentPath.startsWith('/group-matches');
+        if (!onSwipe && !onMatches) {
+          return '/swipe/${activeGroup.groupId}';
+        }
+      }
+
       return null;
     },
     routes: [
@@ -57,7 +78,8 @@ GoRouter createRouter() {
           ),
           GoRoute(
             path: '/swipe/:groupId',
-            builder: (ctx, state) => SwipeScreen(groupId: state.pathParameters['groupId']!),
+            builder: (ctx, state) =>
+                SwipeScreen(groupId: state.pathParameters['groupId']!),
           ),
           GoRoute(
             path: '/group',
@@ -73,7 +95,8 @@ GoRouter createRouter() {
           ),
           GoRoute(
             path: '/group-matches/:groupId',
-            builder: (ctx, state) => GroupMatchesScreen(groupId: state.pathParameters['groupId']!),
+            builder: (ctx, state) =>
+                GroupMatchesScreen(groupId: state.pathParameters['groupId']!),
           ),
           GoRoute(
             path: '/profile',
@@ -88,3 +111,11 @@ GoRouter createRouter() {
     ],
   );
 }
+
+GroupModel? _pickActiveSessionGroup(List<GroupModel> groups) {
+  for (final group in groups) {
+    if (group.activeSessionId != null) return group;
+  }
+  return null;
+}
+

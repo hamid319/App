@@ -9,7 +9,6 @@ class GroupSessionModel {
     required this.status,
     required this.totalPlacesToSwipe,
     required this.participants,
-    required this.threshold,
     required this.swipeProgress,
     required this.createdAt,
     this.endedAt,
@@ -17,6 +16,7 @@ class GroupSessionModel {
     this.swipeLimit,
     this.placePool = const [],
     this.progressByUser,
+    this.orderedPlaceIds,
   });
 
   final String sessionId;
@@ -24,7 +24,6 @@ class GroupSessionModel {
   final String status; // 'in_progress' | 'completed'
   final int totalPlacesToSwipe;
   final List<String> participants;
-  final int threshold; // Min likes to qualify
   final Map<String, int> swipeProgress; // { uid: swipeCount }
   final DateTime createdAt;
   final DateTime? endedAt; // Set on session close
@@ -34,6 +33,7 @@ class GroupSessionModel {
   final int? swipeLimit;
   final List<String> placePool;
   final Map<String, int>? progressByUser;
+  final List<String>? orderedPlaceIds;
 
   bool get isCompleted => status == 'completed';
 
@@ -54,7 +54,6 @@ class GroupSessionModel {
     String? status,
     int? totalPlacesToSwipe,
     List<String>? participants,
-    int? threshold,
     Map<String, int>? swipeProgress,
     DateTime? createdAt,
     DateTime? endedAt,
@@ -62,6 +61,7 @@ class GroupSessionModel {
     int? swipeLimit,
     List<String>? placePool,
     Map<String, int>? progressByUser,
+    List<String>? orderedPlaceIds,
   }) {
     return GroupSessionModel(
       sessionId: sessionId ?? this.sessionId,
@@ -69,7 +69,6 @@ class GroupSessionModel {
       status: status ?? this.status,
       totalPlacesToSwipe: totalPlacesToSwipe ?? this.totalPlacesToSwipe,
       participants: participants ?? this.participants,
-      threshold: threshold ?? this.threshold,
       swipeProgress: swipeProgress ?? this.swipeProgress,
       createdAt: createdAt ?? this.createdAt,
       endedAt: endedAt ?? this.endedAt,
@@ -77,6 +76,7 @@ class GroupSessionModel {
       swipeLimit: swipeLimit ?? this.swipeLimit,
       placePool: placePool ?? this.placePool,
       progressByUser: progressByUser ?? this.progressByUser,
+      orderedPlaceIds: orderedPlaceIds ?? this.orderedPlaceIds,
     );
   }
 
@@ -92,7 +92,6 @@ class GroupSessionModel {
       status: json['status'] as String? ?? 'in_progress',
       totalPlacesToSwipe: _parseInt(json['totalPlacesToSwipe']),
       participants: _stringList(json['participants']),
-      threshold: _parseInt(json['threshold']),
       swipeProgress: _intMap(json['swipeProgress']),
       createdAt: createdAt,
       endedAt: _parseDateTime(json['endedAt']),
@@ -100,6 +99,9 @@ class GroupSessionModel {
       swipeLimit: _parseInt(json['swipeLimit'] ?? json['totalPlacesToSwipe']),
       placePool: _stringList(json['placePool']),
       progressByUser: _intMap(json['progressByUser'] ?? json['swipeProgress']),
+      orderedPlaceIds: json['orderedPlaceIds'] != null
+          ? _stringList(json['orderedPlaceIds'])
+          : null,
     );
   }
 
@@ -109,7 +111,6 @@ class GroupSessionModel {
         'status': status,
         'totalPlacesToSwipe': totalPlacesToSwipe,
         'participants': participants,
-        'threshold': threshold,
         'swipeProgress': swipeProgress,
         'createdAt': Timestamp.fromDate(createdAt),
         if (endedAt != null) 'endedAt': Timestamp.fromDate(endedAt!),
@@ -117,6 +118,7 @@ class GroupSessionModel {
         'swipeLimit': swipeLimit ?? totalPlacesToSwipe,
         'placePool': placePool,
         'progressByUser': progressByUser ?? swipeProgress,
+        if (orderedPlaceIds != null) 'orderedPlaceIds': orderedPlaceIds,
       };
 }
 

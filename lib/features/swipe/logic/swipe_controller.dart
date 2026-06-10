@@ -7,7 +7,9 @@ import '../../profile/data/profile_repository.dart';
 import '../../group/logic/group_controller.dart';
 import '../../../main_providers.dart';
 
-final swipeControllerProvider = AsyncNotifierProvider<SwipeController, List<PlaceModel>>(SwipeController.new);
+final swipeControllerProvider =
+    AsyncNotifierProvider<SwipeController, List<PlaceModel>>(
+        SwipeController.new);
 
 class SwipeController extends AsyncNotifier<List<PlaceModel>> {
   late PlacesRepository _placesRepo;
@@ -28,7 +30,7 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     _currentIndex = 0;
     _favorites.clear();
     _swipedPlaceIds = {};
-    
+
     try {
       final position = await _locationService.getCurrentLocation();
       _userLat = position.latitude;
@@ -36,45 +38,58 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     } catch (e) {
       // Use default location if location services fail
     }
-    
+
+    final groupState = ref.read(groupControllerProvider).value;
+    final sessionId = groupState?.activeSessionId;
+
     final authState = ref.read(authControllerProvider);
     if (authState.value != null) {
       final userId = authState.value!.uid;
       try {
         final userProfile = await _profileRepo.getUserProfile(userId);
         _favorites.addAll(userProfile.favorites);
-        
-        _swipedPlaceIds = await _placesRepo.getSwipedPlaceIds(userId);
+
+        if (groupState != null && sessionId != null) {
+          final groupRepo = ref.read(groupRepositoryProvider);
+          _swipedPlaceIds = await groupRepo.getUserSwipedPlaceIds(
+            groupId: groupState.groupId,
+            sessionId: sessionId,
+            userId: userId,
+          );
+        } else {
+          _swipedPlaceIds = await _placesRepo.getSwipedPlaceIds(userId);
+        }
       } catch (e) {
         _favorites.clear();
         _swipedPlaceIds = {};
       }
     }
-    
-    final groupState = ref.read(groupControllerProvider).value;
-    final sessionId = groupState?.activeSessionId;
 
     if (groupState != null && sessionId != null) {
       final groupRepo = ref.read(groupRepositoryProvider);
-      final session = await groupRepo.getSession(groupId: groupState.groupId, sessionId: sessionId);
+      final session = await groupRepo.getSession(
+          groupId: groupState.groupId, sessionId: sessionId);
       if (session != null) {
         List<PlaceModel> sessionPlaces = [];
         for (var pid in session.placePool) {
-          final p = await _placesRepo.getPlaceById(pid, useMock: true);
+          final p = await _placesRepo.getPlaceById(pid, useMock: false);
           if (p != null) sessionPlaces.add(p);
         }
-        return sessionPlaces.where((p) => !_swipedPlaceIds.contains(p.id)).toList();
+        return sessionPlaces
+            .where((p) => !_swipedPlaceIds.contains(p.id))
+            .toList();
       }
     }
 
     try {
       final allPlaces = await _placesRepo.loadNearbyPlaces(
-        _userLat, 
-        _userLng, 
+        _userLat,
+        _userLng,
         radiusKm: _defaultRadiusKm,
         useMock: true,
       );
-      final unseenPlaces = allPlaces.where((p) => !_swipedPlaceIds.contains(p.id)).toList();
+      final unseenPlaces =
+          allPlaces.where((p) => !_swipedPlaceIds.contains(p.id)).toList();
       return unseenPlaces;
     } catch (e) {
       final allPlaces = PlacesRepository.mockPlaces;
@@ -88,14 +103,15 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
       final position = await _locationService.getCurrentLocation();
       _userLat = position.latitude;
       _userLng = position.longitude;
-      
+
       final allPlaces = await _placesRepo.loadNearbyPlaces(
-        _userLat, 
-        _userLng, 
+        _userLat,
+        _userLng,
         radiusKm: _defaultRadiusKm,
         useMock: true,
       );
-      final unseenPlaces = allPlaces.where((p) => !_swipedPlaceIds.contains(p.id)).toList();
+      final unseenPlaces =
+          allPlaces.where((p) => !_swipedPlaceIds.contains(p.id)).toList();
       _currentIndex = 0;
       state = AsyncData(unseenPlaces);
     } catch (e, st) {
@@ -105,38 +121,44 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
 
   PlaceModel? get currentPlace {
     final data = state.value;
-    if (data == null || data.isEmpty || _currentIndex >= data.length) return null;
+    if (data == null || data.isEmpty || _currentIndex >= data.length)
+      return null;
     return data[_currentIndex];
   }
 
   Future<void> like() async {
     final place = currentPlace;
     if (place == null) return;
-    
+
     // Advance immediately so the UI doesn't freeze waiting for network
     nextPlace();
-    
+
     final authState = ref.read(authControllerProvider);
     if (authState.value != null) {
       final userId = authState.value!.uid;
-      
+      final groupState = ref.read(groupControllerProvider).value;
+      final hasActiveSession = groupState?.activeSessionId != null;
+
+      if (hasActiveSession) {
+        _swipedPlaceIds.add(place.id);
+        try {
+          await ref
+              .read(groupControllerProvider.notifier)
+              .castVote(placeId: place.id, liked: true);
+        } catch (_) {}
+        return;
+      }
+
       if (!_favorites.contains(place.id)) {
         _favorites.add(place.id);
       }
-      
+
       try {
         await _placesRepo.recordSwipe(
           userId: userId,
           placeId: place.id,
           liked: true,
         );
-
-        final groupState = ref.read(groupControllerProvider).value;
-        if (groupState?.activeSessionId != null) {
-          try {
-            await ref.read(groupControllerProvider.notifier).castVote(placeId: place.id, liked: true);
-          } catch (_) {}
-        }
 
         await _profileRepo.updateUserProfile(userId, {'favorites': _favorites});
         await _syncFavoritesWithGroup(userId);
@@ -149,25 +171,32 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
   Future<void> skip() async {
     final place = currentPlace;
     if (place == null) return;
-    
+
     // Advance immediately so the UI doesn't freeze waiting for network
     nextPlace();
-    
+
     final authState = ref.read(authControllerProvider);
     if (authState.value != null) {
+      final userId = authState.value!.uid;
+      final groupState = ref.read(groupControllerProvider).value;
+      final hasActiveSession = groupState?.activeSessionId != null;
+
+      if (hasActiveSession) {
+        _swipedPlaceIds.add(place.id);
+        try {
+          await ref
+              .read(groupControllerProvider.notifier)
+              .castVote(placeId: place.id, liked: false);
+        } catch (_) {}
+        return;
+      }
+
       try {
         await _placesRepo.recordSwipe(
-          userId: authState.value!.uid,
+          userId: userId,
           placeId: place.id,
           liked: false,
         );
-
-        final groupState = ref.read(groupControllerProvider).value;
-        if (groupState?.activeSessionId != null) {
-          try {
-            await ref.read(groupControllerProvider.notifier).castVote(placeId: place.id, liked: false);
-          } catch (_) {}
-        }
       } catch (e) {
         // Continue even on error
       }
@@ -231,7 +260,7 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     try {
       final groupController = ref.read(groupControllerProvider.notifier);
       final groupState = ref.read(groupControllerProvider);
-      
+
       if (groupState.value != null) {
         final group = groupState.value!;
         if (group.members.contains(userId)) {
@@ -246,9 +275,9 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
 
   Future<List<String>> _findMutualFavorites(List<String> memberIds) async {
     if (memberIds.isEmpty) return [];
-    
+
     final List<Set<String>> memberFavoriteSets = [];
-    
+
     for (final memberId in memberIds) {
       try {
         final userProfile = await _profileRepo.getUserProfile(memberId);
@@ -257,14 +286,14 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
         memberFavoriteSets.add({});
       }
     }
-    
+
     if (memberFavoriteSets.isEmpty) return [];
-    
+
     Set<String> intersection = memberFavoriteSets.first;
     for (final favorites in memberFavoriteSets.skip(1)) {
       intersection = intersection.intersection(favorites);
     }
-    
+
     return intersection.toList();
   }
 }

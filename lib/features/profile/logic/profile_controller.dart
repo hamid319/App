@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../common/models/user_model.dart';
 import '../data/profile_repository.dart';
 import '../../../main_providers.dart';
-
+import '../../auth/logic/auth_controller.dart';
 final profileControllerProvider =
     AsyncNotifierProvider<ProfileController, UserModel?>(ProfileController.new);
 
@@ -12,18 +12,12 @@ class ProfileController extends AsyncNotifier<UserModel?> {
 
   @override
   Future<UserModel?> build() async {
-    return null;
-  }
-
-  Future<void> loadProfile(String uid) async {
-    if (state.value?.uid == uid) return;
-    state = const AsyncLoading();
-    try {
-      final user = await _repo.getUserProfile(uid);
-      state = AsyncData(user);
-    } catch (e, st) {
-      state = AsyncError(e, st);
+    final userAsync = ref.watch(authControllerProvider);
+    final user = userAsync.value;
+    if (user != null) {
+      return _repo.getUserProfile(user.uid);
     }
+    return null;
   }
 
   Future<void> updateProfile(String uid, Map<String, dynamic> data) async {

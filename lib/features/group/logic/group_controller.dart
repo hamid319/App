@@ -118,7 +118,6 @@ class GroupController extends AsyncNotifier<GroupModel?> {
   Future<void> createGroupWithSettings({
     required String groupName,
     required GroupLocation location,
-    required int likeThreshold,
   }) async {
     final currentUser = ref.read(authControllerProvider).value;
     if (currentUser == null) throw StateError('Not authenticated');
@@ -132,7 +131,6 @@ class GroupController extends AsyncNotifier<GroupModel?> {
         members: [currentUser.uid],
         ownerUid: currentUser.uid,
         location: location,
-        likeThreshold: likeThreshold,
         joinEnabled: true,
         invite:
             GroupInvite(code: _generateInviteCode(), createdAt: DateTime.now()),
@@ -248,10 +246,17 @@ class GroupController extends AsyncNotifier<GroupModel?> {
 
     state = const AsyncLoading();
     try {
-      final destination =
-          group.location?.cityName ?? group.location?.countryName ?? 'Unknown';
-      final places = await _placesRepo.fetchPlacesFromGoogleAPI(destination,
-          limit: swipeLimit);
+      final location = group.location;
+      if (location == null) {
+        throw StateError('Group location is required to start a session');
+      }
+      final destination = location.cityName.isNotEmpty
+          ? location.cityName
+          : location.countryName;
+      final places = await _placesRepo.fetchExamplePlacesForLocation(
+        location,
+        limit: swipeLimit,
+      );
 
       if (places.isEmpty) {
         throw StateError('No places found for this destination');
@@ -262,7 +267,6 @@ class GroupController extends AsyncNotifier<GroupModel?> {
       await _repo.startSwipeSession(
         groupId: group.groupId,
         destination: destination,
-        threshold: group.likeThreshold ?? 1,
         participantUids: group.members,
         swipeLimit: swipeLimit,
         placePool: placePool,
@@ -274,7 +278,6 @@ class GroupController extends AsyncNotifier<GroupModel?> {
 
   Future<void> startSession({
     required String destination,
-    required int threshold,
   }) async {
     final group = state.value;
     if (group == null) return;
@@ -285,7 +288,17 @@ class GroupController extends AsyncNotifier<GroupModel?> {
 
     state = const AsyncLoading();
     try {
-      final places = await _placesRepo.fetchPlacesFromGoogleAPI(destination);
+      final location = group.location;
+      if (location == null) {
+        throw StateError('Group location is required to start a session');
+      }
+      final resolvedDestination = location.cityName.isNotEmpty
+          ? location.cityName
+          : location.countryName;
+      final places = await _placesRepo.fetchExamplePlacesForLocation(
+        location,
+        limit: 20,
+      );
 
       if (places.isEmpty) {
         throw StateError('No places found for this destination');
@@ -293,8 +306,8 @@ class GroupController extends AsyncNotifier<GroupModel?> {
 
       await _repo.startSwipeSession(
         groupId: group.groupId,
-        destination: destination,
-        threshold: threshold,
+        destination:
+            resolvedDestination.isNotEmpty ? resolvedDestination : destination,
         participantUids: group.members,
         swipeLimit: places.length,
         placePool: places.map((p) => p.id).toList(),
@@ -343,6 +356,16 @@ class GroupController extends AsyncNotifier<GroupModel?> {
       sessionId: sessionId,
       adminUid: currentUser.uid,
     );
+  }
+
+  Future<void> updateSessionOrder(
+      String sessionId, List<String> orderedPlaceIds) async {
+    final group = state.value;
+    if (group == null) return;
+    if (!isAdmin) {
+      throw StateError('Only the admin can reorder the session list');
+    }
+    await _repo.updateSessionOrder(group.groupId, sessionId, orderedPlaceIds);
   }
 }
 

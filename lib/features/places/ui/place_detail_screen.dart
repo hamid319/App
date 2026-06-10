@@ -28,11 +28,11 @@ class PlaceDetailScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Fehler: $error'),
+              Text('Error: $error'),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => context.pop(),
-                child: const Text('Zurück'),
+                child: const Text('Back'),
               ),
             ],
           ),
@@ -45,11 +45,11 @@ class PlaceDetailScreen extends ConsumerWidget {
                 children: [
                   const Icon(Icons.place, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
-                  const Text('Ort nicht gefunden'),
+                  const Text('Place not found'),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => context.pop(),
-                    child: const Text('Zurück'),
+                    child: const Text('Back'),
                   ),
                 ],
               ),
@@ -176,7 +176,7 @@ class _PlaceDetailContent extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Koordinaten',
+                                'Coordinates',
                                 style: Theme.of(context)
                                     .textTheme
                                     .labelMedium
@@ -210,7 +210,7 @@ class _PlaceDetailContent extends ConsumerWidget {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Karten-App konnte nicht geöffnet werden: $e'),
+                              content: Text('Could not open Maps app: $e'),
                               backgroundColor: Colors.red,
                             ),
                           );
@@ -218,7 +218,7 @@ class _PlaceDetailContent extends ConsumerWidget {
                       }
                     },
                     icon: const Icon(Icons.map),
-                    label: const Text('In Karten öffnen'),
+                    label: const Text('Open in Maps'),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),

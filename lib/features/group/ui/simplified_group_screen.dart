@@ -25,7 +25,6 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       TextEditingController(text: '10');
 
   bool _showCreateGroup = false;
-  int _likeThreshold = 1;
 
   final _locationRepo = LocationRepository();
   bool _isLoadingLocations = false;
@@ -299,7 +298,17 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
         ),
         title: Text(group.groupName ?? 'Unnamed Group'),
         subtitle: Text('${group.members.length} members'),
-        trailing: badge,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            badge,
+            if (isOwner)
+              IconButton(
+                icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                onPressed: () => _confirmDeleteGroup(group),
+              ),
+          ],
+        ),
         onTap: () {
           ref.read(selectedGroupIdProvider.notifier).updateState(group.groupId);
         },
@@ -417,18 +426,6 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                     },
                   ),
               const SizedBox(height: 16),
-              Text('Like Threshold: $_likeThreshold'),
-              Slider(
-                value: _likeThreshold.toDouble(),
-                min: 1,
-                max: 5,
-                divisions: 4,
-                label: _likeThreshold.toString(),
-                onChanged: (val) {
-                  setState(() => _likeThreshold = val.toInt());
-                },
-              ),
-              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
@@ -484,8 +481,6 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                   if (group.location != null)
                     Text(
                         'Location: ${group.location!.cityName}, ${group.location!.countryName}'),
-                  const SizedBox(height: 8),
-                  Text('Like Threshold: ${group.likeThreshold ?? 1}'),
                   const SizedBox(height: 16),
                   if (group.invite != null && group.joinEnabled == true) ...[
                     Row(
@@ -676,7 +671,6 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       await ref.read(groupControllerProvider.notifier).createGroupWithSettings(
             groupName: groupName,
             location: location,
-            likeThreshold: _likeThreshold,
           );
       if (mounted) {
         setState(() {
@@ -832,6 +826,38 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Leave'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeleteGroup(GroupModel group) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Group'),
+        content: Text("Are you sure you want to delete '${group.groupName}'? This cannot be undone."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                await ref.read(groupRepositoryProvider).deleteGroup(group.groupId);
+                ref.invalidate(userGroupsProvider);
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error deleting group: $e')),
+                  );
+                }
+              }
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

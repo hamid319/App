@@ -52,10 +52,6 @@ class SimplifiedProfileScreen extends ConsumerWidget {
             );
           }
 
-          // Schedule profile load outside of build to avoid Riverpod error
-          Future.microtask(() {
-            ref.read(profileControllerProvider.notifier).loadProfile(user.uid);
-          });
           final profileState = ref.watch(profileControllerProvider);
 
           return profileState.when(

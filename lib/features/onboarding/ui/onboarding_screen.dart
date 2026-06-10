@@ -16,20 +16,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final List<OnboardingPage> _pages = [
     OnboardingPage(
       icon: Icons.explore,
-      title: 'Entdecke neue Orte',
-      description: 'Swipe durch interessante Plätze in deiner Nähe und finde deine nächsten Reiseziele.',
+      title: 'Discover new places',
+      description: 'Swipe through interesting places nearby and find your next travel destinations.',
       color: Colors.blue,
     ),
     OnboardingPage(
       icon: Icons.favorite,
-      title: 'Sammle Favoriten',
-      description: 'Markiere Orte, die dir gefallen, und erstelle deine persönliche Wunschliste.',
+      title: 'Collect favorites',
+      description: 'Mark places you like and create your personal wishlist.',
       color: Colors.pink,
     ),
     OnboardingPage(
       icon: Icons.group,
-      title: 'Plane mit Freunden',
-      description: 'Erstelle Gruppen und finde gemeinsam die besten Orte für eure nächste Reise.',
+      title: 'Plan with friends',
+      description: 'Create groups and find the best places for your next trip together.',
       color: Colors.green,
     ),
   ];
@@ -78,7 +78,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: TextButton(
                   onPressed: _skip,
-                  child: const Text('Überspringen'),
+                  child: const Text('Skip'),
                 ),
               ),
             ),
@@ -117,7 +117,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: Text(
-                    _currentPage == _pages.length - 1 ? 'Los geht\'s' : 'Weiter',
+                    _currentPage == _pages.length - 1 ? 'Get Started' : 'Next',
                     style: const TextStyle(fontSize: 16),
                   ),
                 ),
