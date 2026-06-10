@@ -3,12 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../logic/profile_controller.dart';
 import '../../auth/logic/auth_controller.dart';
-import '../../swipe/data/places_repository.dart';
-import '../../../common/models/place_model.dart';
 import '../../../common/widgets/loading_spinner.dart';
 import '../../../common/widgets/error_view.dart';
-import '../../../common/widgets/place_card.dart';
-import '../../swipe/logic/swipe_controller.dart';
 
 class SimplifiedProfileScreen extends ConsumerWidget {
   const SimplifiedProfileScreen({super.key});
@@ -21,18 +17,9 @@ class SimplifiedProfileScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Profile'),
         actions: [
-          Consumer(
-            builder: (context, ref, _) {
-              final user = ref.watch(authControllerProvider).value;
-              return IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: user != null ? () => _showEditProfileDialog(context, ref, user) : null,
-              );
-            },
-          ),
           IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _showLogoutDialog(context, ref),
+            icon: const Icon(Icons.settings),
+            onPressed: () => context.push('/settings'),
           ),
         ],
       ),
@@ -115,27 +102,13 @@ class SimplifiedProfileScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _showEditProfileDialog(context, ref, user),
-                  icon: const Icon(Icons.edit),
-                  label: const Text('Edit Profile'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _showLogoutDialog(context, ref),
-                  icon: const Icon(Icons.logout, color: Colors.red),
-                  label: const Text('Logout', style: TextStyle(color: Colors.red)),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.red),
-                  ),
-                ),
-              ),
-            ],
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => _showEditProfileDialog(context, ref, user),
+              icon: const Icon(Icons.edit),
+              label: const Text('Edit Profile'),
+            ),
           ),
           const SizedBox(height: 32),
           Text(
@@ -151,133 +124,9 @@ class SimplifiedProfileScreen extends ConsumerWidget {
             title: const Text('Email'),
             subtitle: Text(user.email?.isNotEmpty == true ? user.email! : 'No email provided'),
           ),
-          const Divider(),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Favorites',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              if (isLoading)
-                const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          if (isLoading)
-            const LoadingSpinner(message: 'Loading favorites...')
-          else
-            _buildFavoritesList(context, user.favorites),
         ],
       ),
     );
-  }
-
-  Widget _buildFavoritesList(BuildContext context, List<String> favoriteIds) {
-    if (favoriteIds.isEmpty) {
-      return Center(
-        child: Column(
-          children: [
-            Icon(Icons.favorite_border, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              'No favorites yet',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Start swiping to add places to your favorites!',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[500],
-                  ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      );
-    }
-
-    return FutureBuilder<List<PlaceModel>>(
-      future: _loadFavoritePlaces(favoriteIds),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const LoadingSpinner(message: 'Loading favorites...');
-        }
-
-        if (snapshot.hasError) {
-          return ErrorView(
-            message: 'Error loading favorites: ${snapshot.error}',
-            icon: Icons.error_outline,
-          );
-        }
-
-        final places = snapshot.data ?? [];
-        if (places.isEmpty) {
-          return const Center(child: Text('No favorite places found'));
-        }
-
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: places.length,
-          itemBuilder: (context, index) {
-            final place = places[index];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: Stack(
-                children: [
-                  PlaceCard(
-                    place: place,
-                    onTap: () => context.push('/place/${place.id}'),
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Consumer(
-                      builder: (context, ref, _) {
-                        return Material(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          shape: const CircleBorder(),
-                          child: IconButton(
-                            icon: const Icon(Icons.favorite, color: Colors.red),
-                            tooltip: 'Remove from favorites',
-                            onPressed: () {
-                              ref.read(swipeControllerProvider.notifier).removeFavorite(place.id);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('${place.name} removed from favorites'),
-                                  backgroundColor: Colors.orange,
-                                  duration: const Duration(seconds: 2),
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Future<List<PlaceModel>> _loadFavoritePlaces(List<String> favoriteIds) async {
-    final repo = PlacesRepository();
-    final allPlaces = await repo.loadNearbyPlaces(0, 0, useMock: true);
-    return allPlaces.where((place) => favoriteIds.contains(place.id)).toList();
   }
 
   void _showEditProfileDialog(BuildContext context, WidgetRef ref, user) {
@@ -297,7 +146,6 @@ class SimplifiedProfileScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () {
-              nameController.dispose();
               Navigator.pop(dialogContext);
             },
             child: const Text('Cancel'),
@@ -309,7 +157,6 @@ class SimplifiedProfileScreen extends ConsumerWidget {
                   user.uid,
                   {'displayName': nameController.text.trim()},
                 );
-                nameController.dispose();
                 if (dialogContext.mounted) {
                   Navigator.pop(dialogContext);
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -328,33 +175,8 @@ class SimplifiedProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-
-  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(dialogContext);
-              await ref.read(authControllerProvider.notifier).logout();
-              if (context.mounted) {
-                context.go('/login');
-              }
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Logout'),
-          ),
-        ],
-      ),
-    );
+    ).then((_) {
+      nameController.dispose();
+    });
   }
 }

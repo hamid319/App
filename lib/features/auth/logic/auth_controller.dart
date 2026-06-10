@@ -69,7 +69,7 @@ class AuthController extends AsyncNotifier<UserModel?> {
     }
   }
 
-  Future<void> signup(String email, String password) async {
+  Future<void> signup(String email, String password, {String? displayName}) async {
     state = const AsyncLoading();
     try {
       final user = await _authRepo.signup(email, password);
@@ -77,7 +77,7 @@ class AuthController extends AsyncNotifier<UserModel?> {
         final newUserModel = UserModel(
           uid: user.uid,
           email: user.email ?? '',
-          displayName: user.displayName,
+          displayName: displayName ?? user.displayName,
           favorites: [],
           groups: [],
           createdAt: DateTime.now(),
