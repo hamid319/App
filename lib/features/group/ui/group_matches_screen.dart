@@ -72,7 +72,7 @@ final sessionResultsProvider =
       final placeId = vote['placeId'] as String?;
       if (placeId == null) continue;
       final likes = (vote['likes'] as num?)?.toInt() ?? 0;
-      final place = await placesRepo.getPlaceById(placeId, useMock: true);
+      final place = await placesRepo.getPlaceById(placeId, useMock: false);
       if (place == null) continue;
       results.add(ResultItem(place: place, likes: likes));
     }
@@ -415,6 +415,7 @@ class _ResultsListState extends ConsumerState<_ResultsList> {
   @override
   Widget build(BuildContext context) {
     return ReorderableListView.builder(
+      buildDefaultDragHandles: false,
       padding: const EdgeInsets.all(16.0),
       itemCount: _results.length,
       onReorder: (oldIndex, newIndex) {
@@ -448,7 +449,10 @@ class _ResultsListState extends ConsumerState<_ResultsList> {
                   icon: const Icon(Icons.delete_outline, color: Colors.red),
                   onPressed: () => _removeItem(index),
                 ),
-                const Icon(Icons.drag_handle, color: Colors.grey),
+                ReorderableDragStartListener(
+                  index: index,
+                  child: const Icon(Icons.drag_handle, color: Colors.grey),
+                ),
               ],
             ],
           ),

@@ -27,7 +27,6 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     _placesRepo = PlacesRepository();
     _profileRepo = ProfileRepository(ref.read(firestoreServiceProvider));
     _locationService = ref.read(locationServiceProvider);
-    _currentIndex = 0;
     _favorites.clear();
     _swipedPlaceIds = {};
 
@@ -39,7 +38,7 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
       // Use default location if location services fail
     }
 
-    final groupState = ref.read(groupControllerProvider).value;
+    final groupState = ref.watch(groupControllerProvider).value;
     final sessionId = groupState?.activeSessionId;
 
     final authState = ref.read(authControllerProvider);
@@ -75,9 +74,9 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
           final p = await _placesRepo.getPlaceById(pid, useMock: false);
           if (p != null) sessionPlaces.add(p);
         }
-        return sessionPlaces
-            .where((p) => !_swipedPlaceIds.contains(p.id))
-            .toList();
+        final filtered = sessionPlaces.where((p) => !_swipedPlaceIds.contains(p.id)).toList();
+        filtered.shuffle();
+        return filtered;
       }
     }
 

@@ -456,11 +456,12 @@ class GroupRepository {
         .collection('sessions')
         .doc(sessionId)
         .collection('votes')
-        .where('likes', isGreaterThanOrEqualTo: 1)
-        .orderBy('likes', descending: true)
         .get();
 
-    return snap.docs.map((doc) => doc.data()).toList();
+    final votes = snap.docs.map((doc) => doc.data()).toList();
+    final qualified = votes.where((v) => (v['likes'] as num? ?? 0) >= 1).toList();
+    qualified.sort((a, b) => (b['likes'] as num? ?? 0).compareTo(a['likes'] as num? ?? 0));
+    return qualified;
   }
 
   Future<List<GroupSessionModel>> getCompletedSessions(String groupId) async {
