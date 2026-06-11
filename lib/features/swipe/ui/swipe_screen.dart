@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,12 +18,59 @@ class SwipeScreen extends ConsumerStatefulWidget {
 }
 
 class _SwipeScreenState extends ConsumerState<SwipeScreen> {
+  Timer? _timer;
+  Duration _timeRemaining = Duration.zero;
+
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
       ref.read(selectedGroupIdProvider.notifier).updateState(widget.groupId);
     });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimerIfNeeded(DateTime? endTime) {
+    if (endTime == null) return;
+    
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      
+      final now = DateTime.now();
+      if (now.isAfter(endTime)) {
+        timer.cancel();
+        setState(() {
+          _timeRemaining = Duration.zero;
+        });
+        _handleTimeUp();
+      } else {
+        setState(() {
+          _timeRemaining = endTime.difference(now);
+        });
+      }
+    });
+  }
+
+  void _handleTimeUp() async {
+    final session = ref.read(activeSessionProvider).value;
+    final currentUser = ref.read(authControllerProvider).value;
+    final isAdmin = session?.participants.isNotEmpty == true &&
+        session!.participants.first == currentUser?.uid;
+        
+    if (isAdmin) {
+      try {
+        await ref.read(groupControllerProvider.notifier).endSession();
+      } catch (_) {}
+    }
   }
 
   @override
@@ -35,15 +83,40 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
     final isAdmin = sessionValue?.participants.isNotEmpty == true &&
         sessionValue!.participants.first == currentUser?.uid;
 
-    ref.listen(activeSessionProvider, (_, next) {
+    ref.listen(activeSessionProvider, (prev, next) {
       if (next.value?.isCompleted == true) {
         context.go('/group-matches/${widget.groupId}');
+      } else if (next.value?.endTime != null && _timer == null) {
+        _startTimerIfNeeded(next.value!.endTime);
+        setState(() {
+           _timeRemaining = next.value!.endTime!.difference(DateTime.now());
+        });
       }
     });
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(sessionValue?.destination ?? 'Discover Places'),
+        title: Row(
+          children: [
+            Expanded(child: Text(sessionValue?.destination ?? 'Discover Places')),
+            if (sessionValue?.endTime != null)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${_timeRemaining.inMinutes.toString().padLeft(2, '0')}:${(_timeRemaining.inSeconds % 60).toString().padLeft(2, '0')}',
+                  style: TextStyle(
+                    color: Colors.red.shade900,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+          ],
+        ),
         actions: [
           if (isAdmin)
             TextButton(
@@ -104,8 +177,8 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
         ),
         data: (places) {
           final current = ctrl.currentPlace;
-          if (current == null) {
-            // No more places to show
+          if (current == null || (sessionValue?.endTime != null && _timeRemaining <= Duration.zero)) {
+            // No more places to show or time is up
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -114,22 +187,23 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
                       size: 80, color: Colors.green),
                   const SizedBox(height: 24),
                   Text(
-                    'No more places!',
+                    (sessionValue?.endTime != null && _timeRemaining <= Duration.zero) ? 'Time is up!' : 'No more places!',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'You have viewed all places',
+                    (sessionValue?.endTime != null && _timeRemaining <= Duration.zero) ? 'Waiting for session to end...' : 'You have viewed all places',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[600],
                         ),
                   ),
                   const SizedBox(height: 32),
-                  ElevatedButton.icon(
-                    onPressed: () => ref.refresh(swipeControllerProvider),
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Reload'),
-                  ),
+                  if (sessionValue?.endTime == null || _timeRemaining > Duration.zero)
+                    ElevatedButton.icon(
+                      onPressed: () => ref.refresh(swipeControllerProvider),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Reload'),
+                    ),
                 ],
               ),
             );

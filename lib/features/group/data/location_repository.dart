@@ -56,9 +56,16 @@ class LocationRepository {
     }
     // Fallback to mock data
     return [
-      {'cityId': '1', 'cityName': 'Mock City 1', 'lat': 0.0, 'lng': 0.0},
-      {'cityId': '2', 'cityName': 'Mock City 2', 'lat': 0.0, 'lng': 0.0},
-      {'cityId': '3', 'cityName': 'Mock City 3', 'lat': 0.0, 'lng': 0.0},
+      {'cityId': '1', 'cityName': 'Paris', 'lat': 48.8566, 'lng': 2.3522},
+      {'cityId': '2', 'cityName': 'London', 'lat': 51.5074, 'lng': -0.1278},
+      {'cityId': '3', 'cityName': 'Tokyo', 'lat': 35.6762, 'lng': 139.6503},
+      {'cityId': '4', 'cityName': 'New York', 'lat': 40.7128, 'lng': -74.0060},
+      {'cityId': '5', 'cityName': 'Rome', 'lat': 41.9028, 'lng': 12.4964},
+      {'cityId': '6', 'cityName': 'Berlin', 'lat': 52.5200, 'lng': 13.4050},
+      {'cityId': '7', 'cityName': 'Madrid', 'lat': 40.4168, 'lng': -3.7038},
+      {'cityId': '8', 'cityName': 'Sydney', 'lat': -33.8688, 'lng': 151.2093},
+      {'cityId': '9', 'cityName': 'Toronto', 'lat': 43.6510, 'lng': -79.3470},
+      {'cityId': '10', 'cityName': 'Dubai', 'lat': 25.2048, 'lng': 55.2708},
     ];
   }
 }

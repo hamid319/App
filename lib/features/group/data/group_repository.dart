@@ -176,6 +176,7 @@ class GroupRepository {
     required List<String> participantUids,
     required int swipeLimit,
     required List<String> placePool,
+    DateTime? endTime,
   }) async {
     final group = await getGroup(groupId);
     if (group == null) {
@@ -207,6 +208,7 @@ class GroupRepository {
       swipeProgress: {for (final uid in participantUids) uid: 0},
       progressByUser: {for (final uid in participantUids) uid: 0},
       createdAt: DateTime.now(),
+      endTime: endTime,
     );
 
     final batch = _db.batch();

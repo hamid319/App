@@ -23,7 +23,10 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
   final TextEditingController _groupNameController = TextEditingController();
   final TextEditingController _swipeLimitController =
       TextEditingController(text: '10');
+  final TextEditingController _timeLimitController =
+      TextEditingController(text: '5');
 
+  bool _isTimeLimit = false;
   bool _showCreateGroup = false;
 
   final _locationRepo = LocationRepository();
@@ -72,6 +75,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
     _inviteCodeController.dispose();
     _groupNameController.dispose();
     _swipeLimitController.dispose();
+    _timeLimitController.dispose();
     super.dispose();
   }
 
@@ -538,21 +542,45 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                       const SizedBox(height: 16),
                       if (!hasActiveSession) ...[
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text('Swipe Limit: '),
+                            const Text('Limit Type: '),
+                            const SizedBox(width: 8),
+                            ChoiceChip(
+                              label: const Text('Swipes'),
+                              selected: !_isTimeLimit,
+                              onSelected: (val) {
+                                if (val) setState(() => _isTimeLimit = false);
+                              },
+                            ),
+                            const SizedBox(width: 8),
+                            ChoiceChip(
+                              label: const Text('Time (mins)'),
+                              selected: _isTimeLimit,
+                              onSelected: (val) {
+                                if (val) setState(() => _isTimeLimit = true);
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Text(_isTimeLimit ? 'Time Limit: ' : 'Swipe Limit: '),
                             Expanded(
                               child: TextField(
-                                controller: _swipeLimitController,
+                                controller: _isTimeLimit ? _timeLimitController : _swipeLimitController,
                                 keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   isDense: true,
-                                  border: OutlineInputBorder(),
+                                  border: const OutlineInputBorder(),
+                                  suffixText: _isTimeLimit ? 'mins' : null,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 16),
                         PrimaryButton(
                           label: 'Start Session',
                           icon: Icons.play_arrow,
@@ -696,20 +724,34 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
   }
 
   void _startSession() async {
-    final limitStr = _swipeLimitController.text.trim();
-    final limit = int.tryParse(limitStr) ?? 10;
+    int? swipeLimit;
+    int? timeLimit;
 
-    if (limit < 1 || limit > 100) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Swipe limit must be between 1 and 100')),
-      );
-      return;
+    if (_isTimeLimit) {
+      final valStr = _timeLimitController.text.trim();
+      timeLimit = int.tryParse(valStr) ?? 5;
+      if (timeLimit < 1 || timeLimit > 120) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Time limit must be between 1 and 120 mins')),
+        );
+        return;
+      }
+      swipeLimit = 100; // Large arbitrary limit when using time
+    } else {
+      final limitStr = _swipeLimitController.text.trim();
+      swipeLimit = int.tryParse(limitStr) ?? 10;
+      if (swipeLimit < 1 || swipeLimit > 100) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Swipe limit must be between 1 and 100')),
+        );
+        return;
+      }
     }
 
     try {
       await ref
           .read(groupControllerProvider.notifier)
-          .startSessionWithLimit(swipeLimit: limit);
+          .startSessionWithLimit(swipeLimit: swipeLimit, durationMinutes: timeLimit);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

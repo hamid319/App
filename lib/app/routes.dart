@@ -15,6 +15,7 @@ import '../features/profile/ui/settings_screen.dart';
 import '../core/services/preferences_service.dart';
 import '../features/group/logic/group_controller.dart';
 import '../common/models/group_model.dart';
+import '../features/auth/logic/auth_controller.dart';
 import 'shell_navigation.dart';
 
 final routerProvider = Provider<GoRouter>((ref) => createRouter(ref));
@@ -22,6 +23,7 @@ final routerProvider = Provider<GoRouter>((ref) => createRouter(ref));
 GoRouter createRouter(Ref ref) {
   final refreshNotifier = ValueNotifier<int>(0);
   ref.listen(userGroupsProvider, (_, __) => refreshNotifier.value++);
+  ref.listen(authControllerProvider, (_, __) => refreshNotifier.value++);
 
   return GoRouter(
     initialLocation: '/',
@@ -35,10 +37,26 @@ GoRouter createRouter(Ref ref) {
         return '/onboarding';
       }
 
-      // After onboarding, redirect root to home
-      if (hasSeenOnboarding && currentPath == '/') {
-        return '/home';
+      final authState = ref.read(authControllerProvider);
+      // Wait for auth to initialize if loading
+      if (authState.isLoading) return null;
+      
+      final isLoggedIn = authState.value != null;
+      final isGoingToAuth = currentPath == '/login' || currentPath == '/register';
+
+      if (hasSeenOnboarding) {
+        if (!isLoggedIn && !isGoingToAuth) {
+          return '/login';
+        }
+        if (isLoggedIn && isGoingToAuth) {
+          return '/home';
+        }
+        if (isLoggedIn && currentPath == '/') {
+          return '/home';
+        }
       }
+      
+      if (!isLoggedIn) return null;
 
       final List<GroupModel> groupsSnapshot = ref.read(userGroupsProvider).value ??
           await ref.read(userGroupsProvider.future);

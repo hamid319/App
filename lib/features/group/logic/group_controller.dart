@@ -236,7 +236,7 @@ class GroupController extends AsyncNotifier<GroupModel?> {
     }
   }
 
-  Future<void> startSessionWithLimit({required int swipeLimit}) async {
+  Future<void> startSessionWithLimit({required int swipeLimit, int? durationMinutes}) async {
     final group = state.value;
     if (group == null) return;
 
@@ -264,12 +264,17 @@ class GroupController extends AsyncNotifier<GroupModel?> {
 
       final placePool = places.map((p) => p.id).toList();
 
+      final endTime = durationMinutes != null
+          ? DateTime.now().add(Duration(minutes: durationMinutes))
+          : null;
+
       await _repo.startSwipeSession(
         groupId: group.groupId,
         destination: destination,
         participantUids: group.members,
         swipeLimit: swipeLimit,
         placePool: placePool,
+        endTime: endTime,
       );
     } catch (e, st) {
       state = AsyncError(e, st);

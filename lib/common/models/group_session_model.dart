@@ -17,6 +17,7 @@ class GroupSessionModel {
     this.placePool = const [],
     this.progressByUser,
     this.orderedPlaceIds,
+    this.endTime,
   });
 
   final String sessionId;
@@ -34,6 +35,7 @@ class GroupSessionModel {
   final List<String> placePool;
   final Map<String, int>? progressByUser;
   final List<String>? orderedPlaceIds;
+  final DateTime? endTime;
 
   bool get isCompleted => status == 'completed';
 
@@ -62,6 +64,7 @@ class GroupSessionModel {
     List<String>? placePool,
     Map<String, int>? progressByUser,
     List<String>? orderedPlaceIds,
+    DateTime? endTime,
   }) {
     return GroupSessionModel(
       sessionId: sessionId ?? this.sessionId,
@@ -77,6 +80,7 @@ class GroupSessionModel {
       placePool: placePool ?? this.placePool,
       progressByUser: progressByUser ?? this.progressByUser,
       orderedPlaceIds: orderedPlaceIds ?? this.orderedPlaceIds,
+      endTime: endTime ?? this.endTime,
     );
   }
 
@@ -102,6 +106,7 @@ class GroupSessionModel {
       orderedPlaceIds: json['orderedPlaceIds'] != null
           ? _stringList(json['orderedPlaceIds'])
           : null,
+      endTime: _parseDateTime(json['endTime']),
     );
   }
 
@@ -119,6 +124,7 @@ class GroupSessionModel {
         'placePool': placePool,
         'progressByUser': progressByUser ?? swipeProgress,
         if (orderedPlaceIds != null) 'orderedPlaceIds': orderedPlaceIds,
+        if (endTime != null) 'endTime': Timestamp.fromDate(endTime!),
       };
 }
 
