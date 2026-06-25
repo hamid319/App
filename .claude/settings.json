@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(rm -rf*)",
+      "Bash(rm -r*)",
+      "Bash(git push*)",
+      "Bash(git commit*)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean*)",
+      "Bash(git branch -D*)",
+      "Bash(git rebase*)",
+      "Bash(firebase deploy*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/hamidebrahimi/Desktop/SwipeTrip/App/.claude/hooks/track_changes.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/hamidebrahimi/Desktop/SwipeTrip/App/.claude/hooks/post_review.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

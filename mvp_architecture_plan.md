@@ -16,9 +16,9 @@ lib/
 │
 ├── app/
 │   ├── app.dart               ✅ Done — MaterialApp.router wrapper
-│   ├── routes.dart            ✅ Done — GoRouter with redirect logic
+│   ├── routes.dart            ✅ Done — GoRouter with redirect logic (Update: Auth redirect implemented)
 │   ├── shell_navigation.dart  ✅ Done — Bottom nav bar shell
-│   └── theme.dart             ❌ INCOMPLETE — only default Material blue, no real theme
+│   └── theme.dart             ❌ INCOMPLETE — only default Material blue, no real theme (Update: Now implemented with custom Light/Dark theme configuration)
 │
 ├── common/
 │   ├── models/
@@ -34,14 +34,16 @@ lib/
 │   │   ├── loading_spinner.dart   ✅ Done
 │   │   └── error_view.dart        ✅ Done
 │   └── utils/
-│       └── geo_utils.dart         ✅ Done
+│       ├── geo_utils.dart         ✅ Done
+│       ├── formatters.dart        ✅ Done — data formatting utilities
+│       └── validators.dart        ✅ Done — form input validators
 │
 ├── core/
 │   ├── config/
-│   │   ├── app_config.dart        ❌ EMPTY FILE (placeholder only)
-│   │   └── env.dart               ❌ EMPTY FILE (placeholder only)
-│   ├── constants/                 ❌ EMPTY FOLDER — no constants defined
-│   ├── errors/                    ❌ EMPTY FOLDER — no custom error classes
+│   │   ├── app_config.dart        ❌ EMPTY FILE (placeholder only) (Update: Done — holds global app config)
+│   │   └── env.dart               ❌ EMPTY FILE (placeholder only) (Update: Done — integrates with dotenv)
+│   ├── constants/                 ❌ EMPTY FOLDER — no constants defined (Update: Done — colors.dart, sizes.dart, typography.dart implemented)
+│   ├── errors/                    ❌ EMPTY FOLDER — no custom error classes (Update: Done — exceptions.dart, failure.dart implemented)
 │   └── services/
 │       ├── auth_service.dart          ✅ Done
 │       ├── firestore_service.dart     ✅ Done
@@ -58,27 +60,28 @@ lib/
     │   └── logic/auth_controller.dart ✅ Done
     │
     ├── onboarding/
-    │   └── ui/onboarding_screen.dart  ⚠️ DONE but text is in German — needs translation
+    │   └── ui/onboarding_screen.dart  ⚠️ DONE but text is in German — needs translation (Update: Done — translated to English)
     │
     ├── home/
     │   └── ui/
-    │       ├── home_screen.dart            ⚠️ OLD FILE — unused, kept for reference
-    │       └── simplified_home_screen.dart ✅ Active — used in routes
+    │       ├── home_screen.dart            ⚠️ OLD FILE — unused, kept for reference (Update: Deleted from project)
+    │       ├── simplified_home_screen.dart ✅ Active — used in routes
+    │       └── favorites_screen.dart       ✅ Active — dedicated screen for user favorites list
     │
     ├── swipe/
-    │   ├── ui/swipe_screen.dart         ✅ Done — Tinder-style swipe with animations
-    │   ├── data/places_repository.dart  ⚠️ PARTIAL — Google API key is hardcoded placeholder
+    │   ├── ui/swipe_screen.dart         ✅ Done — Tinder-style swipe with animations (Update: Updated to use extracted swipe widgets)
+    │   ├── data/places_repository.dart  ⚠️ PARTIAL — Google API key is hardcoded placeholder (Update: Still needs real Google API key migration)
     │   ├── logic/swipe_controller.dart  ✅ Done
     │   └── widgets/
-    │       ├── swipe_card.dart          ❌ EMPTY FILE (1 line)
-    │       └── swipe_buttons.dart       ❌ EMPTY FILE (1 line)
+    │       ├── swipe_card.dart          ❌ EMPTY FILE (1 line) (Update: Done — extracted TinderSwipeCardStack)
+    │       └── swipe_buttons.dart       ❌ EMPTY FILE (1 line) (Update: Done — extracted ActionButton)
     │
     ├── places/
-    │   └── ui/place_detail_screen.dart  ✅ Done (some German text in error strings)
+    │   └── ui/place_detail_screen.dart  ✅ Done (some German text in error strings) (Update: Translated all strings to English)
     │
     ├── group/
     │   ├── ui/
-    │   │   ├── group_screen.dart             ⚠️ OLD FILE — unused, kept for reference
+    │   │   ├── group_screen.dart             ⚠️ OLD FILE — unused, kept for reference (Update: Deleted from project)
     │   │   ├── simplified_group_screen.dart  ✅ Active — used in routes
     │   │   └── group_matches_screen.dart     ✅ Done
     │   ├── data/
@@ -88,10 +91,13 @@ lib/
     │
     └── profile/
         ├── ui/
-        │   ├── profile_screen.dart            ⚠️ OLD FILE — unused
-        │   └── simplified_profile_screen.dart ✅ Active — used in routes
-        ├── data/profile_repository.dart       ⚠️ PARTIAL — very thin, 40 lines
-        └── logic/profile_controller.dart      ⚠️ PARTIAL — only 80 lines
+        │   ├── profile_screen.dart            ⚠️ OLD FILE — unused (Update: Deleted from project)
+        │   ├── simplified_profile_screen.dart ✅ Active — used in routes
+        │   └── settings_screen.dart           ⚠️ Active — settings page (Impressum, Datenschutz, etc.), but strings are in German
+        ├── data/
+        │   ├── profile_repository.dart       ⚠️ PARTIAL — very thin, 40 lines (Update: Holds standard user profile ops)
+        │   └── image_service.dart            ✅ Done — profile photo upload/delete with Firebase Storage
+        └── logic/profile_controller.dart      ⚠️ PARTIAL — only 80 lines (Update: Done — updated to support profile updates, favorites, and image uploads)
 ```
 
 ### Architectural Flow
@@ -116,13 +122,16 @@ lib/
 | `shared_preferences` | ^2.2.2 | ✅ Active |
 | `http` | ^1.6.0 | ✅ Active (for Google Places API) |
 | `meta` | ^1.12.0 | ✅ Active |
-| `material_color_utilities` | ^0.13.0 | ⚠️ Imported but theme not built |
+| `material_color_utilities` | ^0.13.0 | ⚠️ Imported but theme not built (Update: Custom theme implemented in theme.dart) |
+| `flutter_dotenv` | ^6.0.1 | ✅ Active (for secrets/env variables management) |
+| `image_picker` | ^1.1.2 | ✅ Active (for profile picture selection) |
+| `firebase_storage` | ^13.0.0 | ✅ Active (for profile picture upload) |
 
 **Missing / Recommended to Add:**
 - `cached_network_image` — for caching place images (currently raw `Image.network`)
 - `flutter_animate` or `lottie` — for better loading/onboarding animations
 - `share_plus` — for sharing invite codes via native share sheet
-- `flutter_dotenv` — to replace empty `env.dart` for secrets management
+- ~~`flutter_dotenv` — to replace empty `env.dart` for secrets management~~ (Update: Added and integrated)
 
 ---
 
@@ -155,6 +164,7 @@ lib/
 - `PreferencesService` marks onboarding as seen
 - Router redirect sends first-time users to onboarding automatically
 - ⚠️ **Issue**: Text is in **German** (`Entdecke neue Orte`, `Überspringen`, etc.) — needs English translation
+- **Update:** German text translated to English in `onboarding_screen.dart` (Discover new places, Collect favorites, Plan with friends, Skip, Next, Get Started).
 
 ### ✅ Feature 3: Swipe UI (Place Discovery) — DONE
 - Full Tinder-style card stack built from scratch (no 3rd party swipe library)
@@ -168,6 +178,7 @@ lib/
 - "No more places" state with reload button
 - Error state with retry
 - Admin "End session" button visible only to group admin
+- **Update:** Extracted swipe card stack and action buttons into dedicated widget files.
 
 ### ✅ Feature 4: Place Details — DONE (minor issue)
 - `SliverAppBar` with hero image expanded header
@@ -175,6 +186,7 @@ lib/
 - "Open in Maps" button via `MapsLauncher` (uses `url_launcher`)
 - Add to Favorites / Remove from Favorites button (reactive to current state)
 - ⚠️ **Issue**: Some error strings are in **German** (`Fehler`, `Zurück`, `Ort nicht gefunden`, etc.)
+- **Update:** Error and UI strings translated to English in `place_detail_screen.dart` (Coordinates, Open in Maps, Remove/Add to Favorites).
 
 ### ✅ Feature 5: Favorites Management — DONE
 - Favorites list shown in Profile screen
@@ -182,6 +194,7 @@ lib/
 - Remove from favorites button on each card
 - Favorites count badge in swipe screen AppBar
 - Favorites persisted to Firestore `users/{uid}.favorites` array
+- **Update:** Replaced inline favorites on ProfileScreen with a dedicated `FavoritesScreen` accessible from home/profile, updating reactively on removals.
 
 ### ✅ Feature 6: Group Travel Sessions — DONE (complex, mostly working)
 - **Create Group**: name + country + city picker + like threshold slider → creates Firestore document with invite code
@@ -202,6 +215,13 @@ lib/
 - Deep links: `/group/join?groupId=&code=` for invite link handling
 - Auth-aware redirects (onboarding → login → home)
 - Active session redirect (forces to `/swipe/:groupId` if session is live)
+- **Update:** Added Login/Auth guard redirect logic checking `isLoggedIn` inside `routes.dart`.
+
+### ✅ Feature 8: Profile Image Upload — DONE
+- Profile picture picking from camera or gallery (`image_picker`) and upload/delete functionality via Firebase Storage (`ImageService` and `ProfileController`).
+
+### ✅ Feature 9: Settings Screen — DONE
+- Created `SettingsScreen` containing links to Impressum, Datenschutz (Privacy Policy), Sicherheit (Security recommendations), and a logout button.
 
 ---
 
@@ -216,7 +236,7 @@ final String _googleApiKey = "YOUR_GOOGLE_PLACES_API_KEY"; // TODO: Move to .env
 ```
 - The key is a placeholder string.
 - The `fetchPlacesFromGoogleAPI()` method exists but is NOT called anywhere.
-- Currently, all place data comes from `mockPlaces` (25 hardcoded places in Dart).
+- Currently, all place data comes from `mockPlaces` (51 hardcoded places in Dart).
 - **To fix:**
   1. Get a real Google Places API key from Google Cloud Console.
   2. Enable "Places API" in GCP project.
@@ -225,37 +245,27 @@ final String _googleApiKey = "YOUR_GOOGLE_PLACES_API_KEY"; // TODO: Move to .env
 
 #### 5.2 Empty core/config files — MINOR BLOCKER
 **Files:** `lib/core/config/app_config.dart`, `lib/core/config/env.dart`
-- Both files are completely empty (0 actual code, only placeholders).
-- `env.dart` should hold the Google API key and other secrets.
-- `app_config.dart` should hold environment-specific configuration.
+- **Update: RESOLVED** — App configuration and environment dotenv loading (`flutter_dotenv`) implemented.
 
 #### 5.3 Swipe widget files are empty — CODE SMELL
 **Files:** `lib/features/swipe/widgets/swipe_card.dart`, `swipe_buttons.dart`
-- Both files are 1 line (no code).
-- The actual swipe card and button code lives inline in `swipe_screen.dart` (810 lines — too big).
-- **To fix:** Extract `TinderSwipeCardStack` → `swipe_card.dart`, `_ActionButton` → `swipe_buttons.dart`.
+- **Update: RESOLVED** — Extracted widgets `TinderSwipeCardStack` and `ActionButton` are now fully implemented in these files.
 
 #### 5.4 Onboarding text is in German
 **File:** `lib/features/onboarding/ui/onboarding_screen.dart`
-- Titles and descriptions: `Entdecke neue Orte`, `Überspringen`, `Los geht's`, etc.
-- **To fix:** Replace all strings with English (or add localization).
+- **Update: RESOLVED** — Translated onboarding screen texts to English.
 
 #### 5.5 PlaceDetailScreen error text is in German
 **File:** `lib/features/places/ui/place_detail_screen.dart`
-- `Fehler: $error`, `Zurück`, `Ort nicht gefunden`, `In Karten öffnen`, `Koordinaten`
-- **To fix:** Translate all strings.
+- **Update: RESOLVED** — Translated place detail strings to English.
 
 #### 5.6 Theme is not implemented
 **File:** `lib/app/theme.dart`
-- Only 9 lines, uses `Colors.blue` default Material theme.
-- No typography, no color scheme, no dark mode, no custom font.
-- **To fix:** Build a proper `ThemeData` with `ColorScheme`, `TextTheme`, and typography.
+- **Update: RESOLVED** — Custom AppTheme is built with light and dark palettes and applied (light theme) in `app.dart`.
 
 #### 5.7 No Login/Auth gate on the home screen
 **File:** `lib/app/routes.dart`
-- The router does NOT redirect unauthenticated users away from `/home`, `/profile`, `/group`.
-- A user who skips onboarding but never logs in can navigate the app freely.
-- **To fix:** Add auth state check in the router `redirect` function. If not logged in and not on `/onboarding`, `/login`, `/register` → redirect to `/login`.
+- **Update: RESOLVED** — Auth guard is implemented in router redirect logic.
 
 ---
 
@@ -263,10 +273,7 @@ final String _googleApiKey = "YOUR_GOOGLE_PLACES_API_KEY"; // TODO: Move to .env
 
 #### 5.8 Profile screen does not update after Remove Favorite
 **File:** `lib/features/profile/ui/simplified_profile_screen.dart`
-- `_buildFavoritesList` uses `FutureBuilder` with `_loadFavoritePlaces(favoriteIds)`.
-- `_loadFavoritePlaces` uses `useMock: true` — it reads from hardcoded mock data, NOT from Firestore.
-- When a favorite is removed, the list does NOT rebuild reactively (FutureBuilder won't re-fire).
-- **To fix:** Replace `FutureBuilder` with a `StreamBuilder` or a Riverpod `FutureProvider` that can be invalidated, and use real Firestore data.
+- **Update: RESOLVED** — Favorite places are now on a dedicated `FavoritesScreen` that watches `swipeControllerProvider` and rebuilds reactively on change. (Note: Place details are still loaded via `FutureBuilder` on mock data).
 
 #### 5.9 Place Detail "Add to Favorites" uses wrong method
 **File:** `lib/features/places/ui/place_detail_screen.dart` line ~251
@@ -288,33 +295,32 @@ ref.read(swipeControllerProvider.notifier).like(); // BUG: this advances the swi
 - **To fix:** Add `cached_network_image` package. Replace all `Image.network()` with `CachedNetworkImage()`.
 
 #### 5.12 No loading state when user navigates to Swipe without a group session
-- `swipe_controller.dart` builds fine with mock data but only shows 25 same places every time.
+- `swipe_controller.dart` builds fine with mock data but only shows 51 same places every time.
 - Once places are swiped, the "No more places" state shows forever (no real reset).
 - **To fix:** Add a proper "deck empty" experience with a call-to-action (e.g., "Create a group session to discover new places").
 
 #### 5.13 Old/duplicate screen files cluttering the project
-- `home_screen.dart` — 47KB, unused
-- `simplified_home_screen.dart` — 22KB, is the one actually used
-- `group_screen.dart` — 15KB, unused
-- `profile_screen.dart` — 11KB, unused
-- **To fix:** Delete or archive old files. The `simplified_*` versions are the canonical screens.
+- **Update: RESOLVED** — Unused old screen files `home_screen.dart`, `group_screen.dart`, `profile_screen.dart` have been deleted.
 
 #### 5.14 `GoRouterRefreshStream` is watching the wrong provider
 **File:** `lib/app/routes.dart` line 22-24
-```dart
-refreshListenable: GoRouterRefreshStream(
-  ref.watch(userGroupsProvider.stream),
-),
-```
-- Router refreshes on every group change. This does not handle auth state changes.
-- If user logs out, the router does not know to redirect to `/login`.
-- **To fix:** Also listen to `authControllerProvider.stream` in the router refresh.
+- **Update: RESOLVED** — Router uses a `ValueNotifier` that listens to both auth changes and group changes.
 
 #### 5.15 Firestore security rules have a gap for session vote updates
 **File:** `firestore.rules` lines 72-77
 - Session `update` rule allows members to update `progressByUser` and `isCompleted` but the actual field written by `recordSwipeInSession` is `swipeProgress`, not `isCompleted`.
 - The field name mismatch may cause write failures in production.
 - **To fix:** Audit exact field names in `GroupSessionModel.toJson()` vs what the security rules allow.
+
+#### 5.21 German text in SettingsScreen
+**File:** `lib/features/profile/ui/settings_screen.dart`
+- SettingsScreen titles, subtitles, and dialog texts (Einstellungen, Impressum, Rechtliche Informationen, Datenschutz, etc.) are written in German.
+- **To fix:** Translate all strings, dialog titles, buttons, and policy files in SettingsScreen to English.
+
+#### 5.22 Dark theme support configuration
+**File:** `lib/app/app.dart`
+- `ThemeData dark` is implemented in `theme.dart` but is not configured in the `MaterialApp.router` builder inside `app.dart`.
+- **To fix:** Configure `darkTheme: AppTheme.dark` in `MaterialApp.router`.
 
 ---
 
@@ -351,26 +357,26 @@ refreshListenable: GoRouterRefreshStream(
 ### Phase 1: Fix Blockers (Do These First)
 These are things that will **break the app in production** or **confuse users**.
 
-| Step | Task | File(s) | Effort |
-|---|---|---|---|
-| 1 | Add real Google Places API key + move to env | `env.dart`, `places_repository.dart`, `swipe_controller.dart` | Medium |
-| 2 | Add auth guard in router redirect | `routes.dart` | Small |
-| 3 | Fix "Add to Favorites" on place detail screen | `place_detail_screen.dart`, `swipe_controller.dart` | Small |
-| 4 | Translate all German strings to English | `onboarding_screen.dart`, `place_detail_screen.dart` | Small |
-| 5 | Fix Firestore rules field name mismatch | `firestore.rules`, `group_session_model.dart` | Small |
+| Step | Task | File(s) | Effort | Status |
+|---|---|---|---|---|
+| 1 | Add real Google Places API key + move to env | `env.dart`, `places_repository.dart`, `swipe_controller.dart` | Medium | In Progress |
+| 2 | Add auth guard in router redirect | `routes.dart` | Small | ✅ Done |
+| 3 | Fix "Add to Favorites" on place detail screen | `place_detail_screen.dart`, `swipe_controller.dart` | Small | Pending |
+| 4 | Translate all German strings to English | `onboarding_screen.dart`, `place_detail_screen.dart` | Small | ✅ Done (Except SettingsScreen) |
+| 5 | Fix Firestore rules field name mismatch | `firestore.rules`, `group_session_model.dart` | Small | Pending |
 
 ### Phase 2: Quality Fixes (High Impact)
 These make the app feel professional and stable.
 
-| Step | Task | File(s) | Effort |
-|---|---|---|---|
-| 6 | Build a real app theme with colors, fonts | `theme.dart`, `app.dart` | Medium |
-| 7 | Fix profile favorites — reactive updates from Firestore | `simplified_profile_screen.dart`, `profile_controller.dart` | Medium |
-| 8 | Add `cached_network_image` for all images | Multiple screens | Small |
-| 9 | Show member display names in group screen | `simplified_group_screen.dart` | Medium |
-| 10 | Fix router refresh for auth state changes | `routes.dart` | Small |
-| 11 | Extract swipe widgets from `swipe_screen.dart` | `swipe_card.dart`, `swipe_buttons.dart` | Medium |
-| 12 | Delete old/unused screen files | 3 files | Tiny |
+| Step | Task | File(s) | Effort | Status |
+|---|---|---|---|---|
+| 6 | Build a real app theme with colors, fonts | `theme.dart`, `app.dart` | Medium | ✅ Done (Light theme applied, Dark theme built) |
+| 7 | Fix profile favorites — reactive updates from Firestore | `simplified_profile_screen.dart`, `profile_controller.dart` | Medium | ✅ Done (Favorites moved to FavoritesScreen) |
+| 8 | Add `cached_network_image` for all images | Multiple screens | Small | Pending |
+| 9 | Show member display names in group screen | `simplified_group_screen.dart` | Medium | Pending |
+| 10 | Fix router refresh for auth state changes | `routes.dart` | Small | ✅ Done |
+| 11 | Extract swipe widgets from `swipe_screen.dart` | `swipe_card.dart`, `swipe_buttons.dart` | Medium | ✅ Done |
+| 12 | Delete old/unused screen files | 3 files | Tiny | ✅ Done |
 
 ### Phase 3: MVP Polish (Before Release)
 These make the product ready to show to real users.
@@ -536,9 +542,9 @@ These are the technically complex, high-risk areas of the app. Mistakes here cau
 | Tinder-style swipe UI | ✅ Done | Custom built, no external library |
 | Swipe right = like/favorite | ✅ Done | |
 | Swipe left = skip | ✅ Done | |
-| Place detail screen | ✅ Done | Minor German text issue |
-| View favorites list | ✅ Done | Reactive update issue |
-| Remove from favorites | ✅ Done | Bug in detail screen |
+| Place detail screen | ✅ Done | German text translated to English |
+| View favorites list | ✅ Done | Favorites moved to dedicated screen with reactive refresh |
+| Remove from favorites | ✅ Done | Bug in detail screen still needs separate method |
 | Create a group | ✅ Done | |
 | Join a group (invite code) | ✅ Done | |
 | Start a swipe session | ✅ Done | Admin only |
@@ -546,11 +552,11 @@ These are the technically complex, high-risk areas of the app. Mistakes here cau
 | View group matches | ✅ Done | |
 | Session auto-ends | ✅ Done | Firestore transaction |
 | Manual session end (admin) | ✅ Done | |
-| Onboarding screen | ✅ Done | German text — translate |
-| Auth guard (router) | ❌ Missing | No redirect if unauthenticated |
-| Real place data (API) | ❌ Missing | Only 25 mock places |
-| App theme / branding | ❌ Missing | Plain Material blue |
+| Onboarding screen | ✅ Done | German text translated to English |
+| Auth guard (router) | ✅ Done | Redirect check added to router |
+| Real place data (API) | ❌ Missing | Only 51 mock places, API key is placeholder |
+| App theme / branding | ✅ Done | Light & Dark theme built, Light applied |
 | Image caching | ❌ Missing | Raw `Image.network` |
 | Push notifications | ❌ Missing | Not started |
 | Password reset | ❌ Missing | Not started |
-| English strings everywhere | ❌ Missing | German in 2 screens |
+| English strings everywhere | ⚠️ Partial | German in SettingsScreen dialogs |

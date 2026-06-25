@@ -244,6 +244,7 @@ class GroupController extends AsyncNotifier<GroupModel?> {
       throw StateError('Only the admin can start the session');
     }
 
+    final savedState = AsyncValue.data(group);
     state = const AsyncLoading();
     try {
       final location = group.location;
@@ -276,8 +277,9 @@ class GroupController extends AsyncNotifier<GroupModel?> {
         placePool: placePool,
         endTime: endTime,
       );
-    } catch (e, st) {
-      state = AsyncError(e, st);
+    } catch (e) {
+      state = savedState;
+      rethrow;
     }
   }
 
@@ -291,6 +293,7 @@ class GroupController extends AsyncNotifier<GroupModel?> {
       throw StateError('Only the admin can start the session');
     }
 
+    final savedState = AsyncValue.data(group);
     state = const AsyncLoading();
     try {
       final location = group.location;
@@ -317,8 +320,9 @@ class GroupController extends AsyncNotifier<GroupModel?> {
         swipeLimit: places.length,
         placePool: places.map((p) => p.id).toList(),
       );
-    } catch (e, st) {
-      state = AsyncError(e, st);
+    } catch (e) {
+      state = savedState;
+      rethrow;
     }
   }
 

@@ -1,3 +1,6 @@
+# Claude Code hook temp files
+.claude/.turn_changes
+
 # Miscellaneous
 *.class
 *.log
