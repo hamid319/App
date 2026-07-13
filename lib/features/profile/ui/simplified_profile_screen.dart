@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../logic/profile_controller.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../../common/widgets/loading_spinner.dart';
@@ -71,12 +72,15 @@ class SimplifiedProfileScreen extends ConsumerWidget {
                   backgroundColor: Theme.of(context).primaryColor,
                   child: user.photoUrl != null
                       ? ClipOval(
-                          child: Image.network(
-                            user.photoUrl!,
+                          child: CachedNetworkImage(
+                            imageUrl: user.photoUrl!,
                             width: 100,
                             height: 100,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            errorWidget: (context, url, error) =>
                                 const Icon(Icons.person, size: 50, color: Colors.white),
                           ),
                         )

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../common/models/place_model.dart';
 import '../../group/logic/group_controller.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../logic/swipe_controller.dart';
@@ -37,14 +36,14 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
 
   void _startTimerIfNeeded(DateTime? endTime) {
     if (endTime == null) return;
-    
+
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
         timer.cancel();
         return;
       }
-      
+
       final now = DateTime.now();
       if (now.isAfter(endTime)) {
         timer.cancel();
@@ -65,7 +64,7 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
     final currentUser = ref.read(authControllerProvider).value;
     final isAdmin = session?.participants.isNotEmpty == true &&
         session!.participants.first == currentUser?.uid;
-        
+
     if (isAdmin) {
       try {
         await ref.read(groupControllerProvider.notifier).endSession();
@@ -89,7 +88,7 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
       } else if (next.value?.endTime != null && _timer == null) {
         _startTimerIfNeeded(next.value!.endTime);
         setState(() {
-           _timeRemaining = next.value!.endTime!.difference(DateTime.now());
+          _timeRemaining = next.value!.endTime!.difference(DateTime.now());
         });
       }
     });
@@ -98,7 +97,8 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            Expanded(child: Text(sessionValue?.destination ?? 'Discover Places')),
+            Expanded(
+                child: Text(sessionValue?.destination ?? 'Discover Places')),
             if (sessionValue?.endTime != null)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -177,7 +177,9 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
         ),
         data: (places) {
           final current = ctrl.currentPlace;
-          if (current == null || (sessionValue?.endTime != null && _timeRemaining <= Duration.zero)) {
+          if (current == null ||
+              (sessionValue?.endTime != null &&
+                  _timeRemaining <= Duration.zero)) {
             // No more places to show or time is up
             return Center(
               child: Column(
@@ -187,18 +189,25 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
                       size: 80, color: Colors.green),
                   const SizedBox(height: 24),
                   Text(
-                    (sessionValue?.endTime != null && _timeRemaining <= Duration.zero) ? 'Time is up!' : 'No more places!',
+                    (sessionValue?.endTime != null &&
+                            _timeRemaining <= Duration.zero)
+                        ? 'Time is up!'
+                        : 'No more places!',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    (sessionValue?.endTime != null && _timeRemaining <= Duration.zero) ? 'Waiting for session to end...' : 'You have viewed all places',
+                    (sessionValue?.endTime != null &&
+                            _timeRemaining <= Duration.zero)
+                        ? 'Waiting for session to end...'
+                        : 'You have viewed all places',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[600],
                         ),
                   ),
                   const SizedBox(height: 32),
-                  if (sessionValue?.endTime == null || _timeRemaining > Duration.zero)
+                  if (sessionValue?.endTime == null ||
+                      _timeRemaining > Duration.zero)
                     ElevatedButton.icon(
                       onPressed: () => ref.refresh(swipeControllerProvider),
                       icon: const Icon(Icons.refresh),

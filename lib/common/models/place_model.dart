@@ -9,8 +9,11 @@ class PlaceModel {
   final double lng;
   final String? address;
   final List<String> imageUrls;
+  final List<String> photoResourceNames;
   final double? averageRating;
   final List<String> types;
+
+  final String? cityId;
 
   const PlaceModel({
     required this.id,
@@ -20,8 +23,10 @@ class PlaceModel {
     required this.lng,
     this.address,
     this.imageUrls = const [],
+    this.photoResourceNames = const [],
     this.averageRating,
     this.types = const [],
+    this.cityId,
   });
 
   PlaceModel copyWith({
@@ -32,8 +37,10 @@ class PlaceModel {
     double? lng,
     String? address,
     List<String>? imageUrls,
+    List<String>? photoResourceNames,
     double? averageRating,
     List<String>? types,
+    String? cityId,
   }) {
     return PlaceModel(
       id: id ?? this.id,
@@ -43,8 +50,10 @@ class PlaceModel {
       lng: lng ?? this.lng,
       address: address ?? this.address,
       imageUrls: imageUrls ?? this.imageUrls,
+      photoResourceNames: photoResourceNames ?? this.photoResourceNames,
       averageRating: averageRating ?? this.averageRating,
       types: types ?? this.types,
+      cityId: cityId ?? this.cityId,
     );
   }
 
@@ -55,9 +64,15 @@ class PlaceModel {
         lat: (json['lat'] as num).toDouble(),
         lng: (json['lng'] as num).toDouble(),
         address: json['address'] as String?,
-        imageUrls: List<String>.from(json['imageUrls'] ?? (json['images'] ?? [])),
-        averageRating: json['averageRating'] != null ? (json['averageRating'] as num).toDouble() : null,
+        imageUrls:
+            List<String>.from(json['imageUrls'] ?? (json['images'] ?? [])),
+        photoResourceNames:
+            List<String>.from(json['photoResourceNames'] ?? const <String>[]),
+        averageRating: json['averageRating'] != null
+            ? (json['averageRating'] as num).toDouble()
+            : null,
         types: List<String>.from(json['types'] ?? (json['tags'] ?? [])),
+        cityId: json['cityId'] as String?,
       );
 
   Map<String, dynamic> toJson() => {
@@ -67,8 +82,9 @@ class PlaceModel {
         'lat': lat,
         'lng': lng,
         'address': address,
-        'imageUrls': imageUrls,
+        'photoResourceNames': photoResourceNames,
         'averageRating': averageRating,
         'types': types,
+        'cityId': cityId,
       };
 }

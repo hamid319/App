@@ -71,29 +71,25 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
       if (session != null) {
         List<PlaceModel> sessionPlaces = [];
         for (var pid in session.placePool) {
-          final p = await _placesRepo.getPlaceById(pid, useMock: false);
+          final p = await _placesRepo.getPlaceById(pid);
           if (p != null) sessionPlaces.add(p);
         }
-        final filtered = sessionPlaces.where((p) => !_swipedPlaceIds.contains(p.id)).toList();
+        final filtered = sessionPlaces
+            .where((p) => !_swipedPlaceIds.contains(p.id))
+            .toList();
         filtered.shuffle();
         return filtered;
       }
     }
 
-    try {
-      final allPlaces = await _placesRepo.loadNearbyPlaces(
-        _userLat,
-        _userLng,
-        radiusKm: _defaultRadiusKm,
-        useMock: true,
-      );
-      final unseenPlaces =
-          allPlaces.where((p) => !_swipedPlaceIds.contains(p.id)).toList();
-      return unseenPlaces;
-    } catch (e) {
-      final allPlaces = PlacesRepository.mockPlaces;
-      return allPlaces.where((p) => !_swipedPlaceIds.contains(p.id)).toList();
-    }
+    final allPlaces = await _placesRepo.loadNearbyPlaces(
+      _userLat,
+      _userLng,
+      radiusKm: _defaultRadiusKm,
+    );
+    final unseenPlaces =
+        allPlaces.where((p) => !_swipedPlaceIds.contains(p.id)).toList();
+    return unseenPlaces;
   }
 
   Future<void> refreshWithLocation() async {
@@ -107,7 +103,6 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
         _userLat,
         _userLng,
         radiusKm: _defaultRadiusKm,
-        useMock: true,
       );
       final unseenPlaces =
           allPlaces.where((p) => !_swipedPlaceIds.contains(p.id)).toList();
@@ -120,8 +115,9 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
 
   PlaceModel? get currentPlace {
     final data = state.value;
-    if (data == null || data.isEmpty || _currentIndex >= data.length)
+    if (data == null || data.isEmpty || _currentIndex >= data.length) {
       return null;
+    }
     return data[_currentIndex];
   }
 
@@ -217,6 +213,30 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
   List<String> get favoritesList => List.unmodifiable(_favorites);
 
   bool isFavorite(String placeId) => _favorites.contains(placeId);
+
+  Future<void> addFavorite(String placeId) async {
+    if (placeId.isEmpty) return;
+
+    if (!_favorites.contains(placeId)) {
+      _favorites.add(placeId);
+    }
+
+    final data = state.value;
+    if (data != null) {
+      state = AsyncData(List.of(data));
+    }
+
+    final authState = ref.read(authControllerProvider);
+    if (authState.value != null) {
+      final userId = authState.value!.uid;
+      try {
+        await _profileRepo.updateUserProfile(userId, {'favorites': _favorites});
+        await _syncFavoritesWithGroup(userId);
+      } catch (e) {
+        // Continue even on error
+      }
+    }
+  }
 
   Future<void> removeFavorite(String placeId) async {
     _favorites.remove(placeId);

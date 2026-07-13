@@ -40,9 +40,10 @@ GoRouter createRouter(Ref ref) {
       final authState = ref.read(authControllerProvider);
       // Wait for auth to initialize if loading
       if (authState.isLoading) return null;
-      
+
       final isLoggedIn = authState.value != null;
-      final isGoingToAuth = currentPath == '/login' || currentPath == '/register';
+      final isGoingToAuth =
+          currentPath == '/login' || currentPath == '/register';
 
       if (hasSeenOnboarding) {
         if (!isLoggedIn && !isGoingToAuth) {
@@ -55,16 +56,15 @@ GoRouter createRouter(Ref ref) {
           return '/home';
         }
       }
-      
+
       if (!isLoggedIn) return null;
 
-      final List<GroupModel> groupsSnapshot = ref.read(userGroupsProvider).value ??
-          await ref.read(userGroupsProvider.future);
+      final List<GroupModel> groupsSnapshot =
+          ref.read(userGroupsProvider).value ??
+              await ref.read(userGroupsProvider.future);
       final activeGroup = _pickActiveSessionGroup(groupsSnapshot);
       if (activeGroup != null) {
-        final onSwipe = currentPath.startsWith('/swipe');
-        final onMatches = currentPath.startsWith('/group-matches');
-        if (!onSwipe && !onMatches) {
+        if (!isActiveSessionRouteAllowed(currentPath)) {
           return '/swipe/${activeGroup.groupId}';
         }
       }
@@ -147,3 +147,12 @@ GroupModel? _pickActiveSessionGroup(List<GroupModel> groups) {
   return null;
 }
 
+bool isActiveSessionRouteAllowed(String currentPath) {
+  return currentPath.startsWith('/swipe') ||
+      currentPath.startsWith('/group-matches') ||
+      currentPath == '/group' ||
+      currentPath.startsWith('/group/') ||
+      currentPath == '/profile' ||
+      currentPath == '/settings' ||
+      currentPath == '/favorites';
+}

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../common/models/place_model.dart';
-import '../../swipe/data/places_repository.dart';
+import '../../places/data/place_photo_url_builder.dart';
+import '../../../main_providers.dart';
 import '../../swipe/logic/swipe_controller.dart';
 
 class FavoritesScreen extends ConsumerWidget {
@@ -20,7 +22,8 @@ class FavoritesScreen extends ConsumerWidget {
       body: favorites.isEmpty
           ? _buildEmptyState(context)
           : FutureBuilder<List<PlaceModel>>(
-              future: PlacesRepository().loadNearbyPlaces(0, 0, useMock: true),
+              future:
+                  ref.read(placesRepositoryProvider).loadPlacesByIds(favorites),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -34,9 +37,7 @@ class FavoritesScreen extends ConsumerWidget {
                   );
                 }
 
-                final allPlaces = snapshot.data ?? [];
-                final favoritePlaces =
-                    allPlaces.where((p) => favorites.contains(p.id)).toList();
+                final favoritePlaces = snapshot.data ?? [];
 
                 if (favoritePlaces.isEmpty) {
                   return _buildEmptyState(context);
@@ -57,7 +58,8 @@ class FavoritesScreen extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       trailing: IconButton(
-                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                        icon:
+                            const Icon(Icons.delete_outline, color: Colors.red),
                         tooltip: 'Remove from favorites',
                         onPressed: () {
                           ref
@@ -65,7 +67,8 @@ class FavoritesScreen extends ConsumerWidget {
                               .removeFavorite(place.id);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('${place.name} removed from favorites'),
+                              content:
+                                  Text('${place.name} removed from favorites'),
                               backgroundColor: Colors.orange,
                               duration: const Duration(seconds: 2),
                             ),
@@ -87,11 +90,15 @@ class FavoritesScreen extends ConsumerWidget {
       child: SizedBox(
         width: 56,
         height: 56,
-        child: place.imageUrls.isNotEmpty
-            ? Image.network(
-                place.imageUrls.first,
+        child: resolvePlacePhotoUrls(place).isNotEmpty
+            ? CachedNetworkImage(
+                imageUrl: resolvePlacePhotoUrls(place).first,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _buildThumbnailPlaceholder(),
+                placeholder: (context, url) => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+                errorWidget: (context, url, error) =>
+                    _buildThumbnailPlaceholder(),
               )
             : _buildThumbnailPlaceholder(),
       ),

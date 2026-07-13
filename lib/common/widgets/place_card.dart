@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../models/place_model.dart';
+import '../../features/places/data/place_photo_url_builder.dart';
 
 class PlaceCard extends StatelessWidget {
   final PlaceModel place;
@@ -46,11 +48,14 @@ class PlaceCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                child: place.imageUrls.isNotEmpty
-                    ? Image.network(
-                        place.imageUrls.first,
+                child: resolvePlacePhotoUrls(place).isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: resolvePlacePhotoUrls(place).first,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
+                        placeholder: (context, url) => const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                        errorWidget: (context, url, error) =>
                             _buildImagePlaceholder(),
                       )
                     : _buildImagePlaceholder(),

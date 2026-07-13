@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../common/models/place_model.dart';
+import '../../places/data/place_photo_url_builder.dart';
 import '../../swipe/logic/swipe_controller.dart';
 
 class SimplifiedHomeScreen extends ConsumerWidget {
@@ -25,7 +27,10 @@ class SimplifiedHomeScreen extends ConsumerWidget {
                 builder: (context, ref, _) {
                   // Watch the state so badge rebuilds when favorites change
                   ref.watch(swipeControllerProvider);
-                  final favoritesCount = ref.read(swipeControllerProvider.notifier).favoritesList.length;
+                  final favoritesCount = ref
+                      .read(swipeControllerProvider.notifier)
+                      .favoritesList
+                      .length;
                   return IconButton(
                     onPressed: () => context.push('/favorites'),
                     icon: Badge(
@@ -48,11 +53,11 @@ class SimplifiedHomeScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Reset'),
-        content: const Text('Alle Places und Favoriten zurücksetzen?'),
+        content: const Text('Reset all places and favorites?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Abbrechen'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             style: TextButton.styleFrom(foregroundColor: Colors.red),
@@ -62,7 +67,7 @@ class SimplifiedHomeScreen extends ConsumerWidget {
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Alles zurückgesetzt!'),
+                    content: Text('All reset successfully!'),
                     backgroundColor: Colors.green,
                   ),
                 );
@@ -74,7 +79,6 @@ class SimplifiedHomeScreen extends ConsumerWidget {
       ),
     );
   }
-
 }
 
 class _SwipeContent extends ConsumerWidget {
@@ -121,7 +125,8 @@ class _SwipeContent extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.check_circle_outline, size: 80, color: Colors.green),
+                const Icon(Icons.check_circle_outline,
+                    size: 80, color: Colors.green),
                 const SizedBox(height: 24),
                 Text(
                   'No more places!',
@@ -192,7 +197,7 @@ class _SwipeCardStackState extends State<_SwipeCardStack>
   late Animation<Offset> _slideAnimation;
   late Animation<double> _rotationAnimation;
   late Animation<double> _opacityAnimation;
-  
+
   double _dragStartX = 0;
   double _dragStartY = 0;
   bool _isAnimating = false;
@@ -240,12 +245,13 @@ class _SwipeCardStackState extends State<_SwipeCardStack>
     final deltaX = details.globalPosition.dx - _dragStartX;
     final deltaY = details.globalPosition.dy - _dragStartY;
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     final rotation = deltaX / screenWidth * 0.1;
     final opacity = 1.0 - (deltaX.abs() / screenWidth * 0.5).clamp(0.0, 0.5);
-    
+
     setState(() {
-      _slideAnimation = AlwaysStoppedAnimation(Offset(deltaX / screenWidth, deltaY / screenWidth));
+      _slideAnimation = AlwaysStoppedAnimation(
+          Offset(deltaX / screenWidth, deltaY / screenWidth));
       _rotationAnimation = AlwaysStoppedAnimation(rotation);
       _opacityAnimation = AlwaysStoppedAnimation(opacity);
     });
@@ -255,10 +261,10 @@ class _SwipeCardStackState extends State<_SwipeCardStack>
     if (_isAnimating) return;
     final velocity = details.velocity.pixelsPerSecond.dx;
     final currentOffset = _slideAnimation.value.dx;
-    
+
     const threshold = 0.3;
     final fastSwipe = velocity.abs() > 500;
-    
+
     if (currentOffset > threshold || (velocity > 0 && fastSwipe)) {
       _swipeRight();
     } else if (currentOffset < -threshold || (velocity < 0 && fastSwipe)) {
@@ -268,10 +274,11 @@ class _SwipeCardStackState extends State<_SwipeCardStack>
     }
   }
 
-  void _animateOut(Offset targetOffset, double targetRotation, VoidCallback onComplete) {
+  void _animateOut(
+      Offset targetOffset, double targetRotation, VoidCallback onComplete) {
     _isAnimating = true;
     _controller.reset();
-    
+
     _slideAnimation = Tween<Offset>(
       begin: _slideAnimation.value,
       end: targetOffset,
@@ -284,7 +291,7 @@ class _SwipeCardStackState extends State<_SwipeCardStack>
       begin: _opacityAnimation.value,
       end: 0.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
-    
+
     _controller.forward().then((_) {
       if (mounted) {
         _controller.reset();
@@ -314,7 +321,7 @@ class _SwipeCardStackState extends State<_SwipeCardStack>
   void _returnToCenter() {
     _isAnimating = true;
     _controller.reset();
-    
+
     _slideAnimation = Tween<Offset>(
       begin: _slideAnimation.value,
       end: Offset.zero,
@@ -327,7 +334,7 @@ class _SwipeCardStackState extends State<_SwipeCardStack>
       begin: _opacityAnimation.value,
       end: 1.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-    
+
     _controller.forward().then((_) {
       if (mounted) {
         _controller.reset();
@@ -365,115 +372,124 @@ class _SwipeCardStackState extends State<_SwipeCardStack>
                   child: FadeTransition(
                     opacity: _opacityAnimation,
                     child: Card(
-                  elevation: 8,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Stack(
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          height: double.infinity,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Colors.blue.shade400,
-                                Colors.purple.shade400,
-                              ],
+                      elevation: 8,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Stack(
+                          children: [
+                            Container(
+                              width: double.infinity,
+                              height: double.infinity,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    Colors.blue.shade400,
+                                    Colors.purple.shade400,
+                                  ],
+                                ),
+                              ),
+                              child: resolvePlacePhotoUrls(widget.place)
+                                      .isNotEmpty
+                                  ? CachedNetworkImage(
+                                      imageUrl:
+                                          resolvePlacePhotoUrls(widget.place)
+                                              .first,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) =>
+                                          const Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          _buildPlaceholder(),
+                                    )
+                                  : _buildPlaceholder(),
                             ),
-                          ),
-                          child: widget.place.imageUrls.isNotEmpty
-                              ? Image.network(
-                                  widget.place.imageUrls.first,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      _buildPlaceholder(),
-                                )
-                              : _buildPlaceholder(),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.transparent,
-                                  Colors.black.withValues(alpha: 0.8),
-                                ],
+                            Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.transparent,
+                                      Colors.black.withValues(alpha: 0.8),
+                                    ],
+                                  ),
+                                ),
+                                padding: const EdgeInsets.all(24.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      widget.place.name,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      widget.place.description ?? '',
+                                      style: TextStyle(
+                                        color:
+                                            Colors.white.withValues(alpha: 0.9),
+                                        fontSize: 16,
+                                      ),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    if (widget.place.types.isNotEmpty) ...[
+                                      const SizedBox(height: 12),
+                                      Wrap(
+                                        spacing: 8,
+                                        runSpacing: 8,
+                                        children: widget.place.types
+                                            .map(
+                                              (tag) => Chip(
+                                                label: Text(
+                                                  tag,
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                                backgroundColor: Colors.white
+                                                    .withValues(alpha: 0.2),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                  horizontal: 8,
+                                                  vertical: 4,
+                                                ),
+                                              ),
+                                            )
+                                            .toList(),
+                                      ),
+                                    ],
+                                  ],
+                                ),
                               ),
                             ),
-                            padding: const EdgeInsets.all(24.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.place.name,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  widget.place.description ?? '',
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.9),
-                                    fontSize: 16,
-                                  ),
-                                  maxLines: 3,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if (widget.place.types.isNotEmpty) ...[
-                                  const SizedBox(height: 12),
-                                  Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: widget.place.types
-                                        .map(
-                                          (tag) => Chip(
-                                            label: Text(
-                                              tag,
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                            backgroundColor:
-                                                Colors.white.withValues(alpha: 0.2),
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 4,
-                                            ),
-                                          ),
-                                        )
-                                        .toList(),
-                                  ),
-                                ],
-                              ],
+                            Positioned(
+                              top: 16,
+                              right: 16,
+                              child: IconButton(
+                                icon: const Icon(Icons.info_outline,
+                                    color: Colors.white),
+                                onPressed: widget.onDetail,
+                              ),
                             ),
-                          ),
+                          ],
                         ),
-                        Positioned(
-                          top: 16,
-                          right: 16,
-                          child: IconButton(
-                            icon: const Icon(Icons.info_outline,
-                                color: Colors.white),
-                            onPressed: widget.onDetail,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                      ),
                     ),
                   ),
                 ),

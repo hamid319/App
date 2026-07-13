@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/services/maps_launcher.dart';
 import '../../../common/models/place_model.dart';
+import '../data/place_photo_url_builder.dart';
 import '../../swipe/data/places_repository.dart';
 import '../../swipe/logic/swipe_controller.dart';
 
-final placeDetailProvider = FutureProvider.family<PlaceModel?, String>((ref, placeId) async {
+final placeDetailProvider =
+    FutureProvider.family<PlaceModel?, String>((ref, placeId) async {
   final repo = PlacesRepository();
-  return await repo.getPlaceById(placeId, useMock: true);
+  return await repo.getPlaceById(placeId);
 });
 
 class PlaceDetailScreen extends ConsumerWidget {
@@ -20,9 +23,9 @@ class PlaceDetailScreen extends ConsumerWidget {
     final placeAsync = ref.watch(placeDetailProvider(placeId));
 
     final appBarTitle = placeAsync.when(
-      data: (place) => place?.name ?? 'Ort',
-      loading: () => 'Ort',
-      error: (_, __) => 'Ort',
+      data: (place) => place?.name ?? 'Place',
+      loading: () => 'Place',
+      error: (_, __) => 'Place',
     );
 
     return Scaffold(
@@ -92,11 +95,14 @@ class _PlaceDetailContent extends ConsumerWidget {
               borderRadius: BorderRadius.circular(12),
               child: AspectRatio(
                 aspectRatio: 16 / 9,
-                child: place.imageUrls.isNotEmpty
-                    ? Image.network(
-                        place.imageUrls.first,
+                child: resolvePlacePhotoUrls(place).isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: resolvePlacePhotoUrls(place).first,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
+                        placeholder: (context, url) => const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                        errorWidget: (context, url, error) =>
                             _buildImagePlaceholder(),
                       )
                     : _buildImagePlaceholder(),
@@ -207,10 +213,13 @@ class _PlaceDetailContent extends ConsumerWidget {
                   child: isFav
                       ? ElevatedButton.icon(
                           onPressed: () {
-                            ref.read(swipeControllerProvider.notifier).removeFavorite(place.id);
+                            ref
+                                .read(swipeControllerProvider.notifier)
+                                .removeFavorite(place.id);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('${place.name} removed from favorites'),
+                                content: Text(
+                                    '${place.name} removed from favorites'),
                                 backgroundColor: Colors.orange,
                               ),
                             );
@@ -224,11 +233,15 @@ class _PlaceDetailContent extends ConsumerWidget {
                           ),
                         )
                       : OutlinedButton.icon(
-                          onPressed: () {
-                            ref.read(swipeControllerProvider.notifier).like();
+                          onPressed: () async {
+                            await ref
+                                .read(swipeControllerProvider.notifier)
+                                .addFavorite(place.id);
+                            if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('${place.name} added to favorites!'),
+                                content:
+                                    Text('${place.name} added to favorites!'),
                                 backgroundColor: Colors.green,
                               ),
                             );

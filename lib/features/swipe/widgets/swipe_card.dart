@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:math' as math;
 import '../../../common/models/place_model.dart';
+import '../../places/data/place_photo_url_builder.dart';
 import 'swipe_buttons.dart';
 
 class TinderSwipeCardStack extends StatefulWidget {
@@ -341,23 +343,15 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
                     ],
                   ),
                 ),
-                child: widget.place.imageUrls.isNotEmpty
-                    ? Image.network(
-                        widget.place.imageUrls.first,
+                child: resolvePlacePhotoUrls(widget.place).isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: resolvePlacePhotoUrls(widget.place).first,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
+                        placeholder: (context, url) => const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                        errorWidget: (context, url, error) =>
                             _buildPlaceholder(),
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                  : null,
-                            ),
-                          );
-                        },
                       )
                     : _buildPlaceholder(),
               ),
@@ -372,7 +366,7 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        Colors.black.withOpacity(0.8),
+                        Colors.black.withValues(alpha: 0.8),
                       ],
                     ),
                   ),
@@ -392,7 +386,7 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
                       Text(
                         widget.place.description ?? '',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 16,
                         ),
                         maxLines: 3,
@@ -411,7 +405,7 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
                                     vertical: 6,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
+                                    color: Colors.white.withValues(alpha: 0.2),
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   child: Text(
@@ -435,7 +429,7 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
                 right: 16,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black.withValues(alpha: 0.3),
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(

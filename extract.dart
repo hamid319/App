@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'dart:io';
 
 void main() {
@@ -48,5 +49,5 @@ void main() {
   }
   file.writeAsStringSync(newScreenContent.toString());
 
-  print('Extraction successful');
+  developer.log('Extraction successful');
 }

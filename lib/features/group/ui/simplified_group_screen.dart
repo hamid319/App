@@ -308,7 +308,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
             badge,
             if (isOwner)
               IconButton(
-                icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                icon: const Icon(Icons.delete_outline,
+                    color: Colors.red, size: 20),
                 onPressed: () => _confirmDeleteGroup(group),
               ),
           ],
@@ -386,7 +387,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                     labelText: 'Country',
                     border: OutlineInputBorder(),
                   ),
-                  value: _selectedCountryCode,
+                  initialValue: _selectedCountryCode,
                   items: _countries.map((c) {
                     return DropdownMenuItem(
                       value: c['countryCode'],
@@ -415,7 +416,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                       labelText: 'City',
                       border: OutlineInputBorder(),
                     ),
-                    value: _selectedCity,
+                    initialValue: _selectedCity,
                     items: _cities.map((c) {
                       return DropdownMenuItem(
                         value: c,
@@ -566,10 +567,14 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                         const SizedBox(height: 16),
                         Row(
                           children: [
-                            Text(_isTimeLimit ? 'Time Limit: ' : 'Swipe Limit: '),
+                            Text(_isTimeLimit
+                                ? 'Time Limit: '
+                                : 'Swipe Limit: '),
                             Expanded(
                               child: TextField(
-                                controller: _isTimeLimit ? _timeLimitController : _swipeLimitController,
+                                controller: _isTimeLimit
+                                    ? _timeLimitController
+                                    : _swipeLimitController,
                                 keyboardType: TextInputType.number,
                                 decoration: InputDecoration(
                                   isDense: true,
@@ -732,7 +737,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       timeLimit = int.tryParse(valStr) ?? 5;
       if (timeLimit < 1 || timeLimit > 120) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Time limit must be between 1 and 120 mins')),
+          const SnackBar(
+              content: Text('Time limit must be between 1 and 120 mins')),
         );
         return;
       }
@@ -742,16 +748,16 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       swipeLimit = int.tryParse(limitStr) ?? 10;
       if (swipeLimit < 1 || swipeLimit > 100) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Swipe limit must be between 1 and 100')),
+          const SnackBar(
+              content: Text('Swipe limit must be between 1 and 100')),
         );
         return;
       }
     }
 
     try {
-      await ref
-          .read(groupControllerProvider.notifier)
-          .startSessionWithLimit(swipeLimit: swipeLimit, durationMinutes: timeLimit);
+      await ref.read(groupControllerProvider.notifier).startSessionWithLimit(
+          swipeLimit: swipeLimit, durationMinutes: timeLimit);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -879,7 +885,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Group'),
-        content: Text("Are you sure you want to delete '${group.groupName}'? This cannot be undone."),
+        content: Text(
+            "Are you sure you want to delete '${group.groupName}'? This cannot be undone."),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -887,13 +894,16 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
           ),
           TextButton(
             onPressed: () async {
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
               Navigator.pop(context);
               try {
-                await ref.read(groupRepositoryProvider).deleteGroup(group.groupId);
+                await ref
+                    .read(groupRepositoryProvider)
+                    .deleteGroup(group.groupId);
                 ref.invalidate(userGroupsProvider);
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     SnackBar(content: Text('Error deleting group: $e')),
                   );
                 }

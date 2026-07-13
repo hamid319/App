@@ -5,13 +5,20 @@ import '../../../common/models/group_session_model.dart';
 import '../../../core/services/firestore_service.dart';
 
 class GroupRepository {
-  final FirestoreService _firestoreService;
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  GroupRepository(
+    this._firestoreService, {
+    FirebaseFirestore? firestore,
+  })  : _db = firestore ?? FirebaseFirestore.instance,
+        _usesInjectedFirestore = firestore != null;
 
-  GroupRepository(this._firestoreService);
+  final FirestoreService _firestoreService;
+  final FirebaseFirestore _db;
+  final bool _usesInjectedFirestore;
 
   Future<GroupModel?> getGroup(String groupId) async {
-    final doc = await _firestoreService.getDocument('groups', groupId);
+    final doc = _usesInjectedFirestore
+        ? await _db.collection('groups').doc(groupId).get()
+        : await _firestoreService.getDocument('groups', groupId);
     if (doc.exists && doc.data() != null) {
       return GroupModel.fromJson(doc.data()!);
     }
@@ -37,11 +44,18 @@ class GroupRepository {
       invite: group.invite,
     );
 
-    await _firestoreService.setDocument(
-      'groups',
-      group.groupId,
-      normalizedGroup.toJson(),
-    );
+    if (_usesInjectedFirestore) {
+      await _db
+          .collection('groups')
+          .doc(group.groupId)
+          .set(normalizedGroup.toJson());
+    } else {
+      await _firestoreService.setDocument(
+        'groups',
+        group.groupId,
+        normalizedGroup.toJson(),
+      );
+    }
   }
 
   Future<void> joinGroupByInvite(
@@ -147,23 +161,37 @@ class GroupRepository {
     final members = List<String>.from(group.members)..remove(userId);
 
     if (members.isEmpty) {
-      await _firestoreService.deleteDocument('groups', groupId);
+      if (_usesInjectedFirestore) {
+        await _db.collection('groups').doc(groupId).delete();
+      } else {
+        await _firestoreService.deleteDocument('groups', groupId);
+      }
     } else {
-      await _firestoreService.updateDocument('groups', groupId, {
-        'members': members,
-      });
+      final data = {'members': members};
+      if (_usesInjectedFirestore) {
+        await _db.collection('groups').doc(groupId).update(data);
+      } else {
+        await _firestoreService.updateDocument('groups', groupId, data);
+      }
     }
   }
 
   Future<void> deleteGroup(String groupId) async {
-    await _firestoreService.deleteDocument('groups', groupId);
+    if (_usesInjectedFirestore) {
+      await _db.collection('groups').doc(groupId).delete();
+    } else {
+      await _firestoreService.deleteDocument('groups', groupId);
+    }
   }
 
   Future<void> syncFavorites(
       String groupId, List<String> sharedFavorites) async {
-    await _firestoreService.updateDocument('groups', groupId, {
-      'sharedFavorites': sharedFavorites,
-    });
+    final data = {'sharedFavorites': sharedFavorites};
+    if (_usesInjectedFirestore) {
+      await _db.collection('groups').doc(groupId).update(data);
+    } else {
+      await _firestoreService.updateDocument('groups', groupId, data);
+    }
   }
 
   // --- Session & Swiping Logic ---

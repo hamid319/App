@@ -254,7 +254,7 @@ class GroupController extends AsyncNotifier<GroupModel?> {
       final destination = location.cityName.isNotEmpty
           ? location.cityName
           : location.countryName;
-      final places = await _placesRepo.fetchExamplePlacesForLocation(
+      final places = await _placesRepo.fetchAndCachePlacesForCity(
         location,
         limit: swipeLimit,
       );
@@ -303,7 +303,7 @@ class GroupController extends AsyncNotifier<GroupModel?> {
       final resolvedDestination = location.cityName.isNotEmpty
           ? location.cityName
           : location.countryName;
-      final places = await _placesRepo.fetchExamplePlacesForLocation(
+      final places = await _placesRepo.fetchAndCachePlacesForCity(
         location,
         limit: 20,
       );

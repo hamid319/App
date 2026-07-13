@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../common/models/place_model.dart';
+import '../../places/data/place_photo_url_builder.dart';
 import '../../../common/models/group_session_model.dart';
 import '../../../common/widgets/loading_spinner.dart';
 import '../../../common/widgets/error_view.dart';
@@ -72,7 +74,7 @@ final sessionResultsProvider =
       final placeId = vote['placeId'] as String?;
       if (placeId == null) continue;
       final likes = (vote['likes'] as num?)?.toInt() ?? 0;
-      final place = await placesRepo.getPlaceById(placeId, useMock: false);
+      final place = await placesRepo.getPlaceById(placeId);
       if (place == null) continue;
       results.add(ResultItem(place: place, likes: likes));
     }
@@ -121,8 +123,9 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
       final sessions = sessionsAsync.value ?? [];
       if (sessions.isNotEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.read(selectedSessionIdProvider(widget.groupId).notifier).updateState(
-              sessions.first.sessionId);
+          ref
+              .read(selectedSessionIdProvider(widget.groupId).notifier)
+              .updateState(sessions.first.sessionId);
         });
       }
     }
@@ -325,17 +328,21 @@ class _ResultThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (place.imageUrls.isEmpty) {
+    final imageUrls = resolvePlacePhotoUrls(place);
+    if (imageUrls.isEmpty) {
       return _buildImagePlaceholder();
     }
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
-      child: Image.network(
-        place.imageUrls.first,
+      child: CachedNetworkImage(
+        imageUrl: imageUrls.first,
         width: 64,
         height: 64,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => _buildImagePlaceholder(),
+        placeholder: (context, url) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+        errorWidget: (context, url, error) => _buildImagePlaceholder(),
       ),
     );
   }
@@ -393,16 +400,17 @@ class _ResultsListState extends ConsumerState<_ResultsList> {
     super.didUpdateWidget(oldWidget);
     // If the new initial results are completely different (e.g. session switched), update them
     // Otherwise, we keep our local sorted state to prevent jitter during drag/drop
-    if (oldWidget.sessionId != widget.sessionId || oldWidget.initialResults.length != widget.initialResults.length) {
+    if (oldWidget.sessionId != widget.sessionId ||
+        oldWidget.initialResults.length != widget.initialResults.length) {
       _results = List.from(widget.initialResults);
     }
   }
 
   void _saveOrder() {
     ref.read(groupControllerProvider.notifier).updateSessionOrder(
-      widget.sessionId,
-      _results.map((r) => r.place.id).toList(),
-    );
+          widget.sessionId,
+          _results.map((r) => r.place.id).toList(),
+        );
   }
 
   void _removeItem(int index) {
@@ -433,16 +441,19 @@ class _ResultsListState extends ConsumerState<_ResultsList> {
         final result = _results[index];
         return ListTile(
           key: ValueKey(result.place.id),
-          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
           leading: _ResultThumbnail(place: result.place),
           title: Text(result.place.name),
-          subtitle: result.place.address != null ? Text(result.place.address!) : null,
+          subtitle:
+              result.place.address != null ? Text(result.place.address!) : null,
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.favorite, color: Colors.red.shade400, size: 18),
               const SizedBox(width: 6),
-              Text('${result.likes}', style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text('${result.likes}',
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
               if (widget.isAdmin) ...[
                 const SizedBox(width: 8),
                 IconButton(

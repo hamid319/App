@@ -111,7 +111,7 @@ lib/
 
 | Package | Version | Status |
 |---|---|---|
-| `flutter` SDK | — | ✅ Active |
+| `flutter` SDK | — | ✅ Active |re
 | `go_router` | ^17.0.0 | ✅ Active |
 | `firebase_core` | ^4.2.1 | ✅ Active |
 | `firebase_auth` | ^6.1.2 | ✅ Active |
