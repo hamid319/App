@@ -36,7 +36,9 @@ class ImageService {
 
   Future<String> uploadProfileImage(String userId, XFile imageFile) async {
     try {
-      final String fileName = 'profile_$userId.jpg';
+      // Must stay in sync with storage.rules, which allows a user to write
+      // only the object named after their own uid.
+      final String fileName = '$userId.jpg';
       final Reference ref = _storage.ref().child('profile_images').child(fileName);
       
       final File file = File(imageFile.path);
@@ -57,9 +59,10 @@ class ImageService {
     }
   }
 
-  Future<void> deleteProfileImage(String imageUrl) async {
+  Future<void> deleteProfileImage(String userId) async {
     try {
-      final Reference ref = _storage.refFromURL(imageUrl);
+      final Reference ref =
+          _storage.ref().child('profile_images').child('$userId.jpg');
       await ref.delete();
     } catch (e) {
       throw Exception('Failed to delete image: $e');

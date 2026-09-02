@@ -270,22 +270,18 @@ class GroupRepository {
     final voteRef = sessionRef.collection('votes').doc(placeId);
     final userSwipeRef = sessionRef.collection('userSwipes').doc(userId);
 
-    final sessionSnap = await sessionRef.get();
-    if (!sessionSnap.exists || sessionSnap.data() == null) {
-      throw Exception('Session not found');
-    }
-    final preSession = GroupSessionModel.fromJson(sessionSnap.data()!);
-    if (preSession.isCompleted) {
-      return;
-    }
-    if (!preSession.participants.contains(userId)) {
-      throw Exception('User is not a participant in this session');
-    }
-
     await _db.runTransaction((transaction) async {
       final sessionSnap = await transaction.get(sessionRef);
       if (!sessionSnap.exists || sessionSnap.data() == null) {
         throw Exception('Session not found');
+      }
+
+      // The group document is updated when the session completes, so its
+      // absence must fail the transaction up front rather than part-way
+      // through the writes below.
+      final groupSnap = await transaction.get(groupRef);
+      if (!groupSnap.exists) {
+        throw Exception('Group not found');
       }
 
       final session = GroupSessionModel.fromJson(sessionSnap.data()!);

@@ -63,7 +63,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '531891096536',
     projectId: 'travelapp-31255',
     storageBucket: 'travelapp-31255.firebasestorage.app',
-    iosBundleId: 'com.example.mobileapp',
+    iosBundleId: 'com.swipetrip.app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -72,7 +72,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '531891096536',
     projectId: 'travelapp-31255',
     storageBucket: 'travelapp-31255.firebasestorage.app',
-    iosBundleId: 'com.example.mobileapp',
+    iosBundleId: 'com.swipetrip.app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

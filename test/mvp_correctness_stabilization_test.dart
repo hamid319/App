@@ -1,10 +1,10 @@
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobileapp/app/routes.dart';
-import 'package:mobileapp/common/models/place_model.dart';
-import 'package:mobileapp/features/swipe/data/places_repository.dart';
-import 'package:mobileapp/main.dart' as app_main;
+import 'package:swipetrip/app/routes.dart';
+import 'package:swipetrip/common/models/place_model.dart';
+import 'package:swipetrip/features/swipe/data/places_repository.dart';
+import 'package:swipetrip/main.dart' as app_main;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

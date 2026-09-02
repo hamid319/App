@@ -1,0 +1,18 @@
+{
+  "name": "swipetrip-functions",
+  "description": "Cloud Functions for SwipeTrip: server-side Places ingestion and photo caching.",
+  "private": true,
+  "main": "index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "logs": "firebase functions:log",
+    "deploy": "firebase deploy --only functions"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.1.0"
+  }
+}

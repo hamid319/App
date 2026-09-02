@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'theme.dart';
 import 'routes.dart';
 
-class MobileApp extends ConsumerWidget {
-  const MobileApp({super.key});
+class SwipeTripApp extends ConsumerWidget {
+  const SwipeTripApp({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);

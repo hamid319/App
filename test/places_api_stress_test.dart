@@ -4,10 +4,10 @@ import 'package:mocktail/mocktail.dart';
 import 'package:http/http.dart' as http;
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:mobileapp/core/config/app_config.dart';
-import 'package:mobileapp/common/models/place_model.dart';
-import 'package:mobileapp/common/models/group_model.dart';
-import 'package:mobileapp/features/swipe/data/places_repository.dart';
+import 'package:swipetrip/core/config/app_config.dart';
+import 'package:swipetrip/common/models/place_model.dart';
+import 'package:swipetrip/common/models/group_model.dart';
+import 'package:swipetrip/features/swipe/data/places_repository.dart';
 
 class MockHttpClient extends Mock implements http.Client {}
 
@@ -99,13 +99,18 @@ void main() {
             containsAll([
               'tourist_attraction',
               'museum',
-              'landmark',
               'church',
               'art_gallery',
               'historical_landmark',
+              'cultural_landmark',
+              'monument',
               'national_park',
               'sculpture',
             ]));
+
+        // Table B types would make Nearby Search (New) reject the request.
+        expect(includedTypes, isNot(contains('landmark')));
+        expect(excludedTypes, isNot(contains('food')));
 
         expect(
             excludedTypes,
@@ -113,7 +118,6 @@ void main() {
               'restaurant',
               'cafe',
               'bar',
-              'food',
             ]));
 
         // Assert Location Restriction

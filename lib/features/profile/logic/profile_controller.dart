@@ -96,7 +96,7 @@ class ProfileController extends AsyncNotifier<UserModel?> {
     if (currentUser == null || currentUser.photoUrl == null) return;
 
     try {
-      await _imageService.deleteProfileImage(currentUser.photoUrl!);
+      await _imageService.deleteProfileImage(uid);
       await updateProfile(uid, {'photoUrl': null});
     } catch (e) {
       rethrow;

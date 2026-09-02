@@ -1,6 +1,6 @@
 {
-    "name": "mobileapp",
-    "short_name": "mobileapp",
+    "name": "SwipeTrip",
+    "short_name": "SwipeTrip",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

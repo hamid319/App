@@ -1,5 +1,5 @@
-import 'package:mobileapp/common/models/place_model.dart';
-import 'package:mobileapp/core/config/env.dart';
+import 'package:swipetrip/common/models/place_model.dart';
+import 'package:swipetrip/core/config/env.dart';
 
 class PlacePhotoUrlBuilder {
   const PlacePhotoUrlBuilder({required this.apiKey});

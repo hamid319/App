@@ -9,7 +9,7 @@ class LocationRepository {
   Future<List<Map<String, String>>> getCountries() async {
     try {
       final url = Uri.parse(
-          'http://api.geonames.org/countryInfoJSON?username=$_username');
+          'https://secure.geonames.org/countryInfoJSON?username=$_username');
       final response = await http.get(url).timeout(const Duration(seconds: 3));
 
       if (response.statusCode == 200) {
@@ -41,7 +41,7 @@ class LocationRepository {
   Future<List<Map<String, dynamic>>> getCities(String countryCode) async {
     try {
       final url = Uri.parse(
-          'http://api.geonames.org/searchJSON?country=$countryCode&featureClass=P&orderby=population&maxRows=50&username=$_username');
+          'https://secure.geonames.org/searchJSON?country=$countryCode&featureClass=P&orderby=population&maxRows=50&username=$_username');
       final response = await http.get(url).timeout(const Duration(seconds: 3));
 
       if (response.statusCode == 200) {

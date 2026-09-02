@@ -1,0 +1,29 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "swipeResults",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "swipeResults",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "liked", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "endedAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

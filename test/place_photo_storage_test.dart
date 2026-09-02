@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobileapp/common/models/place_model.dart';
-import 'package:mobileapp/features/places/data/place_photo_url_builder.dart';
+import 'package:swipetrip/common/models/place_model.dart';
+import 'package:swipetrip/features/places/data/place_photo_url_builder.dart';
 
 void main() {
   test('cache serialization stores photo names without media credentials', () {

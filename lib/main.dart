@@ -22,5 +22,5 @@ Future<void> bootstrapApp({
       () => Firebase.initializeApp(
             options: DefaultFirebaseOptions.currentPlatform,
           ))();
-  (runApplication ?? runApp)(const ProviderScope(child: MobileApp()));
+  (runApplication ?? runApp)(const ProviderScope(child: SwipeTripApp()));
 }

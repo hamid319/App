@@ -6,18 +6,64 @@ import '../../../common/models/group_model.dart';
 import '../../../common/models/place_cache_metadata.dart';
 import '../../../common/utils/geo_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:mobileapp/core/config/env.dart';
-import 'package:mobileapp/core/config/app_config.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:swipetrip/core/config/env.dart';
+import 'package:swipetrip/core/config/app_config.dart';
 
 class PlacesRepository {
   final FirebaseFirestore _db;
   final http.Client _client;
+  final FirebaseFunctions? _functions;
 
   PlacesRepository({
     FirebaseFirestore? firestore,
     http.Client? httpClient,
+    FirebaseFunctions? functions,
   })  : _db = firestore ?? FirebaseFirestore.instance,
-        _client = httpClient ?? http.Client();
+        _client = httpClient ?? http.Client(),
+        _functions = functions;
+
+  FirebaseFunctions get _functionsInstance =>
+      _functions ??
+      FirebaseFunctions.instanceFor(region: AppConfig.functionsRegion);
+
+  /// Loads the place pool for a city.
+  ///
+  /// Delegates to the `getCityPlaces` Cloud Function, which owns the Google
+  /// API keys and caches photos in Cloud Storage, so no key ships in the app.
+  /// Falls back to the legacy direct-HTTP path only when the Cloud Function is
+  /// switched off in [AppConfig].
+  Future<List<PlaceModel>> fetchPlacesForCity(
+    GroupLocation location, {
+    int limit = 20,
+  }) async {
+    if (!AppConfig.usePlacesCloudFunction) {
+      return fetchAndCachePlacesForCity(location, limit: limit);
+    }
+    if (limit <= 0) return [];
+
+    final restrictedLimit = limit.clamp(1, AppConfig.maxPlacesLimit);
+
+    try {
+      final callable = _functionsInstance.httpsCallable('getCityPlaces');
+      final response = await callable.call<Map<String, dynamic>>({
+        'countryCode': location.countryCode,
+        'cityId': location.cityId,
+        'cityName': location.cityName,
+        'lat': location.lat,
+        'lng': location.lng,
+        'limit': restrictedLimit,
+      });
+
+      final placeIds = List<String>.from(
+        (response.data['placeIds'] as List?) ?? const <String>[],
+      );
+      if (placeIds.isEmpty) return [];
+      return loadPlacesByIds(placeIds);
+    } on FirebaseFunctionsException catch (e) {
+      throw Exception(e.message ?? 'Could not load places for this city.');
+    }
+  }
 
   Future<List<PlaceModel>> fetchAndCachePlacesForCity(
     GroupLocation location, {
@@ -75,17 +121,21 @@ class PlacesRepository {
             'places.id,places.displayName,places.location,places.photos,places.types,places.formattedAddress',
       },
       body: json.encode({
+        // Nearby Search (New) only accepts Table A place types here.
+        // 'landmark' and 'food' are Table B and make the request fail with
+        // INVALID_ARGUMENT, so Table A equivalents are used instead.
         'includedTypes': [
           'tourist_attraction',
           'museum',
-          'landmark',
           'church',
           'art_gallery',
           'historical_landmark',
+          'cultural_landmark',
+          'monument',
           'national_park',
           'sculpture',
         ],
-        'excludedTypes': ['restaurant', 'cafe', 'bar', 'food'],
+        'excludedTypes': ['restaurant', 'cafe', 'bar'],
         'locationRestriction': {
           'circle': {
             'center': {
@@ -115,6 +165,11 @@ class PlacesRepository {
 
     final List<PlaceModel> places = [];
     for (final p in boundedResults) {
+      // An empty id would become doc('') further down, which throws and aborts
+      // the whole cache batch.
+      final placeId = p['id'] as String?;
+      if (placeId == null || placeId.isEmpty) continue;
+
       final photoName = (p['photos'] as List?)?.isNotEmpty == true
           ? p['photos'][0]['name'] as String?
           : null;
@@ -131,7 +186,7 @@ class PlacesRepository {
       );
 
       final place = PlaceModel(
-        id: p['id'] as String? ?? '',
+        id: placeId,
         name: name,
         description: description,
         lat: (p['location']?['latitude'] as num?)?.toDouble() ?? 0.0,

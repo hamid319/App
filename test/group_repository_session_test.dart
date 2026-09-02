@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:mobileapp/common/models/group_model.dart';
-import 'package:mobileapp/core/services/firestore_service.dart';
-import 'package:mobileapp/features/group/data/group_repository.dart';
+import 'package:swipetrip/common/models/group_model.dart';
+import 'package:swipetrip/core/services/firestore_service.dart';
+import 'package:swipetrip/features/group/data/group_repository.dart';
 
 class _MockFirestoreService extends Mock implements FirestoreService {}
 

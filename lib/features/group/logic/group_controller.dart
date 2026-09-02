@@ -254,7 +254,7 @@ class GroupController extends AsyncNotifier<GroupModel?> {
       final destination = location.cityName.isNotEmpty
           ? location.cityName
           : location.countryName;
-      final places = await _placesRepo.fetchAndCachePlacesForCity(
+      final places = await _placesRepo.fetchPlacesForCity(
         location,
         limit: swipeLimit,
       );
@@ -265,6 +265,13 @@ class GroupController extends AsyncNotifier<GroupModel?> {
 
       final placePool = places.map((p) => p.id).toList();
 
+      // The pool is capped by AppConfig.maxPlacesLimit and can be smaller still
+      // in cities with few attractions. A swipeLimit above the pool size can
+      // never be reached, so allMembersDone would never become true and the
+      // session would hang in progress forever.
+      final effectiveSwipeLimit =
+          swipeLimit < placePool.length ? swipeLimit : placePool.length;
+
       final endTime = durationMinutes != null
           ? DateTime.now().add(Duration(minutes: durationMinutes))
           : null;
@@ -273,7 +280,7 @@ class GroupController extends AsyncNotifier<GroupModel?> {
         groupId: group.groupId,
         destination: destination,
         participantUids: group.members,
-        swipeLimit: swipeLimit,
+        swipeLimit: effectiveSwipeLimit,
         placePool: placePool,
         endTime: endTime,
       );
@@ -303,7 +310,7 @@ class GroupController extends AsyncNotifier<GroupModel?> {
       final resolvedDestination = location.cityName.isNotEmpty
           ? location.cityName
           : location.countryName;
-      final places = await _placesRepo.fetchAndCachePlacesForCity(
+      final places = await _placesRepo.fetchPlacesForCity(
         location,
         limit: 20,
       );

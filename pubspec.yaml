@@ -1,5 +1,5 @@
-name: mobileapp
-description: A new Flutter project.
+name: swipetrip
+description: SwipeTrip - swipe to discover places, together.
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -25,6 +25,7 @@ dependencies:
   image_picker: ^1.1.2
   firebase_storage: ^13.0.0
   cached_network_image: ^3.3.1
+  cloud_functions: ^6.0.4
 
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,4 @@
-package com.example.mobileapp
+package com.swipetrip.app
 
 import io.flutter.embedding.android.FlutterActivity
 

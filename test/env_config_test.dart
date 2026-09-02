@@ -1,6 +1,6 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobileapp/core/config/env.dart';
+import 'package:swipetrip/core/config/env.dart';
 
 void main() {
   test('demo config trims required API keys and uses configured model', () {
