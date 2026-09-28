@@ -1,0 +1,24 @@
+{
+  "Q1055": {
+    "id": "Q1055",
+    "labels": { "en": { "value": "Hamburg" } },
+    "claims": {
+      "P31": [{ "rank": "normal", "mainsnak": { "snaktype": "value", "datavalue": { "value": { "id": "Q1549591" } } } }],
+      "P17": [
+        { "rank": "normal", "mainsnak": { "snaktype": "value", "datavalue": { "value": { "id": "Q16957" } } } },
+        { "rank": "preferred", "mainsnak": { "snaktype": "value", "datavalue": { "value": { "id": "Q183" } } } }
+      ],
+      "P625": [{ "rank": "preferred", "mainsnak": { "snaktype": "value", "datavalue": { "value": { "latitude": 53.55, "longitude": 10, "globe": "http://www.wikidata.org/entity/Q2" } } } }]
+    }
+  },
+  "Q334": {
+    "id": "Q334",
+    "labels": { "en": { "value": "Singapore" } },
+    "claims": {
+      "P31": [{ "rank": "normal", "mainsnak": { "snaktype": "value", "datavalue": { "value": { "id": "Q133442" } } } }],
+      "P17": [{ "rank": "preferred", "mainsnak": { "snaktype": "value", "datavalue": { "value": { "id": "Q334" } } } }],
+      "P625": [{ "rank": "preferred", "mainsnak": { "snaktype": "value", "datavalue": { "value": { "latitude": 1.29, "longitude": 103.85, "globe": "http://www.wikidata.org/entity/Q2" } } } }]
+    }
+  },
+  "Q183": { "id": "Q183", "labels": { "en": { "value": "Germany" } } }
+}

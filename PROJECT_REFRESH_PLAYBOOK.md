@@ -51,6 +51,8 @@ If a command fails, report the exact failing command and first actionable error.
 
 ## 3. Refresh Project Brain Docs
 
+For `functions/` changes, use Node 22 and run `npm ci`, `npm run typecheck`, `npm run build`, and `npm test` from that directory. Run its Firestore rules tests only through the emulator with `--project demo-swipetrip-city-pipeline`; the exact command and JDK requirement are in `functions/README.md`. Wikimedia probes are read-only and must retain the descriptive User-Agent and bounded QID list.
+
 Update these files when their topic changes:
 
 - `AGENTS.md` for agent workflow or hard coding rules

@@ -16,6 +16,17 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid in groupData.members;
     }
 
+    // Server-only city preparation pipeline. Callable functions use Admin SDK;
+    // mobile/web clients cannot inspect checkpoints or mutate publications.
+    match /cityPreparationJobs/{document=**} { allow read, write: if false; }
+    match /cityPreparationActive/{document=**} { allow read, write: if false; }
+    match /cityPreparationOutbox/{document=**} { allow read, write: if false; }
+    match /cityPreparationQuotaCounters/{document=**} { allow read, write: if false; }
+    match /cityPreparationValidationCounters/{document=**} { allow read, write: if false; }
+    match /cityPreparationObjectLedger/{document=**} { allow read, write: if false; }
+    match /cityPreparationControl/{document=**} { allow read, write: if false; }
+    match /cityCollections/{document=**} { allow read, write: if false; }
+
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow write: if isAuthenticated() && request.auth.uid == userId;

@@ -19,6 +19,13 @@ This is a documentation-only snapshot based on local project docs, codebase-memo
 - `cached_network_image` for remote place images.
 - `http` for Places API calls.
 - `fake_cloud_firestore` and `mocktail` for Places API migration tests.
+- An isolated, unconnected `functions/` package using Node 22, TypeScript, Firebase Functions 2nd gen task queues, Firestore, Wikimedia APIs, Sharp, and Cloudflare R2.
+
+## Server City Collection Pipeline (Unconnected)
+
+The server package exposes authenticated, App Check-enforced callables for requesting a city, reading preparation status, and reading one bounded published collection. A durable Firestore outbox dispatches a globally one-concurrent task worker. Jobs, candidates, checkpoints, quota counters, and object ledgers remain private.
+
+Versions use `cityCollections/{cityQid}/versions/{versionId}/places/{wd_QID}`. Images use immutable content-addressed R2 objects with creator, source, license, revision, hashes, dimensions, and modification provenance. The worker changes `publishedVersion` only after object and document verification. It never changes existing Google `/places` documents. This package is implemented locally but not deployed, credentialed, or connected to Flutter; its limits are safeguards, not a guaranteed currency-denominated billing cap.
 
 ## Architectural Style
 
@@ -398,4 +405,3 @@ flutter analyze
 flutter test test/places_api_migration_test.dart
 flutter test test/places_api_stress_test.dart
 ```
-

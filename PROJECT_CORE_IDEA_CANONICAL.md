@@ -98,6 +98,8 @@ SwipeTrip is not trying to be:
 
 The app should stay focused on fast place discovery and group decision-making.
 
+The repository also contains a server-only, currently unconnected path for a user to request bounded city preparation by Wikidata QID. It automatically publishes a verified version with 50 places or a partial version with 1–49, discards uncertain attractions/photos, and uses structured facts without AI-generated descriptions. This future path does not yet change the app's discovery flow.
+
 ## MVP Success Criteria
 
 The MVP is successful when a real user can:
@@ -123,4 +125,3 @@ For a demo or student project, it is acceptable to keep advanced features out of
 - Cache aggressively by city: repeated sessions for the same city should not repeatedly call external APIs.
 - Keep UI copy English-only unless a full localization system is introduced.
 - Keep architecture feature-first: UI, logic, and data should remain separated.
-

@@ -19,6 +19,8 @@ Older files may call the project Traveller App. Use SwipeTrip for product-facing
 
 Historical Markdown files can be useful for audit context, but they may describe older mock-based flows or planned behavior. Prefer the canonical docs above.
 
+An isolated Node 22 Firebase Functions package now exists under `functions/`. It prepares versioned Wikidata/Wikimedia Commons city collections and R2 images through task-queue workers. It is not deployed and Flutter does not call it. Start with `functions/README.md` and `docs/superpowers/specs/2026-09-13-city-collection-pipeline-design.md`; do not treat it as a replacement for the current Google Places flow until a separate client-integration phase is approved.
+
 ## Architecture At A Glance
 
 The app follows feature-first clean architecture:

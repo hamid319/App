@@ -127,6 +127,21 @@ Risk: profile updates often combine UI optimistic state, Firestore persistence, 
 
 ## Testing Priorities
 
+The unconnected server city path is:
+
+```text
+authenticated + App Check callable
+  -> validation throttle and authoritative Wikidata city validation
+  -> transactional quotas + active-city lease + durable outbox
+  -> one-concurrent task worker
+  -> bounded Wikidata candidates + exact Commons evidence
+  -> Sharp WebP + immutable R2 provenance
+  -> private staging + verified version
+  -> atomic publishedVersion pointer
+```
+
+Retries are checkpointed and terminal redeliveries no-op. Stale work returns through outbox recovery. Empty or technical failure preserves the previous pointer; controlled resource exhaustion publishes confirmed places as partial. Flutter does not call this path.
+
 Highest-value tests are:
 
 - `GroupRepository.recordSwipeInSession` duplicate vote and concurrent progress behavior.

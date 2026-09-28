@@ -10,6 +10,13 @@
       "Bash(git branch -D*)",
       "Bash(git rebase*)",
       "Bash(firebase deploy*)"
+    ],
+    "allow": [
+      "Bash(flutter analyze*)",
+      "Bash(flutter test*)",
+      "Bash(git diff*)",
+      "Bash(git status*)",
+      "Bash(git add*)"
     ]
   },
   "hooks": {

@@ -1,0 +1,62 @@
+Recovered historical summary from logs_2.sqlite. Log timestamp: 2026-09-15 09:15:50 UTC. This is a secondary summary, not the original chat or proof of current implementation status.
+
+# Task Group: SwipeTrip city-collection pipeline, readiness review, and safe main synchronization
+
+scope: Review documented API readiness, explain and implement a budget-conscious server-side city collection pipeline, and update the main ref without disturbing a dirty feature branch.
+applies_to: cwd=/Users/ozanermis/Desktop/ProjectP/App/App; reuse_rule=checkout- and provider-policy-sensitive; re-check source state, credentials, deployment configuration, and current Google/Wikimedia/R2 policies before treating this as production-ready
+
+## Task 1: Identify the GitHub repository and update local main safely, outcome=partial
+
+### rollout_summary_files
+
+- rollout_summaries/2026-09-12T09-12-25-M3L0-swipetrip_city_collection_pipeline_and_readiness_review.md (cwd=/Users/ozanermis/Desktop/ProjectP/App/App, rollout_path=/Users/ozanermis/.codex/sessions/2026/09/12/rollout-2026-09-12T11-12-25-01a094e3-b353-74f2-bf80-d309cde50d7e.jsonl, updated_at=2026-09-13T16:27:34+00:00, thread_id=01a094e3-b353-74f2-bf80-d309cde50d7e, local main ref updated; branch switch intentionally not completed)
+
+### keywords
+
+- SwipeTrip, hamid319/App, api-gemini-integration-v1, feature/city-collection-pipeline, .claude/settings.json, git fetch origin main:main, 9a1dfd01, git switch main
+
+## Task 2: Assess documentation/API readiness and explain affordable city scaling, outcome=success
+
+### rollout_summary_files
+
+- rollout_summaries/2026-09-12T09-12-25-M3L0-swipetrip_city_collection_pipeline_and_readiness_review.md (cwd=/Users/ozanermis/Desktop/ProjectP/App/App, rollout_path=/Users/ozanermis/.codex/sessions/2026/09/12/rollout-2026-09-12T11-12-25-01a094e3-b353-74f2-bf80-d309cde50d7e.jsonl, updated_at=2026-09-13T16:27:34+00:00, thread_id=01a094e3-b353-74f2-bf80-d309cde50d7e, Markdown-only readiness review and scaling model)
+
+### keywords
+
+- AGENTS.md, PROJECT_CONTEXT_INDEX.md, PROJECT_ARCHITECTURE_CANONICAL.md, TEST_READY.md, places.displayName, Gemini 1.5 Flash, Google Places, photo caching, €50–60/month, 50 places per city
+
+## Task 3: Implement the server-side city collection pipeline, outcome=partial
+
+### rollout_summary_files
+
+- rollout_summaries/2026-09-12T09-12-25-M3L0-swipetrip_city_collection_pipeline_and_readiness_review.md (cwd=/Users/ozanermis/Desktop/ProjectP/App/App, rollout_path=/Users/ozanermis/.codex/sessions/2026/09/12/rollout-2026-09-12T11-12-25-01a094e3-b353-74f2-bf80-d309cde50d7e.jsonl, updated_at=2026-09-13T16:27:34+00:00, thread_id=01a094e3-b353-74f2-bf80-d309cde50d7e, local TypeScript/unit/rules verification passed; deployment and full photo ingestion unverified)
+
+### keywords
+
+- functions/, Node 22, Firebase Functions, Wikidata, Wikimedia Commons, Firestore, Cloudflare R2, Sharp, App Check, checkpoints, outbox, npm run typecheck, npm test, npm run test:rules, wbgetentities, CC-BY-SA-2.5, qs, uuid
+
+## User preferences
+
+- when reviewing readiness, the user asked to read the project Markdown documents without reading code and wanted a concise answer -> honor the requested evidence boundary and label documented findings separately from source/test verification. [Task 2]
+- when discussing architecture and scaling, the user repeatedly asked for simpler, short, step-by-step explanations -> explain the city-pack flow plainly before implementation detail. [Task 2]
+- when defining the solution, the user emphasized a budget around “€50–60/month” and reuse of prepared content across users rather than per-user API calls -> default to background-prepared, reusable city packs and surface cost/policy assumptions. [Task 2][Task 3]
+- when clarifying quality, the user accepted fewer than 50 places when qualified content is insufficient -> publish a partial collection rather than fabricate places or block the city. [Task 2][Task 3]
+- when a dirty `.claude/settings.json` blocked a branch switch, local changes were preserved and only the `main` ref was updated -> default Git work to non-destructive operations; do not stash, discard, or force checkout without approval. [Task 1]
+
+## Reusable knowledge
+
+- `origin` is `https://github.com/hamid319/App.git`. If a checkout is blocked by local changes, `git fetch origin main:main` can update the local `main` ref while remaining on the current branch; re-check refs and worktree before reuse. [Task 1]
+- Read the SwipeTrip canonical docs in this order: `AGENTS.md`, `PROJECT_CORE_IDEA_CANONICAL.md`, `PROJECT_ARCHITECTURE_CANONICAL.md`, `PROJECT_LOGIC_MAP.md`, and `PROJECT_REFRESH_PLAYBOOK.md`; source remains authoritative when documentation conflicts. `TEST_READY.md` recorded zero real-world tests, so it is not proof that adding credentials will make the integration work. [Task 2]
+- Current provider constraints invalidated parts of the older hybrid design: `places.displayName` is Pro-billed, Gemini 1.5 Flash was shut down, and Google Places content/photo caching, attribution, and photo-resource lifetime have restrictions. Revalidate provider pricing/policies before estimating a live design. [Task 2]
+- The implemented package is `functions/`; its design spec is `docs/superpowers/specs/2026-09-13-city-collection-pipeline-design.md`. It stages Wikidata/Wikimedia candidates, makes deterministic fact-based descriptions, processes immutable WebP through Sharp, verifies R2 objects, and atomically publishes a Firestore city version. It targets up to 50 places/city and 3 photos/place, but can publish fewer qualifying places. [Task 3]
+- Admission/recovery controls include authentication/App Check, daily/monthly quotas, fresh-publication reuse, cooldowns, kill switch, storage pause at 8 GiB, checkpoints, stale-job and outbox recovery, retry exhaustion, and server-only Firestore pipeline state. Local evidence: `npm run typecheck`, `npm test` (3 files/14 tests), and Firestore emulator rules tests (2 tests) passed. [Task 3]
+- Use `npm run probe:wikimedia -- Q1055` for read-only probing. Hamburg/Istanbul/Singapore/Colombo/New York resolved with 69/46/16/22/10 candidates; treat those counts as a probe snapshot, not durable content coverage. [Task 3]
+
+## Failures and how to do differently
+
+- Symptom: `git switch main` would overwrite `.claude/settings.json` (after an index-lock permission error). Cause: dirty local settings. Fix: preserve the worktree and update the ref with `git fetch origin main:main`; do not force/stash unless explicitly approved. [Task 1]
+- Symptom: docs or `TEST_READY.md` appear to describe a complete live integration. Cause: expected-test documentation was mistaken for real-world validation. Fix: distinguish docs, local tests, deployed services, and device/app integration; re-check live provider rules separately. [Task 2]
+- Symptom: Wikidata resolution exceeds a 2 MB upstream response limit or a combined attraction query times out. Cause: broad entity payloads and monolithic queries. Fix: use targeted/batched `wbgetentities`, then staged nearby retrieval plus batched classification. [Task 3]
+- Symptom: apparent Commons-photo readiness. Cause: incomplete subject matching/thumbnail-host handling and real licenses outside the CC0/CC-BY-4.0/CC-BY-SA-4.0 allowlist. Fix: make a policy decision on CC-BY-SA 2.5/3.0 and prove full search-to-R2-publication flow before release. [Task 3]
+- The pipeline was not deployed, connected to Flutter, or run with R2 credentials/Firebase Tasks; three moderate `qs`/nested-`uuid` audit findings remain. Do not call it deployment-ready until these are resolved or tracked and an end-to-end live run passes. [Task 3]
+
