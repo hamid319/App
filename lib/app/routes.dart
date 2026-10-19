@@ -82,6 +82,12 @@ GoRouter createRouter(Ref ref) {
         path: '/register',
         builder: (ctx, state) => const RegisterScreen(),
       ),
+      // Full-screen, outside the shell: the photo uses the whole screen and
+      // the bottom bar is the page's own action bar.
+      GoRoute(
+        path: '/place/:id',
+        builder: (ctx, state) => const PlaceDetailScreen(),
+      ),
       // All main routes wrapped in ShellRoute for persistent bottom nav
       ShellRoute(
         builder: (context, state, child) => ShellNavigation(child: child),
@@ -128,7 +134,10 @@ GoRouter createRouter(Ref ref) {
               reason: GateReason.groupMatches,
               icon: Icons.group,
               child: GroupMatchesScreen(
-                  groupId: state.pathParameters['groupId']!),
+                groupId: state.pathParameters['groupId']!,
+                // Set when arriving straight from a session that just ended.
+                celebrate: state.uri.queryParameters['celebrate'] == '1',
+              ),
             ),
           ),
           GoRoute(
@@ -160,10 +169,6 @@ GoRouter createRouter(Ref ref) {
               icon: Icons.favorite,
               child: FavoritesScreen(),
             ),
-          ),
-          GoRoute(
-            path: '/place/:id',
-            builder: (ctx, state) => const PlaceDetailScreen(),
           ),
         ],
       ),
@@ -202,6 +207,8 @@ GroupModel? _pickActiveSessionGroup(List<GroupModel> groups) {
 
 bool isActiveSessionRouteAllowed(String currentPath) {
   return currentPath.startsWith('/swipe') ||
+      // Details of a card being voted on.
+      currentPath.startsWith('/place/') ||
       currentPath.startsWith('/group-matches') ||
       currentPath == '/group' ||
       currentPath.startsWith('/group/') ||

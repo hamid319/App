@@ -5,12 +5,15 @@ import 'package:go_router/go_router.dart';
 import '../logic/group_controller.dart';
 import '../../../common/models/group_model.dart';
 import '../../../common/widgets/primary_button.dart';
-import '../../../common/widgets/loading_spinner.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../data/location_repository.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
+import '../../../app/theme.dart';
+import '../../../common/widgets/skeleton.dart';
+import '../../../common/widgets/member_avatar.dart';
+import '../widgets/session_progress_panel.dart';
 
 class SimplifiedGroupScreen extends ConsumerStatefulWidget {
   const SimplifiedGroupScreen({super.key});
@@ -113,7 +116,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
         ],
       ),
       body: authState.when(
-        loading: () => LoadingSpinner(message: context.l10n.loadingUser),
+        loading: () => const SkeletonList(),
         error: (e, st) => ErrorView(
           message: userMessage(e, fallback: context.l10n.errorLoadAccount, l10n: context.l10n),
           onRetry: () => ref.refresh(authControllerProvider),
@@ -130,7 +133,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
 
           if (selectedId != null) {
             return groupState.when(
-              loading: () => LoadingSpinner(message: context.l10n.loadingGroup),
+              loading: () => const SkeletonList(),
               error: (e, st) => ErrorView(
                 message: userMessage(e, fallback: context.l10n.errorLoadGroups, l10n: context.l10n),
                 onRetry: () => ref.refresh(groupControllerProvider),
@@ -145,7 +148,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
           }
 
           return userGroupsAsync.when(
-            loading: () => LoadingSpinner(message: context.l10n.loadingGroups),
+            loading: () => const SkeletonList(),
             error: (e, st) => ErrorView(
               message: userMessage(e, fallback: context.l10n.errorLoadGroups, l10n: context.l10n),
               onRetry: () => ref.refresh(userGroupsProvider),
@@ -240,13 +243,13 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.red.shade100,
+                color: Theme.of(context).colorScheme.errorContainer,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 context.l10n.statusLive,
                 style: TextStyle(
-                  color: Colors.red.shade700,
+                  color: Theme.of(context).colorScheme.error,
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                 ),
@@ -260,13 +263,13 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     context.l10n.statusDone,
                     style: TextStyle(
-                      color: Colors.grey.shade700,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
                     ),
@@ -284,14 +287,14 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color:
-                        isOwner ? Colors.blue.shade100 : Colors.grey.shade100,
+                        isOwner ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     isOwner ? context.l10n.statusStart : context.l10n.statusIdle,
                     style: TextStyle(
                       color:
-                          isOwner ? Colors.blue.shade700 : Colors.grey.shade700,
+                          isOwner ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
                     ),
@@ -313,8 +316,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
             badge,
             if (isOwner)
               IconButton(
-                icon: const Icon(Icons.delete_outline,
-                    color: Colors.red, size: 20),
+                icon: Icon(Icons.delete_outline,
+                    color: Theme.of(context).colorScheme.error, size: 20),
                 onPressed: () => _confirmDeleteGroup(group),
               ),
           ],
@@ -331,7 +334,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.group_add, size: 80, color: Colors.grey[400]),
+          Icon(Icons.group_add, size: 80, color: Theme.of(context).colorScheme.outline),
           const SizedBox(height: 24),
           Text(
             context.l10n.noGroupsTitle,
@@ -343,7 +346,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
           Text(
             context.l10n.noGroupsBody,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
             textAlign: TextAlign.center,
           ),
@@ -359,7 +362,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
         elevation: 2,
         shape: RoundedRectangleBorder(
           side: BorderSide(
-              color: Colors.grey.shade300, width: 1, style: BorderStyle.solid),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest, width: 1, style: BorderStyle.solid),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Padding(
@@ -536,7 +539,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Card(
-                color: Colors.blue.shade50,
+                color: Theme.of(context).colorScheme.primaryContainer,
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -606,7 +609,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                           icon: const Icon(Icons.stop),
                           label: Text(context.l10n.endSessionEarly),
                           style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.red),
+                              foregroundColor: Theme.of(context).colorScheme.error),
                         ),
                       ],
                     ],
@@ -615,6 +618,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
               ),
             ),
           ],
+          if (hasActiveSession) SessionProgressPanel(userId: userId),
           if (group.members.isNotEmpty) ...[
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -641,13 +645,11 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                         context.l10n.memberFallback(index + 1);
                 final label = memberId == userId ? context.l10n.memberYou(name) : name;
                 return ListTile(
-                  leading: CircleAvatar(
-                    child: Text(name.substring(0, 1).toUpperCase()),
-                  ),
+                  leading: MemberAvatar(id: memberId, name: name, size: 40),
                   title: Text(label),
                   subtitle: isMemberAdmin ? Text(context.l10n.admin) : null,
                   trailing: isMemberAdmin
-                      ? const Icon(Icons.star, color: Colors.amber)
+                      ? Icon(Icons.star, color: context.swipeColors.gold)
                       : null,
                 );
               },
@@ -676,7 +678,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                 OutlinedButton(
                   onPressed: () => _leaveGroup(group.groupId),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.red,
+                    foregroundColor: Theme.of(context).colorScheme.error,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: SizedBox(
@@ -725,7 +727,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(context.l10n.groupCreated),
-            backgroundColor: Colors.green,
+            backgroundColor: context.swipeColors.like,
           ),
         );
       }
@@ -734,7 +736,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(userMessage(e, fallback: context.l10n.errorCreateGroup, l10n: context.l10n)),
-              backgroundColor: Colors.red),
+              backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     }
@@ -773,7 +775,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(context.l10n.sessionStarted), backgroundColor: Colors.green),
+              content: Text(context.l10n.sessionStarted), backgroundColor: context.swipeColors.like),
         );
       }
     } catch (e) {
@@ -781,7 +783,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(userMessage(e, fallback: context.l10n.errorStartSession, l10n: context.l10n)),
-              backgroundColor: Colors.red),
+              backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     }
@@ -844,7 +846,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(context.l10n.joinedGroup),
-              backgroundColor: Colors.green),
+              backgroundColor: context.swipeColors.like),
         );
       }
     } catch (e) {
@@ -852,7 +854,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(userMessage(e, fallback: context.l10n.errorJoinGroup, l10n: context.l10n)),
-              backgroundColor: Colors.red),
+              backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     }
@@ -884,7 +886,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                 );
               }
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
             child: Text(context.l10n.leave),
           ),
         ],
@@ -922,7 +924,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                 }
               }
             },
-            child: Text(context.l10n.delete, style: TextStyle(color: Colors.red)),
+            child: Text(context.l10n.delete, style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),
@@ -961,7 +963,7 @@ class _GroupJoinScreenState extends ConsumerState<GroupJoinScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(context.l10n.joinedViaLink),
-              backgroundColor: Colors.green),
+              backgroundColor: context.swipeColors.like),
         );
         context.go('/group');
       }
@@ -970,7 +972,7 @@ class _GroupJoinScreenState extends ConsumerState<GroupJoinScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(userMessage(e, fallback: context.l10n.errorJoinGroup, l10n: context.l10n)),
-              backgroundColor: Colors.red),
+              backgroundColor: Theme.of(context).colorScheme.error),
         );
         context.go('/group');
       }

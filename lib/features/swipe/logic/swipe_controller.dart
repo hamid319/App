@@ -13,6 +13,16 @@ final swipeControllerProvider =
     AsyncNotifierProvider<SwipeController, List<PlaceModel>>(
         SwipeController.new);
 
+/// One solo swipe that can still be taken back. [write] completes when the
+/// swipe has been saved, so undo never races the save it is reverting.
+class _SwipeStep {
+  _SwipeStep({required this.index, required this.place, required this.liked});
+  final int index;
+  final PlaceModel place;
+  final bool liked;
+  Future<void> write = Future.value();
+}
+
 class SwipeController extends AsyncNotifier<List<PlaceModel>> {
   late PlacesRepository _placesRepo;
   late ProfileRepository _profileRepo;
@@ -20,6 +30,8 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
   int _currentIndex = 0;
   final List<String> _favorites = [];
   Set<String> _swipedPlaceIds = {};
+  final List<_SwipeStep> _undoStack = [];
+  static const int _maxUndo = 10;
   double _userLat = AppConfig.defaultLat;
   double _userLng = AppConfig.defaultLng;
   static const double _defaultRadiusKm = 50.0;
@@ -31,6 +43,7 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     _locationService = ref.read(locationServiceProvider);
     _favorites.clear();
     _swipedPlaceIds = {};
+    _undoStack.clear();
 
     try {
       final position = await _locationService.getCurrentLocation();
@@ -125,6 +138,21 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     }
   }
 
+  /// The card waiting behind the current one, shown as a preview.
+  PlaceModel? get nextPlaceInDeck {
+    final data = state.value;
+    final next = _currentIndex + 1;
+    if (data == null || next >= data.length) return null;
+    return data[next];
+  }
+
+  /// Undo is solo-only: in a group session a vote is already counted for
+  /// everyone and the session may complete on it.
+  bool get canUndo => _undoStack.isNotEmpty && !_inGroupSession;
+
+  bool get _inGroupSession =>
+      ref.read(groupControllerProvider).value?.activeSessionId != null;
+
   PlaceModel? get currentPlace {
     final data = state.value;
     if (data == null || data.isEmpty || _currentIndex >= data.length) {
@@ -136,6 +164,7 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
   Future<void> like() async {
     final place = currentPlace;
     if (place == null) return;
+    final step = _pushUndo(place, liked: true);
 
     // Advance immediately so the UI doesn't freeze waiting for network
     nextPlace();
@@ -160,24 +189,29 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
         _favorites.add(place.id);
       }
 
-      try {
-        await _placesRepo.recordSwipe(
-          userId: userId,
-          placeId: place.id,
-          liked: true,
-        );
-
-        await _profileRepo.addFavorite(userId, place.id);
-        await _syncFavoritesWithGroup(userId);
-      } catch (e) {
-        // Continue even on error
+      Future<void> save() async {
+        try {
+          await _placesRepo.recordSwipe(
+            userId: userId,
+            placeId: place.id,
+            liked: true,
+          );
+          await _profileRepo.addFavorite(userId, place.id);
+          await _syncFavoritesWithGroup(userId);
+        } catch (e) {
+          // Continue even on error
+        }
       }
+
+      step?.write = save();
+      await step?.write;
     }
   }
 
   Future<void> skip() async {
     final place = currentPlace;
     if (place == null) return;
+    final step = _pushUndo(place, liked: false);
 
     // Advance immediately so the UI doesn't freeze waiting for network
     nextPlace();
@@ -198,15 +232,20 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
         return;
       }
 
-      try {
-        await _placesRepo.recordSwipe(
-          userId: userId,
-          placeId: place.id,
-          liked: false,
-        );
-      } catch (e) {
-        // Continue even on error
+      Future<void> save() async {
+        try {
+          await _placesRepo.recordSwipe(
+            userId: userId,
+            placeId: place.id,
+            liked: false,
+          );
+        } catch (e) {
+          // Continue even on error
+        }
       }
+
+      step?.write = save();
+      await step?.write;
     }
   }
 
@@ -218,6 +257,43 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     if (await PreferencesService.hasSeenGuestFavoriteHint()) return false;
     await PreferencesService.setGuestFavoriteHintShown();
     return true;
+  }
+
+  _SwipeStep? _pushUndo(PlaceModel place, {required bool liked}) {
+    if (_inGroupSession) {
+      _undoStack.clear();
+      return null;
+    }
+    final step = _SwipeStep(index: _currentIndex, place: place, liked: liked);
+    _undoStack.add(step);
+    if (_undoStack.length > _maxUndo) _undoStack.removeAt(0);
+    return step;
+  }
+
+  /// Brings the last solo swipe back: the card returns to the top, and a
+  /// like is removed from favorites again. Returns the restored place.
+  Future<PlaceModel?> undo() async {
+    if (!canUndo) return null;
+    final step = _undoStack.removeLast();
+    _currentIndex = step.index;
+    if (step.liked) _favorites.remove(step.place.id);
+    final data = state.value;
+    if (data != null) state = AsyncData(List.of(data));
+
+    final userId = ref.read(authControllerProvider).value?.uid;
+    if (userId == null) return step.place;
+    try {
+      await step.write;
+      await _placesRepo.deleteSwipe(userId: userId, placeId: step.place.id);
+      if (step.liked) {
+        await _profileRepo.removeFavorite(userId, step.place.id);
+        await _syncFavoritesWithGroup(userId);
+      }
+    } catch (e) {
+      // The card is back locally; a failed revert only means the server
+      // still counts the old swipe.
+    }
+    return step.place;
   }
 
   void nextPlace() {
@@ -282,6 +358,7 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
 
   Future<void> resetAll() async {
     _currentIndex = 0;
+    _undoStack.clear();
     _favorites.clear();
     _swipedPlaceIds = {};
 

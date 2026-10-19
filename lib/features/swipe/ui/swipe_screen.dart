@@ -5,9 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../group/logic/group_controller.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../logic/swipe_controller.dart';
-import '../widgets/swipe_card.dart';
+import '../widgets/swipe_deck.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
+import '../../../app/theme.dart';
 
 /// Main Swipe Screen - displays the card stack and handles state
 class SwipeScreen extends ConsumerStatefulWidget {
@@ -86,7 +87,7 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
 
     ref.listen(activeSessionProvider, (prev, next) {
       if (next.value?.isCompleted == true) {
-        context.go('/group-matches/${widget.groupId}');
+        context.go('/group-matches/${widget.groupId}?celebrate=1');
       } else if (next.value?.endTime != null && _timer == null) {
         _startTimerIfNeeded(next.value!.endTime);
         setState(() {
@@ -105,13 +106,13 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade100,
+                  color: Theme.of(context).colorScheme.errorContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   '${_timeRemaining.inMinutes.toString().padLeft(2, '0')}:${(_timeRemaining.inSeconds % 60).toString().padLeft(2, '0')}',
                   style: TextStyle(
-                    color: Colors.red.shade900,
+                    color: Theme.of(context).colorScheme.error,
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
@@ -161,12 +162,12 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
         ],
       ),
       body: state.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SwipeDeckSkeleton(),
         error: (e, st) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              Icon(Icons.error_outline, size: 64, color: Theme.of(context).colorScheme.error),
               const SizedBox(height: 16),
               Text(userMessage(e, fallback: context.l10n.errorLoadPlaces, l10n: context.l10n)),
               const SizedBox(height: 16),
@@ -187,8 +188,8 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.check_circle_outline,
-                      size: 80, color: Colors.green),
+                  Icon(Icons.check_circle_outline,
+                      size: 80, color: context.swipeColors.like),
                   const SizedBox(height: 24),
                   Text(
                     (sessionValue?.endTime != null &&
@@ -204,7 +205,7 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
                         ? context.l10n.waitingForSessionEnd
                         : context.l10n.viewedAllPlaces,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                   ),
                   const SizedBox(height: 32),
@@ -220,43 +221,16 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
             );
           }
 
-          // Build the swipeable card stack
-          return TinderSwipeCardStack(
+          // Votes in a group session are final, so there is no undo here.
+          // The LIKE / NOPE stamps and haptics are the feedback, no snackbar.
+          return SwipeDeck(
             place: current,
-            onLike: () {
-              // In a group session a like only casts a vote; it is not
-              // saved to the user's favorites.
-              final inSession =
-                  ref.read(activeSessionProvider).value != null;
-              ctrl.like();
-              _showSnackBar(
-                context,
-                inSession ? context.l10n.liked : context.l10n.addedToFavorites,
-                Colors.green,
-              );
-            },
-            onSkip: () {
-              ctrl.skip();
-              _showSnackBar(context, context.l10n.skipped, Colors.orange);
-            },
-            onDetail: () {
-              context.push('/place/${current.id}');
-            },
+            nextPlace: ctrl.nextPlaceInDeck,
+            onLike: ctrl.like,
+            onSkip: ctrl.skip,
+            onDetail: () => context.push('/place/${current.id}'),
           );
         },
-      ),
-    );
-  }
-
-  void _showSnackBar(BuildContext context, String message, Color color) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: color,
-        duration: const Duration(seconds: 1),
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
       ),
     );
   }

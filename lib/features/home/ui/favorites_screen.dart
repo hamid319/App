@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../common/models/place_model.dart';
-import '../../places/data/place_photo_url_builder.dart';
+import '../../../common/utils/place_photo_url_builder.dart';
 import '../../../main_providers.dart';
 import '../../swipe/logic/swipe_controller.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
+import '../../../app/theme.dart';
+import '../../../common/widgets/skeleton.dart';
 
 class FavoritesScreen extends ConsumerWidget {
   const FavoritesScreen({super.key});
@@ -44,7 +46,7 @@ class FavoritesScreen extends ConsumerWidget {
                   ref.read(placesRepositoryProvider).loadPlacesByIds(favorites),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const SkeletonList();
                 }
                 if (snapshot.hasError) {
                   return Center(
@@ -68,7 +70,7 @@ class FavoritesScreen extends ConsumerWidget {
                   itemBuilder: (context, index) {
                     final place = favoritePlaces[index];
                     return ListTile(
-                      leading: _buildPlaceThumbnail(place),
+                      leading: _buildPlaceThumbnail(context, place),
                       title: Text(place.name),
                       subtitle: Text(
                         place.description ?? '',
@@ -77,7 +79,7 @@ class FavoritesScreen extends ConsumerWidget {
                       ),
                       trailing: IconButton(
                         icon:
-                            const Icon(Icons.delete_outline, color: Colors.red),
+                            Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
                         tooltip: context.l10n.removeFromFavoritesTooltip,
                         onPressed: () {
                           ref
@@ -87,7 +89,7 @@ class FavoritesScreen extends ConsumerWidget {
                             SnackBar(
                               content:
                                   Text(context.l10n.placeRemovedFromFavorites(place.name)),
-                              backgroundColor: Colors.orange,
+                              backgroundColor: context.swipeColors.gold,
                               duration: const Duration(seconds: 2),
                             ),
                           );
@@ -102,7 +104,7 @@ class FavoritesScreen extends ConsumerWidget {
     );
   }
 
-  static Widget _buildPlaceThumbnail(PlaceModel place) {
+  static Widget _buildPlaceThumbnail(BuildContext context, PlaceModel place) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: SizedBox(
@@ -112,21 +114,19 @@ class FavoritesScreen extends ConsumerWidget {
             ? CachedNetworkImage(
                 imageUrl: resolvePlacePhotoUrls(place).first,
                 fit: BoxFit.cover,
-                placeholder: (context, url) => const Center(
-                  child: CircularProgressIndicator(),
-                ),
+                placeholder: (context, url) => const SkeletonImage(),
                 errorWidget: (context, url, error) =>
-                    _buildThumbnailPlaceholder(),
+                    _buildThumbnailPlaceholder(context),
               )
-            : _buildThumbnailPlaceholder(),
+            : _buildThumbnailPlaceholder(context),
       ),
     );
   }
 
-  static Widget _buildThumbnailPlaceholder() {
+  static Widget _buildThumbnailPlaceholder(BuildContext context) {
     return ColoredBox(
-      color: Colors.grey.shade300,
-      child: Icon(Icons.place, color: Colors.grey.shade600),
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: Icon(Icons.place, color: Theme.of(context).colorScheme.onSurfaceVariant),
     );
   }
 
@@ -144,7 +144,7 @@ class FavoritesScreen extends ConsumerWidget {
             child: Text(context.l10n.cancel),
           ),
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
             onPressed: () async {
               Navigator.pop(ctx);
               await ref.read(swipeControllerProvider.notifier).resetAll();
@@ -170,7 +170,7 @@ class FavoritesScreen extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.favorite_border, size: 64, color: Colors.grey[400]),
+            Icon(Icons.favorite_border, size: 64, color: Theme.of(context).colorScheme.outline),
             const SizedBox(height: 16),
             Text(
               context.l10n.noFavoritesTitle,
@@ -181,7 +181,7 @@ class FavoritesScreen extends ConsumerWidget {
               context.l10n.noFavoritesBody,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
             ),
           ],

@@ -366,6 +366,14 @@ class PlacesRepository {
     await _db.collection('swipeResults').doc(docId).set(swipeResult.toJson());
   }
 
+  /// Removes one swipe again (undo), so the place counts as unseen.
+  Future<void> deleteSwipe({
+    required String userId,
+    required String placeId,
+  }) async {
+    await _db.collection('swipeResults').doc('${userId}_$placeId').delete();
+  }
+
   Future<List<SwipeResultModel>> getUserSwipes(String userId) async {
     final query = await _db
         .collection('swipeResults')

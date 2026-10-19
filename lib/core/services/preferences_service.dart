@@ -4,6 +4,7 @@ class PreferencesService {
   static const String _keyOnboardingShown = 'onboarding_shown';
   static const String _keyGuestFavoriteHintShown = 'guest_favorite_hint_shown';
   static const String _keyLanguageCode = 'language_code';
+  static const String _keyThemeMode = 'theme_mode';
 
   static Future<bool> hasSeenOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
@@ -37,6 +38,21 @@ class PreferencesService {
       await prefs.remove(_keyLanguageCode);
     } else {
       await prefs.setString(_keyLanguageCode, code);
+    }
+  }
+
+  /// 'light', 'dark', or null to follow the device.
+  static Future<String?> getThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyThemeMode);
+  }
+
+  static Future<void> setThemeMode(String? mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mode == null) {
+      await prefs.remove(_keyThemeMode);
+    } else {
+      await prefs.setString(_keyThemeMode, mode);
     }
   }
 }

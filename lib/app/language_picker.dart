@@ -17,7 +17,6 @@ Future<void> showLanguagePicker(BuildContext context, WidgetRef ref) {
     context: context,
     // Above the shell's bottom navigation bar, which would cover the options.
     useRootNavigator: true,
-    showDragHandle: true,
     builder: (sheetContext) {
       final selected = ref.read(localeControllerProvider)?.languageCode;
       final l10n = sheetContext.l10n;

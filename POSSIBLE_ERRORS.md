@@ -103,7 +103,7 @@ descriptions have always been `null`.
 | 5.2 | The Impressum shows **placeholder legal identity** ("Musterfirma GmbH", "Max Mustermann", "HRB 12345"), and the privacy dialog claims **end-to-end encryption**, which is false for a Firebase app. Both are a real risk if users see them. | `settings_screen.dart:99-124,214` | **FIXED** |
 | 5.3 | Login and register sit **inside the bottom-navigation shell**, so a logged-out user sees the Discover/Groups/Profile tab bar. Confirmed visually on the simulator. | `routes.dart:91-98` | **FIXED** |
 | 5.4 | The group member list shows **raw Firebase UIDs** instead of display names. | `simplified_group_screen.dart:630-636` | **FIXED** |
-| 5.5 | Dark theme is fully built but **never wired up**, and ~130 hardcoded `Colors.*` values would break it anyway. | `app.dart:13`, `theme.dart` | **OPEN** |
+| 5.5 | Dark theme is fully built but **never wired up**, and ~130 hardcoded `Colors.*` values would break it anyway. | `app.dart:13`, `theme.dart` | **FIXED** (hardcoded colours replaced by `colorScheme` / `context.swipeColors`; dark mode follows the device, switchable under Settings → Appearance) |
 | 5.6 | The city dropdown keeps a stale selected value when the country changes, causing a Flutter assertion in debug and a blank dropdown in release. | `simplified_group_screen.dart:57-71` | **FIXED** |
 | 5.7 | Login and register screens have no scroll view, so on a small screen with the keyboard open the layout **overflows**. | `login_screen.dart:53`, `register_screen.dart:38` | **FIXED** |
 | 5.8 | A destructive "reset all places and favourites" action sits permanently in the home app bar behind a single confirm. | `simplified_home_screen.dart:18-22` | **FIXED** |
@@ -119,7 +119,7 @@ descriptions have always been `null`.
 | 6.1 | **23 cross-feature imports** violate the layer rules. They use relative paths, so the lint hook that checks for `package:` imports never catches them. | `swipe_controller.dart`, `group_controller.dart`, several screens | **OPEN** |
 | 6.2 | `PlacesRepository()` and `LocationRepository()` are constructed directly inside controllers and widgets instead of injected via providers, which is why the favourites and like paths have no tests. | `swipe_controller.dart:27`, `group_controller.dart:42` | **OPEN** |
 | 6.3 | Providers and data-loading logic live inside UI files. | `group_matches_screen.dart:41-94`, `place_detail_screen.dart:11-15` | **OPEN** |
-| 6.4 | The home screen contains a ~400-line **duplicate** of the swipe card stack, which has already drifted from the real one. `PlaceCard` in `common/` is unused. | `simplified_home_screen.dart:176-581` | **OPEN** |
+| 6.4 | The home screen contains a ~400-line **duplicate** of the swipe card stack, which has already drifted from the real one. `PlaceCard` in `common/` is unused. | `simplified_home_screen.dart:176-581` | **FIXED** (both screens use the shared `SwipeDeck`) |
 | 6.5 | `analysis_options.yaml` has **zero custom lint rules**. `unawaited_futures` alone would have caught the transaction bug in section 4.9. | `analysis_options.yaml` | **OPEN** |
 | 6.6 | Tracked junk in the repo: `lib.rar`, `extract.py`, `extract.dart`. `.gitignore` is missing `*.jks`, `*.keystore`, `android/key.properties`. | repo root | **OPEN** |
 | 6.7 | `GroupRepository` has two parallel code paths (injected vs service), so tests exercise a different path than production. | `group_repository.dart:12,19,47,164` | **OPEN** |

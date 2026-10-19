@@ -890,12 +890,6 @@ abstract class AppLocalizations {
   /// **'Group Results'**
   String get groupResultsTitle;
 
-  /// No description provided for @loadingGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading group...'**
-  String get loadingGroup;
-
   /// No description provided for @failedToLoadGroup.
   ///
   /// In en, this message translates to:
@@ -914,12 +908,6 @@ abstract class AppLocalizations {
   /// **'Create or join a group first'**
   String get noGroupMessage;
 
-  /// No description provided for @loadingSessionHistory.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading session history...'**
-  String get loadingSessionHistory;
-
   /// No description provided for @noCompletedSessionsTitle.
   ///
   /// In en, this message translates to:
@@ -931,12 +919,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Finish a session to see results here.'**
   String get noCompletedSessionsBody;
-
-  /// No description provided for @loadingResults.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading results...'**
-  String get loadingResults;
 
   /// No description provided for @noQualifiedPlacesTitle.
   ///
@@ -967,18 +949,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Groups'**
   String get groupsTitle;
-
-  /// No description provided for @loadingUser.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading user...'**
-  String get loadingUser;
-
-  /// No description provided for @loadingGroups.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading groups...'**
-  String get loadingGroups;
 
   /// No description provided for @notLoggedIn.
   ///
@@ -1310,12 +1280,6 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get profileTitle;
 
-  /// No description provided for @loadingProfile.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading profile...'**
-  String get loadingProfile;
-
   /// No description provided for @loginToViewProfile.
   ///
   /// In en, this message translates to:
@@ -1525,6 +1489,282 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create an account to manage your profile and log in on other devices.'**
   String get createAccountToManage;
+
+  /// No description provided for @tagTouristAttraction.
+  ///
+  /// In en, this message translates to:
+  /// **'Sight'**
+  String get tagTouristAttraction;
+
+  /// No description provided for @tagMuseum.
+  ///
+  /// In en, this message translates to:
+  /// **'Museum'**
+  String get tagMuseum;
+
+  /// No description provided for @tagArtGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get tagArtGallery;
+
+  /// No description provided for @tagArt.
+  ///
+  /// In en, this message translates to:
+  /// **'Art'**
+  String get tagArt;
+
+  /// No description provided for @tagCulture.
+  ///
+  /// In en, this message translates to:
+  /// **'Culture'**
+  String get tagCulture;
+
+  /// No description provided for @tagHistoricalLandmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Historic site'**
+  String get tagHistoricalLandmark;
+
+  /// No description provided for @tagCulturalLandmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Landmark'**
+  String get tagCulturalLandmark;
+
+  /// No description provided for @tagLandmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Landmark'**
+  String get tagLandmark;
+
+  /// No description provided for @tagHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get tagHistory;
+
+  /// No description provided for @tagChurch.
+  ///
+  /// In en, this message translates to:
+  /// **'Church'**
+  String get tagChurch;
+
+  /// No description provided for @tagPark.
+  ///
+  /// In en, this message translates to:
+  /// **'Park'**
+  String get tagPark;
+
+  /// No description provided for @tagNature.
+  ///
+  /// In en, this message translates to:
+  /// **'Nature'**
+  String get tagNature;
+
+  /// No description provided for @tagNaturalFeature.
+  ///
+  /// In en, this message translates to:
+  /// **'Nature spot'**
+  String get tagNaturalFeature;
+
+  /// No description provided for @tagOutdoors.
+  ///
+  /// In en, this message translates to:
+  /// **'Outdoors'**
+  String get tagOutdoors;
+
+  /// No description provided for @tagBeach.
+  ///
+  /// In en, this message translates to:
+  /// **'Beach'**
+  String get tagBeach;
+
+  /// No description provided for @tagViewpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewpoint'**
+  String get tagViewpoint;
+
+  /// No description provided for @tagHiking.
+  ///
+  /// In en, this message translates to:
+  /// **'Hiking'**
+  String get tagHiking;
+
+  /// No description provided for @tagFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get tagFamily;
+
+  /// No description provided for @tagScience.
+  ///
+  /// In en, this message translates to:
+  /// **'Science'**
+  String get tagScience;
+
+  /// No description provided for @tagZoo.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoo'**
+  String get tagZoo;
+
+  /// No description provided for @tagAquarium.
+  ///
+  /// In en, this message translates to:
+  /// **'Aquarium'**
+  String get tagAquarium;
+
+  /// No description provided for @tagAmusementPark.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme park'**
+  String get tagAmusementPark;
+
+  /// No description provided for @tagShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get tagShopping;
+
+  /// No description provided for @tagMarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Market'**
+  String get tagMarket;
+
+  /// No description provided for @tagNightlife.
+  ///
+  /// In en, this message translates to:
+  /// **'Nightlife'**
+  String get tagNightlife;
+
+  /// No description provided for @tagMusic.
+  ///
+  /// In en, this message translates to:
+  /// **'Music'**
+  String get tagMusic;
+
+  /// No description provided for @tagArchitecture.
+  ///
+  /// In en, this message translates to:
+  /// **'Architecture'**
+  String get tagArchitecture;
+
+  /// No description provided for @tagPhotoSpot.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo spot'**
+  String get tagPhotoSpot;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo last swipe'**
+  String get undo;
+
+  /// No description provided for @details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get details;
+
+  /// No description provided for @undone.
+  ///
+  /// In en, this message translates to:
+  /// **'Brought back'**
+  String get undone;
+
+  /// No description provided for @appearanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearanceTitle;
+
+  /// No description provided for @appearanceSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get appearanceSystem;
+
+  /// No description provided for @appearanceLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get appearanceLight;
+
+  /// No description provided for @appearanceDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get appearanceDark;
+
+  /// No description provided for @navFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get navFavorites;
+
+  /// No description provided for @sessionLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Session in progress'**
+  String get sessionLive;
+
+  /// No description provided for @sessionTimeLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min left'**
+  String sessionTimeLeft(int minutes);
+
+  /// No description provided for @yourProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'your progress'**
+  String get yourProgress;
+
+  /// No description provided for @memberDone.
+  ///
+  /// In en, this message translates to:
+  /// **'done'**
+  String get memberDone;
+
+  /// No description provided for @whoIsSwiping.
+  ///
+  /// In en, this message translates to:
+  /// **'Who\'s still swiping?'**
+  String get whoIsSwiping;
+
+  /// No description provided for @matchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s a match!'**
+  String get matchTitle;
+
+  /// No description provided for @matchBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{place} made your list.'**
+  String matchBody(String place);
+
+  /// No description provided for @matchVotes.
+  ///
+  /// In en, this message translates to:
+  /// **'{likes} of {total} likes'**
+  String matchVotes(int likes, int total);
+
+  /// No description provided for @matchSeeResults.
+  ///
+  /// In en, this message translates to:
+  /// **'See all results'**
+  String get matchSeeResults;
+
+  /// No description provided for @matchOpenPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'View place'**
+  String get matchOpenPlace;
 }
 
 class _AppLocalizationsDelegate

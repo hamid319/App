@@ -68,9 +68,10 @@ void main() {
       expect(isActiveSessionRouteAllowed('/favorites'), isTrue);
       expect(isActiveSessionRouteAllowed('/group'), isTrue);
       expect(isActiveSessionRouteAllowed('/group/join'), isTrue);
+      // The details button on a session card opens the place.
+      expect(isActiveSessionRouteAllowed('/place/places-eiffel'), isTrue);
 
       expect(isActiveSessionRouteAllowed('/home'), isFalse);
-      expect(isActiveSessionRouteAllowed('/place/places-eiffel'), isFalse);
     });
 
     test('bootstrap initializes Env before Firebase reads configuration',

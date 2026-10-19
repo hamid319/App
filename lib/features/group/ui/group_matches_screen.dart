@@ -3,15 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../common/models/place_model.dart';
-import '../../places/data/place_photo_url_builder.dart';
+import '../../../common/utils/place_photo_url_builder.dart';
 import '../../../common/models/group_session_model.dart';
-import '../../../common/widgets/loading_spinner.dart';
 import '../../../common/widgets/error_view.dart';
 import '../logic/group_controller.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../swipe/data/places_repository.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
+import '../../../common/widgets/skeleton.dart';
+import '../widgets/match_celebration.dart';
 
 class ResultItem {
   final PlaceModel place;
@@ -97,13 +98,41 @@ final sessionResultsProvider =
 
 class GroupMatchesScreen extends ConsumerStatefulWidget {
   final String groupId;
-  const GroupMatchesScreen({super.key, required this.groupId});
+
+  /// Show the match moment for the newest session once its results load.
+  final bool celebrate;
+
+  const GroupMatchesScreen({
+    super.key,
+    required this.groupId,
+    this.celebrate = false,
+  });
 
   @override
   ConsumerState<GroupMatchesScreen> createState() => _GroupMatchesScreenState();
 }
 
 class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
+  bool _celebrated = false;
+
+  void _maybeCelebrate(GroupSessionModel newest, String shownSessionId,
+      List<ResultItem> results) {
+    if (!widget.celebrate || _celebrated || results.isEmpty) return;
+    if (shownSessionId != newest.sessionId) return;
+    _celebrated = true;
+    final top = results.first;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      showMatchCelebration(
+        context,
+        place: top.place,
+        likes: top.likes,
+        participants: newest.participants,
+        onOpenPlace: () => context.push('/place/${top.place.id}'),
+      );
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -155,7 +184,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
         ],
       ),
       body: groupState.when(
-        loading: () => LoadingSpinner(message: context.l10n.loadingGroup),
+        loading: () => const SkeletonList(),
         error: (error, stack) => ErrorView(
           message: userMessage(error, fallback: context.l10n.errorGeneric, l10n: context.l10n),
           title: context.l10n.failedToLoadGroup,
@@ -173,7 +202,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
 
           return sessionsAsync.when(
             loading: () =>
-                LoadingSpinner(message: context.l10n.loadingSessionHistory),
+                const SkeletonList(),
             error: (error, stack) => ErrorView(
               message: userMessage(error, fallback: context.l10n.errorLoadSessions, l10n: context.l10n),
               onRetry: () =>
@@ -188,7 +217,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                       Icon(
                         Icons.history,
                         size: 80,
-                        color: Colors.grey[400],
+                        color: Theme.of(context).colorScheme.outline,
                       ),
                       const SizedBox(height: 24),
                       Text(
@@ -199,7 +228,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                       Text(
                         context.l10n.noCompletedSessionsBody,
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey[600]),
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                       const SizedBox(height: 32),
                       ElevatedButton.icon(
@@ -226,14 +255,14 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
+                      color: Theme.of(context).colorScheme.primaryContainer,
                       border: Border(
-                        bottom: BorderSide(color: Colors.blue.shade200),
+                        bottom: BorderSide(color: Theme.of(context).colorScheme.primaryContainer),
                       ),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.history, color: Colors.blue.shade700),
+                        Icon(Icons.history, color: Theme.of(context).colorScheme.primary),
                         const SizedBox(width: 12),
                         Expanded(
                           child: DropdownButton<String>(
@@ -267,7 +296,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                   Expanded(
                     child: resultsAsync.when(
                       loading: () =>
-                          LoadingSpinner(message: context.l10n.loadingResults),
+                          const SkeletonList(),
                       error: (error, stack) => ErrorView(
                         message: userMessage(error, fallback: context.l10n.errorLoadResults, l10n: context.l10n),
                         onRetry: () => ref.invalidate(sessionResultsProvider(
@@ -278,6 +307,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                         )),
                       ),
                       data: (results) {
+                        _maybeCelebrate(sessions.first, sessionId, results);
                         if (results.isEmpty) {
                           return Center(
                             child: Column(
@@ -286,7 +316,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                                 Icon(
                                   Icons.favorite_border,
                                   size: 80,
-                                  color: Colors.grey[400],
+                                  color: Theme.of(context).colorScheme.outline,
                                 ),
                                 const SizedBox(height: 24),
                                 Text(
@@ -298,7 +328,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                                 Text(
                                   context.l10n.noQualifiedPlacesBody,
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(color: Colors.grey[600]),
+                                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                                 ),
                               ],
                             ),
@@ -332,7 +362,7 @@ class _ResultThumbnail extends StatelessWidget {
   Widget build(BuildContext context) {
     final imageUrls = resolvePlacePhotoUrls(place);
     if (imageUrls.isEmpty) {
-      return _buildImagePlaceholder();
+      return _buildImagePlaceholder(context);
     }
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
@@ -341,24 +371,22 @@ class _ResultThumbnail extends StatelessWidget {
         width: 64,
         height: 64,
         fit: BoxFit.cover,
-        placeholder: (context, url) => const Center(
-          child: CircularProgressIndicator(),
-        ),
-        errorWidget: (context, url, error) => _buildImagePlaceholder(),
+        placeholder: (context, url) => const SkeletonImage(),
+        errorWidget: (context, url, error) => _buildImagePlaceholder(context),
       ),
     );
   }
 
-  Widget _buildImagePlaceholder() {
+  Widget _buildImagePlaceholder(BuildContext context) {
     return Container(
       width: 64,
       height: 64,
-      color: Colors.grey[300],
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: Center(
         child: Icon(
           Icons.place,
           size: 28,
-          color: Colors.grey[600],
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
     );
@@ -452,19 +480,19 @@ class _ResultsListState extends ConsumerState<_ResultsList> {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.favorite, color: Colors.red.shade400, size: 18),
+              Icon(Icons.favorite, color: Theme.of(context).colorScheme.error, size: 18),
               const SizedBox(width: 6),
               Text('${result.likes}',
                   style: const TextStyle(fontWeight: FontWeight.bold)),
               if (widget.isAdmin) ...[
                 const SizedBox(width: 8),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
                   onPressed: () => _removeItem(index),
                 ),
                 ReorderableDragStartListener(
                   index: index,
-                  child: const Icon(Icons.drag_handle, color: Colors.grey),
+                  child: Icon(Icons.drag_handle, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
               ],
             ],

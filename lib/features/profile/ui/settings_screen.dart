@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../../app/language_picker.dart';
 import '../../../app/locale_controller.dart';
+import '../../../app/theme_mode_controller.dart';
+import '../../../app/theme_mode_picker.dart';
 import '../../../l10n/l10n.dart';
 
 /// Open to everyone. The "App" section (language, privacy, security) works
@@ -17,6 +19,7 @@ class SettingsScreen extends ConsumerWidget {
     final user = ref.watch(authControllerProvider).value;
     final hasAccount = user != null && !user.isAnonymous;
     final languageCode = ref.watch(localeControllerProvider)?.languageCode;
+    final themeMode = ref.watch(themeModeControllerProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -30,6 +33,12 @@ class SettingsScreen extends ConsumerWidget {
             title: Text(l10n.languageTitle),
             subtitle: Text(languageName(l10n, languageCode)),
             onTap: () => showLanguagePicker(context, ref),
+          ),
+          ListTile(
+            leading: const Icon(Icons.dark_mode_outlined),
+            title: Text(l10n.appearanceTitle),
+            subtitle: Text(themeModeName(l10n, themeMode)),
+            onTap: () => showThemeModePicker(context, ref),
           ),
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
@@ -47,7 +56,7 @@ class SettingsScreen extends ConsumerWidget {
           _SectionHeader(l10n.settingsAccountSection),
           if (hasAccount)
             ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
+              leading: Icon(Icons.logout, color: Theme.of(context).colorScheme.error),
               title: Text(l10n.logout),
               subtitle: Text(l10n.logoutSubtitle),
               onTap: () => _showLogoutDialog(context, ref),
@@ -91,7 +100,7 @@ class SettingsScreen extends ConsumerWidget {
                 context.go('/home');
               }
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
             child: Text(l10n.logout),
           ),
         ],

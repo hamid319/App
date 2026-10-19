@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/services/preferences_service.dart';
 import '../../../app/language_picker.dart';
 import '../../../l10n/l10n.dart';
+import '../../../app/theme.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -21,19 +22,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       icon: Icons.explore,
       title: context.l10n.onboardingDiscoverTitle,
       description: context.l10n.onboardingDiscoverBody,
-      color: Colors.blue,
+      color: Theme.of(context).colorScheme.primary,
     ),
     OnboardingPage(
       icon: Icons.favorite,
       title: context.l10n.onboardingFavoritesTitle,
       description: context.l10n.onboardingFavoritesBody,
-      color: Colors.pink,
+      color: context.swipeColors.nope,
     ),
     OnboardingPage(
       icon: Icons.group,
       title: context.l10n.onboardingGroupsTitle,
       description: context.l10n.onboardingGroupsBody,
-      color: Colors.green,
+      color: context.swipeColors.like,
     ),
   ];
 
@@ -143,7 +144,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       height: 8.0,
       width: isActive ? 24.0 : 8.0,
       decoration: BoxDecoration(
-        color: isActive ? Colors.blue : Colors.grey[300],
+        color: isActive ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(4.0),
       ),
     );
@@ -202,7 +203,7 @@ class _OnboardingPageWidget extends StatelessWidget {
           Text(
             page.description,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey[600],
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   height: 1.5,
                 ),
             textAlign: TextAlign.center,

@@ -426,9 +426,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get groupResultsTitle => 'Group Results';
 
   @override
-  String get loadingGroup => 'Loading group...';
-
-  @override
   String get failedToLoadGroup => 'Failed to load group';
 
   @override
@@ -438,16 +435,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noGroupMessage => 'Create or join a group first';
 
   @override
-  String get loadingSessionHistory => 'Loading session history...';
-
-  @override
   String get noCompletedSessionsTitle => 'No Completed Sessions';
 
   @override
   String get noCompletedSessionsBody => 'Finish a session to see results here.';
-
-  @override
-  String get loadingResults => 'Loading results...';
 
   @override
   String get noQualifiedPlacesTitle => 'No Qualified Places';
@@ -464,12 +455,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get groupsTitle => 'Groups';
-
-  @override
-  String get loadingUser => 'Loading user...';
-
-  @override
-  String get loadingGroups => 'Loading groups...';
 
   @override
   String get notLoggedIn => 'Not logged in';
@@ -657,9 +642,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileTitle => 'Profile';
 
   @override
-  String get loadingProfile => 'Loading profile...';
-
-  @override
   String get loginToViewProfile => 'Please login to view your profile';
 
   @override
@@ -769,4 +751,148 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get createAccountToManage =>
       'Create an account to manage your profile and log in on other devices.';
+
+  @override
+  String get tagTouristAttraction => 'Sight';
+
+  @override
+  String get tagMuseum => 'Museum';
+
+  @override
+  String get tagArtGallery => 'Gallery';
+
+  @override
+  String get tagArt => 'Art';
+
+  @override
+  String get tagCulture => 'Culture';
+
+  @override
+  String get tagHistoricalLandmark => 'Historic site';
+
+  @override
+  String get tagCulturalLandmark => 'Landmark';
+
+  @override
+  String get tagLandmark => 'Landmark';
+
+  @override
+  String get tagHistory => 'History';
+
+  @override
+  String get tagChurch => 'Church';
+
+  @override
+  String get tagPark => 'Park';
+
+  @override
+  String get tagNature => 'Nature';
+
+  @override
+  String get tagNaturalFeature => 'Nature spot';
+
+  @override
+  String get tagOutdoors => 'Outdoors';
+
+  @override
+  String get tagBeach => 'Beach';
+
+  @override
+  String get tagViewpoint => 'Viewpoint';
+
+  @override
+  String get tagHiking => 'Hiking';
+
+  @override
+  String get tagFamily => 'Family';
+
+  @override
+  String get tagScience => 'Science';
+
+  @override
+  String get tagZoo => 'Zoo';
+
+  @override
+  String get tagAquarium => 'Aquarium';
+
+  @override
+  String get tagAmusementPark => 'Theme park';
+
+  @override
+  String get tagShopping => 'Shopping';
+
+  @override
+  String get tagMarket => 'Market';
+
+  @override
+  String get tagNightlife => 'Nightlife';
+
+  @override
+  String get tagMusic => 'Music';
+
+  @override
+  String get tagArchitecture => 'Architecture';
+
+  @override
+  String get tagPhotoSpot => 'Photo spot';
+
+  @override
+  String get undo => 'Undo last swipe';
+
+  @override
+  String get details => 'Details';
+
+  @override
+  String get undone => 'Brought back';
+
+  @override
+  String get appearanceTitle => 'Appearance';
+
+  @override
+  String get appearanceSystem => 'System default';
+
+  @override
+  String get appearanceLight => 'Light';
+
+  @override
+  String get appearanceDark => 'Dark';
+
+  @override
+  String get navFavorites => 'Favorites';
+
+  @override
+  String get sessionLive => 'Session in progress';
+
+  @override
+  String sessionTimeLeft(int minutes) {
+    return '$minutes min left';
+  }
+
+  @override
+  String get yourProgress => 'your progress';
+
+  @override
+  String get memberDone => 'done';
+
+  @override
+  String get whoIsSwiping => 'Who\'s still swiping?';
+
+  @override
+  String get matchTitle => 'It\'s a match!';
+
+  @override
+  String matchBody(String place) {
+    return '$place made your list.';
+  }
+
+  @override
+  String matchVotes(int likes, int total) {
+    return '$likes of $total likes';
+  }
+
+  @override
+  String get matchSeeResults => 'See all results';
+
+  @override
+  String get matchOpenPlace => 'View place';
 }

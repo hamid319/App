@@ -4,10 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../logic/profile_controller.dart';
 import '../../auth/logic/auth_controller.dart';
-import '../../../common/widgets/loading_spinner.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
+import '../../../app/theme.dart';
+import '../../../common/widgets/skeleton.dart';
 
 class SimplifiedProfileScreen extends ConsumerWidget {
   const SimplifiedProfileScreen({super.key});
@@ -27,7 +28,7 @@ class SimplifiedProfileScreen extends ConsumerWidget {
         ],
       ),
       body: authState.when(
-        loading: () => LoadingSpinner(message: context.l10n.loadingProfile),
+        loading: () => const SkeletonList(count: 3, thumbnail: false),
         error: (e, st) => ErrorView(
           message: userMessage(e, fallback: context.l10n.errorLoadProfile, l10n: context.l10n),
           onRetry: () => ref.refresh(authControllerProvider),
@@ -71,7 +72,7 @@ class SimplifiedProfileScreen extends ConsumerWidget {
               children: [
                 CircleAvatar(
                   radius: 50,
-                  backgroundColor: Theme.of(context).primaryColor,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   child: user.photoUrl != null
                       ? ClipOval(
                           child: CachedNetworkImage(
@@ -79,9 +80,7 @@ class SimplifiedProfileScreen extends ConsumerWidget {
                             width: 100,
                             height: 100,
                             fit: BoxFit.cover,
-                            placeholder: (context, url) => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
+                            placeholder: (context, url) => const SkeletonImage(),
                             errorWidget: (context, url, error) =>
                                 const Icon(Icons.person, size: 50, color: Colors.white),
                           ),
@@ -100,7 +99,7 @@ class SimplifiedProfileScreen extends ConsumerWidget {
                   Text(
                     user.email,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                   ),
                 ],
@@ -166,13 +165,13 @@ class SimplifiedProfileScreen extends ConsumerWidget {
                 if (dialogContext.mounted) {
                   Navigator.pop(dialogContext);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(context.l10n.profileUpdated), backgroundColor: Colors.green),
+                    SnackBar(content: Text(context.l10n.profileUpdated), backgroundColor: context.swipeColors.like),
                   );
                 }
               } catch (e) {
                 if (dialogContext.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(userMessage(e, fallback: context.l10n.errorUpdateProfile, l10n: context.l10n)), backgroundColor: Colors.red),
+                    SnackBar(content: Text(userMessage(e, fallback: context.l10n.errorUpdateProfile, l10n: context.l10n)), backgroundColor: Theme.of(context).colorScheme.error),
                   );
                 }
               }

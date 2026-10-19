@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import '../../../core/services/maps_launcher.dart';
+import '../../../app/theme.dart';
 import '../../../common/models/place_model.dart';
-import '../data/place_photo_url_builder.dart';
+import '../../../common/utils/place_type_labels.dart';
+import '../../../common/widgets/place_photo.dart';
+import '../../../common/widgets/skeleton.dart';
+import '../../../core/constants/colors.dart';
+import '../../../core/constants/sizes.dart';
+import '../../../core/errors/user_message.dart';
+import '../../../core/services/maps_launcher.dart';
+import '../../../l10n/l10n.dart';
 import '../../swipe/data/places_repository.dart';
 import '../../swipe/logic/swipe_controller.dart';
-import '../../../core/errors/user_message.dart';
-import '../../../l10n/l10n.dart';
 
 final placeDetailProvider =
     FutureProvider.family<PlaceModel?, String>((ref, placeId) async {
@@ -24,254 +29,414 @@ class PlaceDetailScreen extends ConsumerWidget {
     final placeId = GoRouterState.of(context).pathParameters['id'] ?? '';
     final placeAsync = ref.watch(placeDetailProvider(placeId));
 
-    final appBarTitle = placeAsync.when(
-      data: (place) => place?.name ?? context.l10n.placeFallbackTitle,
-      loading: () => context.l10n.placeFallbackTitle,
-      error: (_, __) => context.l10n.placeFallbackTitle,
-    );
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(appBarTitle),
+    return placeAsync.when(
+      loading: () => const Scaffold(body: SkeletonDetail()),
+      error: (error, stack) => _Message(
+        icon: Icons.error_outline,
+        iconColor: Theme.of(context).colorScheme.error,
+        text: userMessage(
+          error,
+          fallback: context.l10n.errorLoadPlace,
+          l10n: context.l10n,
+        ),
       ),
-      body: placeAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
+      data: (place) => place == null
+          ? _Message(
+              icon: Icons.place,
+              iconColor: Theme.of(context).colorScheme.onSurfaceVariant,
+              text: context.l10n.placeNotFound,
+            )
+          : _PlaceDetailContent(place: place),
+    );
+  }
+}
+
+class _Message extends StatelessWidget {
+  const _Message({
+    required this.icon,
+    required this.iconColor,
+    required this.text,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSizes.space24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(userMessage(error, fallback: context.l10n.errorLoadPlace, l10n: context.l10n)),
-              const SizedBox(height: 16),
-              ElevatedButton(
+              Icon(icon, size: 64, color: iconColor),
+              const SizedBox(height: AppSizes.space16),
+              Text(text, textAlign: TextAlign.center),
+              const SizedBox(height: AppSizes.space16),
+              OutlinedButton(
                 onPressed: () => context.pop(),
                 child: Text(context.l10n.back),
               ),
             ],
           ),
         ),
-        data: (place) {
-          if (place == null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.place, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  Text(context.l10n.placeNotFound),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => context.pop(),
-                    child: Text(context.l10n.back),
+      ),
+    );
+  }
+}
+
+/// Big photo that shrinks as you scroll (the card's photo flies in via
+/// Hero), floating glass buttons, and the main action pinned at the bottom.
+class _PlaceDetailContent extends ConsumerStatefulWidget {
+  const _PlaceDetailContent({required this.place});
+
+  final PlaceModel place;
+
+  @override
+  ConsumerState<_PlaceDetailContent> createState() =>
+      _PlaceDetailContentState();
+}
+
+class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
+  final _scroll = ScrollController();
+
+  /// True once the photo has scrolled away; the status bar text then has to
+  /// switch from light (on the photo) to the theme's normal colour.
+  bool _collapsed = false;
+
+  PlaceModel get place => widget.place;
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _onScroll(double heroHeight) {
+    final collapsed = _scroll.offset > heroHeight - kToolbarHeight - 24;
+    if (collapsed != _collapsed) setState(() => _collapsed = collapsed);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.watch(swipeControllerProvider);
+    final swipeCtrl = ref.read(swipeControllerProvider.notifier);
+    final isFav = swipeCtrl.isFavorite(place.id);
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final l10n = context.l10n;
+    final tags = placeTypeLabels(l10n, place.types);
+    final description = place.description?.trim() ?? '';
+    final heroHeight = MediaQuery.sizeOf(context).height * 0.46;
+    final darkTheme = Theme.of(context).brightness == Brightness.dark;
+
+    Future<void> toggleFavorite() async {
+      final messenger = ScaffoldMessenger.of(context);
+      if (isFav) {
+        await swipeCtrl.removeFavorite(place.id);
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.placeRemovedFromFavorites(place.name))),
+        );
+      } else {
+        await swipeCtrl.addFavorite(place.id);
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.placeAddedToFavorites(place.name))),
+        );
+      }
+    }
+
+    return Scaffold(
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (_) {
+          _onScroll(heroHeight);
+          return false;
+        },
+        child: CustomScrollView(
+          controller: _scroll,
+          slivers: [
+            SliverAppBar(
+              systemOverlayStyle: _collapsed && !darkTheme
+                  ? SystemUiOverlayStyle.dark
+                  : SystemUiOverlayStyle.light,
+              expandedHeight: heroHeight,
+              pinned: true,
+              stretch: true,
+              backgroundColor: scheme.surfaceContainerLowest,
+              automaticallyImplyLeading: false,
+              leading: Padding(
+                padding: const EdgeInsets.all(8),
+                child: _GlassButton(
+                  icon: Icons.arrow_back_rounded,
+                  tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                  onPressed: () => context.pop(),
+                ),
+              ),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: _GlassButton(
+                    icon: isFav ? Icons.favorite : Icons.favorite_border,
+                    color: isFav ? scheme.primary : null,
+                    tooltip:
+                        isFav ? l10n.removeFromFavorites : l10n.addToFavorites,
+                    onPressed: toggleFavorite,
                   ),
+                ),
+              ],
+              flexibleSpace: FlexibleSpaceBar(
+                stretchModes: const [StretchMode.zoomBackground],
+                background: Hero(
+                  tag: placePhotoHeroTag(place.id),
+                  child: PlacePhoto(place: place),
+                ),
+              ),
+              // Rounded top edge of the content sheet, overlapping the photo.
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(AppSizes.radiusLg),
+                child: Container(
+                  height: AppSizes.radiusLg,
+                  decoration: BoxDecoration(
+                    color: scheme.surfaceContainerLowest,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(AppSizes.radiusLg),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSizes.screenEdge + 2,
+                0,
+                AppSizes.screenEdge + 2,
+                AppSizes.space32,
+              ),
+              sliver: SliverList.list(
+                children: [
+                  Text(place.name, style: text.headlineMedium),
+                  const SizedBox(height: AppSizes.space8),
+                  _MetaRow(place: place),
+                  if (tags.isNotEmpty) ...[
+                    const SizedBox(height: AppSizes.space16),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [for (final t in tags) _SoftTag(label: t)],
+                    ),
+                  ],
+                  if (description.isNotEmpty) ...[
+                    const SizedBox(height: AppSizes.groupGap),
+                    Text(
+                      description,
+                      style: text.bodyLarge?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                        height: 1.6,
+                      ),
+                    ),
+                  ],
                 ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: _ActionBar(
+        isFav: isFav,
+        onToggleFavorite: toggleFavorite,
+        onOpenMaps: () async {
+          try {
+            await MapsLauncher.openInMaps(place.lat, place.lng, place.name);
+          } catch (e) {
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  userMessage(e, fallback: l10n.errorOpenMaps, l10n: l10n),
+                ),
               ),
             );
           }
-          return _PlaceDetailContent(place: place);
         },
       ),
     );
   }
 }
 
-class _PlaceDetailContent extends ConsumerWidget {
+class _MetaRow extends StatelessWidget {
+  const _MetaRow({required this.place});
+
   final PlaceModel place;
 
-  const _PlaceDetailContent({required this.place});
-
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Watch the swipe controller to get reactive updates on favorite status
-    ref.watch(swipeControllerProvider);
-    final swipeCtrl = ref.read(swipeControllerProvider.notifier);
-    final isFav = swipeCtrl.isFavorite(place.id);
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: resolvePlacePhotoUrls(place).isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: resolvePlacePhotoUrls(place).first,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => const Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                        errorWidget: (context, url, error) =>
-                            _buildImagePlaceholder(),
-                      )
-                    : _buildImagePlaceholder(),
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final style = Theme.of(context)
+        .textTheme
+        .bodyMedium
+        ?.copyWith(color: scheme.onSurfaceVariant);
+    final rating = place.averageRating;
+    final address = place.address?.trim();
+    return Wrap(
+      spacing: AppSizes.space12,
+      runSpacing: AppSizes.space4,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        if (rating != null && rating > 0)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.star_rounded,
+                  size: 18, color: context.swipeColors.gold),
+              const SizedBox(width: 2),
+              Text(
+                rating.toStringAsFixed(1),
+                style: style?.copyWith(
+                  color: scheme.onSurface,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.place_outlined,
+                size: 16, color: scheme.onSurfaceVariant),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                (address != null && address.isNotEmpty)
+                    ? address
+                    : '${place.lat.toStringAsFixed(4)}, '
+                        '${place.lng.toStringAsFixed(4)}',
+                style: style,
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  place.description ?? '',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        height: 1.6,
-                        color: Colors.grey[700],
-                      ),
-                ),
-                const SizedBox(height: 24),
-                // Tags
-                if (place.types.isNotEmpty) ...[
-                  Text(
-                    context.l10n.tags,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: place.types
-                        .map(
-                          (tag) => Chip(
-                            label: Text(tag),
-                            backgroundColor: Colors.blue.shade50,
-                            side: BorderSide(color: Colors.blue.shade200),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                  const SizedBox(height: 24),
-                ],
-                // Koordinaten
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.location_on, color: Colors.red),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                context.l10n.coordinates,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelMedium
-                                    ?.copyWith(color: Colors.grey[600]),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${place.lat.toStringAsFixed(6)}, ${place.lng.toStringAsFixed(6)}',
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // Action Buttons
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      try {
-                        await MapsLauncher.openInMaps(
-                          place.lat,
-                          place.lng,
-                          place.name,
-                        );
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(userMessage(e, fallback: context.l10n.errorOpenMaps, l10n: context.l10n)),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      }
-                    },
-                    icon: const Icon(Icons.map),
-                    label: Text(context.l10n.openInMaps),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: isFav
-                      ? ElevatedButton.icon(
-                          onPressed: () {
-                            ref
-                                .read(swipeControllerProvider.notifier)
-                                .removeFavorite(place.id);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                    context.l10n.placeRemovedFromFavorites(place.name)),
-                                backgroundColor: Colors.orange,
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.favorite, color: Colors.white),
-                          label: Text(context.l10n.removeFromFavorites),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
-                        )
-                      : OutlinedButton.icon(
-                          onPressed: () async {
-                            await ref
-                                .read(swipeControllerProvider.notifier)
-                                .addFavorite(place.id);
-                            if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content:
-                                    Text(context.l10n.placeAddedToFavorites(place.name)),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.favorite_border),
-                          label: Text(context.l10n.addToFavorites),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
-                        ),
-                ),
-                const SizedBox(height: 32),
-              ],
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _SoftTag extends StatelessWidget {
+  const _SoftTag({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: scheme.onSurface,
             ),
-          ),
-        ],
       ),
     );
   }
+}
 
-  Widget _buildImagePlaceholder() {
-    return Container(
-      color: Colors.grey[300],
-      child: Center(
-        child: Icon(
-          Icons.place,
-          size: 100,
-          color: Colors.grey[600],
+/// Round, light button that floats on top of the photo.
+class _GlassButton extends StatelessWidget {
+  const _GlassButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+    this.color,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: PhotoColors.glass,
+      shape: const CircleBorder(),
+      child: IconButton(
+        tooltip: tooltip,
+        icon: Icon(icon, color: color ?? PhotoColors.onGlass, size: 20),
+        onPressed: onPressed,
+      ),
+    );
+  }
+}
+
+class _ActionBar extends StatelessWidget {
+  const _ActionBar({
+    required this.isFav,
+    required this.onToggleFavorite,
+    required this.onOpenMaps,
+  });
+
+  final bool isFav;
+  final VoidCallback onToggleFavorite;
+  final VoidCallback onOpenMaps;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        border: Border(top: BorderSide(color: scheme.outlineVariant)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSizes.screenEdge,
+            AppSizes.space12,
+            AppSizes.screenEdge,
+            AppSizes.space12,
+          ),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 52,
+                height: 52,
+                child: OutlinedButton(
+                  onPressed: onToggleFavorite,
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(52, 52),
+                  ),
+                  child: Icon(
+                    isFav ? Icons.favorite : Icons.favorite_border,
+                    color: scheme.primary,
+                    semanticLabel:
+                        isFav ? l10n.removeFromFavorites : l10n.addToFavorites,
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSizes.space8),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: onOpenMaps,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: scheme.onSurface,
+                    foregroundColor: scheme.surface,
+                  ),
+                  icon: const Icon(Icons.map_outlined),
+                  label: Text(l10n.openInMaps),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
