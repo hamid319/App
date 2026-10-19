@@ -7,6 +7,8 @@ import '../../../common/models/place_model.dart';
 import '../data/place_photo_url_builder.dart';
 import '../../swipe/data/places_repository.dart';
 import '../../swipe/logic/swipe_controller.dart';
+import '../../../core/errors/user_message.dart';
+import '../../../l10n/l10n.dart';
 
 final placeDetailProvider =
     FutureProvider.family<PlaceModel?, String>((ref, placeId) async {
@@ -23,9 +25,9 @@ class PlaceDetailScreen extends ConsumerWidget {
     final placeAsync = ref.watch(placeDetailProvider(placeId));
 
     final appBarTitle = placeAsync.when(
-      data: (place) => place?.name ?? 'Place',
-      loading: () => 'Place',
-      error: (_, __) => 'Place',
+      data: (place) => place?.name ?? context.l10n.placeFallbackTitle,
+      loading: () => context.l10n.placeFallbackTitle,
+      error: (_, __) => context.l10n.placeFallbackTitle,
     );
 
     return Scaffold(
@@ -40,11 +42,11 @@ class PlaceDetailScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Error: $error'),
+              Text(userMessage(error, fallback: context.l10n.errorLoadPlace, l10n: context.l10n)),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => context.pop(),
-                child: const Text('Back'),
+                child: Text(context.l10n.back),
               ),
             ],
           ),
@@ -57,11 +59,11 @@ class PlaceDetailScreen extends ConsumerWidget {
                 children: [
                   const Icon(Icons.place, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
-                  const Text('Place not found'),
+                  Text(context.l10n.placeNotFound),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => context.pop(),
-                    child: const Text('Back'),
+                    child: Text(context.l10n.back),
                   ),
                 ],
               ),
@@ -125,7 +127,7 @@ class _PlaceDetailContent extends ConsumerWidget {
                 // Tags
                 if (place.types.isNotEmpty) ...[
                   Text(
-                    'Tags',
+                    context.l10n.tags,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -159,7 +161,7 @@ class _PlaceDetailContent extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Coordinates',
+                                context.l10n.coordinates,
                                 style: Theme.of(context)
                                     .textTheme
                                     .labelMedium
@@ -193,7 +195,7 @@ class _PlaceDetailContent extends ConsumerWidget {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Could not open Maps app: $e'),
+                              content: Text(userMessage(e, fallback: context.l10n.errorOpenMaps, l10n: context.l10n)),
                               backgroundColor: Colors.red,
                             ),
                           );
@@ -201,7 +203,7 @@ class _PlaceDetailContent extends ConsumerWidget {
                       }
                     },
                     icon: const Icon(Icons.map),
-                    label: const Text('Open in Maps'),
+                    label: Text(context.l10n.openInMaps),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
@@ -219,13 +221,13 @@ class _PlaceDetailContent extends ConsumerWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                    '${place.name} removed from favorites'),
+                                    context.l10n.placeRemovedFromFavorites(place.name)),
                                 backgroundColor: Colors.orange,
                               ),
                             );
                           },
                           icon: const Icon(Icons.favorite, color: Colors.white),
-                          label: const Text('Remove from Favorites'),
+                          label: Text(context.l10n.removeFromFavorites),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
                             foregroundColor: Colors.white,
@@ -241,13 +243,13 @@ class _PlaceDetailContent extends ConsumerWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content:
-                                    Text('${place.name} added to favorites!'),
+                                    Text(context.l10n.placeAddedToFavorites(place.name)),
                                 backgroundColor: Colors.green,
                               ),
                             );
                           },
                           icon: const Icon(Icons.favorite_border),
-                          label: const Text('Add to Favorites'),
+                          label: Text(context.l10n.addToFavorites),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                           ),

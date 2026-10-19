@@ -7,8 +7,9 @@ class FirestoreService {
     return _db.collection(collection).doc(docId).get();
   }
 
-  Future<void> setDocument(String collection, String docId, Map<String, dynamic> data) {
-    return _db.collection(collection).doc(docId).set(data);
+  Future<void> setDocument(String collection, String docId, Map<String, dynamic> data,
+      {bool merge = false}) {
+    return _db.collection(collection).doc(docId).set(data, SetOptions(merge: merge));
   }
 
   Future<void> updateDocument(String collection, String docId, Map<String, dynamic> data) {

@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import '../../../common/models/place_model.dart';
 import '../../places/data/place_photo_url_builder.dart';
 import 'swipe_buttons.dart';
+import '../../../l10n/l10n.dart';
 
 class TinderSwipeCardStack extends StatefulWidget {
   final PlaceModel place;
@@ -240,8 +241,8 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
                                     ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: const Text(
-                                    'LIKE',
+                                  child: Text(
+                                    context.l10n.likeStamp,
                                     style: TextStyle(
                                       color: Colors.green,
                                       fontSize: 32,
@@ -272,8 +273,8 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
                                     ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: const Text(
-                                    'NOPE',
+                                  child: Text(
+                                    context.l10n.nopeStamp,
                                     style: TextStyle(
                                       color: Colors.red,
                                       fontSize: 32,
@@ -301,14 +302,14 @@ class _TinderSwipeCardStackState extends State<TinderSwipeCardStack>
                 icon: Icons.close,
                 color: Colors.red,
                 onPressed: _handleButtonSkip,
-                label: 'Skip',
+                label: context.l10n.skip,
               ),
               const SizedBox(width: 24),
               ActionButton(
                 icon: Icons.favorite,
                 color: Colors.green,
                 onPressed: _handleButtonLike,
-                label: 'Like',
+                label: context.l10n.like,
               ),
             ],
           ),

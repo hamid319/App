@@ -10,6 +10,8 @@ import '../../../common/widgets/error_view.dart';
 import '../logic/group_controller.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../swipe/data/places_repository.dart';
+import '../../../core/errors/user_message.dart';
+import '../../../l10n/l10n.dart';
 
 class ResultItem {
   final PlaceModel place;
@@ -132,7 +134,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Group Results'),
+        title: Text(context.l10n.groupResultsTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -153,17 +155,17 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
         ],
       ),
       body: groupState.when(
-        loading: () => const LoadingSpinner(message: 'Loading group...'),
+        loading: () => LoadingSpinner(message: context.l10n.loadingGroup),
         error: (error, stack) => ErrorView(
-          message: 'Error: $error',
-          title: 'Failed to load group',
+          message: userMessage(error, fallback: context.l10n.errorGeneric, l10n: context.l10n),
+          title: context.l10n.failedToLoadGroup,
           onRetry: () => ref.invalidate(groupControllerProvider),
         ),
         data: (group) {
           if (group == null) {
             return ErrorView(
-              message: 'Create or join a group first',
-              title: 'No Group',
+              message: context.l10n.noGroupMessage,
+              title: context.l10n.noGroupTitle,
               icon: Icons.group_off,
               onRetry: () => context.go('/home'),
             );
@@ -171,9 +173,9 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
 
           return sessionsAsync.when(
             loading: () =>
-                const LoadingSpinner(message: 'Loading session history...'),
+                LoadingSpinner(message: context.l10n.loadingSessionHistory),
             error: (error, stack) => ErrorView(
-              message: 'Error loading sessions: $error',
+              message: userMessage(error, fallback: context.l10n.errorLoadSessions, l10n: context.l10n),
               onRetry: () =>
                   ref.invalidate(completedSessionsProvider(widget.groupId)),
             ),
@@ -190,12 +192,12 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'No Completed Sessions',
+                        context.l10n.noCompletedSessionsTitle,
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Finish a session to see results here.',
+                        context.l10n.noCompletedSessionsBody,
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.grey[600]),
                       ),
@@ -203,7 +205,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                       ElevatedButton.icon(
                         onPressed: () => context.go('/home'),
                         icon: const Icon(Icons.explore),
-                        label: const Text('Discover Places'),
+                        label: Text(context.l10n.discoverTitle),
                       ),
                     ],
                   ),
@@ -251,7 +253,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                                   (session) => DropdownMenuItem(
                                     value: session.sessionId,
                                     child: Text(
-                                      _formatSessionLabel(session),
+                                      _formatSessionLabel(context, session),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
@@ -265,9 +267,9 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                   Expanded(
                     child: resultsAsync.when(
                       loading: () =>
-                          const LoadingSpinner(message: 'Loading results...'),
+                          LoadingSpinner(message: context.l10n.loadingResults),
                       error: (error, stack) => ErrorView(
-                        message: 'Error loading results: $error',
+                        message: userMessage(error, fallback: context.l10n.errorLoadResults, l10n: context.l10n),
                         onRetry: () => ref.invalidate(sessionResultsProvider(
                           SessionResultsQuery(
                             groupId: widget.groupId,
@@ -288,13 +290,13 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                                 ),
                                 const SizedBox(height: 24),
                                 Text(
-                                  'No Qualified Places',
+                                  context.l10n.noQualifiedPlacesTitle,
                                   style:
                                       Theme.of(context).textTheme.headlineSmall,
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Places need enough likes to appear here.',
+                                  context.l10n.noQualifiedPlacesBody,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(color: Colors.grey[600]),
                                 ),
@@ -363,10 +365,10 @@ class _ResultThumbnail extends StatelessWidget {
   }
 }
 
-String _formatSessionLabel(GroupSessionModel session) {
+String _formatSessionLabel(BuildContext context, GroupSessionModel session) {
   final endedAt = session.endedAt;
   final dateLabel = endedAt == null
-      ? 'in progress'
+      ? context.l10n.sessionInProgress
       : endedAt.toLocal().toIso8601String().split('T').first;
   return '${session.destination} · $dateLabel';
 }

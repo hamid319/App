@@ -12,6 +12,10 @@ class UserModel {
   final DateTime? createdAt;
   final String? fcmToken;
 
+  /// True for the invisible guest account (Firebase Anonymous Auth). Comes
+  /// from the auth session, so it is never stored in Firestore.
+  final bool isAnonymous;
+
   const UserModel({
     required this.uid,
     required this.email,
@@ -21,6 +25,7 @@ class UserModel {
     this.groups = const [],
     this.createdAt,
     this.fcmToken,
+    this.isAnonymous = false,
   });
 
   UserModel copyWith({
@@ -32,6 +37,7 @@ class UserModel {
     List<String>? groups,
     DateTime? createdAt,
     String? fcmToken,
+    bool? isAnonymous,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -42,6 +48,7 @@ class UserModel {
       groups: groups ?? this.groups,
       createdAt: createdAt ?? this.createdAt,
       fcmToken: fcmToken ?? this.fcmToken,
+      isAnonymous: isAnonymous ?? this.isAnonymous,
     );
   }
 

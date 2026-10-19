@@ -6,6 +6,8 @@ import '../../group/logic/group_controller.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../logic/swipe_controller.dart';
 import '../widgets/swipe_card.dart';
+import '../../../core/errors/user_message.dart';
+import '../../../l10n/l10n.dart';
 
 /// Main Swipe Screen - displays the card stack and handles state
 class SwipeScreen extends ConsumerStatefulWidget {
@@ -98,7 +100,7 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
         title: Row(
           children: [
             Expanded(
-                child: Text(sessionValue?.destination ?? 'Discover Places')),
+                child: Text(sessionValue?.destination ?? context.l10n.discoverTitle)),
             if (sessionValue?.endTime != null)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -124,18 +126,18 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
                 final confirm = await showDialog<bool>(
                   context: context,
                   builder: (dialogContext) => AlertDialog(
-                    title: const Text('End session?'),
-                    content: const Text(
-                      'This will end the session for all participants.',
+                    title: Text(context.l10n.endSessionTitle),
+                    content: Text(
+                      context.l10n.endSessionBody,
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(dialogContext).pop(false),
-                        child: const Text('Cancel'),
+                        child: Text(context.l10n.cancel),
                       ),
                       TextButton(
                         onPressed: () => Navigator.of(dialogContext).pop(true),
-                        child: const Text('End'),
+                        child: Text(context.l10n.end),
                       ),
                     ],
                   ),
@@ -145,7 +147,7 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
                   await ref.read(groupControllerProvider.notifier).endSession();
                 }
               },
-              child: const Text('End session'),
+              child: Text(context.l10n.endSession),
             ),
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
@@ -166,11 +168,11 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
             children: [
               const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Error: $e'),
+              Text(userMessage(e, fallback: context.l10n.errorLoadPlaces, l10n: context.l10n)),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => ref.refresh(swipeControllerProvider),
-                child: const Text('Try again'),
+                child: Text(context.l10n.tryAgain),
               ),
             ],
           ),
@@ -191,16 +193,16 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
                   Text(
                     (sessionValue?.endTime != null &&
                             _timeRemaining <= Duration.zero)
-                        ? 'Time is up!'
-                        : 'No more places!',
+                        ? context.l10n.timeIsUp
+                        : context.l10n.noMorePlacesTitle,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     (sessionValue?.endTime != null &&
                             _timeRemaining <= Duration.zero)
-                        ? 'Waiting for session to end...'
-                        : 'You have viewed all places',
+                        ? context.l10n.waitingForSessionEnd
+                        : context.l10n.viewedAllPlaces,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[600],
                         ),
@@ -211,7 +213,7 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
                     ElevatedButton.icon(
                       onPressed: () => ref.refresh(swipeControllerProvider),
                       icon: const Icon(Icons.refresh),
-                      label: const Text('Reload'),
+                      label: Text(context.l10n.reload),
                     ),
                 ],
               ),
@@ -222,12 +224,20 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
           return TinderSwipeCardStack(
             place: current,
             onLike: () {
+              // In a group session a like only casts a vote; it is not
+              // saved to the user's favorites.
+              final inSession =
+                  ref.read(activeSessionProvider).value != null;
               ctrl.like();
-              _showSnackBar(context, 'Added to favorites!', Colors.green);
+              _showSnackBar(
+                context,
+                inSession ? context.l10n.liked : context.l10n.addedToFavorites,
+                Colors.green,
+              );
             },
             onSkip: () {
               ctrl.skip();
-              _showSnackBar(context, 'Skipped', Colors.orange);
+              _showSnackBar(context, context.l10n.skipped, Colors.orange);
             },
             onDetail: () {
               context.push('/place/${current.id}');

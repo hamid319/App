@@ -1,11 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../common/models/place_model.dart';
 import '../../../core/services/location_service.dart';
+import '../../../core/services/preferences_service.dart';
 import '../data/places_repository.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../profile/data/profile_repository.dart';
 import '../../group/logic/group_controller.dart';
 import '../../../main_providers.dart';
+import '../../../core/config/app_config.dart';
 
 final swipeControllerProvider =
     AsyncNotifierProvider<SwipeController, List<PlaceModel>>(
@@ -18,8 +20,8 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
   int _currentIndex = 0;
   final List<String> _favorites = [];
   Set<String> _swipedPlaceIds = {};
-  double _userLat = 34.0522;
-  double _userLng = -118.2437;
+  double _userLat = AppConfig.defaultLat;
+  double _userLng = AppConfig.defaultLng;
   static const double _defaultRadiusKm = 50.0;
 
   @override
@@ -40,6 +42,16 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
 
     final groupState = ref.watch(groupControllerProvider).value;
     final sessionId = groupState?.activeSessionId;
+
+    // Reload when the account changes (guest -> login). A guest upgrade keeps
+    // the UID, so it does not reset the stack.
+    ref.watch(authControllerProvider.select((s) => s.value?.uid));
+    if (ref.read(authControllerProvider).isLoading) {
+      // /places needs a signed-in session, so wait for the guest sign-in.
+      try {
+        await ref.read(authControllerProvider.future);
+      } catch (_) {}
+    }
 
     final authState = ref.read(authControllerProvider);
     if (authState.value != null) {
@@ -155,7 +167,7 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
           liked: true,
         );
 
-        await _profileRepo.updateUserProfile(userId, {'favorites': _favorites});
+        await _profileRepo.addFavorite(userId, place.id);
         await _syncFavoritesWithGroup(userId);
       } catch (e) {
         // Continue even on error
@@ -198,6 +210,16 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     }
   }
 
+  /// True exactly once for a guest, after their first like: tells the UI to
+  /// suggest an account so the favorites are kept for good.
+  Future<bool> takeGuestFavoriteHint() async {
+    final user = ref.read(authControllerProvider).value;
+    if (user == null || !user.isAnonymous) return false;
+    if (await PreferencesService.hasSeenGuestFavoriteHint()) return false;
+    await PreferencesService.setGuestFavoriteHintShown();
+    return true;
+  }
+
   void nextPlace() {
     final data = state.value;
     if (data == null) return;
@@ -230,7 +252,7 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     if (authState.value != null) {
       final userId = authState.value!.uid;
       try {
-        await _profileRepo.updateUserProfile(userId, {'favorites': _favorites});
+        await _profileRepo.addFavorite(userId, placeId);
         await _syncFavoritesWithGroup(userId);
       } catch (e) {
         // Continue even on error
@@ -250,7 +272,7 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     if (authState.value != null) {
       final userId = authState.value!.uid;
       try {
-        await _profileRepo.updateUserProfile(userId, {'favorites': _favorites});
+        await _profileRepo.removeFavorite(userId, placeId);
         await _syncFavoritesWithGroup(userId);
       } catch (e) {
         // Continue even on error

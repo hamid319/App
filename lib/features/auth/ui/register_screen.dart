@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/errors/user_message.dart';
 import '../logic/auth_controller.dart';
+import '../../../l10n/l10n.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -19,110 +21,119 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
-    
-    // Listener für erfolgreiche Registrierung
+
+    // Navigate home once registration succeeds
     ref.listen<AsyncValue>(authControllerProvider, (previous, next) {
       next.whenData((user) {
-        if (user != null && mounted) {
+        // A guest session is not a finished sign-in; wait for a real account.
+        if (user != null && !user.isAnonymous && mounted) {
           context.go('/home');
         }
       });
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Register')),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextFormField(
-                controller: nameController,
-                textCapitalization: TextCapitalization.words,
-                textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  labelText: 'Name / Benutzername',
-                  hintText: 'Wie sollen andere dich nennen?',
+      appBar: AppBar(title: Text(context.l10n.registerButton)),
+      // Scrollable so the keyboard cannot push the form off a small screen.
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: nameController,
+                  textCapitalization: TextCapitalization.words,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.nameLabel,
+                    hintText: context.l10n.nameHint,
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return context.l10n.nameRequired;
+                    }
+                    if (value.trim().length < 2) {
+                      return context.l10n.nameTooShort;
+                    }
+                    return null;
+                  },
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Bitte geben Sie einen Namen ein';
-                  }
-                  if (value.trim().length < 2) {
-                    return 'Der Name muss mindestens 2 Zeichen lang sein';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                autocorrect: false,
-                enableSuggestions: false,
-                textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(labelText: 'Email'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Bitte geben Sie eine E-Mail ein';
-                  }
-                  if (!value.contains('@')) {
-                    return 'Bitte geben Sie eine gültige E-Mail ein';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: passwordController,
-                decoration: const InputDecoration(labelText: 'Password'),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Bitte geben Sie ein Passwort ein';
-                  }
-                  if (value.length < 6) {
-                    return 'Das Passwort muss mindestens 6 Zeichen lang sein';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 24),
-              // Fehleranzeige
-              authState.when(
-                data: (_) => const SizedBox.shrink(),
-                loading: () => const CircularProgressIndicator(),
-                error: (error, stack) => Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: Text(
-                    _getErrorMessage(error),
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(labelText: context.l10n.emailLabel),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return context.l10n.emailRequired;
+                    }
+                    if (!value.contains('@')) {
+                      return context.l10n.emailInvalid;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: passwordController,
+                  decoration: InputDecoration(labelText: context.l10n.passwordLabel),
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return context.l10n.passwordRequired;
+                    }
+                    if (value.length < 6) {
+                      return context.l10n.passwordTooShort;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 24),
+                // Error message
+                authState.when(
+                  data: (_) => const SizedBox.shrink(),
+                  loading: () => const CircularProgressIndicator(),
+                  error: (error, stack) => Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: Text(
+                      userMessage(error, fallback: context.l10n.signupFailed, l10n: context.l10n),
+                      style: const TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: authState.isLoading ? null : _handleRegister,
-                  child: authState.isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Register'),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: authState.isLoading ? null : _handleRegister,
+                    child: authState.isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(context.l10n.registerButton),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: () => context.go('/login'),
-                child: const Text('Already have an account? Login'),
-              ),
-            ],
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () => context.pushReplacement('/login'),
+                  child: Text(context.l10n.haveAccountLogin),
+                ),
+                if (authState.value?.isAnonymous ?? false)
+                  TextButton(
+                    onPressed: () => context.go('/home'),
+                    child: Text(context.l10n.continueAsGuest),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -141,22 +152,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             displayName: nameController.text.trim(),
           );
     } catch (e) {
-      // Fehler wird durch den AsyncValue-State behandelt
+      // Errors are surfaced through the AsyncValue state
     }
-  }
-
-  String _getErrorMessage(Object error) {
-    final errorString = error.toString().toLowerCase();
-    if (errorString.contains('email-already-in-use')) {
-      return 'Diese E-Mail wird bereits verwendet';
-    } else if (errorString.contains('invalid-email')) {
-      return 'Ungültige E-Mail-Adresse';
-    } else if (errorString.contains('weak-password')) {
-      return 'Das Passwort ist zu schwach';
-    } else if (errorString.contains('network')) {
-      return 'Netzwerkfehler. Bitte überprüfen Sie Ihre Internetverbindung';
-    }
-    return 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut';
   }
 
   @override

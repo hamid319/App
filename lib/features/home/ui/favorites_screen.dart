@@ -6,6 +6,8 @@ import '../../../common/models/place_model.dart';
 import '../../places/data/place_photo_url_builder.dart';
 import '../../../main_providers.dart';
 import '../../swipe/logic/swipe_controller.dart';
+import '../../../core/errors/user_message.dart';
+import '../../../l10n/l10n.dart';
 
 class FavoritesScreen extends ConsumerWidget {
   const FavoritesScreen({super.key});
@@ -17,7 +19,23 @@ class FavoritesScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Favorites'),
+        title: Text(context.l10n.favoritesTitle),
+        actions: [
+          // Destructive reset lives behind a menu here rather than as a
+          // one-tap red button on the Discover screen.
+          PopupMenuButton<String>(
+            tooltip: context.l10n.moreOptions,
+            onSelected: (value) {
+              if (value == 'reset') _confirmReset(context, ref);
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'reset',
+                child: Text(context.l10n.clearFavoritesMenu),
+              ),
+            ],
+          ),
+        ],
       ),
       body: favorites.isEmpty
           ? _buildEmptyState(context)
@@ -32,7 +50,7 @@ class FavoritesScreen extends ConsumerWidget {
                   return Center(
                     child: Padding(
                       padding: const EdgeInsets.all(24),
-                      child: Text('Error loading places: ${snapshot.error}'),
+                      child: Text(userMessage(snapshot.error!, fallback: context.l10n.errorLoadFavorites, l10n: context.l10n)),
                     ),
                   );
                 }
@@ -60,7 +78,7 @@ class FavoritesScreen extends ConsumerWidget {
                       trailing: IconButton(
                         icon:
                             const Icon(Icons.delete_outline, color: Colors.red),
-                        tooltip: 'Remove from favorites',
+                        tooltip: context.l10n.removeFromFavoritesTooltip,
                         onPressed: () {
                           ref
                               .read(swipeControllerProvider.notifier)
@@ -68,7 +86,7 @@ class FavoritesScreen extends ConsumerWidget {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content:
-                                  Text('${place.name} removed from favorites'),
+                                  Text(context.l10n.placeRemovedFromFavorites(place.name)),
                               backgroundColor: Colors.orange,
                               duration: const Duration(seconds: 2),
                             ),
@@ -112,6 +130,39 @@ class FavoritesScreen extends ConsumerWidget {
     );
   }
 
+  void _confirmReset(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(context.l10n.clearEverythingTitle),
+        content: Text(
+          context.l10n.clearEverythingBody,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(context.l10n.cancel),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await ref.read(swipeControllerProvider.notifier).resetAll();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(context.l10n.clearedSnack),
+                  ),
+                );
+              }
+            },
+            child: Text(context.l10n.clear),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Padding(
@@ -122,12 +173,12 @@ class FavoritesScreen extends ConsumerWidget {
             Icon(Icons.favorite_border, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
-              'No favorites yet',
+              context.l10n.noFavoritesTitle,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
             Text(
-              'Start swiping to add places to your favorites!',
+              context.l10n.noFavoritesBody,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.grey[600],

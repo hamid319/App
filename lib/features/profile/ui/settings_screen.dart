@@ -2,51 +2,67 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../auth/logic/auth_controller.dart';
+import '../../../app/language_picker.dart';
+import '../../../app/locale_controller.dart';
+import '../../../l10n/l10n.dart';
 
+/// Open to everyone. The "App" section (language, privacy, security) works
+/// for guests too; the "Account" section depends on having a real account.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authControllerProvider);
-    final isLoggedIn = authState.maybeWhen(
-      data: (user) => user != null,
-      orElse: () => false,
-    );
+    final l10n = context.l10n;
+    final user = ref.watch(authControllerProvider).value;
+    final hasAccount = user != null && !user.isAnonymous;
+    final languageCode = ref.watch(localeControllerProvider)?.languageCode;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Einstellungen'),
+        title: Text(l10n.settingsTitle),
       ),
       body: ListView(
         children: [
+          _SectionHeader(l10n.settingsAppSection),
           ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: const Text('Impressum'),
-            subtitle: const Text('Rechtliche Informationen'),
-            onTap: () => _showImpressum(context),
+            leading: const Icon(Icons.language),
+            title: Text(l10n.languageTitle),
+            subtitle: Text(languageName(l10n, languageCode)),
+            onTap: () => showLanguagePicker(context, ref),
           ),
-          const Divider(),
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
-            title: const Text('Datenschutz'),
-            subtitle: const Text('Datenschutzerklärung ansehen'),
+            title: Text(l10n.privacy),
+            subtitle: Text(l10n.privacySubtitle),
             onTap: () => _showDataPrivacy(context),
           ),
-          const Divider(),
           ListTile(
             leading: const Icon(Icons.security_outlined),
-            title: const Text('Sicherheit'),
-            subtitle: const Text('Sicherheitseinstellungen'),
+            title: Text(l10n.security),
+            subtitle: Text(l10n.securitySubtitle),
             onTap: () => _showSecurity(context),
           ),
-          if (isLoggedIn) ...[
-            const Divider(),
+          const Divider(),
+          _SectionHeader(l10n.settingsAccountSection),
+          if (hasAccount)
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text('Abmelden'),
-              subtitle: const Text('Von diesem Gerät abmelden'),
+              title: Text(l10n.logout),
+              subtitle: Text(l10n.logoutSubtitle),
               onTap: () => _showLogoutDialog(context, ref),
+            )
+          else ...[
+            ListTile(
+              leading: const Icon(Icons.person_add_alt_1),
+              title: Text(l10n.gateCreateAccount),
+              subtitle: Text(l10n.createAccountToManage),
+              onTap: () => context.push('/register'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.login),
+              title: Text(l10n.gateHaveAccount),
+              onTap: () => context.push('/login'),
             ),
           ],
         ],
@@ -55,80 +71,28 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Abmelden'),
-        content: const Text('Möchten Sie sich wirklich abmelden?'),
+        title: Text(l10n.logout),
+        content: Text(l10n.logoutConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Abbrechen'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () async {
               Navigator.pop(dialogContext);
               await ref.read(authControllerProvider.notifier).logout();
               if (context.mounted) {
-                context.go('/login');
+                // Logging out starts a fresh guest session, so go back to swiping.
+                context.go('/home');
               }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Abmelden'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showImpressum(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Impressum'),
-        content: const SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Angaben gemäß § 5 TMG',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 16),
-              Text('Musterfirma GmbH'),
-              Text('Musterstraße 123'),
-              Text('12345 Musterstadt'),
-              SizedBox(height: 16),
-              Text(
-                'Kontakt',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text('Telefon: +49 (0) 123 456789'),
-              Text('E-Mail: info@example.com'),
-              SizedBox(height: 16),
-              Text(
-                'Vertretungsberechtigte Geschäftsführer',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text('Max Mustermann'),
-              SizedBox(height: 16),
-              Text(
-                'Registereintrag',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text('Handelsregister: HRB 12345'),
-              Text('Registergericht: Amtsgericht Musterstadt'),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Schließen'),
+            child: Text(l10n.logout),
           ),
         ],
       ),
@@ -136,111 +100,98 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _showDataPrivacy(BuildContext context) {
+    final l10n = context.l10n;
+    _showInfoDialog(
+      context,
+      title: l10n.privacy,
+      children: [
+        _bold(l10n.privacyWhatWeStore),
+        const SizedBox(height: 8),
+        Text(l10n.privacyItemEmail),
+        Text(l10n.privacyItemProfile),
+        Text(l10n.privacyItemActivity),
+        Text(l10n.privacyItemLocation),
+        const SizedBox(height: 16),
+        _bold(l10n.privacyWhereStored),
+        const SizedBox(height: 8),
+        Text(l10n.privacyWhereStoredBody),
+        const SizedBox(height: 16),
+        _bold(l10n.privacyRights),
+        const SizedBox(height: 8),
+        Text(l10n.privacyRightsBody),
+      ],
+    );
+  }
+
+  void _showSecurity(BuildContext context) {
+    final l10n = context.l10n;
+    _showInfoDialog(
+      context,
+      title: l10n.security,
+      children: [
+        _bold(l10n.securityHeader),
+        const SizedBox(height: 16),
+        Text(l10n.securityItemAuth),
+        const SizedBox(height: 8),
+        Text(l10n.securityItemHttps),
+        const SizedBox(height: 16),
+        _bold(l10n.securityTips),
+        const SizedBox(height: 8),
+        Text(l10n.securityTipPassword),
+        Text(l10n.securityTipLogout),
+        Text(l10n.securityTipUpdate),
+        const SizedBox(height: 16),
+        Text(
+          l10n.securityComingSoon,
+          style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+        ),
+      ],
+    );
+  }
+
+  Widget _bold(String text) =>
+      Text(text, style: const TextStyle(fontWeight: FontWeight.bold));
+
+  void _showInfoDialog(
+    BuildContext context, {
+    required String title,
+    required List<Widget> children,
+  }) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Datenschutzerklärung'),
-        content: const SingleChildScrollView(
+        title: Text(title),
+        content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '1. Datenschutz auf einen Blick',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Diese App erhebt und verarbeitet personenbezogene Daten im Rahmen der DSGVO.',
-              ),
-              SizedBox(height: 16),
-              Text(
-                '2. Welche Daten sammeln wir?',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text('• E-Mail-Adresse (für die Authentifizierung)'),
-              Text('• Benutzername'),
-              Text('• Standortdaten (für Ortungsvorschläge)'),
-              Text('• Favoriten und Präferenzen'),
-              SizedBox(height: 16),
-              Text(
-                '3. Wie verwenden wir Ihre Daten?',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Ihre Daten werden ausschließlich zur Bereitstellung der App-Funktionen verwendet und nicht an Dritte weitergegeben.',
-              ),
-              SizedBox(height: 16),
-              Text(
-                '4. Ihre Rechte',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text('Sie haben das Recht auf:'),
-              Text('• Auskunft über Ihre gespeicherten Daten'),
-              Text('• Berichtigung unrichtiger Daten'),
-              Text('• Löschung Ihrer Daten'),
-              Text('• Widerspruch gegen die Verarbeitung'),
-            ],
+            children: children,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Schließen'),
+            child: Text(context.l10n.close),
           ),
         ],
       ),
     );
   }
+}
 
-  void _showSecurity(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Sicherheit'),
-        content: const SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Sicherheitsmaßnahmen',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 16),
-              Text('✓ Ende-zu-Ende-Verschlüsselung'),
-              SizedBox(height: 8),
-              Text('✓ Sichere Firebase-Authentifizierung'),
-              SizedBox(height: 8),
-              Text('✓ Verschlüsselte Datenübertragung (HTTPS)'),
-              SizedBox(height: 8),
-              Text('✓ Regelmäßige Sicherheitsupdates'),
-              SizedBox(height: 16),
-              Text(
-                'Empfehlungen',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text('• Verwenden Sie ein starkes Passwort'),
-              Text('• Melden Sie sich auf fremden Geräten ab'),
-              Text('• Halten Sie die App aktuell'),
-              SizedBox(height: 16),
-              Text(
-                'Hinweis: Passwort ändern und Zwei-Faktor-Authentifizierung werden in einer zukünftigen Version verfügbar sein.',
-                style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Schließen'),
-          ),
-        ],
+class _SectionHeader extends StatelessWidget {
+  final String text;
+  const _SectionHeader(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+            ),
       ),
     );
   }

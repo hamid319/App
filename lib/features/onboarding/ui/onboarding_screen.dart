@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/services/preferences_service.dart';
+import '../../../app/language_picker.dart';
+import '../../../l10n/l10n.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -13,23 +15,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<OnboardingPage> _pages = [
+  // A getter, not a field, so the texts follow the current language.
+  List<OnboardingPage> get _pages => [
     OnboardingPage(
       icon: Icons.explore,
-      title: 'Discover new places',
-      description: 'Swipe through interesting places nearby and find your next travel destinations.',
+      title: context.l10n.onboardingDiscoverTitle,
+      description: context.l10n.onboardingDiscoverBody,
       color: Colors.blue,
     ),
     OnboardingPage(
       icon: Icons.favorite,
-      title: 'Collect favorites',
-      description: 'Mark places you like and create your personal wishlist.',
+      title: context.l10n.onboardingFavoritesTitle,
+      description: context.l10n.onboardingFavoritesBody,
       color: Colors.pink,
     ),
     OnboardingPage(
       icon: Icons.group,
-      title: 'Plan with friends',
-      description: 'Create groups and find the best places for your next trip together.',
+      title: context.l10n.onboardingGroupsTitle,
+      description: context.l10n.onboardingGroupsBody,
       color: Colors.green,
     ),
   ];
@@ -71,15 +74,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Skip Button
-            Align(
-              alignment: Alignment.topRight,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: TextButton(
-                  onPressed: _skip,
-                  child: const Text('Skip'),
-                ),
+            // Language switch and Skip button
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const LanguageToggle(),
+                  TextButton(
+                    onPressed: _skip,
+                    child: Text(context.l10n.onboardingSkip),
+                  ),
+                ],
               ),
             ),
             // PageView
@@ -117,7 +123,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: Text(
-                    _currentPage == _pages.length - 1 ? 'Get Started' : 'Next',
+                    _currentPage == _pages.length - 1 ? context.l10n.onboardingGetStarted : context.l10n.onboardingNext,
                     style: const TextStyle(fontSize: 16),
                   ),
                 ),

@@ -152,28 +152,31 @@ class GroupRepository {
             snap.docs.map((doc) => GroupModel.fromJson(doc.data())).toList());
   }
 
+  /// Removes [userId] from the group inside a transaction, so a concurrent
+  /// join is not lost. When the owner leaves, ownership passes to the
+  /// longest-standing remaining member; otherwise nobody could start or end
+  /// sessions again. The last member leaving deletes the group.
   Future<void> leaveGroup(String groupId, String userId) async {
-    final doc = await _firestoreService.getDocument('groups', groupId);
-    if (!doc.exists || doc.data() == null) {
-      throw Exception('Group not found');
-    }
-    final group = GroupModel.fromJson(doc.data()!);
-    final members = List<String>.from(group.members)..remove(userId);
+    final groupRef = _db.collection('groups').doc(groupId);
+    await _db.runTransaction((transaction) async {
+      final snap = await transaction.get(groupRef);
+      if (!snap.exists || snap.data() == null) {
+        throw Exception('Group not found');
+      }
+      final group = GroupModel.fromJson(snap.data()!);
+      if (!group.members.contains(userId)) return;
 
-    if (members.isEmpty) {
-      if (_usesInjectedFirestore) {
-        await _db.collection('groups').doc(groupId).delete();
-      } else {
-        await _firestoreService.deleteDocument('groups', groupId);
+      final remaining = group.members.where((m) => m != userId).toList();
+      if (remaining.isEmpty) {
+        transaction.delete(groupRef);
+        return;
       }
-    } else {
-      final data = {'members': members};
-      if (_usesInjectedFirestore) {
-        await _db.collection('groups').doc(groupId).update(data);
-      } else {
-        await _firestoreService.updateDocument('groups', groupId, data);
-      }
-    }
+
+      transaction.update(groupRef, {
+        'members': FieldValue.arrayRemove([userId]),
+        if (group.ownerUid == userId) 'ownerUid': remaining.first,
+      });
+    });
   }
 
   Future<void> deleteGroup(String groupId) async {
@@ -198,6 +201,9 @@ class GroupRepository {
 
   /// Creates a brand-new session for [groupId].
   /// Called by the admin after choosing destination + threshold.
+  ///
+  /// If the group already has an active session, that session's ID is
+  /// returned and nothing is written, so a double tap cannot orphan it.
   Future<String> startSwipeSession({
     required String groupId,
     required String destination,
@@ -206,54 +212,52 @@ class GroupRepository {
     required List<String> placePool,
     DateTime? endTime,
   }) async {
-    final group = await getGroup(groupId);
-    if (group == null) {
-      throw Exception('Group not found');
-    }
-    if (participantUids.isEmpty) {
-      throw Exception('Session must include at least one participant');
-    }
-    final invalidUids =
-        participantUids.where((uid) => !group.members.contains(uid)).toList();
-    if (invalidUids.isNotEmpty) {
-      throw Exception('Participants must be group members');
-    }
-    if (swipeLimit <= 0) {
-      throw Exception('Session must include at least one place');
-    }
+    final groupRef = _db.collection('groups').doc(groupId);
+    final sessionRef = groupRef.collection('sessions').doc();
 
-    final sessionId =
-        _db.collection('groups').doc(groupId).collection('sessions').doc().id;
+    return _db.runTransaction((transaction) async {
+      final snap = await transaction.get(groupRef);
+      if (!snap.exists || snap.data() == null) {
+        throw Exception('Group not found');
+      }
+      final group = GroupModel.fromJson(snap.data()!);
+      if (group.activeSessionId != null) {
+        return group.activeSessionId!;
+      }
+      if (participantUids.isEmpty) {
+        throw Exception('Session must include at least one participant');
+      }
+      final invalidUids = participantUids
+          .where((uid) => !group.members.contains(uid))
+          .toList();
+      if (invalidUids.isNotEmpty) {
+        throw Exception('Participants must be group members');
+      }
+      if (swipeLimit <= 0) {
+        throw Exception('Session must include at least one place');
+      }
 
-    final session = GroupSessionModel(
-      sessionId: sessionId,
-      destination: destination,
-      status: 'in_progress',
-      totalPlacesToSwipe: swipeLimit,
-      swipeLimit: swipeLimit,
-      placePool: placePool,
-      participants: participantUids,
-      swipeProgress: {for (final uid in participantUids) uid: 0},
-      progressByUser: {for (final uid in participantUids) uid: 0},
-      createdAt: DateTime.now(),
-      endTime: endTime,
-    );
+      final session = GroupSessionModel(
+        sessionId: sessionRef.id,
+        destination: destination,
+        status: 'in_progress',
+        totalPlacesToSwipe: swipeLimit,
+        swipeLimit: swipeLimit,
+        placePool: placePool,
+        participants: participantUids,
+        swipeProgress: {for (final uid in participantUids) uid: 0},
+        progressByUser: {for (final uid in participantUids) uid: 0},
+        createdAt: DateTime.now(),
+        endTime: endTime,
+      );
 
-    final batch = _db.batch();
-    final sessionRef = _db
-        .collection('groups')
-        .doc(groupId)
-        .collection('sessions')
-        .doc(sessionId);
-
-    batch.set(sessionRef, session.toJson());
-    batch.update(_db.collection('groups').doc(groupId), {
-      'activeSessionId': sessionId,
-      'joinEnabled': false, // Prevent joining once session starts
+      transaction.set(sessionRef, session.toJson());
+      transaction.update(groupRef, {
+        'activeSessionId': sessionRef.id,
+        'joinEnabled': false, // Prevent joining once session starts
+      });
+      return sessionRef.id;
     });
-
-    await batch.commit();
-    return sessionId;
   }
 
   /// Called after every swipe. Increments the member's progress,
@@ -418,11 +422,10 @@ class GroupRepository {
       return null;
     }
 
-    try {
-      return GroupSessionModel.fromJson(snap.data()!);
-    } catch (_) {
-      return null;
-    }
+    // A document that exists but fails to parse is an error, not a missing
+    // session. Returning null here made callers clear the active session for
+    // every member.
+    return GroupSessionModel.fromJson(snap.data()!);
   }
 
   Future<void> clearActiveSessionIfMatch({

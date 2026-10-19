@@ -12,5 +12,13 @@ class AuthRepository {
 
   Future<User?> signup(String email, String password) => _authService.registerWithEmail(email, password);
 
+  Future<User?> signInAsGuest() => _authService.signInAnonymously();
+
+  Future<User?> upgradeGuest(String email, String password) =>
+      _authService.linkGuestWithEmail(email, password);
+
+  Future<void> updateDisplayName(String displayName) =>
+      _authService.updateDisplayName(displayName);
+
   Future<void> logout() => _authService.signOut();
 }
