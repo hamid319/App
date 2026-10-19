@@ -29,12 +29,23 @@ final userGroupsProvider = StreamProvider<List<GroupModel>>((ref) {
   return ref.watch(groupRepositoryProvider).streamUserGroups(user.uid);
 });
 
+/// Display name for a group member, or null when the profile has none.
+final groupMemberNameProvider =
+    FutureProvider.family<String?, String>((ref, uid) async {
+  final profile =
+      await ref.watch(profileRepositoryProvider).getUserProfile(uid);
+  final name = profile.displayName?.trim();
+  return (name == null || name.isEmpty) ? null : name;
+});
+
 final groupControllerProvider =
     AsyncNotifierProvider<GroupController, GroupModel?>(GroupController.new);
 
 class GroupController extends AsyncNotifier<GroupModel?> {
   String? _lastMembersSignature;
   List<String>? _lastSharedFavorites;
+  // Blocks a second start while the place pool for the first is still loading.
+  bool _isStartingSession = false;
 
   GroupRepository get _repo => ref.read(groupRepositoryProvider);
   ProfileRepository get _profileRepo =>
@@ -63,11 +74,17 @@ class GroupController extends AsyncNotifier<GroupModel?> {
       var resolvedGroup = group;
       final sessionId = group.activeSessionId;
       if (sessionId != null) {
-        final session = await _repo.getSession(
-          groupId: group.groupId,
-          sessionId: sessionId,
-        );
-        if (session == null) {
+        // Only a session document that is really gone may be cleared. A read
+        // or parse failure keeps the session live for everyone.
+        var sessionMissing = false;
+        try {
+          sessionMissing = await _repo.getSession(
+                groupId: group.groupId,
+                sessionId: sessionId,
+              ) ==
+              null;
+        } catch (_) {}
+        if (sessionMissing) {
           await _repo.clearActiveSessionIfMatch(
             groupId: group.groupId,
             sessionId: sessionId,
@@ -236,13 +253,17 @@ class GroupController extends AsyncNotifier<GroupModel?> {
     }
   }
 
-  Future<void> startSessionWithLimit({required int swipeLimit, int? durationMinutes}) async {
+  Future<void> startSessionWithLimit(
+      {required int swipeLimit, int? durationMinutes}) async {
     final group = state.value;
     if (group == null) return;
 
     if (!isAdmin) {
       throw StateError('Only the admin can start the session');
     }
+
+    if (_isStartingSession || group.activeSessionId != null) return;
+    _isStartingSession = true;
 
     final savedState = AsyncValue.data(group);
     state = const AsyncLoading();
@@ -287,6 +308,8 @@ class GroupController extends AsyncNotifier<GroupModel?> {
     } catch (e) {
       state = savedState;
       rethrow;
+    } finally {
+      _isStartingSession = false;
     }
   }
 
@@ -299,6 +322,9 @@ class GroupController extends AsyncNotifier<GroupModel?> {
     if (!isAdmin) {
       throw StateError('Only the admin can start the session');
     }
+
+    if (_isStartingSession || group.activeSessionId != null) return;
+    _isStartingSession = true;
 
     final savedState = AsyncValue.data(group);
     state = const AsyncLoading();
@@ -330,6 +356,8 @@ class GroupController extends AsyncNotifier<GroupModel?> {
     } catch (e) {
       state = savedState;
       rethrow;
+    } finally {
+      _isStartingSession = false;
     }
   }
 

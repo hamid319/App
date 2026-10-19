@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../l10n/l10n.dart';
 
 class ShellNavigation extends StatelessWidget {
   final Widget child;
@@ -31,18 +32,18 @@ class ShellNavigation extends StatelessWidget {
       currentIndex: currentIndex,
       type: BottomNavigationBarType.fixed,
       onTap: (index) => _onItemTapped(context, index),
-      items: const [
+      items: [
         BottomNavigationBarItem(
           icon: Icon(Icons.explore),
-          label: 'Discover',
+          label: context.l10n.navDiscover,
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.group),
-          label: 'Groups',
+          label: context.l10n.navGroups,
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person),
-          label: 'Profile',
+          label: context.l10n.navProfile,
         ),
       ],
     );

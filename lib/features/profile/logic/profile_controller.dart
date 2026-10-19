@@ -54,20 +54,21 @@ class ProfileController extends AsyncNotifier<UserModel?> {
     final currentUser = state.value;
     if (currentUser == null) return;
 
-    final newFavorites = List<String>.from(currentUser.favorites);
-    if (!newFavorites.contains(placeId)) {
-      newFavorites.add(placeId);
-      await updateProfile(uid, {'favorites': newFavorites});
-    }
+    if (currentUser.favorites.contains(placeId)) return;
+    await _repo.addFavorite(uid, placeId);
+    state = AsyncData(currentUser.copyWith(
+      favorites: [...currentUser.favorites, placeId],
+    ));
   }
 
   Future<void> removeFavorite(String uid, String placeId) async {
     final currentUser = state.value;
     if (currentUser == null) return;
 
-    final newFavorites = List<String>.from(currentUser.favorites)
-      ..remove(placeId);
-    await updateProfile(uid, {'favorites': newFavorites});
+    await _repo.removeFavorite(uid, placeId);
+    state = AsyncData(currentUser.copyWith(
+      favorites: currentUser.favorites.where((id) => id != placeId).toList(),
+    ));
   }
 
   Future<String?> pickAndUploadProfileImage(String uid, ImageSource source) async {

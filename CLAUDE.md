@@ -7,7 +7,8 @@ Flutter · Riverpod 3 · Firebase (Auth, Firestore, Storage) · GoRouter 17 · f
 
 ```
 lib/
-├── app/           → GoRouter, ShellNavigation, AppTheme
+├── app/           → GoRouter, ShellNavigation, AppTheme, AccountGate, locale (language) controller + picker
+├── l10n/          → app_en.arb / app_de.arb + generated AppLocalizations (`context.l10n`)
 ├── common/        → Shared models, shared widgets (used by 2+ features)
 ├── core/          → Services, config, constants, errors
 ├── features/      → auth | home | swipe | places | group | profile | onboarding
@@ -73,7 +74,7 @@ Env.googlePlacesApiKey  // loaded from .env via flutter_dotenv
 1. **Favorites bug**: `place_detail_screen.dart` must NOT call `swipeController.like()` (advances swipe stack). Use `addFavoriteById(placeId)`.
 2. **Firestore rule mismatch**: session `update` rule must allow `swipeProgress`, not `isCompleted`.
 3. **UID display**: group member list must resolve UIDs to `UserModel.displayName`.
-4. **German strings**: all UI text must be English. Catch: `Fehler`, `Zurück`, `Einstellungen`, `Datenschutz`, `Impressum`, `Überspringen`.
+4. **Hardcoded UI text**: the app supports English and German. Every user-visible string goes through `context.l10n.<key>` (import `l10n/l10n.dart`), defined in `lib/l10n/app_en.arb` (template) and `lib/l10n/app_de.arb`. Never put a text literal in a widget. Add new keys to both files; `flutter gen-l10n` (or `flutter pub get`) regenerates the Dart code. Errors shown to users go through `userMessage(e, fallback: ..., l10n: context.l10n)`.
 
 ## Forbidden patterns (blocked or flagged by hooks)
 - `Image.network(` → use `CachedNetworkImage(` (package not yet added — add it)
@@ -84,11 +85,14 @@ Env.googlePlacesApiKey  // loaded from .env via flutter_dotenv
 
 ## MVP pending (as of June 2026)
 - Google Places API key (currently mock data, 51 hardcoded places)
-- `cached_network_image` package not yet added
-- German strings remain in `settings_screen.dart`
 - FCM push notifications (not started)
 - Password reset screen (not started)
 - Dark theme wired in `app.dart` (built in `theme.dart`, not applied yet)
+
+## Before launch
+Dev-only shortcuts that must be reverted before release are listed in
+`POSSIBLE_ERRORS.md` section 9 (e.g. `AppConfig.useFixedDevLocation`).
+Add any new dev shortcut there too.
 
 ## Review skills
 - `/flutter-review` — Dart code rules check

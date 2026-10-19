@@ -9,7 +9,7 @@ Run `git diff --name-only HEAD | grep '\.dart$' | grep '^lib/'` to get changed f
 
 Rules (HIGH = must fix before merge, LOW = highlight only):
 
-1. [HIGH] German strings must be English — catch: Fehler, Zurück, Überspringen, Einstellungen, Datenschutz, Impressum
+1. [HIGH] No hardcoded UI text in `.dart` files — every user-visible string comes from `context.l10n` (`lib/l10n/app_en.arb` + `app_de.arb`). Catch: `Text('...')` with a literal, German words like Fehler, Zurück, Überspringen, Einstellungen, Datenschutz outside `lib/l10n/`
 2. [HIGH] No hardcoded API keys, secrets, or base URLs — must use `AppConfig` / `dotenv`
 3. [HIGH] `Image.network(` must not be used — replace with `CachedNetworkImage(`
 4. [HIGH] `swipeControllerProvider.notifier).like()` must NOT be called from `place_detail_screen.dart` — it advances the swipe stack (known bug). Use `addFavoriteById(placeId)` instead

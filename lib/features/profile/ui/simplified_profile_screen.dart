@@ -6,6 +6,8 @@ import '../logic/profile_controller.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../../common/widgets/loading_spinner.dart';
 import '../../../common/widgets/error_view.dart';
+import '../../../core/errors/user_message.dart';
+import '../../../l10n/l10n.dart';
 
 class SimplifiedProfileScreen extends ConsumerWidget {
   const SimplifiedProfileScreen({super.key});
@@ -16,7 +18,7 @@ class SimplifiedProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(context.l10n.profileTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -25,16 +27,16 @@ class SimplifiedProfileScreen extends ConsumerWidget {
         ],
       ),
       body: authState.when(
-        loading: () => const LoadingSpinner(message: 'Loading profile...'),
+        loading: () => LoadingSpinner(message: context.l10n.loadingProfile),
         error: (e, st) => ErrorView(
-          message: 'Error loading profile: $e',
+          message: userMessage(e, fallback: context.l10n.errorLoadProfile, l10n: context.l10n),
           onRetry: () => ref.refresh(authControllerProvider),
         ),
         data: (user) {
           if (user == null) {
             return ErrorView(
-              message: 'Please login to view your profile',
-              title: 'Not logged in',
+              message: context.l10n.loginToViewProfile,
+              title: context.l10n.notLoggedIn,
               icon: Icons.login,
               onRetry: () => context.go('/login'),
             );
@@ -45,7 +47,7 @@ class SimplifiedProfileScreen extends ConsumerWidget {
           return profileState.when(
             loading: () => _buildProfileContent(context, ref, user, isLoading: true),
             error: (e, st) => ErrorView(
-              message: 'Error loading profile: $e',
+              message: userMessage(e, fallback: context.l10n.errorLoadProfile, l10n: context.l10n),
               onRetry: () => ref.refresh(profileControllerProvider),
             ),
             data: (profileUser) {
@@ -88,7 +90,7 @@ class SimplifiedProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  user.displayName ?? 'User',
+                  user.displayName ?? context.l10n.userFallbackName,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -111,12 +113,12 @@ class SimplifiedProfileScreen extends ConsumerWidget {
             child: OutlinedButton.icon(
               onPressed: () => _showEditProfileDialog(context, ref, user),
               icon: const Icon(Icons.edit),
-              label: const Text('Edit Profile'),
+              label: Text(context.l10n.editProfile),
             ),
           ),
           const SizedBox(height: 32),
           Text(
-            'Account Info',
+            context.l10n.accountInfo,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -125,8 +127,8 @@ class SimplifiedProfileScreen extends ConsumerWidget {
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.email_outlined),
-            title: const Text('Email'),
-            subtitle: Text(user.email?.isNotEmpty == true ? user.email! : 'No email provided'),
+            title: Text(context.l10n.emailLabel),
+            subtitle: Text(user.email?.isNotEmpty == true ? user.email! : context.l10n.noEmail),
           ),
         ],
       ),
@@ -139,11 +141,11 @@ class SimplifiedProfileScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Edit Profile'),
+        title: Text(context.l10n.editProfile),
         content: TextField(
           controller: nameController,
-          decoration: const InputDecoration(
-            labelText: 'Display Name',
+          decoration: InputDecoration(
+            labelText: context.l10n.displayNameLabel,
             border: OutlineInputBorder(),
           ),
         ),
@@ -152,7 +154,7 @@ class SimplifiedProfileScreen extends ConsumerWidget {
             onPressed: () {
               Navigator.pop(dialogContext);
             },
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -164,18 +166,18 @@ class SimplifiedProfileScreen extends ConsumerWidget {
                 if (dialogContext.mounted) {
                   Navigator.pop(dialogContext);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Profile updated!'), backgroundColor: Colors.green),
+                    SnackBar(content: Text(context.l10n.profileUpdated), backgroundColor: Colors.green),
                   );
                 }
               } catch (e) {
                 if (dialogContext.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error updating profile: $e'), backgroundColor: Colors.red),
+                    SnackBar(content: Text(userMessage(e, fallback: context.l10n.errorUpdateProfile, l10n: context.l10n)), backgroundColor: Colors.red),
                   );
                 }
               }
             },
-            child: const Text('Save'),
+            child: Text(context.l10n.save),
           ),
         ],
       ),

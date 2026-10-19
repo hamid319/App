@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../common/models/place_model.dart';
+import '../../../core/errors/user_message.dart';
 import '../../places/data/place_photo_url_builder.dart';
 import '../../swipe/logic/swipe_controller.dart';
+import '../../../l10n/l10n.dart';
 
 class SimplifiedHomeScreen extends ConsumerWidget {
   const SimplifiedHomeScreen({super.key});
@@ -13,13 +15,8 @@ class SimplifiedHomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Discover Places'),
+        title: Text(context.l10n.discoverTitle),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.restart_alt, color: Colors.red),
-            tooltip: 'Reset all places & favorites',
-            onPressed: () => _confirmReset(context, ref),
-          ),
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: Center(
@@ -47,38 +44,6 @@ class SimplifiedHomeScreen extends ConsumerWidget {
       body: const _SwipeContent(),
     );
   }
-
-  void _confirmReset(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Reset'),
-        content: const Text('Reset all places and favorites?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await ref.read(swipeControllerProvider.notifier).resetAll();
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('All reset successfully!'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              }
-            },
-            child: const Text('Reset'),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _SwipeContent extends ConsumerWidget {
@@ -100,19 +65,19 @@ class _SwipeContent extends ConsumerWidget {
               const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
               Text(
-                'Error loading places',
+                context.l10n.errorLoadingPlacesTitle,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 8),
               Text(
-                e.toString(),
+                userMessage(e, fallback: context.l10n.errorLoadPlaces, l10n: context.l10n),
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.grey),
               ),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => ref.refresh(swipeControllerProvider),
-                child: const Text('Retry'),
+                child: Text(context.l10n.retry),
               ),
             ],
           ),
@@ -129,12 +94,12 @@ class _SwipeContent extends ConsumerWidget {
                     size: 80, color: Colors.green),
                 const SizedBox(height: 24),
                 Text(
-                  'No more places!',
+                  context.l10n.noMorePlacesTitle,
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'You have seen all places',
+                  context.l10n.seenAllPlaces,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Colors.grey[600],
                       ),
@@ -143,7 +108,7 @@ class _SwipeContent extends ConsumerWidget {
                 ElevatedButton.icon(
                   onPressed: () => ref.refresh(swipeControllerProvider),
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Reload'),
+                  label: Text(context.l10n.reload),
                 ),
               ],
             ),
@@ -151,13 +116,33 @@ class _SwipeContent extends ConsumerWidget {
         }
         return _SwipeCardStack(
           place: current,
-          onLike: () {
+          onLike: () async {
             ctrl.like();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Added to favorites!'),
+            final messenger = ScaffoldMessenger.of(context);
+            final router = GoRouter.of(context);
+            final l10n = context.l10n;
+            // Guests keep swiping freely; they get one gentle nudge to save
+            // their likes with an account instead of a blocking prompt.
+            if (await ctrl.takeGuestFavoriteHint()) {
+              messenger.showSnackBar(
+                SnackBar(
+                  content: Text(
+                    l10n.guestLikeHint,
+                  ),
+                  duration: const Duration(seconds: 6),
+                  action: SnackBarAction(
+                    label: l10n.signUp,
+                    onPressed: () => router.push('/register'),
+                  ),
+                ),
+              );
+              return;
+            }
+            messenger.showSnackBar(
+              SnackBar(
+                content: Text(l10n.addedToFavorites),
                 backgroundColor: Colors.green,
-                duration: Duration(seconds: 1),
+                duration: const Duration(seconds: 1),
               ),
             );
           },
@@ -520,8 +505,8 @@ class _SwipeCardStackState extends State<_SwipeCardStack>
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Skip',
+                  Text(
+                    context.l10n.skip,
                     style: TextStyle(
                       color: Colors.red,
                       fontSize: 12,
@@ -549,8 +534,8 @@ class _SwipeCardStackState extends State<_SwipeCardStack>
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Like',
+                  Text(
+                    context.l10n.like,
                     style: TextStyle(
                       color: Colors.green,
                       fontSize: 12,

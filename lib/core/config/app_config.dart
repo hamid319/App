@@ -18,6 +18,18 @@ class AppConfig {
   // Google caps Nearby Search (New) at 20 results per request.
   static const int maxPlacesLimit = 20;
 
+  // Location used when GPS is skipped or fails: Los Angeles, where the
+  // current Firestore test places are. Switch to Hamburg (53.5511, 9.9937)
+  // once real Places data for Hamburg is loaded.
+  static const double defaultLat = 34.0522;
+  static const double defaultLng = -118.2437;
+
+  // Development shortcut: skip GPS entirely and always use the default
+  // location above. Avoids the permission prompt and the wait for a fix
+  // (the simulator has none).
+  // TODO(before-launch): set to false. Tracked in POSSIBLE_ERRORS.md 9.1.
+  static const bool useFixedDevLocation = true;
+
   // Define other global app configuration constants here
   // e.g., timeouts, max limits, default settings
 }

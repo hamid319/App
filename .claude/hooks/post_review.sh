@@ -36,6 +36,8 @@ if [ "$ERROR_COUNT" -eq 0 ]; then
   while IFS= read -r f; do
     [ ! -f "$f" ] && continue
     SHORT="${f#$APP/}"
+    # Translations legitimately contain German; hardcoded German elsewhere is a smell.
+    case "$SHORT" in lib/l10n/*) continue ;; esac
     HIT=$(grep -nE "Image\.network\(|\.like\(\)|TODO|FIXME|Fehler|Zurück|Überspringen|Einstellungen|Datenschutz" "$f" 2>/dev/null)
     [ -n "$HIT" ] && ISSUES="${ISSUES}  ${SHORT}:\n$(echo "$HIT" | sed 's/^/    /')\n"
   done <<< "$DART_CHANGED"

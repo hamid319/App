@@ -59,7 +59,7 @@ descriptions have always been `null`.
 | 2.5 | `/users` is readable by every authenticated user, exposing **all emails** and FCM tokens. Nothing currently reads another user's document, so tightening this is safe. | `firestore.rules:19-21` | **OPEN** — needs a `publicProfiles` collection for member names first |
 | 2.6 | No **Firebase App Check**. Without it, anyone with the public config can call the backend and the Cloud Function directly. | no `firebase_app_check` dependency | **OPEN** — `enforceAppCheck` is ready to switch on in `functions/index.js` |
 | 2.7 | Release builds are signed with the **debug keystore**. Not publishable, and it prevents per-app API key restriction. | `android/app/build.gradle.kts` | **OPEN** |
-| 2.8 | Raw exception text is shown to users in ~15 places, leaking Firestore paths and permission-denied internals. | group, profile, swipe and home screens | **OPEN** |
+| 2.8 | Raw exception text is shown to users in ~15 places, leaking Firestore paths and permission-denied internals. | group, profile, swipe and home screens | **FIXED** |
 | 2.9 | Place content (names, addresses, photos) was cached **indefinitely**. Google's Places policy allows storing place IDs indefinitely but not content. Not independently verified against the current policy text — worth confirming. | `place_model.dart`, cache metadata | **FIXED** (30-day TTL plus a daily refresh job in the Cloud Function) |
 
 ---
@@ -83,10 +83,10 @@ descriptions have always been `null`.
 
 | # | Problem | Where | Status |
 |---|---|---|---|
-| 4.1 | Favourites are written as a **whole-array overwrite** from an in-memory list, and the profile read swallows errors and returns an empty list. One failed read followed by one like **wipes the user's favourites**. | `swipe_controller.dart:158`, `profile_repository.dart:16-18` | **OPEN** — use `arrayUnion`/`arrayRemove` |
-| 4.2 | A parse error on a session document is treated as "session missing", which **clears the active session for every member**, killing a live session. | `group_repository.dart:425-429`, `group_controller.dart:66-76` | **OPEN** |
-| 4.3 | `leaveGroup` is a non-transactional read-modify-write, so a concurrent join is lost. If the owner leaves, `ownerUid` points at a non-member and **nobody can start or end sessions again**. | `group_repository.dart:155-177` | **OPEN** |
-| 4.4 | `startSwipeSession` never checks for an existing active session, so a double-tap creates **two sessions**, orphaning the first. | `group_repository.dart:209-257` | **OPEN** |
+| 4.1 | Favourites are written as a **whole-array overwrite** from an in-memory list, and the profile read swallows errors and returns an empty list. One failed read followed by one like **wipes the user's favourites**. | `swipe_controller.dart:158`, `profile_repository.dart:16-18` | **FIXED** |
+| 4.2 | A parse error on a session document is treated as "session missing", which **clears the active session for every member**, killing a live session. | `group_repository.dart:425-429`, `group_controller.dart:66-76` | **FIXED** |
+| 4.3 | `leaveGroup` is a non-transactional read-modify-write, so a concurrent join is lost. If the owner leaves, `ownerUid` points at a non-member and **nobody can start or end sessions again**. | `group_repository.dart:155-177` | **FIXED** |
+| 4.4 | `startSwipeSession` never checks for an existing active session, so a double-tap creates **two sessions**, orphaning the first. | `group_repository.dart:209-257` | **FIXED** |
 | 4.5 | A place with an empty id became `doc('')`, which throws and **aborts the entire cache batch**. | `places_repository.dart:134` | **FIXED** |
 | 4.6 | `toJson` writes explicit `null`s with `merge: true`, so one failed Gemini call **erases a description that was already cached**. | `place_model.dart:78-89` | **OPEN** in the legacy path; **FIXED** in the Cloud Function (nulls omitted) |
 | 4.7 | No timeouts on the Places or Gemini HTTP calls — a hang leaves the UI stuck loading forever. | `places_repository.dart:69,207` | **OPEN** in the legacy path; **FIXED** in the Cloud Function |
@@ -99,15 +99,15 @@ descriptions have always been `null`.
 
 | # | Problem | Where | Status |
 |---|---|---|---|
-| 5.1 | **~88 German strings** remain, in the settings, login and register screens — more than the project docs claimed. All UI text is supposed to be English. | `settings_screen.dart`, `login_screen.dart`, `register_screen.dart` | **OPEN** |
-| 5.2 | The Impressum shows **placeholder legal identity** ("Musterfirma GmbH", "Max Mustermann", "HRB 12345"), and the privacy dialog claims **end-to-end encryption**, which is false for a Firebase app. Both are a real risk if users see them. | `settings_screen.dart:99-124,214` | **OPEN** — awaiting a decision on real text vs removal |
-| 5.3 | Login and register sit **inside the bottom-navigation shell**, so a logged-out user sees the Discover/Groups/Profile tab bar. Confirmed visually on the simulator. | `routes.dart:91-98` | **OPEN** |
-| 5.4 | The group member list shows **raw Firebase UIDs** instead of display names. | `simplified_group_screen.dart:630-636` | **OPEN** |
+| 5.1 | **~88 German strings** remain, in the settings, login and register screens — more than the project docs claimed. All UI text is supposed to be English. | `settings_screen.dart`, `login_screen.dart`, `register_screen.dart` | **FIXED** |
+| 5.2 | The Impressum shows **placeholder legal identity** ("Musterfirma GmbH", "Max Mustermann", "HRB 12345"), and the privacy dialog claims **end-to-end encryption**, which is false for a Firebase app. Both are a real risk if users see them. | `settings_screen.dart:99-124,214` | **FIXED** |
+| 5.3 | Login and register sit **inside the bottom-navigation shell**, so a logged-out user sees the Discover/Groups/Profile tab bar. Confirmed visually on the simulator. | `routes.dart:91-98` | **FIXED** |
+| 5.4 | The group member list shows **raw Firebase UIDs** instead of display names. | `simplified_group_screen.dart:630-636` | **FIXED** |
 | 5.5 | Dark theme is fully built but **never wired up**, and ~130 hardcoded `Colors.*` values would break it anyway. | `app.dart:13`, `theme.dart` | **OPEN** |
-| 5.6 | The city dropdown keeps a stale selected value when the country changes, causing a Flutter assertion in debug and a blank dropdown in release. | `simplified_group_screen.dart:57-71` | **OPEN** |
-| 5.7 | Login and register screens have no scroll view, so on a small screen with the keyboard open the layout **overflows**. | `login_screen.dart:53`, `register_screen.dart:38` | **OPEN** |
-| 5.8 | A destructive "reset all places and favourites" action sits permanently in the home app bar behind a single confirm. | `simplified_home_screen.dart:18-22` | **OPEN** |
-| 5.9 | In a group session the app shows "Added to favorites!" when the like only cast a vote. | `swipe_screen.dart:224-227` | **OPEN** |
+| 5.6 | The city dropdown keeps a stale selected value when the country changes, causing a Flutter assertion in debug and a blank dropdown in release. | `simplified_group_screen.dart:57-71` | **FIXED** |
+| 5.7 | Login and register screens have no scroll view, so on a small screen with the keyboard open the layout **overflows**. | `login_screen.dart:53`, `register_screen.dart:38` | **FIXED** |
+| 5.8 | A destructive "reset all places and favourites" action sits permanently in the home app bar behind a single confirm. | `simplified_home_screen.dart:18-22` | **FIXED** |
+| 5.9 | In a group session the app shows "Added to favorites!" when the like only cast a vote. | `swipe_screen.dart:224-227` | **FIXED** |
 | 5.10 | Only 2 icon buttons in the whole app have accessibility labels. | many screens | **OPEN** |
 
 ---
@@ -156,5 +156,17 @@ project by API key. But **push notifications, App Check and Google Sign-In
 will not work** until the apps are re-registered:
 
 ```bash
-dart run flutterfire_cli:flutterfire configure
+dart pub global activate flutterfire_cli   # once; it is no longer a project dependency
+flutterfire configure
 ```
+
+---
+
+## 9. Before launch: remove development shortcuts
+
+Settings that exist only to make local development faster. Every one of them
+must be reverted before a public release.
+
+| # | Shortcut | Where | What to do before launch |
+|---|---|---|---|
+| 9.1 | **Fixed dev location.** `AppConfig.useFixedDevLocation = true` skips GPS entirely and always uses `defaultLat` / `defaultLng` (currently Los Angeles, where the Firestore test places are). Real users would only ever see places around that point, and the app never asks for location permission. | `lib/core/config/app_config.dart`, used in `lib/core/services/location_service.dart` | Set `useFixedDevLocation` to `false`. Set `defaultLat`/`defaultLng` to the intended fallback for when GPS fails (planned: Hamburg, 53.5511 / 9.9937, once real Places data exists). |

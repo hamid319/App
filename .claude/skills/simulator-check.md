@@ -16,7 +16,7 @@ Use the Flutter MCP server to check the running app. Steps:
 
 4. **Capture and report** — take a screenshot (if MCP supports it) and report:
    - Does the screen render without errors?
-   - Are all strings in English (no German text visible)?
+   - Is all text in the selected language (English or German), with no untranslated strings mixed in?
    - Does the UI match the expected layout for that screen?
 
 5. **Verdict**:

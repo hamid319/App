@@ -9,6 +9,8 @@ import '../../../common/widgets/loading_spinner.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../data/location_repository.dart';
+import '../../../core/errors/user_message.dart';
+import '../../../l10n/l10n.dart';
 
 class SimplifiedGroupScreen extends ConsumerStatefulWidget {
   const SimplifiedGroupScreen({super.key});
@@ -59,6 +61,9 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       _selectedCountryCode = countryCode;
       _selectedCountryName = countryName;
       _selectedCity = null;
+      // Drop the old country's cities so the city field never offers, or
+      // holds, a value from another country while the new list loads.
+      _cities = [];
       _isLoadingLocations = true;
     });
     try {
@@ -97,7 +102,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                 },
               )
             : null,
-        title: Text(selectedId != null ? 'Group Details' : 'Groups'),
+        title: Text(selectedId != null ? context.l10n.groupDetailsTitle : context.l10n.groupsTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -108,16 +113,16 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
         ],
       ),
       body: authState.when(
-        loading: () => const LoadingSpinner(message: 'Loading user...'),
+        loading: () => LoadingSpinner(message: context.l10n.loadingUser),
         error: (e, st) => ErrorView(
-          message: 'Error loading user: $e',
+          message: userMessage(e, fallback: context.l10n.errorLoadAccount, l10n: context.l10n),
           onRetry: () => ref.refresh(authControllerProvider),
         ),
         data: (user) {
           if (user == null) {
             return ErrorView(
-              message: 'Please login to use groups',
-              title: 'Not logged in',
+              message: context.l10n.loginToUseGroups,
+              title: context.l10n.notLoggedIn,
               icon: Icons.login,
               onRetry: () => context.go('/login'),
             );
@@ -125,14 +130,14 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
 
           if (selectedId != null) {
             return groupState.when(
-              loading: () => const LoadingSpinner(message: 'Loading group...'),
+              loading: () => LoadingSpinner(message: context.l10n.loadingGroup),
               error: (e, st) => ErrorView(
-                message: 'Error: $e',
+                message: userMessage(e, fallback: context.l10n.errorLoadGroups, l10n: context.l10n),
                 onRetry: () => ref.refresh(groupControllerProvider),
               ),
               data: (group) {
                 if (group == null) {
-                  return const Center(child: Text('Group not found'));
+                  return Center(child: Text(context.l10n.groupNotFound));
                 }
                 return _buildGroupView(group, user.uid, groupController);
               },
@@ -140,9 +145,9 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
           }
 
           return userGroupsAsync.when(
-            loading: () => const LoadingSpinner(message: 'Loading groups...'),
+            loading: () => LoadingSpinner(message: context.l10n.loadingGroups),
             error: (e, st) => ErrorView(
-              message: 'Error: $e',
+              message: userMessage(e, fallback: context.l10n.errorLoadGroups, l10n: context.l10n),
               onRetry: () => ref.refresh(userGroupsProvider),
             ),
             data: (groups) {
@@ -163,7 +168,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
             child: OutlinedButton.icon(
               onPressed: _showJoinGroupDialog,
               icon: const Icon(Icons.group_add),
-              label: const Text('Join'),
+              label: Text(context.l10n.join),
             ),
           ),
           const SizedBox(width: 16),
@@ -171,7 +176,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
             child: PrimaryButton(
               onPressed: () => setState(() => _showCreateGroup = true),
               icon: Icons.add,
-              label: '+ New',
+              label: context.l10n.newGroupButton,
             ),
           ),
         ],
@@ -239,7 +244,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                'Live',
+                context.l10n.statusLive,
                 style: TextStyle(
                   color: Colors.red.shade700,
                   fontWeight: FontWeight.bold,
@@ -259,7 +264,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    'Done',
+                    context.l10n.statusDone,
                     style: TextStyle(
                       color: Colors.grey.shade700,
                       fontWeight: FontWeight.bold,
@@ -283,7 +288,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    isOwner ? 'Start' : 'Idle',
+                    isOwner ? context.l10n.statusStart : context.l10n.statusIdle,
                     style: TextStyle(
                       color:
                           isOwner ? Colors.blue.shade700 : Colors.grey.shade700,
@@ -300,8 +305,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
         leading: CircleAvatar(
           child: Text(group.groupName?.substring(0, 1).toUpperCase() ?? 'G'),
         ),
-        title: Text(group.groupName ?? 'Unnamed Group'),
-        subtitle: Text('${group.members.length} members'),
+        title: Text(group.groupName ?? context.l10n.unnamedGroup),
+        subtitle: Text(context.l10n.memberCount(group.members.length)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -329,14 +334,14 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
           Icon(Icons.group_add, size: 80, color: Colors.grey[400]),
           const SizedBox(height: 24),
           Text(
-            'No Groups Yet',
+            context.l10n.noGroupsTitle,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Create a new group or join an existing one',
+            context.l10n.noGroupsBody,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[600],
                 ),
@@ -363,7 +368,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Create New Group',
+                context.l10n.createNewGroup,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -371,9 +376,9 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
               const SizedBox(height: 16),
               TextField(
                 controller: _groupNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Group Name',
-                  hintText: 'Enter group name',
+                decoration: InputDecoration(
+                  labelText: context.l10n.groupNameLabel,
+                  hintText: context.l10n.groupNameHint,
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -383,8 +388,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
               else
                 DropdownButtonFormField<String>(
                   isExpanded: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Country',
+                  decoration: InputDecoration(
+                    labelText: context.l10n.countryLabel,
                     border: OutlineInputBorder(),
                   ),
                   initialValue: _selectedCountryCode,
@@ -411,9 +416,13 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                   const CircularProgressIndicator()
                 else
                   DropdownButtonFormField<Map<String, dynamic>>(
+                    // initialValue is only read once, so rebuild the field per
+                    // country; otherwise it keeps a city that is no longer in
+                    // the list and trips Flutter's dropdown assertion.
+                    key: ValueKey(_selectedCountryCode),
                     isExpanded: true,
-                    decoration: const InputDecoration(
-                      labelText: 'City',
+                    decoration: InputDecoration(
+                      labelText: context.l10n.cityLabel,
                       border: OutlineInputBorder(),
                     ),
                     initialValue: _selectedCity,
@@ -441,13 +450,13 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                           _groupNameController.clear();
                         });
                       },
-                      child: const Text('Cancel'),
+                      child: Text(context.l10n.cancel),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: PrimaryButton(
-                      label: 'Create',
+                      label: context.l10n.create,
                       onPressed: _createGroup,
                       isLoading: ref.watch(groupControllerProvider).isLoading,
                     ),
@@ -477,7 +486,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    group.groupName ?? 'Unnamed Group',
+                    group.groupName ?? context.l10n.unnamedGroup,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -485,14 +494,14 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                   const SizedBox(height: 8),
                   if (group.location != null)
                     Text(
-                        'Location: ${group.location!.cityName}, ${group.location!.countryName}'),
+                        context.l10n.groupLocation(group.location!.cityName, group.location!.countryName)),
                   const SizedBox(height: 16),
                   if (group.invite != null && group.joinEnabled == true) ...[
                     Row(
                       children: [
                         Expanded(
                           child: Text(
-                            'Invite Code: ${group.invite!.code}',
+                            context.l10n.inviteCode(group.invite!.code),
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 18),
                           ),
@@ -503,9 +512,9 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                             Clipboard.setData(
                                 ClipboardData(text: group.invite!.code));
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                   content:
-                                      Text('Invite code copied to clipboard')),
+                                      Text(context.l10n.inviteCodeCopied)),
                             );
                           },
                         ),
@@ -513,11 +522,11 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                     ),
                   ],
                   if (group.joinEnabled == false)
-                    const Text('Joining is disabled (Session active)'),
+                    Text(context.l10n.joiningDisabled),
                   if (!isAdmin && !hasActiveSession)
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.only(top: 8.0),
-                      child: Text('Waiting for the admin to start a session.'),
+                      child: Text(context.l10n.waitingForAdmin),
                     ),
                 ],
               ),
@@ -534,7 +543,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        'Admin Controls',
+                        context.l10n.adminControls,
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -545,10 +554,10 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text('Limit Type: '),
+                            Text(context.l10n.limitType),
                             const SizedBox(width: 8),
                             ChoiceChip(
-                              label: const Text('Swipes'),
+                              label: Text(context.l10n.limitSwipes),
                               selected: !_isTimeLimit,
                               onSelected: (val) {
                                 if (val) setState(() => _isTimeLimit = false);
@@ -556,7 +565,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                             ),
                             const SizedBox(width: 8),
                             ChoiceChip(
-                              label: const Text('Time (mins)'),
+                              label: Text(context.l10n.limitTime),
                               selected: _isTimeLimit,
                               onSelected: (val) {
                                 if (val) setState(() => _isTimeLimit = true);
@@ -568,8 +577,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                         Row(
                           children: [
                             Text(_isTimeLimit
-                                ? 'Time Limit: '
-                                : 'Swipe Limit: '),
+                                ? context.l10n.timeLimitLabel
+                                : context.l10n.swipeLimitLabel),
                             Expanded(
                               child: TextField(
                                 controller: _isTimeLimit
@@ -579,7 +588,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                                 decoration: InputDecoration(
                                   isDense: true,
                                   border: const OutlineInputBorder(),
-                                  suffixText: _isTimeLimit ? 'mins' : null,
+                                  suffixText: _isTimeLimit ? context.l10n.minutesSuffix : null,
                                 ),
                               ),
                             ),
@@ -587,7 +596,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                         ),
                         const SizedBox(height: 16),
                         PrimaryButton(
-                          label: 'Start Session',
+                          label: context.l10n.startSession,
                           icon: Icons.play_arrow,
                           onPressed: _startSession,
                         ),
@@ -595,7 +604,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                         OutlinedButton.icon(
                           onPressed: () => controller.endSession(),
                           icon: const Icon(Icons.stop),
-                          label: const Text('End Session Early'),
+                          label: Text(context.l10n.endSessionEarly),
                           style: OutlinedButton.styleFrom(
                               foregroundColor: Colors.red),
                         ),
@@ -612,7 +621,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Members (${group.members.length})',
+                  context.l10n.membersHeader(group.members.length),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -627,13 +636,16 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
               itemBuilder: (context, index) {
                 final memberId = group.members[index];
                 final isMemberAdmin = memberId == group.ownerUid;
+                final name =
+                    ref.watch(groupMemberNameProvider(memberId)).value ??
+                        context.l10n.memberFallback(index + 1);
+                final label = memberId == userId ? context.l10n.memberYou(name) : name;
                 return ListTile(
                   leading: CircleAvatar(
-                    child: Text(memberId.substring(0, 1).toUpperCase()),
+                    child: Text(name.substring(0, 1).toUpperCase()),
                   ),
-                  title:
-                      Text(memberId == userId ? 'You' : 'Member ${index + 1}'),
-                  subtitle: Text(memberId),
+                  title: Text(label),
+                  subtitle: isMemberAdmin ? Text(context.l10n.admin) : null,
                   trailing: isMemberAdmin
                       ? const Icon(Icons.star, color: Colors.amber)
                       : null,
@@ -647,14 +659,14 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
               children: [
                 if (hasActiveSession)
                   PrimaryButton(
-                    label: 'Continue Swiping',
+                    label: context.l10n.continueSwiping,
                     icon: Icons.swipe,
                     width: double.infinity,
                     onPressed: () => context.push('/swipe/${group.groupId}'),
                   )
                 else
                   PrimaryButton(
-                    label: 'View Matches',
+                    label: context.l10n.viewMatches,
                     icon: Icons.favorite,
                     width: double.infinity,
                     onPressed: () =>
@@ -667,9 +679,9 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                     foregroundColor: Colors.red,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: const SizedBox(
+                  child: SizedBox(
                     width: double.infinity,
-                    child: Text('Leave Group', textAlign: TextAlign.center),
+                    child: Text(context.l10n.leaveGroup, textAlign: TextAlign.center),
                   ),
                 ),
               ],
@@ -686,7 +698,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
         _selectedCountryCode == null ||
         _selectedCity == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter name and select location')),
+        SnackBar(content: Text(context.l10n.enterNameAndLocation)),
       );
       return;
     }
@@ -711,8 +723,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
           _groupNameController.clear();
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Group created successfully!'),
+          SnackBar(
+            content: Text(context.l10n.groupCreated),
             backgroundColor: Colors.green,
           ),
         );
@@ -721,7 +733,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('Error creating group: $e'),
+              content: Text(userMessage(e, fallback: context.l10n.errorCreateGroup, l10n: context.l10n)),
               backgroundColor: Colors.red),
         );
       }
@@ -737,8 +749,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       timeLimit = int.tryParse(valStr) ?? 5;
       if (timeLimit < 1 || timeLimit > 120) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Time limit must be between 1 and 120 mins')),
+          SnackBar(
+              content: Text(context.l10n.timeLimitRange)),
         );
         return;
       }
@@ -748,8 +760,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       swipeLimit = int.tryParse(limitStr) ?? 10;
       if (swipeLimit < 1 || swipeLimit > 100) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Swipe limit must be between 1 and 100')),
+          SnackBar(
+              content: Text(context.l10n.swipeLimitRange)),
         );
         return;
       }
@@ -760,15 +772,15 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
           swipeLimit: swipeLimit, durationMinutes: timeLimit);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Session started!'), backgroundColor: Colors.green),
+          SnackBar(
+              content: Text(context.l10n.sessionStarted), backgroundColor: Colors.green),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('Error starting session: $e'),
+              content: Text(userMessage(e, fallback: context.l10n.errorStartSession, l10n: context.l10n)),
               backgroundColor: Colors.red),
         );
       }
@@ -779,14 +791,14 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Join Group via Invite'),
+        title: Text(context.l10n.joinGroupViaInvite),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: _inviteCodeController,
-              decoration: const InputDecoration(
-                labelText: 'Invite Code (6 chars)',
+              decoration: InputDecoration(
+                labelText: context.l10n.inviteCodeFieldLabel,
                 border: OutlineInputBorder(),
               ),
               textCapitalization: TextCapitalization.characters,
@@ -799,10 +811,10 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
               _inviteCodeController.clear();
               Navigator.pop(context);
             },
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancel),
           ),
           PrimaryButton(
-            label: 'Join',
+            label: context.l10n.join,
             onPressed: () {
               _joinGroup();
               Navigator.pop(context);
@@ -818,7 +830,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
 
     if (code.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter an Invite Code')),
+        SnackBar(content: Text(context.l10n.enterInviteCode)),
       );
       return;
     }
@@ -830,8 +842,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       if (mounted) {
         _inviteCodeController.clear();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Successfully joined group!'),
+          SnackBar(
+              content: Text(context.l10n.joinedGroup),
               backgroundColor: Colors.green),
         );
       }
@@ -839,7 +851,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('Error joining group: $e'),
+              content: Text(userMessage(e, fallback: context.l10n.errorJoinGroup, l10n: context.l10n)),
               backgroundColor: Colors.red),
         );
       }
@@ -853,12 +865,12 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Leave Group?'),
-        content: const Text('Are you sure you want to leave this group?'),
+        title: Text(context.l10n.leaveGroupTitle),
+        content: Text(context.l10n.leaveGroupBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -868,12 +880,12 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                   .leaveGroup(groupId, userId);
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Left group')),
+                  SnackBar(content: Text(context.l10n.leftGroup)),
                 );
               }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Leave'),
+            child: Text(context.l10n.leave),
           ),
         ],
       ),
@@ -884,17 +896,18 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Group'),
+        title: Text(context.l10n.deleteGroupTitle),
         content: Text(
-            "Are you sure you want to delete '${group.groupName}'? This cannot be undone."),
+            context.l10n.deleteGroupBody(group.groupName ?? context.l10n.unnamedGroup)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancel),
           ),
           TextButton(
             onPressed: () async {
               final scaffoldMessenger = ScaffoldMessenger.of(context);
+              final l10n = context.l10n;
               Navigator.pop(context);
               try {
                 await ref
@@ -904,12 +917,12 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
               } catch (e) {
                 if (mounted) {
                   scaffoldMessenger.showSnackBar(
-                    SnackBar(content: Text('Error deleting group: $e')),
+                    SnackBar(content: Text(userMessage(e, fallback: l10n.errorDeleteGroup, l10n: l10n))),
                   );
                 }
               }
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(context.l10n.delete, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -946,8 +959,8 @@ class _GroupJoinScreenState extends ConsumerState<GroupJoinScreen> {
           .joinByInviteLink(widget.groupId, widget.code);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Joined group via link!'),
+          SnackBar(
+              content: Text(context.l10n.joinedViaLink),
               backgroundColor: Colors.green),
         );
         context.go('/group');
@@ -956,7 +969,7 @@ class _GroupJoinScreenState extends ConsumerState<GroupJoinScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('Failed to join via link: $e'),
+              content: Text(userMessage(e, fallback: context.l10n.errorJoinGroup, l10n: context.l10n)),
               backgroundColor: Colors.red),
         );
         context.go('/group');
@@ -966,14 +979,14 @@ class _GroupJoinScreenState extends ConsumerState<GroupJoinScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircularProgressIndicator(),
             SizedBox(height: 16),
-            Text('Joining Group...'),
+            Text(context.l10n.joiningGroup),
           ],
         ),
       ),
