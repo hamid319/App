@@ -194,12 +194,6 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get navProfile;
 
-  /// No description provided for @onboardingSkip.
-  ///
-  /// In en, this message translates to:
-  /// **'Skip'**
-  String get onboardingSkip;
-
   /// No description provided for @onboardingNext.
   ///
   /// In en, this message translates to:
@@ -211,42 +205,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Get Started'**
   String get onboardingGetStarted;
-
-  /// No description provided for @onboardingDiscoverTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Discover new places'**
-  String get onboardingDiscoverTitle;
-
-  /// No description provided for @onboardingDiscoverBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Swipe through interesting places nearby and find your next travel destinations.'**
-  String get onboardingDiscoverBody;
-
-  /// No description provided for @onboardingFavoritesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Collect favorites'**
-  String get onboardingFavoritesTitle;
-
-  /// No description provided for @onboardingFavoritesBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Mark places you like and create your personal wishlist.'**
-  String get onboardingFavoritesBody;
-
-  /// No description provided for @onboardingGroupsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Plan with friends'**
-  String get onboardingGroupsTitle;
-
-  /// No description provided for @onboardingGroupsBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Create groups and find the best places for your next trip together.'**
-  String get onboardingGroupsBody;
 
   /// No description provided for @languageTitle.
   ///
@@ -1765,6 +1723,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View place'**
   String get matchOpenPlace;
+
+  /// No description provided for @onboarding1Lead.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe your way to your'**
+  String get onboarding1Lead;
+
+  /// No description provided for @onboarding1Accent.
+  ///
+  /// In en, this message translates to:
+  /// **'next favourite place.'**
+  String get onboarding1Accent;
+
+  /// No description provided for @onboarding1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe right for “want to see”, left for “rather not”.'**
+  String get onboarding1Body;
+
+  /// No description provided for @onboarding2Lead.
+  ///
+  /// In en, this message translates to:
+  /// **'Save what you love,'**
+  String get onboarding2Lead;
+
+  /// No description provided for @onboarding2Accent.
+  ///
+  /// In en, this message translates to:
+  /// **'plan it later.'**
+  String get onboarding2Accent;
+
+  /// No description provided for @onboarding2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Every like lands in your favorites, ready for your next trip.'**
+  String get onboarding2Body;
+
+  /// No description provided for @onboarding3Lead.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan together,'**
+  String get onboarding3Lead;
+
+  /// No description provided for @onboarding3Accent.
+  ///
+  /// In en, this message translates to:
+  /// **'without endless chats.'**
+  String get onboarding3Accent;
+
+  /// No description provided for @onboarding3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone swipes the same deck. SwipeTrip shows you what you all like.'**
+  String get onboarding3Body;
+
+  /// No description provided for @onboardingGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Just look around as a guest'**
+  String get onboardingGuest;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All · {count}'**
+  String filterAll(int count);
+
+  /// No description provided for @profileStats.
+  ///
+  /// In en, this message translates to:
+  /// **'{favorites, plural, =1{1 favorite} other{{favorites} favorites}} · {groups, plural, =1{1 group} other{{groups} groups}}'**
+  String profileStats(int favorites, int groups);
+
+  /// No description provided for @guestName.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest'**
+  String get guestName;
+
+  /// No description provided for @guestSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in'**
+  String get guestSubtitle;
+
+  /// No description provided for @loginHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back'**
+  String get loginHeadline;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to sync your favorites and groups.'**
+  String get loginSubtitle;
+
+  /// No description provided for @registerHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your account'**
+  String get registerHeadline;
+
+  /// No description provided for @registerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep your favorites and plan trips with friends.'**
+  String get registerSubtitle;
 }
 
 class _AppLocalizationsDelegate

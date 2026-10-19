@@ -57,34 +57,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get navProfile => 'Profil';
 
   @override
-  String get onboardingSkip => 'Überspringen';
-
-  @override
   String get onboardingNext => 'Weiter';
 
   @override
   String get onboardingGetStarted => 'Los geht\'s';
-
-  @override
-  String get onboardingDiscoverTitle => 'Neue Orte entdecken';
-
-  @override
-  String get onboardingDiscoverBody =>
-      'Swipe durch spannende Orte und finde dein nächstes Reiseziel.';
-
-  @override
-  String get onboardingFavoritesTitle => 'Favoriten sammeln';
-
-  @override
-  String get onboardingFavoritesBody =>
-      'Markiere Orte, die dir gefallen, und erstelle deine persönliche Wunschliste.';
-
-  @override
-  String get onboardingGroupsTitle => 'Mit Freunden planen';
-
-  @override
-  String get onboardingGroupsBody =>
-      'Erstelle Gruppen und findet gemeinsam die besten Orte für eure nächste Reise.';
 
   @override
   String get languageTitle => 'Sprache';
@@ -918,4 +894,79 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get matchOpenPlace => 'Ort ansehen';
+
+  @override
+  String get onboarding1Lead => 'Swipe dich zu deinem';
+
+  @override
+  String get onboarding1Accent => 'nächsten Lieblingsort.';
+
+  @override
+  String get onboarding1Body =>
+      'Rechts für „will ich sehen“, links für „lieber nicht“.';
+
+  @override
+  String get onboarding2Lead => 'Sammle, was dir gefällt –';
+
+  @override
+  String get onboarding2Accent => 'plane später.';
+
+  @override
+  String get onboarding2Body =>
+      'Jedes Like landet in deinen Favoriten, bereit für die nächste Reise.';
+
+  @override
+  String get onboarding3Lead => 'Plant zusammen,';
+
+  @override
+  String get onboarding3Accent => 'ohne endlose Chats.';
+
+  @override
+  String get onboarding3Body =>
+      'Alle swipen denselben Stapel. SwipeTrip zeigt euch, was allen gefällt.';
+
+  @override
+  String get onboardingGuest => 'Erst mal als Gast umsehen';
+
+  @override
+  String filterAll(int count) {
+    return 'Alle · $count';
+  }
+
+  @override
+  String profileStats(int favorites, int groups) {
+    String _temp0 = intl.Intl.pluralLogic(
+      favorites,
+      locale: localeName,
+      other: '$favorites Favoriten',
+      one: '1 Favorit',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      groups,
+      locale: localeName,
+      other: '$groups Gruppen',
+      one: '1 Gruppe',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get guestName => 'Gast';
+
+  @override
+  String get guestSubtitle => 'Nicht angemeldet';
+
+  @override
+  String get loginHeadline => 'Willkommen zurück';
+
+  @override
+  String get loginSubtitle =>
+      'Melde dich an, um Favoriten und Gruppen zu synchronisieren.';
+
+  @override
+  String get registerHeadline => 'Erstelle dein Konto';
+
+  @override
+  String get registerSubtitle =>
+      'Behalte deine Favoriten und plane Reisen mit Freunden.';
 }

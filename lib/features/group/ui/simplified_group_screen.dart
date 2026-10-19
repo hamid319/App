@@ -236,95 +236,134 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
     final isLive = group.activeSessionId != null;
     final hasCompleted = group.hasCompletedSession == true;
     final isOwner = group.ownerUid == userId;
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final l10n = context.l10n;
+    void open() =>
+        ref.read(selectedGroupIdProvider.notifier).updateState(group.groupId);
 
-    final badge = isLive
-        ? InkWell(
-            onTap: () => context.push('/swipe/${group.groupId}'),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.errorContainer,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                context.l10n.statusLive,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.error,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          )
-        : hasCompleted
-            ? InkWell(
-                onTap: () => context.push('/group-matches/${group.groupId}'),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    context.l10n.statusDone,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
+    final (String label, Color fg, Color bg, VoidCallback onTap) status =
+        isLive
+            ? (
+                l10n.statusLive,
+                context.swipeColors.like,
+                context.swipeColors.like.withValues(alpha: 0.14),
+                () => context.push('/swipe/${group.groupId}'),
               )
-            : InkWell(
-                onTap: () {
-                  ref
-                      .read(selectedGroupIdProvider.notifier)
-                      .updateState(group.groupId);
-                },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color:
-                        isOwner ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(12),
+            : hasCompleted
+                ? (
+                    l10n.statusDone,
+                    scheme.onSurfaceVariant,
+                    scheme.surfaceContainerHighest,
+                    () => context.push('/group-matches/${group.groupId}'),
+                  )
+                : isOwner
+                    ? (
+                        l10n.statusStart,
+                        scheme.primary,
+                        scheme.primaryContainer,
+                        open,
+                      )
+                    : (
+                        l10n.statusIdle,
+                        scheme.onSurfaceVariant,
+                        scheme.surfaceContainerHighest,
+                        open,
+                      );
+    final subtitle = [
+      if (group.location?.cityName.isNotEmpty == true) group.location!.cityName,
+      l10n.memberCount(group.members.length),
+    ].join(' · ');
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Card(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(24),
+          onTap: open,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 4, 14),
+            child: Row(
+              children: [
+                _AvatarStack(memberIds: group.members),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        group.groupName ?? l10n.unnamedGroup,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: text.titleMedium,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: text.bodySmall
+                            ?.copyWith(color: scheme.onSurfaceVariant),
+                      ),
+                    ],
                   ),
-                  child: Text(
-                    isOwner ? context.l10n.statusStart : context.l10n.statusIdle,
-                    style: TextStyle(
-                      color:
-                          isOwner ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                ),
+                InkWell(
+                  borderRadius: BorderRadius.circular(999),
+                  onTap: status.$4,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: status.$3,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (isLive) ...[
+                          Container(
+                            width: 7,
+                            height: 7,
+                            decoration: BoxDecoration(
+                              color: status.$2,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                        ],
+                        Text(
+                          status.$1,
+                          style: text.labelMedium?.copyWith(
+                            color: status.$2,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              );
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: CircleAvatar(
-          child: Text(group.groupName?.substring(0, 1).toUpperCase() ?? 'G'),
+                if (isOwner)
+                  PopupMenuButton<String>(
+                    tooltip: l10n.moreOptions,
+                    icon: Icon(Icons.more_vert, color: scheme.onSurfaceVariant),
+                    onSelected: (_) => _confirmDeleteGroup(group),
+                    itemBuilder: (_) => [
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Text(
+                          l10n.deleteGroupTitle,
+                          style: TextStyle(color: scheme.error),
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  const SizedBox(width: 12),
+              ],
+            ),
+          ),
         ),
-        title: Text(group.groupName ?? context.l10n.unnamedGroup),
-        subtitle: Text(context.l10n.memberCount(group.members.length)),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            badge,
-            if (isOwner)
-              IconButton(
-                icon: Icon(Icons.delete_outline,
-                    color: Theme.of(context).colorScheme.error, size: 20),
-                onPressed: () => _confirmDeleteGroup(group),
-              ),
-          ],
-        ),
-        onTap: () {
-          ref.read(selectedGroupIdProvider.notifier).updateState(group.groupId);
-        },
       ),
     );
   }
@@ -991,6 +1030,39 @@ class _GroupJoinScreenState extends ConsumerState<GroupJoinScreen> {
             Text(context.l10n.joiningGroup),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Up to three overlapping member avatars, like a group chat icon.
+class _AvatarStack extends ConsumerWidget {
+  const _AvatarStack({required this.memberIds});
+
+  final List<String> memberIds;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    const size = 34.0;
+    const overlap = 12.0;
+    final shown = memberIds.take(3).toList();
+    final ring = Theme.of(context).colorScheme.surface;
+    return SizedBox(
+      width: size + (shown.length - 1).clamp(0, 2) * (size - overlap),
+      height: size,
+      child: Stack(
+        children: [
+          for (final (i, id) in shown.indexed)
+            Positioned(
+              left: i * (size - overlap),
+              child: MemberAvatar(
+                id: id,
+                name: ref.watch(groupMemberNameProvider(id)).value ?? '',
+                size: size,
+                borderColor: ring,
+              ),
+            ),
+        ],
       ),
     );
   }

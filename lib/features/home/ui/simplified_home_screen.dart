@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/errors/user_message.dart';
 import '../../swipe/logic/swipe_controller.dart';
 import '../../swipe/widgets/swipe_deck.dart';
+import '../../../common/widgets/wordmark.dart';
 import '../../../l10n/l10n.dart';
 import '../../../app/theme.dart';
 
@@ -14,7 +15,7 @@ class SimplifiedHomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.l10n.discoverTitle),
+        title: const Wordmark(),
       ),
       body: const _SwipeContent(),
     );

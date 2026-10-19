@@ -16,15 +16,8 @@
   "navDiscover": "Discover",
   "navGroups": "Groups",
   "navProfile": "Profile",
-  "onboardingSkip": "Skip",
   "onboardingNext": "Next",
   "onboardingGetStarted": "Get Started",
-  "onboardingDiscoverTitle": "Discover new places",
-  "onboardingDiscoverBody": "Swipe through interesting places nearby and find your next travel destinations.",
-  "onboardingFavoritesTitle": "Collect favorites",
-  "onboardingFavoritesBody": "Mark places you like and create your personal wishlist.",
-  "onboardingGroupsTitle": "Plan with friends",
-  "onboardingGroupsBody": "Create groups and find the best places for your next trip together.",
   "languageTitle": "Language",
   "languageSystem": "System default",
   "languageEnglish": "English",
@@ -367,5 +360,40 @@
         "type": "int"
       }
     }
-  }
+  },
+  "onboarding1Lead": "Swipe your way to your",
+  "onboarding1Accent": "next favourite place.",
+  "onboarding1Body": "Swipe right for “want to see”, left for “rather not”.",
+  "onboarding2Lead": "Save what you love,",
+  "onboarding2Accent": "plan it later.",
+  "onboarding2Body": "Every like lands in your favorites, ready for your next trip.",
+  "onboarding3Lead": "Plan together,",
+  "onboarding3Accent": "without endless chats.",
+  "onboarding3Body": "Everyone swipes the same deck. SwipeTrip shows you what you all like.",
+  "onboardingGuest": "Just look around as a guest",
+  "filterAll": "All · {count}",
+  "@filterAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profileStats": "{favorites, plural, =1{1 favorite} other{{favorites} favorites}} · {groups, plural, =1{1 group} other{{groups} groups}}",
+  "guestName": "Guest",
+  "guestSubtitle": "Not signed in",
+  "@profileStats": {
+    "placeholders": {
+      "favorites": {
+        "type": "int"
+      },
+      "groups": {
+        "type": "int"
+      }
+    }
+  },
+  "loginHeadline": "Welcome back",
+  "loginSubtitle": "Log in to sync your favorites and groups.",
+  "registerHeadline": "Create your account",
+  "registerSubtitle": "Keep your favorites and plan trips with friends."
 }

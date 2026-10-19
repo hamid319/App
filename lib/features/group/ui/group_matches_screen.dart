@@ -13,6 +13,7 @@ import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
 import '../../../common/widgets/skeleton.dart';
 import '../widgets/match_celebration.dart';
+import '../../../app/theme.dart';
 
 class ResultItem {
   final PlaceModel place;
@@ -452,16 +453,17 @@ class _ResultsListState extends ConsumerState<_ResultsList> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final like = context.swipeColors.like;
     return ReorderableListView.builder(
       buildDefaultDragHandles: false,
       padding: const EdgeInsets.all(16.0),
       itemCount: _results.length,
-      onReorder: (oldIndex, newIndex) {
+      // onReorderItem already accounts for the removed item's index shift.
+      onReorderItem: (oldIndex, newIndex) {
         if (!widget.isAdmin) return;
         setState(() {
-          if (newIndex > oldIndex) {
-            newIndex -= 1;
-          }
           final item = _results.removeAt(oldIndex);
           _results.insert(newIndex, item);
         });
@@ -469,35 +471,98 @@ class _ResultsListState extends ConsumerState<_ResultsList> {
       },
       itemBuilder: (context, index) {
         final result = _results[index];
-        return ListTile(
+        final podium = index < 3;
+        return Padding(
           key: ValueKey(result.place.id),
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-          leading: _ResultThumbnail(place: result.place),
-          title: Text(result.place.name),
-          subtitle:
-              result.place.address != null ? Text(result.place.address!) : null,
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.favorite, color: Theme.of(context).colorScheme.error, size: 18),
-              const SizedBox(width: 6),
-              Text('${result.likes}',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              if (widget.isAdmin) ...[
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
-                  onPressed: () => _removeItem(index),
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Card(
+            child: InkWell(
+              borderRadius: BorderRadius.circular(24),
+              onTap: () => context.push('/place/${result.place.id}'),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 10, 6, 10),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 28,
+                      child: Text(
+                        '${index + 1}',
+                        textAlign: TextAlign.center,
+                        style: text.headlineSmall?.copyWith(
+                          color: podium ? scheme.primary : scheme.outline,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    _ResultThumbnail(place: result.place),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            result.place.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: text.titleMedium,
+                          ),
+                          if (result.place.address != null) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              result.place.address!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: text.bodySmall
+                                  ?.copyWith(color: scheme.onSurfaceVariant),
+                            ),
+                          ],
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: like.withValues(alpha: 0.14),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.favorite, size: 13, color: like),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${result.likes}',
+                                  style: text.labelMedium?.copyWith(
+                                    color: like,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (widget.isAdmin) ...[
+                      IconButton(
+                        tooltip: MaterialLocalizations.of(context)
+                            .deleteButtonTooltip,
+                        icon: Icon(Icons.close, color: scheme.onSurfaceVariant),
+                        onPressed: () => _removeItem(index),
+                      ),
+                      ReorderableDragStartListener(
+                        index: index,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Icon(Icons.drag_indicator,
+                              color: scheme.onSurfaceVariant),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-                ReorderableDragStartListener(
-                  index: index,
-                  child: Icon(Icons.drag_handle, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                ),
-              ],
-            ],
+              ),
+            ),
           ),
-          onTap: () => context.push('/place/${result.place.id}'),
         );
       },
     );

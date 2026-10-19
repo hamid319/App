@@ -7,6 +7,9 @@ import '../../../app/locale_controller.dart';
 import '../../../app/theme_mode_controller.dart';
 import '../../../app/theme_mode_picker.dart';
 import '../../../l10n/l10n.dart';
+import '../../../common/widgets/member_avatar.dart';
+import '../../group/logic/group_controller.dart';
+import '../../swipe/logic/swipe_controller.dart';
 
 /// Open to everyone. The "App" section (language, privacy, security) works
 /// for guests too; the "Account" section depends on having a real account.
@@ -27,6 +30,7 @@ class SettingsScreen extends ConsumerWidget {
       ),
       body: ListView(
         children: [
+          _ProfileCard(hasAccount: hasAccount),
           _SectionHeader(l10n.settingsAppSection),
           ListTile(
             leading: const Icon(Icons.language),
@@ -201,6 +205,78 @@ class _SectionHeader extends StatelessWidget {
         style: Theme.of(context).textTheme.labelLarge?.copyWith(
               color: Theme.of(context).colorScheme.primary,
             ),
+      ),
+    );
+  }
+}
+
+/// Who is signed in, with a quick count of what they have saved.
+class _ProfileCard extends ConsumerWidget {
+  const _ProfileCard({required this.hasAccount});
+
+  final bool hasAccount;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final user = ref.watch(authControllerProvider).value;
+    ref.watch(swipeControllerProvider);
+    final favorites =
+        ref.read(swipeControllerProvider.notifier).favoritesList.length;
+    final groups = ref.watch(userGroupsProvider).value?.length ?? 0;
+    final name = hasAccount
+        ? (user?.displayName?.trim().isNotEmpty == true
+            ? user!.displayName!.trim()
+            : (user?.email ?? l10n.userFallbackName))
+        : l10n.guestName;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      child: Card(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(24),
+          onTap: () => context.go('/profile'),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                hasAccount
+                    ? MemberAvatar(id: user?.uid ?? '', name: name, size: 48)
+                    : CircleAvatar(
+                        radius: 24,
+                        backgroundColor: scheme.surfaceContainerHighest,
+                        child: Icon(Icons.person_outline,
+                            color: scheme.onSurfaceVariant),
+                      ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: text.titleMedium,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        hasAccount
+                            ? l10n.profileStats(favorites, groups)
+                            : l10n.guestSubtitle,
+                        style: text.bodyMedium
+                            ?.copyWith(color: scheme.onSurfaceVariant),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
