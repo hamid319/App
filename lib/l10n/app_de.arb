@@ -330,5 +330,8 @@
   "photoCreditGoogle": "Google Maps",
   "photoCreditWikimedia": "Wikimedia Commons",
   "photoCreditNumber": "Foto {number}",
-  "errorOpenLink": "Der Link konnte nicht geöffnet werden."
+  "errorOpenLink": "Der Link konnte nicht geöffnet werden.",
+  "mapsChooseTitle": "Route öffnen mit",
+  "appleMaps": "Apple Karten",
+  "googleMaps": "Google Maps"
 }

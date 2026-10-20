@@ -1105,4 +1105,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get errorOpenLink => 'Der Link konnte nicht geöffnet werden.';
+
+  @override
+  String get mapsChooseTitle => 'Route öffnen mit';
+
+  @override
+  String get appleMaps => 'Apple Karten';
+
+  @override
+  String get googleMaps => 'Google Maps';
 }

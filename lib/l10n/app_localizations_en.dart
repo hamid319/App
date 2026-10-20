@@ -1080,4 +1080,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorOpenLink => 'Couldn\'t open the link.';
+
+  @override
+  String get mapsChooseTitle => 'Get directions with';
+
+  @override
+  String get appleMaps => 'Apple Maps';
+
+  @override
+  String get googleMaps => 'Google Maps';
 }

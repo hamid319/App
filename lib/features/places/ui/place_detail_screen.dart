@@ -14,6 +14,7 @@ import '../../../core/services/maps_launcher.dart';
 import '../../../l10n/l10n.dart';
 import '../../swipe/data/places_repository.dart';
 import '../../swipe/logic/swipe_controller.dart';
+import '../widgets/maps_app_sheet.dart';
 import '../widgets/photo_credits.dart';
 import '../widgets/prompt_tile.dart';
 
@@ -268,8 +269,13 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
         isFav: isFav,
         onToggleFavorite: toggleFavorite,
         onOpenMaps: () async {
+          // iOS users choose between Apple Maps and Google Maps.
+          final app = Theme.of(context).platform == TargetPlatform.iOS
+              ? await showMapsAppSheet(context)
+              : MapsApp.google;
+          if (app == null) return;
           try {
-            await MapsLauncher.openInMaps(place.lat, place.lng, place.name);
+            await MapsLauncher.open(app, place.lat, place.lng, place.name);
           } catch (e) {
             if (!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(

@@ -2083,6 +2083,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t open the link.'**
   String get errorOpenLink;
+
+  /// No description provided for @mapsChooseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get directions with'**
+  String get mapsChooseTitle;
+
+  /// No description provided for @appleMaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Apple Maps'**
+  String get appleMaps;
+
+  /// No description provided for @googleMaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Maps'**
+  String get googleMaps;
 }
 
 class _AppLocalizationsDelegate

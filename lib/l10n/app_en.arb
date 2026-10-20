@@ -465,5 +465,8 @@
         "type": "int"
       }
     }
-  }
+  },
+  "mapsChooseTitle": "Get directions with",
+  "appleMaps": "Apple Maps",
+  "googleMaps": "Google Maps"
 }
