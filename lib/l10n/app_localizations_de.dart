@@ -1114,4 +1114,34 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get googleMaps => 'Google Maps';
+
+  @override
+  String get fromCalendar => 'Aus Kalender übernehmen';
+
+  @override
+  String get calendarPickTitle => 'Reise aus deinem Kalender wählen';
+
+  @override
+  String get calendarPickHint =>
+      'Wir übernehmen Titel, Ort und Datum des Termins für die Gruppe. Sonst verlässt nichts dein Handy.';
+
+  @override
+  String get calendarPermissionDenied =>
+      'SwipeTrip hat keinen Zugriff auf deinen Kalender. Du kannst ihn in den Einstellungen deines iPhones oder Android-Geräts erlauben.';
+
+  @override
+  String get errorLoadCalendar => 'Dein Kalender konnte nicht geladen werden.';
+
+  @override
+  String get calendarNoEvents => 'Keine kommenden Termine in deinem Kalender.';
+
+  @override
+  String get calendarCityNotFound =>
+      'Die Stadt wurde nicht erkannt. Bitte wähle sie aus.';
+
+  @override
+  String get tripDatesLabel => 'Reisezeitraum (optional)';
+
+  @override
+  String get clearTripDates => 'Zeitraum entfernen';
 }

@@ -1089,4 +1089,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get googleMaps => 'Google Maps';
+
+  @override
+  String get fromCalendar => 'From calendar';
+
+  @override
+  String get calendarPickTitle => 'Pick a trip from your calendar';
+
+  @override
+  String get calendarPickHint =>
+      'We use the event\'s title, place and dates for the group. Nothing else leaves your phone.';
+
+  @override
+  String get calendarPermissionDenied =>
+      'SwipeTrip has no access to your calendar. You can allow it in the iPhone or Android settings.';
+
+  @override
+  String get errorLoadCalendar => 'Couldn\'t load your calendar.';
+
+  @override
+  String get calendarNoEvents => 'No upcoming events in your calendar.';
+
+  @override
+  String get calendarCityNotFound =>
+      'We couldn\'t recognise the city. Please pick it.';
+
+  @override
+  String get tripDatesLabel => 'Travel dates (optional)';
+
+  @override
+  String get clearTripDates => 'Remove dates';
 }

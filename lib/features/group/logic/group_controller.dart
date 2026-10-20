@@ -135,6 +135,8 @@ class GroupController extends AsyncNotifier<GroupModel?> {
   Future<void> createGroupWithSettings({
     required String groupName,
     required GroupLocation location,
+    DateTime? tripStart,
+    DateTime? tripEnd,
   }) async {
     final currentUser = ref.read(authControllerProvider).value;
     if (currentUser == null) throw StateError('Not authenticated');
@@ -152,6 +154,8 @@ class GroupController extends AsyncNotifier<GroupModel?> {
         invite:
             GroupInvite(code: _generateInviteCode(), createdAt: DateTime.now()),
         createdAt: DateTime.now(),
+        tripStart: tripStart,
+        tripEnd: tripEnd,
       );
       await _repo.createGroup(group);
       ref.read(selectedGroupIdProvider.notifier).updateState(group.groupId);

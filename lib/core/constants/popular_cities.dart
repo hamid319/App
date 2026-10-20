@@ -22,6 +22,28 @@ class PopularCity {
   /// English country name, as stored on a group's location.
   String get countryNameEn => _countryNames[countryCode] ?? countryCode;
 
+  /// Finds a city named (in English or German) in free text such as a
+  /// calendar event's location or title, e.g. "Wochenende Lissabon".
+  /// Texts are checked in order; whole words only, so "Rom" does not match
+  /// "Romantik".
+  static PopularCity? findIn(Iterable<String?> texts) {
+    String words(String text) =>
+        ' ${text.toLowerCase().split(RegExp(r'[^\p{L}]+', unicode: true)).where((w) => w.isNotEmpty).join(' ')} ';
+    final byLength = [...popularCities]
+      ..sort((a, b) => b.nameEn.length.compareTo(a.nameEn.length));
+    for (final text in texts) {
+      if (text == null || text.trim().isEmpty) continue;
+      final haystack = words(text);
+      for (final city in byLength) {
+        if (haystack.contains(words(city.nameEn)) ||
+            haystack.contains(words(city.nameDe))) {
+          return city;
+        }
+      }
+    }
+    return null;
+  }
+
   static PopularCity? byId(String? id) {
     if (id == null) return null;
     for (final c in popularCities) {

@@ -15,6 +15,9 @@ import '../../../common/widgets/member_avatar.dart';
 import '../widgets/session_progress_panel.dart';
 import '../../../common/widgets/city_picker.dart';
 import '../../../core/constants/popular_cities.dart';
+import '../../../common/utils/trip_dates.dart';
+import '../../../main_providers.dart';
+import '../widgets/calendar_trip_sheet.dart';
 
 class SimplifiedGroupScreen extends ConsumerStatefulWidget {
   const SimplifiedGroupScreen({super.key});
@@ -37,6 +40,9 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
 
   /// Destination of the group being created.
   PopularCity? _city;
+
+  /// Optional travel dates of the group being created.
+  DateTimeRange? _tripDates;
 
   @override
   void dispose() {
@@ -236,6 +242,9 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                   );
     final subtitle = [
       if (group.location?.cityName.isNotEmpty == true) group.location!.cityName,
+      if (group.tripStart != null)
+        formatTripDates(group.tripStart!, group.tripEnd,
+            Localizations.localeOf(context).toLanguageTag()),
       l10n.memberCount(group.members.length),
     ].join(' · ');
 
@@ -385,7 +394,16 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                       fontWeight: FontWeight.bold,
                     ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: _fillFromCalendar,
+                  icon: const Icon(Icons.event_outlined),
+                  label: Text(context.l10n.fromCalendar),
+                ),
+              ),
+              const SizedBox(height: 8),
               TextField(
                 controller: _groupNameController,
                 decoration: InputDecoration(
@@ -405,6 +423,12 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                 ),
               ),
               const SizedBox(height: 16),
+              _TripDatesField(
+                dates: _tripDates,
+                onTap: _pickTripDates,
+                onClear: () => setState(() => _tripDates = null),
+              ),
+              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
@@ -413,6 +437,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                         setState(() {
                           _showCreateGroup = false;
                           _groupNameController.clear();
+                          _city = null;
+                          _tripDates = null;
                         });
                       },
                       child: Text(context.l10n.cancel),
@@ -466,8 +492,17 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            '${group.location!.cityName}, '
-                            '${group.location!.countryName}',
+                            [
+                              '${group.location!.cityName}, '
+                                  '${group.location!.countryName}',
+                              if (group.tripStart != null)
+                                formatTripDates(
+                                  group.tripStart!,
+                                  group.tripEnd,
+                                  Localizations.localeOf(context)
+                                      .toLanguageTag(),
+                                ),
+                            ].join(' · '),
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
@@ -712,6 +747,40 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
     );
   }
 
+  /// Fills name, city and dates from an event the user picks in their
+  /// calendar. Calendar access is only requested here, on the user's tap.
+  Future<void> _fillFromCalendar() async {
+    final calendar = ref.read(calendarServiceProvider);
+    final trip = await showCalendarTripSheet(
+      context,
+      loadTrips: calendar.upcomingTrips,
+    );
+    if (trip == null || !mounted) return;
+    final city = PopularCity.findIn([trip.location, trip.title]);
+    setState(() {
+      _groupNameController.text = trip.title;
+      if (city != null) _city = city;
+      _tripDates = DateTimeRange(start: trip.start, end: trip.end);
+    });
+    if (city == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.calendarCityNotFound)),
+      );
+    }
+  }
+
+  Future<void> _pickTripDates() async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: today,
+      lastDate: today.add(const Duration(days: 730)),
+      initialDateRange: _tripDates,
+    );
+    if (picked != null && mounted) setState(() => _tripDates = picked);
+  }
+
   void _createGroup() async {
     final groupName = _groupNameController.text.trim();
     final city = _city;
@@ -736,12 +805,15 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       await ref.read(groupControllerProvider.notifier).createGroupWithSettings(
             groupName: groupName,
             location: location,
+            tripStart: _tripDates?.start,
+            tripEnd: _tripDates?.end,
           );
       if (mounted) {
         setState(() {
           _showCreateGroup = false;
           _groupNameController.clear();
           _city = null;
+          _tripDates = null;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1088,6 +1160,46 @@ class _CityField extends StatelessWidget {
         child: city == null
             ? null
             : Text('${city!.nameFor(lang)} · ${city!.countryCode}'),
+      ),
+    );
+  }
+}
+
+/// Optional travel dates, styled like the city field; opens a range picker.
+class _TripDatesField extends StatelessWidget {
+  const _TripDatesField({
+    required this.dates,
+    required this.onTap,
+    required this.onClear,
+  });
+
+  final DateTimeRange? dates;
+  final VoidCallback onTap;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final range = dates;
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: InputDecorator(
+        isEmpty: range == null,
+        decoration: InputDecoration(
+          labelText: context.l10n.tripDatesLabel,
+          prefixIcon: const Icon(Icons.date_range_outlined),
+          suffixIcon: range == null
+              ? const Icon(Icons.expand_more)
+              : IconButton(
+                  tooltip: context.l10n.clearTripDates,
+                  icon: const Icon(Icons.close),
+                  onPressed: onClear,
+                ),
+        ),
+        child: range == null
+            ? null
+            : Text(formatTripDates(range.start, range.end,
+                Localizations.localeOf(context).toLanguageTag())),
       ),
     );
   }

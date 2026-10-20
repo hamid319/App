@@ -468,5 +468,14 @@
   },
   "mapsChooseTitle": "Get directions with",
   "appleMaps": "Apple Maps",
-  "googleMaps": "Google Maps"
+  "googleMaps": "Google Maps",
+  "fromCalendar": "From calendar",
+  "calendarPickTitle": "Pick a trip from your calendar",
+  "calendarPickHint": "We use the event's title, place and dates for the group. Nothing else leaves your phone.",
+  "calendarPermissionDenied": "SwipeTrip has no access to your calendar. You can allow it in the iPhone or Android settings.",
+  "errorLoadCalendar": "Couldn't load your calendar.",
+  "calendarNoEvents": "No upcoming events in your calendar.",
+  "calendarCityNotFound": "We couldn't recognise the city. Please pick it.",
+  "tripDatesLabel": "Travel dates (optional)",
+  "clearTripDates": "Remove dates"
 }

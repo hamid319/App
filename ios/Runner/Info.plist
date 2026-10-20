@@ -55,5 +55,9 @@
 	<array>
 		<string>comgooglemaps</string>
 	</array>
+	<key>NSCalendarsUsageDescription</key>
+	<string>SwipeTrip reads the calendar event you pick to prepare a travel group with its title, place and dates.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>SwipeTrip reads the calendar event you pick to prepare a travel group with its title, place and dates.</string>
 </dict>
 </plist>

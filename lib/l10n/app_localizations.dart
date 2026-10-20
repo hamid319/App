@@ -2101,6 +2101,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Google Maps'**
   String get googleMaps;
+
+  /// No description provided for @fromCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'From calendar'**
+  String get fromCalendar;
+
+  /// No description provided for @calendarPickTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a trip from your calendar'**
+  String get calendarPickTitle;
+
+  /// No description provided for @calendarPickHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We use the event\'s title, place and dates for the group. Nothing else leaves your phone.'**
+  String get calendarPickHint;
+
+  /// No description provided for @calendarPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'SwipeTrip has no access to your calendar. You can allow it in the iPhone or Android settings.'**
+  String get calendarPermissionDenied;
+
+  /// No description provided for @errorLoadCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your calendar.'**
+  String get errorLoadCalendar;
+
+  /// No description provided for @calendarNoEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming events in your calendar.'**
+  String get calendarNoEvents;
+
+  /// No description provided for @calendarCityNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t recognise the city. Please pick it.'**
+  String get calendarCityNotFound;
+
+  /// No description provided for @tripDatesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel dates (optional)'**
+  String get tripDatesLabel;
+
+  /// No description provided for @clearTripDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove dates'**
+  String get clearTripDates;
 }
 
 class _AppLocalizationsDelegate

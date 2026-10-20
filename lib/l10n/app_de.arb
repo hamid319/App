@@ -333,5 +333,14 @@
   "errorOpenLink": "Der Link konnte nicht geöffnet werden.",
   "mapsChooseTitle": "Route öffnen mit",
   "appleMaps": "Apple Karten",
-  "googleMaps": "Google Maps"
+  "googleMaps": "Google Maps",
+  "fromCalendar": "Aus Kalender übernehmen",
+  "calendarPickTitle": "Reise aus deinem Kalender wählen",
+  "calendarPickHint": "Wir übernehmen Titel, Ort und Datum des Termins für die Gruppe. Sonst verlässt nichts dein Handy.",
+  "calendarPermissionDenied": "SwipeTrip hat keinen Zugriff auf deinen Kalender. Du kannst ihn in den Einstellungen deines iPhones oder Android-Geräts erlauben.",
+  "errorLoadCalendar": "Dein Kalender konnte nicht geladen werden.",
+  "calendarNoEvents": "Keine kommenden Termine in deinem Kalender.",
+  "calendarCityNotFound": "Die Stadt wurde nicht erkannt. Bitte wähle sie aus.",
+  "tripDatesLabel": "Reisezeitraum (optional)",
+  "clearTripDates": "Zeitraum entfernen"
 }
