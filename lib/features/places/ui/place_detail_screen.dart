@@ -14,6 +14,8 @@ import '../../../core/services/maps_launcher.dart';
 import '../../../l10n/l10n.dart';
 import '../../swipe/data/places_repository.dart';
 import '../../swipe/logic/swipe_controller.dart';
+import '../widgets/photo_credits.dart';
+import '../widgets/prompt_tile.dart';
 
 final placeDetailProvider =
     FutureProvider.family<PlaceModel?, String>((ref, placeId) async {
@@ -188,9 +190,24 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
               ],
               flexibleSpace: FlexibleSpaceBar(
                 stretchModes: const [StretchMode.zoomBackground],
-                background: Hero(
-                  tag: placePhotoHeroTag(place.id),
-                  child: PlacePhoto(place: place),
+                background: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Hero(
+                      tag: placePhotoHeroTag(place.id),
+                      child: PlacePhoto(place: place),
+                    ),
+                    if (place.photoCredits.isNotEmpty)
+                      Positioned(
+                        left: AppSizes.screenEdge,
+                        right: AppSizes.screenEdge * 3,
+                        bottom: AppSizes.radiusLg + AppSizes.space8,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: PhotoCreditChip(credits: place.photoCredits),
+                        ),
+                      ),
+                  ],
                 ),
               ),
               // Rounded top edge of the content sheet, overlapping the photo.
@@ -226,6 +243,10 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
                       runSpacing: 6,
                       children: [for (final t in tags) _SoftTag(label: t)],
                     ),
+                  ],
+                  for (final prompt in place.prompts) ...[
+                    const SizedBox(height: AppSizes.space12),
+                    PromptTile(prompt: prompt),
                   ],
                   if (description.isNotEmpty) ...[
                     const SizedBox(height: AppSizes.groupGap),

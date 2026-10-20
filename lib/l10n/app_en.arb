@@ -438,5 +438,32 @@
       }
     }
   },
-  "inviteCodeTitle": "Invite code"
+  "inviteCodeTitle": "Invite code",
+  "promptBestTime": "Best time",
+  "promptInsiderTip": "Insider tip",
+  "promptDontMiss": "Don't miss",
+  "promptGoodFor": "Perfect for",
+  "promptFunFact": "Did you know?",
+  "photoCreditShort": "Photo: {author}",
+  "photoCreditsTitle": "Photo credits",
+  "photoCreditsHint": "Photos belong to their authors and are shown under the terms listed.",
+  "photoCreditUnknownAuthor": "Unknown author",
+  "photoCreditGoogle": "Google Maps",
+  "photoCreditWikimedia": "Wikimedia Commons",
+  "photoCreditNumber": "Photo {number}",
+  "errorOpenLink": "Couldn't open the link.",
+  "@photoCreditShort": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      }
+    }
+  },
+  "@photoCreditNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  }
 }

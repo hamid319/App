@@ -68,6 +68,9 @@ Env.googlePlacesApiKey  // loaded from .env via flutter_dotenv
     /votes/{placeId}   likedBy: string[], dislikedBy: string[]
     /userSwipes/{uid}  swipedPlaceIds: string[]
 /places/{placeId}      imageUrls: string[], types: string[]
+                       prompts: [{kind, text: {en, de}}]   (prompt tiles; kinds in PlacePromptKind)
+                       photos: [{publicUrl, creator, licenseName, licenseUrl, commonsFilePageUrl}]  (Wikidata pipeline)
+                       photoAttributions: [{displayName, uri}]  (Google; must be shown with the photo)
 ```
 
 ## Known bugs — never reintroduce

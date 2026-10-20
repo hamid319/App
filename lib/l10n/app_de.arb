@@ -317,5 +317,18 @@
   "emptyFilteredTitle": "Nichts passt zu deinen Filtern",
   "emptyFilteredBody": "Probier andere Interessen oder einen größeren Umkreis.",
   "changePlace": "Ort ändern",
-  "inviteCodeTitle": "Einladungscode"
+  "inviteCodeTitle": "Einladungscode",
+  "promptBestTime": "Am besten",
+  "promptInsiderTip": "Insider-Tipp",
+  "promptDontMiss": "Nicht verpassen",
+  "promptGoodFor": "Ideal für",
+  "promptFunFact": "Schon gewusst?",
+  "photoCreditShort": "Foto: {author}",
+  "photoCreditsTitle": "Bildnachweise",
+  "photoCreditsHint": "Die Fotos gehören ihren Urhebern und werden zu den genannten Bedingungen gezeigt.",
+  "photoCreditUnknownAuthor": "Unbekannter Urheber",
+  "photoCreditGoogle": "Google Maps",
+  "photoCreditWikimedia": "Wikimedia Commons",
+  "photoCreditNumber": "Foto {number}",
+  "errorOpenLink": "Der Link konnte nicht geöffnet werden."
 }

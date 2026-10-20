@@ -1061,4 +1061,48 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get inviteCodeTitle => 'Einladungscode';
+
+  @override
+  String get promptBestTime => 'Am besten';
+
+  @override
+  String get promptInsiderTip => 'Insider-Tipp';
+
+  @override
+  String get promptDontMiss => 'Nicht verpassen';
+
+  @override
+  String get promptGoodFor => 'Ideal für';
+
+  @override
+  String get promptFunFact => 'Schon gewusst?';
+
+  @override
+  String photoCreditShort(String author) {
+    return 'Foto: $author';
+  }
+
+  @override
+  String get photoCreditsTitle => 'Bildnachweise';
+
+  @override
+  String get photoCreditsHint =>
+      'Die Fotos gehören ihren Urhebern und werden zu den genannten Bedingungen gezeigt.';
+
+  @override
+  String get photoCreditUnknownAuthor => 'Unbekannter Urheber';
+
+  @override
+  String get photoCreditGoogle => 'Google Maps';
+
+  @override
+  String get photoCreditWikimedia => 'Wikimedia Commons';
+
+  @override
+  String photoCreditNumber(int number) {
+    return 'Foto $number';
+  }
+
+  @override
+  String get errorOpenLink => 'Der Link konnte nicht geöffnet werden.';
 }

@@ -2005,6 +2005,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invite code'**
   String get inviteCodeTitle;
+
+  /// No description provided for @promptBestTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Best time'**
+  String get promptBestTime;
+
+  /// No description provided for @promptInsiderTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Insider tip'**
+  String get promptInsiderTip;
+
+  /// No description provided for @promptDontMiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t miss'**
+  String get promptDontMiss;
+
+  /// No description provided for @promptGoodFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfect for'**
+  String get promptGoodFor;
+
+  /// No description provided for @promptFunFact.
+  ///
+  /// In en, this message translates to:
+  /// **'Did you know?'**
+  String get promptFunFact;
+
+  /// No description provided for @photoCreditShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo: {author}'**
+  String photoCreditShort(String author);
+
+  /// No description provided for @photoCreditsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo credits'**
+  String get photoCreditsTitle;
+
+  /// No description provided for @photoCreditsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos belong to their authors and are shown under the terms listed.'**
+  String get photoCreditsHint;
+
+  /// No description provided for @photoCreditUnknownAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown author'**
+  String get photoCreditUnknownAuthor;
+
+  /// No description provided for @photoCreditGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Maps'**
+  String get photoCreditGoogle;
+
+  /// No description provided for @photoCreditWikimedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Wikimedia Commons'**
+  String get photoCreditWikimedia;
+
+  /// No description provided for @photoCreditNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo {number}'**
+  String photoCreditNumber(int number);
+
+  /// No description provided for @errorOpenLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the link.'**
+  String get errorOpenLink;
 }
 
 class _AppLocalizationsDelegate

@@ -58,6 +58,16 @@ class AppTypography {
         color: Colors.white,
       );
 
+  /// Answer line of a prompt tile.
+  static TextStyle prompt(Color color) => TextStyle(
+        fontFamily: displayFamily,
+        fontSize: 17,
+        height: 1.3,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.2,
+        color: color,
+      );
+
   /// LIKE / NOPE stamp.
   static TextStyle stamp(Color color) => TextStyle(
         fontFamily: displayFamily,

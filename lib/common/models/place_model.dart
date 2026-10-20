@@ -1,5 +1,8 @@
 import 'package:meta/meta.dart';
 
+import 'photo_credit.dart';
+import 'place_prompt.dart';
+
 @immutable
 class PlaceModel {
   final String id;
@@ -15,6 +18,12 @@ class PlaceModel {
 
   final String? cityId;
 
+  /// Prompt tiles for the detail page; empty until the backend fills them.
+  final List<PlacePrompt> prompts;
+
+  /// Author and licence per photo, in the same order as the photos.
+  final List<PhotoCredit> photoCredits;
+
   const PlaceModel({
     required this.id,
     required this.name,
@@ -27,6 +36,8 @@ class PlaceModel {
     this.averageRating,
     this.types = const [],
     this.cityId,
+    this.prompts = const [],
+    this.photoCredits = const [],
   });
 
   PlaceModel copyWith({
@@ -41,6 +52,8 @@ class PlaceModel {
     double? averageRating,
     List<String>? types,
     String? cityId,
+    List<PlacePrompt>? prompts,
+    List<PhotoCredit>? photoCredits,
   }) {
     return PlaceModel(
       id: id ?? this.id,
@@ -54,6 +67,8 @@ class PlaceModel {
       averageRating: averageRating ?? this.averageRating,
       types: types ?? this.types,
       cityId: cityId ?? this.cityId,
+      prompts: prompts ?? this.prompts,
+      photoCredits: photoCredits ?? this.photoCredits,
     );
   }
 
@@ -64,8 +79,7 @@ class PlaceModel {
         lat: (json['lat'] as num).toDouble(),
         lng: (json['lng'] as num).toDouble(),
         address: json['address'] as String?,
-        imageUrls:
-            List<String>.from(json['imageUrls'] ?? (json['images'] ?? [])),
+        imageUrls: _imageUrls(json),
         photoResourceNames:
             List<String>.from(json['photoResourceNames'] ?? const <String>[]),
         averageRating: json['averageRating'] != null
@@ -73,7 +87,15 @@ class PlaceModel {
             : null,
         types: List<String>.from(json['types'] ?? (json['tags'] ?? [])),
         cityId: json['cityId'] as String?,
+        prompts: PlacePrompt.listFromJson(json['prompts']),
+        photoCredits: PhotoCredit.listFromPlaceJson(json),
       );
+
+  static List<String> _imageUrls(Map<String, dynamic> json) {
+    final urls =
+        List<String>.from(json['imageUrls'] ?? (json['images'] ?? const []));
+    return urls.isNotEmpty ? urls : PhotoCredit.pipelineImageUrls(json);
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,
