@@ -18,10 +18,20 @@ import type { WikimediaHttpClient } from "../src/adapters/safe-http.js";
 import { JobBudget } from "../src/services/budget.js";
 import { runCityPipeline, type CollectionSource, type PipelineRepository } from "../src/services/pipeline.js";
 
-let sourceImage: Buffer;
-beforeAll(async () => {
-  sourceImage = await sharp({ create: { width: 800, height: 640, channels: 3, background: "#336699" } }).jpeg().toBuffer();
-});
+// One distinct image per thumbnail URL. The pipeline drops photos whose
+// processed output hash it has already stored, so a single shared image
+// let only the first place through and broke the 30/50-place cases.
+const imageCache = new Map<string, Buffer>();
+async function imageFor(url: string): Promise<Buffer> {
+  const number = Number(url.match(/(\d+)\.jpg$/)?.[1] ?? 0);
+  if (!imageCache.has(url)) {
+    imageCache.set(url, await sharp({
+      create: { width: 800, height: 640, channels: 3, background: { r: number % 256, g: (number * 7) % 256, b: 128 } },
+    }).jpeg().toBuffer());
+  }
+  return imageCache.get(url)!;
+}
+beforeAll(() => imageCache.clear());
 
 describe("city pipeline publication", () => {
   for (const count of [0, 1, 30, 50]) {
@@ -65,7 +75,7 @@ function dependencies(repository: FakeRepository, count: number) {
     source,
     budget,
     objects: new FakeObjects() as ObjectStore,
-    http: { download: async () => sourceImage } as unknown as WikimediaHttpClient,
+    http: { download: async (url: string) => imageFor(url) } as unknown as WikimediaHttpClient,
     now: () => new Date("2026-09-13T12:00:00Z"),
   };
 }

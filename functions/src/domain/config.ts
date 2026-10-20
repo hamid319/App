@@ -15,6 +15,9 @@ export const LIMITS: Readonly<PipelineLimits> = Object.freeze({
   maxAttempts: 3,
   totalRuntimeMs: 60 * 60 * 1000,
   radiusKm: 15,
+  // Places with fewer Wikipedia articles are rarely what travellers look for,
+  // and the filter keeps the radius queries fast.
+  minSitelinks: 3,
   minLongEdge: 640,
   minShortEdge: 320,
   maxOutputLongEdge: 1280,
@@ -55,6 +58,19 @@ export const ATTRACTION_TYPE_ROOTS = Object.freeze([
   { qid: "Q22698", label: "park", priority: 6 },
   { qid: "Q1107656", label: "garden", priority: 7 },
   { qid: "Q6017969", label: "viewpoint", priority: 8 },
+]);
+
+// Searched in addition to ATTRACTION_TYPE_ROOTS when collecting candidates.
+// The radius queries follow one subclass hop for speed, and these sit two
+// hops below "religious building" (cathedral -> church building -> religious
+// building), so St. Stephen's and Notre-Dame were missed. The classification
+// pass still maps them to the attraction roots.
+export const EXTRA_DISCOVERY_ROOTS = Object.freeze([
+  "Q16970", // church building
+  "Q2977", // cathedral
+  "Q32815", // mosque
+  "Q34627", // synagogue
+  "Q44539", // temple
 ]);
 
 export const EXCLUDED_TYPE_ROOTS = Object.freeze([

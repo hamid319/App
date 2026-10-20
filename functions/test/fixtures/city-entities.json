@@ -20,5 +20,20 @@
       "P625": [{ "rank": "preferred", "mainsnak": { "snaktype": "value", "datavalue": { "value": { "latitude": 1.29, "longitude": 103.85, "globe": "http://www.wikidata.org/entity/Q2" } } } }]
     }
   },
-  "Q183": { "id": "Q183", "labels": { "en": { "value": "Germany" } } }
+  "Q183": { "id": "Q183", "labels": { "en": { "value": "Germany" } } },
+  "Q65": {
+    "id": "Q65",
+    "labels": { "en": { "value": "Los Angeles" } },
+    "claims": {
+      "P31": [
+        { "rank": "preferred", "mainsnak": { "snaktype": "value", "datavalue": { "value": { "id": "Q13218391" } } } },
+        { "rank": "normal", "mainsnak": { "snaktype": "value", "datavalue": { "value": { "id": "Q515" } } } },
+        { "rank": "normal", "mainsnak": { "snaktype": "value", "datavalue": { "value": { "id": "Q200250" } } } }
+      ],
+      "P17": [{ "rank": "normal", "mainsnak": { "snaktype": "value", "datavalue": { "value": { "id": "Q30" } } } }],
+      "P625": [{ "rank": "normal", "mainsnak": { "snaktype": "value", "datavalue": { "value": { "latitude": 34.05223, "longitude": -118.24368, "globe": "http://www.wikidata.org/entity/Q2" } } } }]
+    }
+  },
+  "Q30": { "id": "Q30", "labels": { "en": { "value": "United States" } } },
+  "Q13218391": { "id": "Q13218391", "labels": { "en": { "value": "charter city" } }, "claims": {} }
 }

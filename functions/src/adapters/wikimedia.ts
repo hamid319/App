@@ -2,6 +2,7 @@ import {
   ALLOWED_CITY_ROOT_TYPES,
   ATTRACTION_TYPE_ROOTS,
   EXCLUDED_TYPE_ROOTS,
+  EXTRA_DISCOVERY_ROOTS,
   LIMITS,
 } from "../domain/config.js";
 import { PipelineError } from "../domain/errors.js";
@@ -45,7 +46,10 @@ export class WikimediaSource {
     const label = sanitizePlainText(entity.labels?.en?.value);
     if (!label) throw new PipelineError("invalid-city-name", "City has no English label");
 
-    const typeQids = this.bestEntityIds(entity.claims?.P31);
+    // Types use every non-deprecated claim. Taking only the preferred one
+    // rejected Los Angeles, whose preferred type is "charter city" while
+    // "city" and "metropolis" are normal-rank claims.
+    const typeQids = this.liveEntityIds(entity.claims?.P31);
     if (!typeQids.some((type) => ALLOWED_CITY_ROOT_TYPES.has(type))) {
       const isSettlement = await this.isSubclassOfAny(typeQids, ALLOWED_CITY_ROOT_TYPES, 4);
       if (!isSettlement) throw new PipelineError("invalid-city-type", "Entity is not a settlement");
@@ -66,7 +70,23 @@ export class WikimediaSource {
   }
 
   async findAttractions(city: CityIdentity): Promise<AttractionCandidate[]> {
-    const query = `
+    // One small radius query per attraction type, merged afterwards.
+    //  - Filtering by type after ranking everything in the radius spent the
+    //    candidate limit on districts, stations and universities: Paris kept
+    //    11 of its several hundred attractions.
+    //  - Includes EXTRA_DISCOVERY_ROOTS (church, cathedral, …), see config.
+    //  - A single query with all types plus subclass paths timed out on the
+    //    public endpoint for dense cities (Paris: 504 after 60 s), while one
+    //    type at a time answers in a few seconds.
+    // One subclass hop keeps each query fast; the classification pass below
+    // still walks four hops and applies the exclusions.
+    const grouped = new Map<string, AttractionCandidate>();
+    const discoveryRoots = [
+      ...ATTRACTION_TYPE_ROOTS.map((item) => item.qid),
+      ...EXTRA_DISCOVERY_ROOTS,
+    ];
+    for (const rootQid of discoveryRoots) {
+      const query = `
 SELECT DISTINCT ?item ?coord ?image ?sitelinks ?distance
 WHERE {
   SERVICE wikibase:around {
@@ -75,43 +95,49 @@ WHERE {
                     wikibase:radius "${LIMITS.radiusKm}";
                     wikibase:distance ?distance.
   }
-  ?item wdt:P17 wd:${city.countryQid}; wikibase:sitelinks ?sitelinks.
+  ?item wdt:P31/wdt:P279? wd:${rootQid}.
+  ?item wikibase:sitelinks ?sitelinks.
+  FILTER(?sitelinks >= ${LIMITS.minSitelinks})
+  ?item wdt:P17 wd:${city.countryQid}.
   OPTIONAL { ?item wdt:P18 ?image. }
 }
 ORDER BY DESC(?sitelinks) ?item
 LIMIT ${LIMITS.candidateLimit}`;
-    const url = new URL("https://query.wikidata.org/sparql");
-    url.searchParams.set("query", query);
-    url.searchParams.set("format", "json");
-    const response = await this.http.json<SparqlResponse>(url);
-    const grouped = new Map<string, AttractionCandidate>();
-    for (const row of response.results?.bindings ?? []) {
-      const qid = entityId(row.item?.value);
-      const coord = parseWktPoint(row.coord?.value);
-      if (!qid || !coord || !isQid(qid)) continue;
-      const existing = grouped.get(qid);
-      const image = commonsTitleFromUri(row.image?.value);
-      if (existing) {
-        if (image && !existing.p18Files.includes(image)) existing.p18Files.push(image);
-        continue;
+      const url = new URL("https://query.wikidata.org/sparql");
+      url.searchParams.set("query", query);
+      url.searchParams.set("format", "json");
+      // The query service allows up to 60 s per query.
+      const response = await this.http.json<SparqlResponse>(url, { timeoutMs: 60_000 });
+      for (const row of response.results?.bindings ?? []) {
+        const qid = entityId(row.item?.value);
+        const coord = parseWktPoint(row.coord?.value);
+        if (!qid || !coord || !isQid(qid)) continue;
+        const existing = grouped.get(qid);
+        const image = commonsTitleFromUri(row.image?.value);
+        if (existing) {
+          if (image && !existing.p18Files.includes(image)) existing.p18Files.push(image);
+          continue;
+        }
+        grouped.set(qid, {
+          rank: 0,
+          qid,
+          name: qid,
+          coordinates: coord,
+          countryQid: city.countryQid,
+          types: [],
+          typeLabels: [],
+          sitelinks: Number(row.sitelinks?.value ?? 0),
+          distanceKm: Number(row.distance?.value ?? Number.MAX_SAFE_INTEGER),
+          p18Files: image ? [image] : [],
+          sourceRevisionId: 0,
+          sourceRevisionTimestamp: "",
+        });
       }
-      grouped.set(qid, {
-        rank: 0,
-        qid,
-        name: qid,
-        coordinates: coord,
-        countryQid: city.countryQid,
-        types: [],
-        typeLabels: [],
-        sitelinks: Number(row.sitelinks?.value ?? 0),
-        distanceKm: Number(row.distance?.value ?? Number.MAX_SAFE_INTEGER),
-        p18Files: image ? [image] : [],
-        sourceRevisionId: 0,
-        sourceRevisionTimestamp: "",
-      });
-      if (grouped.size >= LIMITS.candidateLimit) break;
     }
-    const nearby = [...grouped.values()];
+    // Best-known first, capped like before.
+    const nearby = [...grouped.values()]
+      .sort((x, y) => y.sitelinks - x.sitelinks || x.qid.localeCompare(y.qid))
+      .slice(0, LIMITS.candidateLimit);
     const allowed = ATTRACTION_TYPE_ROOTS.map((item) => `wd:${item.qid}`).join(" ");
     const excluded = EXCLUDED_TYPE_ROOTS.map((qid) => `wd:${qid}`).join(" ");
     for (let offset = 0; offset < nearby.length; offset += 50) {
@@ -129,7 +155,7 @@ SELECT DISTINCT ?item ?rootType WHERE {
       const classifyUrl = new URL("https://query.wikidata.org/sparql");
       classifyUrl.searchParams.set("query", classification);
       classifyUrl.searchParams.set("format", "json");
-      const classified = await this.http.json<SparqlResponse>(classifyUrl);
+      const classified = await this.http.json<SparqlResponse>(classifyUrl, { timeoutMs: 60_000 });
       for (const row of classified.results?.bindings ?? []) {
         const qid = entityId(row.item?.value);
         const rootType = entityId(row.rootType?.value);
@@ -272,6 +298,14 @@ SELECT DISTINCT ?item ?rootType WHERE {
     const live = (claims ?? []).filter((claim) => claim.rank !== "deprecated" && claim.mainsnak?.snaktype === "value");
     const preferred = live.filter((claim) => claim.rank === "preferred");
     return preferred.length > 0 ? preferred : live.filter((claim) => claim.rank !== "deprecated");
+  }
+
+  private liveEntityIds(claims: WikidataClaim[] | undefined): string[] {
+    const ids = (claims ?? [])
+      .filter((claim) => claim.rank !== "deprecated" && claim.mainsnak?.snaktype === "value")
+      .map((claim) => entityValue(claim.mainsnak?.datavalue?.value))
+      .filter((value): value is string => Boolean(value && isQid(value)));
+    return [...new Set(ids)];
   }
 
   private bestEntityIds(claims: WikidataClaim[] | undefined): string[] {

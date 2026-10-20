@@ -157,6 +157,7 @@ export interface PipelineLimits {
   maxAttempts: number;
   totalRuntimeMs: number;
   radiusKm: number;
+  minSitelinks: number;
   minLongEdge: number;
   minShortEdge: number;
   maxOutputLongEdge: number;

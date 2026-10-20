@@ -17,7 +17,7 @@ for (const cityQid of cityQids) {
     checkedAt: new Date().toISOString(),
     city,
     candidateCount: candidates.length,
-    firstCandidates: candidates.slice(0, 5).map(({ qid, name, types, sitelinks, distanceKm, p18Files }) => ({ qid, name, types, sitelinks, distanceKm, p18Count: p18Files.length })),
+    firstCandidates: candidates.slice(0, 8).map(({ qid, name, types, sitelinks, distanceKm, p18Files }) => ({ qid, name, types, sitelinks, distanceKm, p18Count: p18Files.length })),
     counters,
   })}\n`);
 }
