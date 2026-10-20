@@ -17,7 +17,6 @@ Future<void> showLanguagePicker(BuildContext context, WidgetRef ref) {
     context: context,
     // Above the shell's bottom navigation bar, which would cover the options.
     useRootNavigator: true,
-    showDragHandle: true,
     builder: (sheetContext) {
       final selected = ref.read(localeControllerProvider)?.languageCode;
       final l10n = sheetContext.l10n;
@@ -50,34 +49,4 @@ Future<void> showLanguagePicker(BuildContext context, WidgetRef ref) {
       );
     },
   );
-}
-
-/// Compact DE | EN switch for the onboarding screen. Shows the language the
-/// app is currently displayed in, which may come from the device.
-class LanguageToggle extends ConsumerWidget {
-  const LanguageToggle({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final current = Localizations.localeOf(context).languageCode;
-    return SegmentedButton<String>(
-      showSelectedIcon: false,
-      style: const ButtonStyle(
-        visualDensity: VisualDensity.compact,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
-      segments: [
-        for (final code in supportedLanguageCodes)
-          ButtonSegment(
-            value: code,
-            label: Text(code.toUpperCase()),
-            tooltip: languageName(context.l10n, code),
-          ),
-      ],
-      selected: {current},
-      onSelectionChanged: (selection) => ref
-          .read(localeControllerProvider.notifier)
-          .setLanguage(selection.first),
-    );
-  }
 }

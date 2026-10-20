@@ -194,12 +194,6 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get navProfile;
 
-  /// No description provided for @onboardingSkip.
-  ///
-  /// In en, this message translates to:
-  /// **'Skip'**
-  String get onboardingSkip;
-
   /// No description provided for @onboardingNext.
   ///
   /// In en, this message translates to:
@@ -211,42 +205,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Get Started'**
   String get onboardingGetStarted;
-
-  /// No description provided for @onboardingDiscoverTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Discover new places'**
-  String get onboardingDiscoverTitle;
-
-  /// No description provided for @onboardingDiscoverBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Swipe through interesting places nearby and find your next travel destinations.'**
-  String get onboardingDiscoverBody;
-
-  /// No description provided for @onboardingFavoritesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Collect favorites'**
-  String get onboardingFavoritesTitle;
-
-  /// No description provided for @onboardingFavoritesBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Mark places you like and create your personal wishlist.'**
-  String get onboardingFavoritesBody;
-
-  /// No description provided for @onboardingGroupsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Plan with friends'**
-  String get onboardingGroupsTitle;
-
-  /// No description provided for @onboardingGroupsBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Create groups and find the best places for your next trip together.'**
-  String get onboardingGroupsBody;
 
   /// No description provided for @languageTitle.
   ///
@@ -890,12 +848,6 @@ abstract class AppLocalizations {
   /// **'Group Results'**
   String get groupResultsTitle;
 
-  /// No description provided for @loadingGroup.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading group...'**
-  String get loadingGroup;
-
   /// No description provided for @failedToLoadGroup.
   ///
   /// In en, this message translates to:
@@ -914,12 +866,6 @@ abstract class AppLocalizations {
   /// **'Create or join a group first'**
   String get noGroupMessage;
 
-  /// No description provided for @loadingSessionHistory.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading session history...'**
-  String get loadingSessionHistory;
-
   /// No description provided for @noCompletedSessionsTitle.
   ///
   /// In en, this message translates to:
@@ -931,12 +877,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Finish a session to see results here.'**
   String get noCompletedSessionsBody;
-
-  /// No description provided for @loadingResults.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading results...'**
-  String get loadingResults;
 
   /// No description provided for @noQualifiedPlacesTitle.
   ///
@@ -968,18 +908,6 @@ abstract class AppLocalizations {
   /// **'Groups'**
   String get groupsTitle;
 
-  /// No description provided for @loadingUser.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading user...'**
-  String get loadingUser;
-
-  /// No description provided for @loadingGroups.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading groups...'**
-  String get loadingGroups;
-
   /// No description provided for @notLoggedIn.
   ///
   /// In en, this message translates to:
@@ -1001,7 +929,7 @@ abstract class AppLocalizations {
   /// No description provided for @newGroupButton.
   ///
   /// In en, this message translates to:
-  /// **'+ New'**
+  /// **'New'**
   String get newGroupButton;
 
   /// No description provided for @statusLive.
@@ -1310,12 +1238,6 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get profileTitle;
 
-  /// No description provided for @loadingProfile.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading profile...'**
-  String get loadingProfile;
-
   /// No description provided for @loginToViewProfile.
   ///
   /// In en, this message translates to:
@@ -1525,6 +1447,714 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create an account to manage your profile and log in on other devices.'**
   String get createAccountToManage;
+
+  /// No description provided for @tagTouristAttraction.
+  ///
+  /// In en, this message translates to:
+  /// **'Sight'**
+  String get tagTouristAttraction;
+
+  /// No description provided for @tagMuseum.
+  ///
+  /// In en, this message translates to:
+  /// **'Museum'**
+  String get tagMuseum;
+
+  /// No description provided for @tagArtGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get tagArtGallery;
+
+  /// No description provided for @tagArt.
+  ///
+  /// In en, this message translates to:
+  /// **'Art'**
+  String get tagArt;
+
+  /// No description provided for @tagCulture.
+  ///
+  /// In en, this message translates to:
+  /// **'Culture'**
+  String get tagCulture;
+
+  /// No description provided for @tagHistoricalLandmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Historic site'**
+  String get tagHistoricalLandmark;
+
+  /// No description provided for @tagCulturalLandmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Landmark'**
+  String get tagCulturalLandmark;
+
+  /// No description provided for @tagLandmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Landmark'**
+  String get tagLandmark;
+
+  /// No description provided for @tagHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get tagHistory;
+
+  /// No description provided for @tagChurch.
+  ///
+  /// In en, this message translates to:
+  /// **'Church'**
+  String get tagChurch;
+
+  /// No description provided for @tagPark.
+  ///
+  /// In en, this message translates to:
+  /// **'Park'**
+  String get tagPark;
+
+  /// No description provided for @tagNature.
+  ///
+  /// In en, this message translates to:
+  /// **'Nature'**
+  String get tagNature;
+
+  /// No description provided for @tagNaturalFeature.
+  ///
+  /// In en, this message translates to:
+  /// **'Nature spot'**
+  String get tagNaturalFeature;
+
+  /// No description provided for @tagOutdoors.
+  ///
+  /// In en, this message translates to:
+  /// **'Outdoors'**
+  String get tagOutdoors;
+
+  /// No description provided for @tagBeach.
+  ///
+  /// In en, this message translates to:
+  /// **'Beach'**
+  String get tagBeach;
+
+  /// No description provided for @tagViewpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewpoint'**
+  String get tagViewpoint;
+
+  /// No description provided for @tagHiking.
+  ///
+  /// In en, this message translates to:
+  /// **'Hiking'**
+  String get tagHiking;
+
+  /// No description provided for @tagFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get tagFamily;
+
+  /// No description provided for @tagScience.
+  ///
+  /// In en, this message translates to:
+  /// **'Science'**
+  String get tagScience;
+
+  /// No description provided for @tagZoo.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoo'**
+  String get tagZoo;
+
+  /// No description provided for @tagAquarium.
+  ///
+  /// In en, this message translates to:
+  /// **'Aquarium'**
+  String get tagAquarium;
+
+  /// No description provided for @tagAmusementPark.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme park'**
+  String get tagAmusementPark;
+
+  /// No description provided for @tagShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get tagShopping;
+
+  /// No description provided for @tagMarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Market'**
+  String get tagMarket;
+
+  /// No description provided for @tagNightlife.
+  ///
+  /// In en, this message translates to:
+  /// **'Nightlife'**
+  String get tagNightlife;
+
+  /// No description provided for @tagMusic.
+  ///
+  /// In en, this message translates to:
+  /// **'Music'**
+  String get tagMusic;
+
+  /// No description provided for @tagArchitecture.
+  ///
+  /// In en, this message translates to:
+  /// **'Architecture'**
+  String get tagArchitecture;
+
+  /// No description provided for @tagPhotoSpot.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo spot'**
+  String get tagPhotoSpot;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo last swipe'**
+  String get undo;
+
+  /// No description provided for @details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get details;
+
+  /// No description provided for @undone.
+  ///
+  /// In en, this message translates to:
+  /// **'Brought back'**
+  String get undone;
+
+  /// No description provided for @appearanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearanceTitle;
+
+  /// No description provided for @appearanceSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get appearanceSystem;
+
+  /// No description provided for @appearanceLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get appearanceLight;
+
+  /// No description provided for @appearanceDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get appearanceDark;
+
+  /// No description provided for @navFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get navFavorites;
+
+  /// No description provided for @sessionLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Session in progress'**
+  String get sessionLive;
+
+  /// No description provided for @sessionTimeLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min left'**
+  String sessionTimeLeft(int minutes);
+
+  /// No description provided for @yourProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'your progress'**
+  String get yourProgress;
+
+  /// No description provided for @memberDone.
+  ///
+  /// In en, this message translates to:
+  /// **'done'**
+  String get memberDone;
+
+  /// No description provided for @whoIsSwiping.
+  ///
+  /// In en, this message translates to:
+  /// **'Who\'s still swiping?'**
+  String get whoIsSwiping;
+
+  /// No description provided for @matchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s a match!'**
+  String get matchTitle;
+
+  /// No description provided for @matchBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{place} made your list.'**
+  String matchBody(String place);
+
+  /// No description provided for @matchVotes.
+  ///
+  /// In en, this message translates to:
+  /// **'{likes} of {total} likes'**
+  String matchVotes(int likes, int total);
+
+  /// No description provided for @matchSeeResults.
+  ///
+  /// In en, this message translates to:
+  /// **'See all results'**
+  String get matchSeeResults;
+
+  /// No description provided for @matchOpenPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'View place'**
+  String get matchOpenPlace;
+
+  /// No description provided for @onboarding1Lead.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe your way to your'**
+  String get onboarding1Lead;
+
+  /// No description provided for @onboarding1Accent.
+  ///
+  /// In en, this message translates to:
+  /// **'next favourite place.'**
+  String get onboarding1Accent;
+
+  /// No description provided for @onboarding1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe right for “want to see”, left for “rather not”.'**
+  String get onboarding1Body;
+
+  /// No description provided for @onboarding2Lead.
+  ///
+  /// In en, this message translates to:
+  /// **'Save what you love,'**
+  String get onboarding2Lead;
+
+  /// No description provided for @onboarding2Accent.
+  ///
+  /// In en, this message translates to:
+  /// **'plan it later.'**
+  String get onboarding2Accent;
+
+  /// No description provided for @onboarding2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Every like lands in your favorites, ready for your next trip.'**
+  String get onboarding2Body;
+
+  /// No description provided for @onboarding3Lead.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan together,'**
+  String get onboarding3Lead;
+
+  /// No description provided for @onboarding3Accent.
+  ///
+  /// In en, this message translates to:
+  /// **'without endless chats.'**
+  String get onboarding3Accent;
+
+  /// No description provided for @onboarding3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone swipes the same deck. SwipeTrip shows you what you all like.'**
+  String get onboarding3Body;
+
+  /// No description provided for @onboardingGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Just look around as a guest'**
+  String get onboardingGuest;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All · {count}'**
+  String filterAll(int count);
+
+  /// No description provided for @profileStats.
+  ///
+  /// In en, this message translates to:
+  /// **'{favorites, plural, =1{1 favorite} other{{favorites} favorites}} · {groups, plural, =1{1 group} other{{groups} groups}}'**
+  String profileStats(int favorites, int groups);
+
+  /// No description provided for @guestName.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest'**
+  String get guestName;
+
+  /// No description provided for @guestSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in'**
+  String get guestSubtitle;
+
+  /// No description provided for @loginHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back'**
+  String get loginHeadline;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to sync your favorites and groups.'**
+  String get loginSubtitle;
+
+  /// No description provided for @registerHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your account'**
+  String get registerHeadline;
+
+  /// No description provided for @registerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep your favorites and plan trips with friends.'**
+  String get registerSubtitle;
+
+  /// No description provided for @licenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Open source licenses'**
+  String get licenses;
+
+  /// No description provided for @nearby.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby'**
+  String get nearby;
+
+  /// No description provided for @locationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where to?'**
+  String get locationTitle;
+
+  /// No description provided for @currentLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Current location'**
+  String get currentLocation;
+
+  /// No description provided for @currentLocationSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Places around you'**
+  String get currentLocationSubtitle;
+
+  /// No description provided for @searchCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Search city'**
+  String get searchCity;
+
+  /// No description provided for @popularDestinations.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular destinations'**
+  String get popularDestinations;
+
+  /// No description provided for @noCityFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching city'**
+  String get noCityFound;
+
+  /// No description provided for @filtersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get filtersTitle;
+
+  /// No description provided for @interestsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Interests'**
+  String get interestsTitle;
+
+  /// No description provided for @interestsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows places that match at least one.'**
+  String get interestsHint;
+
+  /// No description provided for @radiusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance'**
+  String get radiusTitle;
+
+  /// No description provided for @radiusKm.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km'**
+  String radiusKm(int km);
+
+  /// No description provided for @applyFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Show places'**
+  String get applyFilters;
+
+  /// No description provided for @resetFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get resetFilters;
+
+  /// No description provided for @interestCulture.
+  ///
+  /// In en, this message translates to:
+  /// **'Culture & museums'**
+  String get interestCulture;
+
+  /// No description provided for @interestNature.
+  ///
+  /// In en, this message translates to:
+  /// **'Nature & parks'**
+  String get interestNature;
+
+  /// No description provided for @interestHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Sights & history'**
+  String get interestHistory;
+
+  /// No description provided for @interestBeach.
+  ///
+  /// In en, this message translates to:
+  /// **'Beaches'**
+  String get interestBeach;
+
+  /// No description provided for @interestViews.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewpoints'**
+  String get interestViews;
+
+  /// No description provided for @interestFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get interestFamily;
+
+  /// No description provided for @interestNightlife.
+  ///
+  /// In en, this message translates to:
+  /// **'Nightlife'**
+  String get interestNightlife;
+
+  /// No description provided for @interestShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get interestShopping;
+
+  /// No description provided for @emptyNoPlacesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No places here yet'**
+  String get emptyNoPlacesTitle;
+
+  /// No description provided for @emptyNoPlacesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We don\'t have places for {place} yet. Try another destination.'**
+  String emptyNoPlacesBody(String place);
+
+  /// No description provided for @emptyFilteredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches your filters'**
+  String get emptyFilteredTitle;
+
+  /// No description provided for @emptyFilteredBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Try other interests or a larger distance.'**
+  String get emptyFilteredBody;
+
+  /// No description provided for @changePlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Change place'**
+  String get changePlace;
+
+  /// No description provided for @inviteCodeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code'**
+  String get inviteCodeTitle;
+
+  /// No description provided for @promptBestTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Best time'**
+  String get promptBestTime;
+
+  /// No description provided for @promptInsiderTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Insider tip'**
+  String get promptInsiderTip;
+
+  /// No description provided for @promptDontMiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t miss'**
+  String get promptDontMiss;
+
+  /// No description provided for @promptGoodFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfect for'**
+  String get promptGoodFor;
+
+  /// No description provided for @promptFunFact.
+  ///
+  /// In en, this message translates to:
+  /// **'Did you know?'**
+  String get promptFunFact;
+
+  /// No description provided for @photoCreditShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo: {author}'**
+  String photoCreditShort(String author);
+
+  /// No description provided for @photoCreditsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo credits'**
+  String get photoCreditsTitle;
+
+  /// No description provided for @photoCreditsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos belong to their authors and are shown under the terms listed.'**
+  String get photoCreditsHint;
+
+  /// No description provided for @photoCreditUnknownAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown author'**
+  String get photoCreditUnknownAuthor;
+
+  /// No description provided for @photoCreditGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Maps'**
+  String get photoCreditGoogle;
+
+  /// No description provided for @photoCreditWikimedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Wikimedia Commons'**
+  String get photoCreditWikimedia;
+
+  /// No description provided for @photoCreditNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo {number}'**
+  String photoCreditNumber(int number);
+
+  /// No description provided for @errorOpenLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the link.'**
+  String get errorOpenLink;
+
+  /// No description provided for @mapsChooseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get directions with'**
+  String get mapsChooseTitle;
+
+  /// No description provided for @appleMaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Apple Maps'**
+  String get appleMaps;
+
+  /// No description provided for @googleMaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Maps'**
+  String get googleMaps;
+
+  /// No description provided for @fromCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'From calendar'**
+  String get fromCalendar;
+
+  /// No description provided for @calendarPickTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a trip from your calendar'**
+  String get calendarPickTitle;
+
+  /// No description provided for @calendarPickHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We use the event\'s title, place and dates for the group. Nothing else leaves your phone.'**
+  String get calendarPickHint;
+
+  /// No description provided for @calendarPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'SwipeTrip has no access to your calendar. You can allow it in the iPhone or Android settings.'**
+  String get calendarPermissionDenied;
+
+  /// No description provided for @errorLoadCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your calendar.'**
+  String get errorLoadCalendar;
+
+  /// No description provided for @calendarNoEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming events in your calendar.'**
+  String get calendarNoEvents;
+
+  /// No description provided for @calendarCityNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t recognise the city. Please pick it.'**
+  String get calendarCityNotFound;
+
+  /// No description provided for @tripDatesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel dates (optional)'**
+  String get tripDatesLabel;
+
+  /// No description provided for @clearTripDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove dates'**
+  String get clearTripDates;
 }
 
 class _AppLocalizationsDelegate

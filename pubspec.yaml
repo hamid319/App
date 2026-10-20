@@ -29,6 +29,7 @@ dependencies:
   firebase_storage: ^13.0.0
   cached_network_image: ^3.3.1
   cloud_functions: ^6.0.4
+  device_calendar: ^4.3.3
 
 dev_dependencies:
   flutter_test:
@@ -36,9 +37,59 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   mocktail: ^1.0.4
   fake_cloud_firestore: ^4.1.0+1
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.8
 
 flutter:
   generate: true
   uses-material-design: true
   assets:
     - .env
+    # Font licences (SIL OFL 1.1), registered with LicenseRegistry in main.dart.
+    - assets/fonts/Figtree-OFL.txt
+    - assets/fonts/BricolageGrotesque-OFL.txt
+
+  # Bundled so the app needs no network for fonts. Static instances of the
+  # Google Fonts variable fonts (Bricolage at opsz 24 for headline sizes, wdth 100).
+  fonts:
+    - family: Figtree
+      fonts:
+        - asset: assets/fonts/Figtree-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Figtree-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Figtree-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Figtree-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Figtree-ExtraBold.ttf
+          weight: 800
+    - family: BricolageGrotesque
+      fonts:
+        - asset: assets/fonts/BricolageGrotesque-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/BricolageGrotesque-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/BricolageGrotesque-ExtraBold.ttf
+          weight: 800
+
+# App icons and native splash, generated from assets/branding/ (rendered by
+# tool/brand_assets_test.dart). Regenerate with:
+#   dart run flutter_launcher_icons && dart run flutter_native_splash:create
+flutter_launcher_icons:
+  image_path: assets/branding/app_icon.png
+  ios: true
+  remove_alpha_ios: true
+  android: ic_launcher
+  adaptive_icon_background: "#FF5A36"
+  adaptive_icon_foreground: assets/branding/app_icon_foreground.png
+  min_sdk_android: 21
+
+flutter_native_splash:
+  color: "#FF5A36"
+  image: assets/branding/splash_mark.png
+  android_12:
+    color: "#FF5A36"
+    image: assets/branding/splash_android12.png
+    icon_background_color: "#FF5A36"
+  web: false

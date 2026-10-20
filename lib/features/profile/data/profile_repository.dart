@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/services/firestore_service.dart';
 import '../../../common/models/user_model.dart';
@@ -15,6 +16,7 @@ class ProfileRepository {
         return UserModel(uid: uid, email: '', favorites: [], groups: [], createdAt: DateTime.now());
       }
     } catch (e) {
+      debugPrint('Reading profile $uid failed: $e');
       return UserModel(uid: uid, email: '', favorites: [], groups: [], createdAt: DateTime.now());
     }
   }

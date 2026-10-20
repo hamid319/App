@@ -51,5 +51,13 @@
 	<string>This app requires access to the camera to take profile photos.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app uses your location to show places to swipe near you.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>comgooglemaps</string>
+	</array>
+	<key>NSCalendarsUsageDescription</key>
+	<string>SwipeTrip reads the calendar event you pick to prepare a travel group with its title, place and dates.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>SwipeTrip reads the calendar event you pick to prepare a travel group with its title, place and dates.</string>
 </dict>
 </plist>

@@ -57,34 +57,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get navProfile => 'Profil';
 
   @override
-  String get onboardingSkip => 'Überspringen';
-
-  @override
   String get onboardingNext => 'Weiter';
 
   @override
   String get onboardingGetStarted => 'Los geht\'s';
-
-  @override
-  String get onboardingDiscoverTitle => 'Neue Orte entdecken';
-
-  @override
-  String get onboardingDiscoverBody =>
-      'Swipe durch spannende Orte und finde dein nächstes Reiseziel.';
-
-  @override
-  String get onboardingFavoritesTitle => 'Favoriten sammeln';
-
-  @override
-  String get onboardingFavoritesBody =>
-      'Markiere Orte, die dir gefallen, und erstelle deine persönliche Wunschliste.';
-
-  @override
-  String get onboardingGroupsTitle => 'Mit Freunden planen';
-
-  @override
-  String get onboardingGroupsBody =>
-      'Erstelle Gruppen und findet gemeinsam die besten Orte für eure nächste Reise.';
 
   @override
   String get languageTitle => 'Sprache';
@@ -439,9 +415,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get groupResultsTitle => 'Gruppen-Ergebnisse';
 
   @override
-  String get loadingGroup => 'Gruppe wird geladen...';
-
-  @override
   String get failedToLoadGroup => 'Gruppe konnte nicht geladen werden';
 
   @override
@@ -452,17 +425,11 @@ class AppLocalizationsDe extends AppLocalizations {
       'Erstelle zuerst eine Gruppe oder tritt einer bei';
 
   @override
-  String get loadingSessionHistory => 'Sessions werden geladen...';
-
-  @override
   String get noCompletedSessionsTitle => 'Keine abgeschlossenen Sessions';
 
   @override
   String get noCompletedSessionsBody =>
       'Schließt eine Session ab, um hier Ergebnisse zu sehen.';
-
-  @override
-  String get loadingResults => 'Ergebnisse werden geladen...';
 
   @override
   String get noQualifiedPlacesTitle => 'Keine passenden Orte';
@@ -481,12 +448,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get groupsTitle => 'Gruppen';
 
   @override
-  String get loadingUser => 'Nutzer wird geladen...';
-
-  @override
-  String get loadingGroups => 'Gruppen werden geladen...';
-
-  @override
   String get notLoggedIn => 'Nicht angemeldet';
 
   @override
@@ -496,7 +457,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get groupNotFound => 'Gruppe nicht gefunden';
 
   @override
-  String get newGroupButton => '+ Neu';
+  String get newGroupButton => 'Neu';
 
   @override
   String get statusLive => 'Live';
@@ -677,9 +638,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get profileTitle => 'Profil';
 
   @override
-  String get loadingProfile => 'Profil wird geladen...';
-
-  @override
   String get loginToViewProfile =>
       'Bitte melde dich an, um dein Profil zu sehen';
 
@@ -792,4 +750,398 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get createAccountToManage =>
       'Erstelle ein Konto, um dein Profil zu verwalten und dich auf anderen Geräten anzumelden.';
+
+  @override
+  String get tagTouristAttraction => 'Sehenswürdigkeit';
+
+  @override
+  String get tagMuseum => 'Museum';
+
+  @override
+  String get tagArtGallery => 'Galerie';
+
+  @override
+  String get tagArt => 'Kunst';
+
+  @override
+  String get tagCulture => 'Kultur';
+
+  @override
+  String get tagHistoricalLandmark => 'Historischer Ort';
+
+  @override
+  String get tagCulturalLandmark => 'Wahrzeichen';
+
+  @override
+  String get tagLandmark => 'Wahrzeichen';
+
+  @override
+  String get tagHistory => 'Geschichte';
+
+  @override
+  String get tagChurch => 'Kirche';
+
+  @override
+  String get tagPark => 'Park';
+
+  @override
+  String get tagNature => 'Natur';
+
+  @override
+  String get tagNaturalFeature => 'Naturspot';
+
+  @override
+  String get tagOutdoors => 'Draußen';
+
+  @override
+  String get tagBeach => 'Strand';
+
+  @override
+  String get tagViewpoint => 'Aussichtspunkt';
+
+  @override
+  String get tagHiking => 'Wandern';
+
+  @override
+  String get tagFamily => 'Familie';
+
+  @override
+  String get tagScience => 'Wissenschaft';
+
+  @override
+  String get tagZoo => 'Zoo';
+
+  @override
+  String get tagAquarium => 'Aquarium';
+
+  @override
+  String get tagAmusementPark => 'Freizeitpark';
+
+  @override
+  String get tagShopping => 'Shopping';
+
+  @override
+  String get tagMarket => 'Markt';
+
+  @override
+  String get tagNightlife => 'Nachtleben';
+
+  @override
+  String get tagMusic => 'Musik';
+
+  @override
+  String get tagArchitecture => 'Architektur';
+
+  @override
+  String get tagPhotoSpot => 'Fotospot';
+
+  @override
+  String get undo => 'Letzten Swipe rückgängig machen';
+
+  @override
+  String get details => 'Details';
+
+  @override
+  String get undone => 'Zurückgeholt';
+
+  @override
+  String get appearanceTitle => 'Darstellung';
+
+  @override
+  String get appearanceSystem => 'Wie System';
+
+  @override
+  String get appearanceLight => 'Hell';
+
+  @override
+  String get appearanceDark => 'Dunkel';
+
+  @override
+  String get navFavorites => 'Favoriten';
+
+  @override
+  String get sessionLive => 'Session läuft';
+
+  @override
+  String sessionTimeLeft(int minutes) {
+    return 'noch $minutes Min.';
+  }
+
+  @override
+  String get yourProgress => 'dein Fortschritt';
+
+  @override
+  String get memberDone => 'fertig';
+
+  @override
+  String get whoIsSwiping => 'Wer swipt noch?';
+
+  @override
+  String get matchTitle => 'Ihr seid euch einig!';
+
+  @override
+  String matchBody(String place) {
+    return '$place steht auf eurer Liste.';
+  }
+
+  @override
+  String matchVotes(int likes, int total) {
+    return '$likes von $total Likes';
+  }
+
+  @override
+  String get matchSeeResults => 'Alle Ergebnisse ansehen';
+
+  @override
+  String get matchOpenPlace => 'Ort ansehen';
+
+  @override
+  String get onboarding1Lead => 'Swipe dich zu deinem';
+
+  @override
+  String get onboarding1Accent => 'nächsten Lieblingsort.';
+
+  @override
+  String get onboarding1Body =>
+      'Rechts für „will ich sehen“, links für „lieber nicht“.';
+
+  @override
+  String get onboarding2Lead => 'Sammle, was dir gefällt –';
+
+  @override
+  String get onboarding2Accent => 'plane später.';
+
+  @override
+  String get onboarding2Body =>
+      'Jedes Like landet in deinen Favoriten, bereit für die nächste Reise.';
+
+  @override
+  String get onboarding3Lead => 'Plant zusammen,';
+
+  @override
+  String get onboarding3Accent => 'ohne endlose Chats.';
+
+  @override
+  String get onboarding3Body =>
+      'Alle swipen denselben Stapel. SwipeTrip zeigt euch, was allen gefällt.';
+
+  @override
+  String get onboardingGuest => 'Erst mal als Gast umsehen';
+
+  @override
+  String filterAll(int count) {
+    return 'Alle · $count';
+  }
+
+  @override
+  String profileStats(int favorites, int groups) {
+    String _temp0 = intl.Intl.pluralLogic(
+      favorites,
+      locale: localeName,
+      other: '$favorites Favoriten',
+      one: '1 Favorit',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      groups,
+      locale: localeName,
+      other: '$groups Gruppen',
+      one: '1 Gruppe',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get guestName => 'Gast';
+
+  @override
+  String get guestSubtitle => 'Nicht angemeldet';
+
+  @override
+  String get loginHeadline => 'Willkommen zurück';
+
+  @override
+  String get loginSubtitle =>
+      'Melde dich an, um Favoriten und Gruppen zu synchronisieren.';
+
+  @override
+  String get registerHeadline => 'Erstelle dein Konto';
+
+  @override
+  String get registerSubtitle =>
+      'Behalte deine Favoriten und plane Reisen mit Freunden.';
+
+  @override
+  String get licenses => 'Open-Source-Lizenzen';
+
+  @override
+  String get nearby => 'In der Nähe';
+
+  @override
+  String get locationTitle => 'Wohin geht\'s?';
+
+  @override
+  String get currentLocation => 'Aktueller Standort';
+
+  @override
+  String get currentLocationSubtitle => 'Orte in deiner Umgebung';
+
+  @override
+  String get searchCity => 'Stadt suchen';
+
+  @override
+  String get popularDestinations => 'Beliebte Ziele';
+
+  @override
+  String get noCityFound => 'Keine passende Stadt';
+
+  @override
+  String get filtersTitle => 'Filter';
+
+  @override
+  String get interestsTitle => 'Interessen';
+
+  @override
+  String get interestsHint => 'Zeigt Orte, die zu mindestens einem passen.';
+
+  @override
+  String get radiusTitle => 'Umkreis';
+
+  @override
+  String radiusKm(int km) {
+    return '$km km';
+  }
+
+  @override
+  String get applyFilters => 'Orte anzeigen';
+
+  @override
+  String get resetFilters => 'Zurücksetzen';
+
+  @override
+  String get interestCulture => 'Kultur & Museen';
+
+  @override
+  String get interestNature => 'Natur & Parks';
+
+  @override
+  String get interestHistory => 'Sehenswürdigkeiten & Geschichte';
+
+  @override
+  String get interestBeach => 'Strände';
+
+  @override
+  String get interestViews => 'Aussichtspunkte';
+
+  @override
+  String get interestFamily => 'Familie';
+
+  @override
+  String get interestNightlife => 'Nachtleben';
+
+  @override
+  String get interestShopping => 'Shopping';
+
+  @override
+  String get emptyNoPlacesTitle => 'Hier gibt es noch keine Orte';
+
+  @override
+  String emptyNoPlacesBody(String place) {
+    return 'Für $place haben wir noch keine Orte. Probier ein anderes Ziel.';
+  }
+
+  @override
+  String get emptyFilteredTitle => 'Nichts passt zu deinen Filtern';
+
+  @override
+  String get emptyFilteredBody =>
+      'Probier andere Interessen oder einen größeren Umkreis.';
+
+  @override
+  String get changePlace => 'Ort ändern';
+
+  @override
+  String get inviteCodeTitle => 'Einladungscode';
+
+  @override
+  String get promptBestTime => 'Am besten';
+
+  @override
+  String get promptInsiderTip => 'Insider-Tipp';
+
+  @override
+  String get promptDontMiss => 'Nicht verpassen';
+
+  @override
+  String get promptGoodFor => 'Ideal für';
+
+  @override
+  String get promptFunFact => 'Schon gewusst?';
+
+  @override
+  String photoCreditShort(String author) {
+    return 'Foto: $author';
+  }
+
+  @override
+  String get photoCreditsTitle => 'Bildnachweise';
+
+  @override
+  String get photoCreditsHint =>
+      'Die Fotos gehören ihren Urhebern und werden zu den genannten Bedingungen gezeigt.';
+
+  @override
+  String get photoCreditUnknownAuthor => 'Unbekannter Urheber';
+
+  @override
+  String get photoCreditGoogle => 'Google Maps';
+
+  @override
+  String get photoCreditWikimedia => 'Wikimedia Commons';
+
+  @override
+  String photoCreditNumber(int number) {
+    return 'Foto $number';
+  }
+
+  @override
+  String get errorOpenLink => 'Der Link konnte nicht geöffnet werden.';
+
+  @override
+  String get mapsChooseTitle => 'Route öffnen mit';
+
+  @override
+  String get appleMaps => 'Apple Karten';
+
+  @override
+  String get googleMaps => 'Google Maps';
+
+  @override
+  String get fromCalendar => 'Aus Kalender übernehmen';
+
+  @override
+  String get calendarPickTitle => 'Reise aus deinem Kalender wählen';
+
+  @override
+  String get calendarPickHint =>
+      'Wir übernehmen Titel, Ort und Datum des Termins für die Gruppe. Sonst verlässt nichts dein Handy.';
+
+  @override
+  String get calendarPermissionDenied =>
+      'SwipeTrip hat keinen Zugriff auf deinen Kalender. Du kannst ihn in den Einstellungen deines iPhones oder Android-Geräts erlauben.';
+
+  @override
+  String get errorLoadCalendar => 'Dein Kalender konnte nicht geladen werden.';
+
+  @override
+  String get calendarNoEvents => 'Keine kommenden Termine in deinem Kalender.';
+
+  @override
+  String get calendarCityNotFound =>
+      'Die Stadt wurde nicht erkannt. Bitte wähle sie aus.';
+
+  @override
+  String get tripDatesLabel => 'Reisezeitraum (optional)';
+
+  @override
+  String get clearTripDates => 'Zeitraum entfernen';
 }

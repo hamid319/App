@@ -4,7 +4,12 @@ import 'package:go_router/go_router.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../../app/language_picker.dart';
 import '../../../app/locale_controller.dart';
+import '../../../app/theme_mode_controller.dart';
+import '../../../app/theme_mode_picker.dart';
 import '../../../l10n/l10n.dart';
+import '../../../common/widgets/member_avatar.dart';
+import '../../group/logic/group_controller.dart';
+import '../../swipe/logic/swipe_controller.dart';
 
 /// Open to everyone. The "App" section (language, privacy, security) works
 /// for guests too; the "Account" section depends on having a real account.
@@ -17,6 +22,7 @@ class SettingsScreen extends ConsumerWidget {
     final user = ref.watch(authControllerProvider).value;
     final hasAccount = user != null && !user.isAnonymous;
     final languageCode = ref.watch(localeControllerProvider)?.languageCode;
+    final themeMode = ref.watch(themeModeControllerProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -24,12 +30,19 @@ class SettingsScreen extends ConsumerWidget {
       ),
       body: ListView(
         children: [
+          _ProfileCard(hasAccount: hasAccount),
           _SectionHeader(l10n.settingsAppSection),
           ListTile(
             leading: const Icon(Icons.language),
             title: Text(l10n.languageTitle),
             subtitle: Text(languageName(l10n, languageCode)),
             onTap: () => showLanguagePicker(context, ref),
+          ),
+          ListTile(
+            leading: const Icon(Icons.dark_mode_outlined),
+            title: Text(l10n.appearanceTitle),
+            subtitle: Text(themeModeName(l10n, themeMode)),
+            onTap: () => showThemeModePicker(context, ref),
           ),
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
@@ -43,11 +56,19 @@ class SettingsScreen extends ConsumerWidget {
             subtitle: Text(l10n.securitySubtitle),
             onTap: () => _showSecurity(context),
           ),
+          ListTile(
+            leading: const Icon(Icons.article_outlined),
+            title: Text(l10n.licenses),
+            onTap: () => showLicensePage(
+              context: context,
+              applicationName: 'SwipeTrip',
+            ),
+          ),
           const Divider(),
           _SectionHeader(l10n.settingsAccountSection),
           if (hasAccount)
             ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
+              leading: Icon(Icons.logout, color: Theme.of(context).colorScheme.error),
               title: Text(l10n.logout),
               subtitle: Text(l10n.logoutSubtitle),
               onTap: () => _showLogoutDialog(context, ref),
@@ -91,7 +112,7 @@ class SettingsScreen extends ConsumerWidget {
                 context.go('/home');
               }
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
             child: Text(l10n.logout),
           ),
         ],
@@ -192,6 +213,78 @@ class _SectionHeader extends StatelessWidget {
         style: Theme.of(context).textTheme.labelLarge?.copyWith(
               color: Theme.of(context).colorScheme.primary,
             ),
+      ),
+    );
+  }
+}
+
+/// Who is signed in, with a quick count of what they have saved.
+class _ProfileCard extends ConsumerWidget {
+  const _ProfileCard({required this.hasAccount});
+
+  final bool hasAccount;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final user = ref.watch(authControllerProvider).value;
+    ref.watch(swipeControllerProvider);
+    final favorites =
+        ref.read(swipeControllerProvider.notifier).favoritesList.length;
+    final groups = ref.watch(userGroupsProvider).value?.length ?? 0;
+    final name = hasAccount
+        ? (user?.displayName?.trim().isNotEmpty == true
+            ? user!.displayName!.trim()
+            : (user?.email ?? l10n.userFallbackName))
+        : l10n.guestName;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      child: Card(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(24),
+          onTap: () => context.go('/profile'),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                hasAccount
+                    ? MemberAvatar(id: user?.uid ?? '', name: name, size: 48)
+                    : CircleAvatar(
+                        radius: 24,
+                        backgroundColor: scheme.surfaceContainerHighest,
+                        child: Icon(Icons.person_outline,
+                            color: scheme.onSurfaceVariant),
+                      ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: text.titleMedium,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        hasAccount
+                            ? l10n.profileStats(favorites, groups)
+                            : l10n.guestSubtitle,
+                        style: text.bodyMedium
+                            ?.copyWith(color: scheme.onSurfaceVariant),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

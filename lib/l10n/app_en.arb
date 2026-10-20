@@ -1,6 +1,5 @@
 {
   "@@locale": "en",
-
   "cancel": "Cancel",
   "close": "Close",
   "retry": "Retry",
@@ -14,26 +13,15 @@
   "create": "Create",
   "end": "End",
   "clear": "Clear",
-
   "navDiscover": "Discover",
   "navGroups": "Groups",
   "navProfile": "Profile",
-
-  "onboardingSkip": "Skip",
   "onboardingNext": "Next",
   "onboardingGetStarted": "Get Started",
-  "onboardingDiscoverTitle": "Discover new places",
-  "onboardingDiscoverBody": "Swipe through interesting places nearby and find your next travel destinations.",
-  "onboardingFavoritesTitle": "Collect favorites",
-  "onboardingFavoritesBody": "Mark places you like and create your personal wishlist.",
-  "onboardingGroupsTitle": "Plan with friends",
-  "onboardingGroupsBody": "Create groups and find the best places for your next trip together.",
-
   "languageTitle": "Language",
   "languageSystem": "System default",
   "languageEnglish": "English",
   "languageGerman": "Deutsch",
-
   "gateGroupSwipeTitle": "Create an account to swipe together with a group",
   "gateGroupsTitle": "Create an account to create or join a group",
   "gateJoinGroupTitle": "Create an account to join this group",
@@ -43,7 +31,6 @@
   "gateBody": "It only takes a minute, and the places you liked as a guest come with you.",
   "gateCreateAccount": "Create account",
   "gateHaveAccount": "I already have an account",
-
   "loginTitle": "Login",
   "registerTitle": "Register",
   "emailLabel": "Email",
@@ -70,7 +57,6 @@
   "authInvalidCredential": "Incorrect email or password",
   "loginFailed": "Login failed. Please try again.",
   "signupFailed": "Sign-up failed. Please try again.",
-
   "errorGeneric": "Something went wrong. Please try again.",
   "errorPermissionDenied": "You don't have permission to do that.",
   "errorNoConnection": "No connection. Please check your internet and try again.",
@@ -101,7 +87,6 @@
   "errorDeleteGroup": "Could not delete the group.",
   "errorLoadSessions": "Could not load past sessions.",
   "errorLoadResults": "Could not load results.",
-
   "discoverTitle": "Discover Places",
   "errorLoadingPlacesTitle": "Error loading places",
   "noMorePlacesTitle": "No more places!",
@@ -113,21 +98,31 @@
   "like": "Like",
   "likeStamp": "LIKE",
   "nopeStamp": "NOPE",
-
   "favoritesTitle": "Your Favorites",
   "moreOptions": "More options",
   "clearFavoritesMenu": "Clear favorites & swipe history",
   "removeFromFavoritesTooltip": "Remove from favorites",
   "placeRemovedFromFavorites": "{name} removed from favorites",
-  "@placeRemovedFromFavorites": {"placeholders": {"name": {"type": "String"}}},
+  "@placeRemovedFromFavorites": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "placeAddedToFavorites": "{name} added to favorites!",
-  "@placeAddedToFavorites": {"placeholders": {"name": {"type": "String"}}},
+  "@placeAddedToFavorites": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "clearEverythingTitle": "Clear everything?",
   "clearEverythingBody": "This removes all your favorites and your swipe history, so places you already swiped will show up again. This cannot be undone.",
   "clearedSnack": "Favorites and swipe history cleared",
   "noFavoritesTitle": "No favorites yet",
   "noFavoritesBody": "Start swiping to add places to your favorites!",
-
   "endSessionTitle": "End session?",
   "endSessionBody": "This will end the session for all participants.",
   "endSession": "End session",
@@ -136,7 +131,6 @@
   "viewedAllPlaces": "You have viewed all places",
   "liked": "Liked",
   "skipped": "Skipped",
-
   "placeFallbackTitle": "Place",
   "placeNotFound": "Place not found",
   "tags": "Tags",
@@ -144,35 +138,34 @@
   "openInMaps": "Open in Maps",
   "removeFromFavorites": "Remove from Favorites",
   "addToFavorites": "Add to Favorites",
-
   "groupResultsTitle": "Group Results",
-  "loadingGroup": "Loading group...",
   "failedToLoadGroup": "Failed to load group",
   "noGroupTitle": "No Group",
   "noGroupMessage": "Create or join a group first",
-  "loadingSessionHistory": "Loading session history...",
   "noCompletedSessionsTitle": "No Completed Sessions",
   "noCompletedSessionsBody": "Finish a session to see results here.",
-  "loadingResults": "Loading results...",
   "noQualifiedPlacesTitle": "No Qualified Places",
   "noQualifiedPlacesBody": "Places need enough likes to appear here.",
   "sessionInProgress": "in progress",
-
   "groupDetailsTitle": "Group Details",
   "groupsTitle": "Groups",
-  "loadingUser": "Loading user...",
-  "loadingGroups": "Loading groups...",
   "notLoggedIn": "Not logged in",
   "loginToUseGroups": "Please login to use groups",
   "groupNotFound": "Group not found",
-  "newGroupButton": "+ New",
+  "newGroupButton": "New",
   "statusLive": "Live",
   "statusDone": "Done",
   "statusStart": "Start",
   "statusIdle": "Idle",
   "unnamedGroup": "Unnamed Group",
   "memberCount": "{count, plural, =1{1 member} other{{count} members}}",
-  "@memberCount": {"placeholders": {"count": {"type": "int"}}},
+  "@memberCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "noGroupsTitle": "No Groups Yet",
   "noGroupsBody": "Create a new group or join an existing one",
   "createNewGroup": "Create New Group",
@@ -181,9 +174,24 @@
   "countryLabel": "Country",
   "cityLabel": "City",
   "groupLocation": "Location: {city}, {country}",
-  "@groupLocation": {"placeholders": {"city": {"type": "String"}, "country": {"type": "String"}}},
+  "@groupLocation": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      },
+      "country": {
+        "type": "String"
+      }
+    }
+  },
   "inviteCode": "Invite Code: {code}",
-  "@inviteCode": {"placeholders": {"code": {"type": "String"}}},
+  "@inviteCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "inviteCodeCopied": "Invite code copied to clipboard",
   "joiningDisabled": "Joining is disabled (Session active)",
   "waitingForAdmin": "Waiting for the admin to start a session.",
@@ -197,11 +205,29 @@
   "startSession": "Start Session",
   "endSessionEarly": "End Session Early",
   "membersHeader": "Members ({count})",
-  "@membersHeader": {"placeholders": {"count": {"type": "int"}}},
+  "@membersHeader": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "memberFallback": "Member {number}",
-  "@memberFallback": {"placeholders": {"number": {"type": "int"}}},
+  "@memberFallback": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "memberYou": "{name} (you)",
-  "@memberYou": {"placeholders": {"name": {"type": "String"}}},
+  "@memberYou": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "admin": "Admin",
   "continueSwiping": "Continue Swiping",
   "viewMatches": "View Matches",
@@ -220,12 +246,16 @@
   "leftGroup": "Left group",
   "deleteGroupTitle": "Delete Group",
   "deleteGroupBody": "Are you sure you want to delete '{name}'? This cannot be undone.",
-  "@deleteGroupBody": {"placeholders": {"name": {"type": "String"}}},
+  "@deleteGroupBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "joinedViaLink": "Joined group via link!",
   "joiningGroup": "Joining Group...",
-
   "profileTitle": "Profile",
-  "loadingProfile": "Loading profile...",
   "loginToViewProfile": "Please login to view your profile",
   "editProfile": "Edit Profile",
   "accountInfo": "Account Info",
@@ -233,7 +263,6 @@
   "displayNameLabel": "Display Name",
   "profileUpdated": "Profile updated!",
   "userFallbackName": "User",
-
   "settingsTitle": "Settings",
   "settingsAppSection": "App",
   "settingsAccountSection": "Account",
@@ -261,5 +290,192 @@
   "securityTipLogout": "• Log out on shared devices",
   "securityTipUpdate": "• Keep the app up to date",
   "securityComingSoon": "Changing your password and two-factor authentication are coming in a future version.",
-  "createAccountToManage": "Create an account to manage your profile and log in on other devices."
+  "createAccountToManage": "Create an account to manage your profile and log in on other devices.",
+  "tagTouristAttraction": "Sight",
+  "tagMuseum": "Museum",
+  "tagArtGallery": "Gallery",
+  "tagArt": "Art",
+  "tagCulture": "Culture",
+  "tagHistoricalLandmark": "Historic site",
+  "tagCulturalLandmark": "Landmark",
+  "tagLandmark": "Landmark",
+  "tagHistory": "History",
+  "tagChurch": "Church",
+  "tagPark": "Park",
+  "tagNature": "Nature",
+  "tagNaturalFeature": "Nature spot",
+  "tagOutdoors": "Outdoors",
+  "tagBeach": "Beach",
+  "tagViewpoint": "Viewpoint",
+  "tagHiking": "Hiking",
+  "tagFamily": "Family",
+  "tagScience": "Science",
+  "tagZoo": "Zoo",
+  "tagAquarium": "Aquarium",
+  "tagAmusementPark": "Theme park",
+  "tagShopping": "Shopping",
+  "tagMarket": "Market",
+  "tagNightlife": "Nightlife",
+  "tagMusic": "Music",
+  "tagArchitecture": "Architecture",
+  "tagPhotoSpot": "Photo spot",
+  "undo": "Undo last swipe",
+  "details": "Details",
+  "undone": "Brought back",
+  "appearanceTitle": "Appearance",
+  "appearanceSystem": "System default",
+  "appearanceLight": "Light",
+  "appearanceDark": "Dark",
+  "navFavorites": "Favorites",
+  "sessionLive": "Session in progress",
+  "sessionTimeLeft": "{minutes} min left",
+  "yourProgress": "your progress",
+  "memberDone": "done",
+  "whoIsSwiping": "Who's still swiping?",
+  "matchTitle": "It's a match!",
+  "matchBody": "{place} made your list.",
+  "matchVotes": "{likes} of {total} likes",
+  "matchSeeResults": "See all results",
+  "matchOpenPlace": "View place",
+  "@sessionTimeLeft": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@matchBody": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "@matchVotes": {
+    "placeholders": {
+      "likes": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "onboarding1Lead": "Swipe your way to your",
+  "onboarding1Accent": "next favourite place.",
+  "onboarding1Body": "Swipe right for “want to see”, left for “rather not”.",
+  "onboarding2Lead": "Save what you love,",
+  "onboarding2Accent": "plan it later.",
+  "onboarding2Body": "Every like lands in your favorites, ready for your next trip.",
+  "onboarding3Lead": "Plan together,",
+  "onboarding3Accent": "without endless chats.",
+  "onboarding3Body": "Everyone swipes the same deck. SwipeTrip shows you what you all like.",
+  "onboardingGuest": "Just look around as a guest",
+  "filterAll": "All · {count}",
+  "@filterAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profileStats": "{favorites, plural, =1{1 favorite} other{{favorites} favorites}} · {groups, plural, =1{1 group} other{{groups} groups}}",
+  "guestName": "Guest",
+  "guestSubtitle": "Not signed in",
+  "@profileStats": {
+    "placeholders": {
+      "favorites": {
+        "type": "int"
+      },
+      "groups": {
+        "type": "int"
+      }
+    }
+  },
+  "loginHeadline": "Welcome back",
+  "loginSubtitle": "Log in to sync your favorites and groups.",
+  "registerHeadline": "Create your account",
+  "registerSubtitle": "Keep your favorites and plan trips with friends.",
+  "licenses": "Open source licenses",
+  "nearby": "Nearby",
+  "locationTitle": "Where to?",
+  "currentLocation": "Current location",
+  "currentLocationSubtitle": "Places around you",
+  "searchCity": "Search city",
+  "popularDestinations": "Popular destinations",
+  "noCityFound": "No matching city",
+  "filtersTitle": "Filters",
+  "interestsTitle": "Interests",
+  "interestsHint": "Shows places that match at least one.",
+  "radiusTitle": "Distance",
+  "radiusKm": "{km} km",
+  "applyFilters": "Show places",
+  "resetFilters": "Reset",
+  "interestCulture": "Culture & museums",
+  "interestNature": "Nature & parks",
+  "interestHistory": "Sights & history",
+  "interestBeach": "Beaches",
+  "interestViews": "Viewpoints",
+  "interestFamily": "Family",
+  "interestNightlife": "Nightlife",
+  "interestShopping": "Shopping",
+  "emptyNoPlacesTitle": "No places here yet",
+  "emptyNoPlacesBody": "We don't have places for {place} yet. Try another destination.",
+  "emptyFilteredTitle": "Nothing matches your filters",
+  "emptyFilteredBody": "Try other interests or a larger distance.",
+  "changePlace": "Change place",
+  "@radiusKm": {
+    "placeholders": {
+      "km": {
+        "type": "int"
+      }
+    }
+  },
+  "@emptyNoPlacesBody": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteCodeTitle": "Invite code",
+  "promptBestTime": "Best time",
+  "promptInsiderTip": "Insider tip",
+  "promptDontMiss": "Don't miss",
+  "promptGoodFor": "Perfect for",
+  "promptFunFact": "Did you know?",
+  "photoCreditShort": "Photo: {author}",
+  "photoCreditsTitle": "Photo credits",
+  "photoCreditsHint": "Photos belong to their authors and are shown under the terms listed.",
+  "photoCreditUnknownAuthor": "Unknown author",
+  "photoCreditGoogle": "Google Maps",
+  "photoCreditWikimedia": "Wikimedia Commons",
+  "photoCreditNumber": "Photo {number}",
+  "errorOpenLink": "Couldn't open the link.",
+  "@photoCreditShort": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      }
+    }
+  },
+  "@photoCreditNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "mapsChooseTitle": "Get directions with",
+  "appleMaps": "Apple Maps",
+  "googleMaps": "Google Maps",
+  "fromCalendar": "From calendar",
+  "calendarPickTitle": "Pick a trip from your calendar",
+  "calendarPickHint": "We use the event's title, place and dates for the group. Nothing else leaves your phone.",
+  "calendarPermissionDenied": "SwipeTrip has no access to your calendar. You can allow it in the iPhone or Android settings.",
+  "errorLoadCalendar": "Couldn't load your calendar.",
+  "calendarNoEvents": "No upcoming events in your calendar.",
+  "calendarCityNotFound": "We couldn't recognise the city. Please pick it.",
+  "tripDatesLabel": "Travel dates (optional)",
+  "clearTripDates": "Remove dates"
 }

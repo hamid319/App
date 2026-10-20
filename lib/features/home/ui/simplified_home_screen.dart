@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import '../../../common/models/place_model.dart';
 import '../../../core/errors/user_message.dart';
-import '../../places/data/place_photo_url_builder.dart';
 import '../../swipe/logic/swipe_controller.dart';
+import '../../swipe/widgets/swipe_deck.dart';
+import '../../swipe/widgets/discover_filters.dart';
+import '../../swipe/logic/discover_preferences_controller.dart';
+import '../../../common/widgets/wordmark.dart';
 import '../../../l10n/l10n.dart';
+import '../../../app/theme.dart';
 
 class SimplifiedHomeScreen extends ConsumerWidget {
   const SimplifiedHomeScreen({super.key});
@@ -15,30 +17,12 @@ class SimplifiedHomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.l10n.discoverTitle),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: Center(
-              child: Consumer(
-                builder: (context, ref, _) {
-                  // Watch the state so badge rebuilds when favorites change
-                  ref.watch(swipeControllerProvider);
-                  final favoritesCount = ref
-                      .read(swipeControllerProvider.notifier)
-                      .favoritesList
-                      .length;
-                  return IconButton(
-                    onPressed: () => context.push('/favorites'),
-                    icon: Badge(
-                      label: Text('$favoritesCount'),
-                      child: const Icon(Icons.favorite),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
+        title: const Wordmark(),
+        actions: const [
+          DiscoverLocationChip(),
+          SizedBox(width: 6),
+          DiscoverFilterButton(),
+          SizedBox(width: 12),
         ],
       ),
       body: const _SwipeContent(),
@@ -55,14 +39,14 @@ class _SwipeContent extends ConsumerWidget {
     final ctrl = ref.read(swipeControllerProvider.notifier);
 
     return state.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const SwipeDeckSkeleton(),
       error: (e, st) => Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              Icon(Icons.error_outline, size: 64, color: Theme.of(context).colorScheme.error),
               const SizedBox(height: 16),
               Text(
                 context.l10n.errorLoadingPlacesTitle,
@@ -72,7 +56,7 @@ class _SwipeContent extends ConsumerWidget {
               Text(
                 userMessage(e, fallback: context.l10n.errorLoadPlaces, l10n: context.l10n),
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.grey),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 16),
               ElevatedButton(
@@ -86,36 +70,15 @@ class _SwipeContent extends ConsumerWidget {
       data: (places) {
         final current = ctrl.currentPlace;
         if (current == null) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.check_circle_outline,
-                    size: 80, color: Colors.green),
-                const SizedBox(height: 24),
-                Text(
-                  context.l10n.noMorePlacesTitle,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  context.l10n.seenAllPlaces,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                ),
-                const SizedBox(height: 32),
-                ElevatedButton.icon(
-                  onPressed: () => ref.refresh(swipeControllerProvider),
-                  icon: const Icon(Icons.refresh),
-                  label: Text(context.l10n.reload),
-                ),
-              ],
-            ),
-          );
+          return _EmptyDeck(reason: ctrl.emptyReason);
         }
-        return _SwipeCardStack(
+        return SwipeDeck(
           place: current,
+          nextPlace: ctrl.nextPlaceInDeck,
+          canUndo: ctrl.canUndo,
+          onUndo: ctrl.undo,
+          onSkip: ctrl.skip,
+          onDetail: () => context.push('/place/${current.id}'),
           onLike: () async {
             ctrl.like();
             final messenger = ScaffoldMessenger.of(context);
@@ -123,34 +86,22 @@ class _SwipeContent extends ConsumerWidget {
             final l10n = context.l10n;
             // Guests keep swiping freely; they get one gentle nudge to save
             // their likes with an account instead of a blocking prompt.
+            // Everyone else sees the LIKE stamp and the favorites badge.
             if (await ctrl.takeGuestFavoriteHint()) {
               messenger.showSnackBar(
                 SnackBar(
-                  content: Text(
-                    l10n.guestLikeHint,
-                  ),
+                  content: Text(l10n.guestLikeHint),
                   duration: const Duration(seconds: 6),
+                  // Snackbars with an action stay until dismissed by default;
+                  // this one would cover the swipe buttons.
+                  persist: false,
                   action: SnackBarAction(
                     label: l10n.signUp,
                     onPressed: () => router.push('/register'),
                   ),
                 ),
               );
-              return;
             }
-            messenger.showSnackBar(
-              SnackBar(
-                content: Text(l10n.addedToFavorites),
-                backgroundColor: Colors.green,
-                duration: const Duration(seconds: 1),
-              ),
-            );
-          },
-          onSkip: () {
-            ctrl.skip();
-          },
-          onDetail: () {
-            context.push('/place/${current.id}');
           },
         );
       },
@@ -158,407 +109,84 @@ class _SwipeContent extends ConsumerWidget {
   }
 }
 
-// Swipe card stack widget with drag gestures (same as original)
-class _SwipeCardStack extends StatefulWidget {
-  final PlaceModel place;
-  final VoidCallback onLike;
-  final VoidCallback onSkip;
-  final VoidCallback onDetail;
+/// What to show when the deck is empty, with the matching way out.
+class _EmptyDeck extends ConsumerWidget {
+  const _EmptyDeck({required this.reason});
 
-  const _SwipeCardStack({
-    required this.place,
-    required this.onLike,
-    required this.onSkip,
-    required this.onDetail,
-  });
+  final DeckEmptyReason reason;
 
   @override
-  State<_SwipeCardStack> createState() => _SwipeCardStackState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final prefs = ref.watch(discoverPreferencesProvider).value ??
+        const DiscoverPreferences();
 
-class _SwipeCardStackState extends State<_SwipeCardStack>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _rotationAnimation;
-  late Animation<double> _opacityAnimation;
+    final (IconData icon, Color color, String title, String body, Widget action) =
+        switch (reason) {
+      DeckEmptyReason.noPlacesInArea => (
+          Icons.travel_explore,
+          scheme.primary,
+          l10n.emptyNoPlacesTitle,
+          l10n.emptyNoPlacesBody(placeLabel(context, prefs)),
+          FilledButton.icon(
+            onPressed: () => showLocationPicker(context, ref),
+            icon: const Icon(Icons.place_outlined),
+            label: Text(l10n.changePlace),
+          ),
+        ),
+      DeckEmptyReason.filteredOut => (
+          Icons.filter_alt_off_outlined,
+          scheme.primary,
+          l10n.emptyFilteredTitle,
+          l10n.emptyFilteredBody,
+          FilledButton.icon(
+            onPressed: () =>
+                ref.read(discoverPreferencesProvider.notifier).resetFilters(),
+            icon: const Icon(Icons.restart_alt),
+            label: Text(l10n.resetFilters),
+          ),
+        ),
+      _ => (
+          Icons.check_circle_outline,
+          context.swipeColors.like,
+          l10n.noMorePlacesTitle,
+          l10n.seenAllPlaces,
+          OutlinedButton.icon(
+            onPressed: () => ref.invalidate(swipeControllerProvider),
+            icon: const Icon(Icons.refresh),
+            label: Text(l10n.reload),
+          ),
+        ),
+    };
 
-  double _dragStartX = 0;
-  double _dragStartY = 0;
-  bool _isAnimating = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _resetAnimations();
-  }
-
-  @override
-  void didUpdateWidget(covariant _SwipeCardStack oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.place.id != widget.place.id) {
-      _controller.reset();
-      _resetAnimations();
-      _isAnimating = false;
-    }
-  }
-
-  void _resetAnimations() {
-    _slideAnimation = const AlwaysStoppedAnimation(Offset.zero);
-    _rotationAnimation = const AlwaysStoppedAnimation(0.0);
-    _opacityAnimation = const AlwaysStoppedAnimation(1.0);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _handleDragStart(DragStartDetails details) {
-    if (_isAnimating) return;
-    _dragStartX = details.globalPosition.dx;
-    _dragStartY = details.globalPosition.dy;
-  }
-
-  void _handleDragUpdate(DragUpdateDetails details) {
-    if (_isAnimating) return;
-    final deltaX = details.globalPosition.dx - _dragStartX;
-    final deltaY = details.globalPosition.dy - _dragStartY;
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    final rotation = deltaX / screenWidth * 0.1;
-    final opacity = 1.0 - (deltaX.abs() / screenWidth * 0.5).clamp(0.0, 0.5);
-
-    setState(() {
-      _slideAnimation = AlwaysStoppedAnimation(
-          Offset(deltaX / screenWidth, deltaY / screenWidth));
-      _rotationAnimation = AlwaysStoppedAnimation(rotation);
-      _opacityAnimation = AlwaysStoppedAnimation(opacity);
-    });
-  }
-
-  void _handleDragEnd(DragEndDetails details) {
-    if (_isAnimating) return;
-    final velocity = details.velocity.pixelsPerSecond.dx;
-    final currentOffset = _slideAnimation.value.dx;
-
-    const threshold = 0.3;
-    final fastSwipe = velocity.abs() > 500;
-
-    if (currentOffset > threshold || (velocity > 0 && fastSwipe)) {
-      _swipeRight();
-    } else if (currentOffset < -threshold || (velocity < 0 && fastSwipe)) {
-      _swipeLeft();
-    } else {
-      _returnToCenter();
-    }
-  }
-
-  void _animateOut(
-      Offset targetOffset, double targetRotation, VoidCallback onComplete) {
-    _isAnimating = true;
-    _controller.reset();
-
-    _slideAnimation = Tween<Offset>(
-      begin: _slideAnimation.value,
-      end: targetOffset,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
-    _rotationAnimation = Tween<double>(
-      begin: _rotationAnimation.value,
-      end: targetRotation,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
-    _opacityAnimation = Tween<double>(
-      begin: _opacityAnimation.value,
-      end: 0.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
-
-    _controller.forward().then((_) {
-      if (mounted) {
-        _controller.reset();
-        _resetAnimations();
-        _isAnimating = false;
-        onComplete();
-      }
-    });
-  }
-
-  void _swipeRight() {
-    _animateOut(
-      Offset(2.0, _slideAnimation.value.dy),
-      0.2,
-      widget.onLike,
-    );
-  }
-
-  void _swipeLeft() {
-    _animateOut(
-      Offset(-2.0, _slideAnimation.value.dy),
-      -0.2,
-      widget.onSkip,
-    );
-  }
-
-  void _returnToCenter() {
-    _isAnimating = true;
-    _controller.reset();
-
-    _slideAnimation = Tween<Offset>(
-      begin: _slideAnimation.value,
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-    _rotationAnimation = Tween<double>(
-      begin: _rotationAnimation.value,
-      end: 0.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-    _opacityAnimation = Tween<double>(
-      begin: _opacityAnimation.value,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-
-    _controller.forward().then((_) {
-      if (mounted) {
-        _controller.reset();
-        _isAnimating = false;
-      }
-    });
-  }
-
-  void _handleLike() {
-    if (_isAnimating) return;
-    _swipeRight();
-  }
-
-  void _handleSkip() {
-    if (_isAnimating) return;
-    _swipeLeft();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: GestureDetector(
-              onTap: widget.onDetail,
-              onPanStart: _handleDragStart,
-              onPanUpdate: _handleDragUpdate,
-              onPanEnd: _handleDragEnd,
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: RotationTransition(
-                  turns: _rotationAnimation,
-                  child: FadeTransition(
-                    opacity: _opacityAnimation,
-                    child: Card(
-                      elevation: 8,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: Stack(
-                          children: [
-                            Container(
-                              width: double.infinity,
-                              height: double.infinity,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    Colors.blue.shade400,
-                                    Colors.purple.shade400,
-                                  ],
-                                ),
-                              ),
-                              child: resolvePlacePhotoUrls(widget.place)
-                                      .isNotEmpty
-                                  ? CachedNetworkImage(
-                                      imageUrl:
-                                          resolvePlacePhotoUrls(widget.place)
-                                              .first,
-                                      fit: BoxFit.cover,
-                                      placeholder: (context, url) =>
-                                          const Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                      errorWidget: (context, url, error) =>
-                                          _buildPlaceholder(),
-                                    )
-                                  : _buildPlaceholder(),
-                            ),
-                            Positioned(
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      Colors.transparent,
-                                      Colors.black.withValues(alpha: 0.8),
-                                    ],
-                                  ),
-                                ),
-                                padding: const EdgeInsets.all(24.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      widget.place.name,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      widget.place.description ?? '',
-                                      style: TextStyle(
-                                        color:
-                                            Colors.white.withValues(alpha: 0.9),
-                                        fontSize: 16,
-                                      ),
-                                      maxLines: 3,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    if (widget.place.types.isNotEmpty) ...[
-                                      const SizedBox(height: 12),
-                                      Wrap(
-                                        spacing: 8,
-                                        runSpacing: 8,
-                                        children: widget.place.types
-                                            .map(
-                                              (tag) => Chip(
-                                                label: Text(
-                                                  tag,
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                                backgroundColor: Colors.white
-                                                    .withValues(alpha: 0.2),
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                  horizontal: 8,
-                                                  vertical: 4,
-                                                ),
-                                              ),
-                                            )
-                                            .toList(),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              top: 16,
-                              right: 16,
-                              child: IconButton(
-                                icon: const Icon(Icons.info_outline,
-                                    color: Colors.white),
-                                onPressed: widget.onDetail,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 88,
+              height: 88,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
               ),
+              child: Icon(icon, size: 40, color: color),
             ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.red),
-                      iconSize: 32,
-                      onPressed: _handleSkip,
-                      style: IconButton.styleFrom(
-                        padding: const EdgeInsets.all(16),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    context.l10n.skip,
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 24),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.favorite, color: Colors.green),
-                      iconSize: 32,
-                      onPressed: _handleLike,
-                      style: IconButton.styleFrom(
-                        padding: const EdgeInsets.all(16),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    context.l10n.like,
-                    style: TextStyle(
-                      color: Colors.green,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPlaceholder() {
-    return Container(
-      color: Colors.grey[300],
-      child: Center(
-        child: Icon(
-          Icons.place,
-          size: 80,
-          color: Colors.grey[600],
+            const SizedBox(height: 24),
+            Text(title, style: text.headlineSmall, textAlign: TextAlign.center),
+            const SizedBox(height: 8),
+            Text(
+              body,
+              textAlign: TextAlign.center,
+              style: text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(height: 48, child: action),
+          ],
         ),
       ),
     );

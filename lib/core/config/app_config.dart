@@ -30,6 +30,12 @@ class AppConfig {
   // TODO(before-launch): set to false. Tracked in POSSIBLE_ERRORS.md 9.1.
   static const bool useFixedDevLocation = true;
 
+  // Development shortcut: when the getCityPlaces Cloud Function is not
+  // deployed (or unreachable), build group sessions from places already in
+  // Firestore around the group's city instead of failing.
+  // TODO(before-launch): set to false. Tracked in POSSIBLE_ERRORS.md 9.2.
+  static const bool useDevPlacesFallback = true;
+
   // Define other global app configuration constants here
   // e.g., timeouts, max limits, default settings
 }

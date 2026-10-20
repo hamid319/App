@@ -42,6 +42,8 @@ class GroupRepository {
       location: group.location,
       joinEnabled: true,
       invite: group.invite,
+      tripStart: group.tripStart,
+      tripEnd: group.tripEnd,
     );
 
     if (_usesInjectedFirestore) {

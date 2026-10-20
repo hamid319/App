@@ -68,6 +68,9 @@ Env.googlePlacesApiKey  // loaded from .env via flutter_dotenv
     /votes/{placeId}   likedBy: string[], dislikedBy: string[]
     /userSwipes/{uid}  swipedPlaceIds: string[]
 /places/{placeId}      imageUrls: string[], types: string[]
+                       prompts: [{kind, text: {en, de}}]   (prompt tiles; kinds in PlacePromptKind)
+                       photos: [{publicUrl, creator, licenseName, licenseUrl, commonsFilePageUrl}]  (Wikidata pipeline)
+                       photoAttributions: [{displayName, uri}]  (Google; must be shown with the photo)
 ```
 
 ## Known bugs — never reintroduce
@@ -88,6 +91,10 @@ Env.googlePlacesApiKey  // loaded from .env via flutter_dotenv
 - FCM push notifications (not started)
 - Password reset screen (not started)
 - Dark theme wired in `app.dart` (built in `theme.dart`, not applied yet)
+
+## Open product decisions
+Listed in `POSSIBLE_ERRORS.md` section 10 (e.g. the group match rule).
+Do not implement features that depend on them before the owner decides.
 
 ## Before launch
 Dev-only shortcuts that must be reverted before release are listed in

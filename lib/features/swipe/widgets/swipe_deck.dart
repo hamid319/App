@@ -1,0 +1,545 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../../../app/theme.dart';
+import '../../../common/models/place_model.dart';
+import '../../../common/utils/place_type_labels.dart';
+import '../../../common/widgets/place_photo.dart';
+import '../../../common/widgets/skeleton.dart';
+import '../../../core/constants/colors.dart';
+import '../../../core/constants/sizes.dart';
+import '../../../core/constants/typography.dart';
+import '../../../l10n/l10n.dart';
+
+/// The swipe stack used by Discover (solo) and group sessions: the current
+/// card on top, the next place's photo waiting behind it, LIKE / NOPE stamps
+/// that follow the drag, and the action row underneath.
+class SwipeDeck extends StatefulWidget {
+  const SwipeDeck({
+    super.key,
+    required this.place,
+    required this.onLike,
+    required this.onSkip,
+    required this.onDetail,
+    this.nextPlace,
+    this.onUndo,
+    this.canUndo = false,
+  });
+
+  final PlaceModel place;
+  final PlaceModel? nextPlace;
+  final VoidCallback onLike;
+  final VoidCallback onSkip;
+  final VoidCallback onDetail;
+
+  /// Null hides the undo button entirely (group sessions).
+  final VoidCallback? onUndo;
+
+  /// Whether there is a swipe to take back; false greys the button out.
+  final bool canUndo;
+
+  @override
+  State<SwipeDeck> createState() => _SwipeDeckState();
+}
+
+class _SwipeDeckState extends State<SwipeDeck>
+    with SingleTickerProviderStateMixin {
+  /// Share of the card width a drag must pass to count as a swipe.
+  static const double _threshold = 0.3;
+  static const double _maxRotation = 0.22;
+
+  late final AnimationController _anim;
+  Offset _drag = Offset.zero;
+  bool _animating = false;
+  bool _pastThreshold = false;
+  double _width = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _anim = AnimationController(vsync: this);
+  }
+
+  @override
+  void didUpdateWidget(SwipeDeck oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.place.id != widget.place.id) {
+      _anim.stop();
+      _drag = Offset.zero;
+      _animating = false;
+      _pastThreshold = false;
+    }
+  }
+
+  @override
+  void dispose() {
+    _anim.dispose();
+    super.dispose();
+  }
+
+  void _onPanUpdate(DragUpdateDetails d) {
+    if (_animating) return;
+    setState(() => _drag += d.delta);
+    final past = _drag.dx.abs() > _width * _threshold;
+    if (past && !_pastThreshold) HapticFeedback.lightImpact();
+    _pastThreshold = past;
+  }
+
+  void _onPanEnd(DragEndDetails d) {
+    if (_animating) return;
+    final vx = d.velocity.pixelsPerSecond.dx;
+    final flung = vx.abs() > 800 && vx.sign == _drag.dx.sign;
+    if (_drag.dx.abs() > _width * _threshold || flung) {
+      _flyOut(toRight: _drag.dx > 0);
+    } else {
+      _snapBack();
+    }
+  }
+
+  void _animateTo(
+    Offset target,
+    Duration duration,
+    Curve curve, {
+    VoidCallback? onDone,
+  }) {
+    _animating = true;
+    final tween = Tween(begin: _drag, end: target)
+        .chain(CurveTween(curve: curve));
+    void tick() => setState(() => _drag = tween.evaluate(_anim));
+    _anim
+      ..duration = duration
+      ..addListener(tick);
+    _anim.forward(from: 0).whenComplete(() {
+      _anim.removeListener(tick);
+      if (!mounted) return;
+      _animating = false;
+      onDone?.call();
+    });
+  }
+
+  void _snapBack() => _animateTo(
+        Offset.zero,
+        AppSizes.snapBack,
+        Curves.easeOutBack,
+        onDone: () => _pastThreshold = false,
+      );
+
+  void _flyOut({required bool toRight}) {
+    final target = Offset(
+      (toRight ? 1 : -1) * _width * 1.6,
+      _drag.dy + 40,
+    );
+    _animateTo(target, AppSizes.cardOut, Curves.easeIn, onDone: () {
+      toRight ? widget.onLike() : widget.onSkip();
+      // The parent swaps in the next place; until it does, keep the old card
+      // off-screen instead of flashing it back in the middle.
+    });
+  }
+
+  void _buttonSwipe({required bool toRight}) {
+    if (_animating) return;
+    HapticFeedback.selectionClick();
+    _drag = Offset(toRight ? 8 : -8, 0);
+    _flyOut(toRight: toRight);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.swipeColors;
+    final l10n = context.l10n;
+    return Column(
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSizes.cardInset,
+              AppSizes.space4,
+              AppSizes.cardInset,
+              0,
+            ),
+            child: LayoutBuilder(builder: (context, box) {
+              _width = box.maxWidth;
+              final progress = (_drag.dx / (_width * _threshold)).clamp(-1.0, 1.0);
+              return Stack(
+                children: [
+                  if (widget.nextPlace != null)
+                    Positioned.fill(
+                      child: _BackCard(
+                        place: widget.nextPlace!,
+                        // The waiting card rises as the top card leaves.
+                        lift: progress.abs(),
+                      ),
+                    ),
+                  Positioned.fill(
+                    child: TweenAnimationBuilder<double>(
+                      // Replays when a new card comes up (or one is undone).
+                      key: ValueKey(widget.place.id),
+                      tween: Tween(begin: AppSizes.backCardScale, end: 1),
+                      duration: AppSizes.nextCardUp,
+                      curve: Curves.easeOut,
+                      builder: (context, scale, child) =>
+                          Transform.scale(scale: scale, child: child),
+                      child: GestureDetector(
+                        onTap: widget.onDetail,
+                        onPanUpdate: _onPanUpdate,
+                        onPanEnd: _onPanEnd,
+                        child: Transform.translate(
+                          offset: _drag,
+                          child: Transform.rotate(
+                            angle: _drag.dx / _width * _maxRotation,
+                            child: _CardFace(
+                              place: widget.place,
+                              likeOpacity: progress.clamp(0.0, 1.0),
+                              nopeOpacity: (-progress).clamp(0.0, 1.0),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSizes.screenEdge,
+            AppSizes.space16,
+            AppSizes.screenEdge,
+            AppSizes.space12,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (widget.onUndo != null) ...[
+                _RoundAction(
+                  icon: Icons.undo_rounded,
+                  color: colors.gold,
+                  tooltip: l10n.undo,
+                  onPressed:
+                      _animating || !widget.canUndo ? null : widget.onUndo,
+                ),
+                const SizedBox(width: AppSizes.space16),
+              ],
+              _RoundAction(
+                large: true,
+                icon: Icons.close_rounded,
+                color: colors.nope,
+                tooltip: l10n.skip,
+                onPressed: () => _buttonSwipe(toRight: false),
+              ),
+              const SizedBox(width: AppSizes.space16),
+              _RoundAction(
+                large: true,
+                filled: true,
+                icon: Icons.favorite_rounded,
+                color: colors.like,
+                tooltip: l10n.like,
+                onPressed: () => _buttonSwipe(toRight: true),
+              ),
+              const SizedBox(width: AppSizes.space16),
+              _RoundAction(
+                icon: Icons.info_outline_rounded,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                tooltip: l10n.details,
+                onPressed: widget.onDetail,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Card shadow from the design tokens (s3 · swipe).
+const _cardShadow = [
+  BoxShadow(
+    color: Color(0x59101218),
+    blurRadius: 28,
+    spreadRadius: -10,
+    offset: Offset(0, 10),
+  ),
+];
+
+class _CardFace extends StatelessWidget {
+  const _CardFace({
+    required this.place,
+    required this.likeOpacity,
+    required this.nopeOpacity,
+  });
+
+  final PlaceModel place;
+  final double likeOpacity;
+  final double nopeOpacity;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.swipeColors;
+    final tags = placeTypeLabels(context.l10n, place.types).take(3).toList();
+    final description = place.description?.trim() ?? '';
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        boxShadow: _cardShadow,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Hero(
+              tag: placePhotoHeroTag(place.id),
+              child: PlacePhoto(place: place),
+            ),
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: [0, 0.22, 0.42, 0.78, 1],
+                  colors: [
+                    PhotoColors.scrimTop,
+                    Colors.transparent,
+                    Colors.transparent,
+                    Color(0xC7080A0E),
+                    PhotoColors.scrimBottom,
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              left: AppSizes.space16,
+              right: AppSizes.space16,
+              bottom: AppSizes.space16,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    place.name,
+                    style: AppTypography.cardTitle(),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (description.isNotEmpty) ...[
+                    const SizedBox(height: AppSizes.space8),
+                    Text(
+                      description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.9),
+                          ),
+                    ),
+                  ],
+                  if (tags.isNotEmpty) ...[
+                    const SizedBox(height: AppSizes.space12),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [for (final t in tags) PhotoChip(label: t)],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            Positioned(
+              top: 30,
+              left: 18,
+              child: _Stamp(
+                text: context.l10n.likeStamp,
+                color: colors.like,
+                angle: -0.24,
+                opacity: likeOpacity,
+              ),
+            ),
+            Positioned(
+              top: 30,
+              right: 18,
+              child: _Stamp(
+                text: context.l10n.nopeStamp,
+                color: colors.nope,
+                angle: 0.24,
+                opacity: nopeOpacity,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BackCard extends StatelessWidget {
+  const _BackCard({required this.place, required this.lift});
+
+  final PlaceModel place;
+
+  /// 0 = resting behind, 1 = top card has passed the swipe threshold.
+  final double lift;
+
+  @override
+  Widget build(BuildContext context) {
+    final scale = AppSizes.backCardScale + (1 - AppSizes.backCardScale) * lift;
+    return Transform.translate(
+      offset: Offset(0, 10 * (1 - lift)),
+      child: Transform.scale(
+        scale: scale,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
+          child: ColorFiltered(
+            colorFilter: ColorFilter.mode(
+              Colors.black.withValues(alpha: 0.18 * (1 - lift)),
+              BlendMode.darken,
+            ),
+            child: PlacePhoto(place: place),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Stamp extends StatelessWidget {
+  const _Stamp({
+    required this.text,
+    required this.color,
+    required this.angle,
+    required this.opacity,
+  });
+
+  final String text;
+  final Color color;
+  final double angle;
+  final double opacity;
+
+  @override
+  Widget build(BuildContext context) {
+    if (opacity <= 0) return const SizedBox.shrink();
+    return Opacity(
+      opacity: opacity,
+      child: Transform.rotate(
+        angle: angle,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.08),
+            border: Border.all(color: color, width: 3.5),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(text, style: AppTypography.stamp(color)),
+        ),
+      ),
+    );
+  }
+}
+
+class _RoundAction extends StatelessWidget {
+  const _RoundAction({
+    required this.icon,
+    required this.color,
+    required this.tooltip,
+    required this.onPressed,
+    this.large = false,
+    this.filled = false,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String tooltip;
+  final VoidCallback? onPressed;
+  final bool large;
+  final bool filled;
+
+  @override
+  Widget build(BuildContext context) {
+    final size = large ? 64.0 : 46.0;
+    final surface = Theme.of(context).colorScheme.surface;
+    return Tooltip(
+      message: tooltip,
+      child: AnimatedOpacity(
+        opacity: onPressed != null ? 1 : 0.4,
+        duration: const Duration(milliseconds: 150),
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: filled ? color : surface,
+            shape: BoxShape.circle,
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x4D000000),
+                blurRadius: 16,
+                spreadRadius: -6,
+                offset: Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: onPressed,
+              child: Icon(
+                icon,
+                size: large ? 30 : 22,
+                color: filled ? Colors.white : color,
+                semanticLabel: tooltip,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Placeholder in the shape of the deck while places load.
+class SwipeDeckSkeleton extends StatelessWidget {
+  const SwipeDeckSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Skeleton(
+      child: Column(
+        children: [
+          const Expanded(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                AppSizes.cardInset,
+                AppSizes.space4,
+                AppSizes.cardInset,
+                0,
+              ),
+              child: SkeletonBox(
+                width: double.infinity,
+                height: double.infinity,
+                radius: AppSizes.radiusCard,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSizes.screenEdge,
+              AppSizes.space16,
+              AppSizes.screenEdge,
+              AppSizes.space12,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                for (final (i, size) in const [46.0, 64.0, 64.0, 46.0].indexed) ...[
+                  if (i > 0) const SizedBox(width: AppSizes.space16),
+                  SkeletonBox(width: size, height: size, radius: size / 2),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

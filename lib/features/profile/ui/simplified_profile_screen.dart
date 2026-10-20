@@ -4,10 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../logic/profile_controller.dart';
 import '../../auth/logic/auth_controller.dart';
-import '../../../common/widgets/loading_spinner.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
+import '../../../app/theme.dart';
+import '../../../common/widgets/skeleton.dart';
+import '../../../common/widgets/member_avatar.dart';
+import '../../group/logic/group_controller.dart';
+import '../../swipe/logic/swipe_controller.dart';
 
 class SimplifiedProfileScreen extends ConsumerWidget {
   const SimplifiedProfileScreen({super.key});
@@ -27,7 +31,7 @@ class SimplifiedProfileScreen extends ConsumerWidget {
         ],
       ),
       body: authState.when(
-        loading: () => LoadingSpinner(message: context.l10n.loadingProfile),
+        loading: () => const SkeletonList(count: 3, thumbnail: false),
         error: (e, st) => ErrorView(
           message: userMessage(e, fallback: context.l10n.errorLoadProfile, l10n: context.l10n),
           onRetry: () => ref.refresh(authControllerProvider),
@@ -61,6 +65,17 @@ class SimplifiedProfileScreen extends ConsumerWidget {
   }
 
   Widget _buildProfileContent(BuildContext context, WidgetRef ref, user, {bool isLoading = false}) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final l10n = context.l10n;
+    final String name = (user.displayName as String?)?.trim().isNotEmpty == true
+        ? user.displayName as String
+        : l10n.userFallbackName;
+    ref.watch(swipeControllerProvider);
+    final favorites =
+        ref.read(swipeControllerProvider.notifier).favoritesList.length;
+    final groups = ref.watch(userGroupsProvider).value?.length ?? 0;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
       child: Column(
@@ -69,66 +84,74 @@ class SimplifiedProfileScreen extends ConsumerWidget {
           Center(
             child: Column(
               children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Theme.of(context).primaryColor,
-                  child: user.photoUrl != null
-                      ? ClipOval(
-                          child: CachedNetworkImage(
-                            imageUrl: user.photoUrl!,
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                            errorWidget: (context, url, error) =>
-                                const Icon(Icons.person, size: 50, color: Colors.white),
-                          ),
-                        )
-                      : const Icon(Icons.person, size: 50, color: Colors.white),
-                ),
+                user.photoUrl != null
+                    ? ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: user.photoUrl!,
+                          width: 96,
+                          height: 96,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => const SkeletonImage(),
+                          errorWidget: (context, url, error) =>
+                              MemberAvatar(id: user.uid, name: name, size: 96),
+                        ),
+                      )
+                    : MemberAvatar(id: user.uid, name: name, size: 96),
                 const SizedBox(height: 16),
-                Text(
-                  user.displayName ?? context.l10n.userFallbackName,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
+                Text(name, style: text.headlineSmall),
                 if (user.email != null && user.email.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
                     user.email,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
-                        ),
+                    style: text.bodyMedium
+                        ?.copyWith(color: scheme.onSurfaceVariant),
                   ),
                 ],
               ],
             ),
           ),
           const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: _StatTile(
+                  icon: Icons.favorite_rounded,
+                  value: favorites,
+                  label: l10n.navFavorites,
+                  onTap: () => context.go('/favorites'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _StatTile(
+                  icon: Icons.groups_rounded,
+                  value: groups,
+                  label: l10n.navGroups,
+                  onTap: () => context.go('/group'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
               onPressed: () => _showEditProfileDialog(context, ref, user),
-              icon: const Icon(Icons.edit),
-              label: Text(context.l10n.editProfile),
+              icon: const Icon(Icons.edit_outlined),
+              label: Text(l10n.editProfile),
             ),
           ),
           const SizedBox(height: 32),
-          Text(
-            context.l10n.accountInfo,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 16),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.email_outlined),
-            title: Text(context.l10n.emailLabel),
-            subtitle: Text(user.email?.isNotEmpty == true ? user.email! : context.l10n.noEmail),
+          Text(l10n.accountInfo, style: text.titleMedium),
+          const SizedBox(height: 8),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.mail_outline),
+              title: Text(l10n.emailLabel),
+              subtitle: Text(
+                user.email?.isNotEmpty == true ? user.email! : l10n.noEmail,
+              ),
+            ),
           ),
         ],
       ),
@@ -166,13 +189,13 @@ class SimplifiedProfileScreen extends ConsumerWidget {
                 if (dialogContext.mounted) {
                   Navigator.pop(dialogContext);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(context.l10n.profileUpdated), backgroundColor: Colors.green),
+                    SnackBar(content: Text(context.l10n.profileUpdated), backgroundColor: context.swipeColors.like),
                   );
                 }
               } catch (e) {
                 if (dialogContext.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(userMessage(e, fallback: context.l10n.errorUpdateProfile, l10n: context.l10n)), backgroundColor: Colors.red),
+                    SnackBar(content: Text(userMessage(e, fallback: context.l10n.errorUpdateProfile, l10n: context.l10n)), backgroundColor: Theme.of(context).colorScheme.error),
                   );
                 }
               }
@@ -184,5 +207,59 @@ class SimplifiedProfileScreen extends ConsumerWidget {
     ).then((_) {
       nameController.dispose();
     });
+  }
+}
+
+class _StatTile extends StatelessWidget {
+  const _StatTile({
+    required this.icon,
+    required this.value,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final int value;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    return Card(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: scheme.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 20, color: scheme.primary),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('$value', style: text.headlineSmall),
+                  Text(
+                    label,
+                    style: text.bodySmall
+                        ?.copyWith(color: scheme.onSurfaceVariant),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

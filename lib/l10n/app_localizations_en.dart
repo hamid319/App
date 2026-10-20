@@ -57,34 +57,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navProfile => 'Profile';
 
   @override
-  String get onboardingSkip => 'Skip';
-
-  @override
   String get onboardingNext => 'Next';
 
   @override
   String get onboardingGetStarted => 'Get Started';
-
-  @override
-  String get onboardingDiscoverTitle => 'Discover new places';
-
-  @override
-  String get onboardingDiscoverBody =>
-      'Swipe through interesting places nearby and find your next travel destinations.';
-
-  @override
-  String get onboardingFavoritesTitle => 'Collect favorites';
-
-  @override
-  String get onboardingFavoritesBody =>
-      'Mark places you like and create your personal wishlist.';
-
-  @override
-  String get onboardingGroupsTitle => 'Plan with friends';
-
-  @override
-  String get onboardingGroupsBody =>
-      'Create groups and find the best places for your next trip together.';
 
   @override
   String get languageTitle => 'Language';
@@ -426,9 +402,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get groupResultsTitle => 'Group Results';
 
   @override
-  String get loadingGroup => 'Loading group...';
-
-  @override
   String get failedToLoadGroup => 'Failed to load group';
 
   @override
@@ -438,16 +411,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noGroupMessage => 'Create or join a group first';
 
   @override
-  String get loadingSessionHistory => 'Loading session history...';
-
-  @override
   String get noCompletedSessionsTitle => 'No Completed Sessions';
 
   @override
   String get noCompletedSessionsBody => 'Finish a session to see results here.';
-
-  @override
-  String get loadingResults => 'Loading results...';
 
   @override
   String get noQualifiedPlacesTitle => 'No Qualified Places';
@@ -466,12 +433,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get groupsTitle => 'Groups';
 
   @override
-  String get loadingUser => 'Loading user...';
-
-  @override
-  String get loadingGroups => 'Loading groups...';
-
-  @override
   String get notLoggedIn => 'Not logged in';
 
   @override
@@ -481,7 +442,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get groupNotFound => 'Group not found';
 
   @override
-  String get newGroupButton => '+ New';
+  String get newGroupButton => 'New';
 
   @override
   String get statusLive => 'Live';
@@ -657,9 +618,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileTitle => 'Profile';
 
   @override
-  String get loadingProfile => 'Loading profile...';
-
-  @override
   String get loginToViewProfile => 'Please login to view your profile';
 
   @override
@@ -769,4 +727,396 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get createAccountToManage =>
       'Create an account to manage your profile and log in on other devices.';
+
+  @override
+  String get tagTouristAttraction => 'Sight';
+
+  @override
+  String get tagMuseum => 'Museum';
+
+  @override
+  String get tagArtGallery => 'Gallery';
+
+  @override
+  String get tagArt => 'Art';
+
+  @override
+  String get tagCulture => 'Culture';
+
+  @override
+  String get tagHistoricalLandmark => 'Historic site';
+
+  @override
+  String get tagCulturalLandmark => 'Landmark';
+
+  @override
+  String get tagLandmark => 'Landmark';
+
+  @override
+  String get tagHistory => 'History';
+
+  @override
+  String get tagChurch => 'Church';
+
+  @override
+  String get tagPark => 'Park';
+
+  @override
+  String get tagNature => 'Nature';
+
+  @override
+  String get tagNaturalFeature => 'Nature spot';
+
+  @override
+  String get tagOutdoors => 'Outdoors';
+
+  @override
+  String get tagBeach => 'Beach';
+
+  @override
+  String get tagViewpoint => 'Viewpoint';
+
+  @override
+  String get tagHiking => 'Hiking';
+
+  @override
+  String get tagFamily => 'Family';
+
+  @override
+  String get tagScience => 'Science';
+
+  @override
+  String get tagZoo => 'Zoo';
+
+  @override
+  String get tagAquarium => 'Aquarium';
+
+  @override
+  String get tagAmusementPark => 'Theme park';
+
+  @override
+  String get tagShopping => 'Shopping';
+
+  @override
+  String get tagMarket => 'Market';
+
+  @override
+  String get tagNightlife => 'Nightlife';
+
+  @override
+  String get tagMusic => 'Music';
+
+  @override
+  String get tagArchitecture => 'Architecture';
+
+  @override
+  String get tagPhotoSpot => 'Photo spot';
+
+  @override
+  String get undo => 'Undo last swipe';
+
+  @override
+  String get details => 'Details';
+
+  @override
+  String get undone => 'Brought back';
+
+  @override
+  String get appearanceTitle => 'Appearance';
+
+  @override
+  String get appearanceSystem => 'System default';
+
+  @override
+  String get appearanceLight => 'Light';
+
+  @override
+  String get appearanceDark => 'Dark';
+
+  @override
+  String get navFavorites => 'Favorites';
+
+  @override
+  String get sessionLive => 'Session in progress';
+
+  @override
+  String sessionTimeLeft(int minutes) {
+    return '$minutes min left';
+  }
+
+  @override
+  String get yourProgress => 'your progress';
+
+  @override
+  String get memberDone => 'done';
+
+  @override
+  String get whoIsSwiping => 'Who\'s still swiping?';
+
+  @override
+  String get matchTitle => 'It\'s a match!';
+
+  @override
+  String matchBody(String place) {
+    return '$place made your list.';
+  }
+
+  @override
+  String matchVotes(int likes, int total) {
+    return '$likes of $total likes';
+  }
+
+  @override
+  String get matchSeeResults => 'See all results';
+
+  @override
+  String get matchOpenPlace => 'View place';
+
+  @override
+  String get onboarding1Lead => 'Swipe your way to your';
+
+  @override
+  String get onboarding1Accent => 'next favourite place.';
+
+  @override
+  String get onboarding1Body =>
+      'Swipe right for “want to see”, left for “rather not”.';
+
+  @override
+  String get onboarding2Lead => 'Save what you love,';
+
+  @override
+  String get onboarding2Accent => 'plan it later.';
+
+  @override
+  String get onboarding2Body =>
+      'Every like lands in your favorites, ready for your next trip.';
+
+  @override
+  String get onboarding3Lead => 'Plan together,';
+
+  @override
+  String get onboarding3Accent => 'without endless chats.';
+
+  @override
+  String get onboarding3Body =>
+      'Everyone swipes the same deck. SwipeTrip shows you what you all like.';
+
+  @override
+  String get onboardingGuest => 'Just look around as a guest';
+
+  @override
+  String filterAll(int count) {
+    return 'All · $count';
+  }
+
+  @override
+  String profileStats(int favorites, int groups) {
+    String _temp0 = intl.Intl.pluralLogic(
+      favorites,
+      locale: localeName,
+      other: '$favorites favorites',
+      one: '1 favorite',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      groups,
+      locale: localeName,
+      other: '$groups groups',
+      one: '1 group',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get guestName => 'Guest';
+
+  @override
+  String get guestSubtitle => 'Not signed in';
+
+  @override
+  String get loginHeadline => 'Welcome back';
+
+  @override
+  String get loginSubtitle => 'Log in to sync your favorites and groups.';
+
+  @override
+  String get registerHeadline => 'Create your account';
+
+  @override
+  String get registerSubtitle =>
+      'Keep your favorites and plan trips with friends.';
+
+  @override
+  String get licenses => 'Open source licenses';
+
+  @override
+  String get nearby => 'Nearby';
+
+  @override
+  String get locationTitle => 'Where to?';
+
+  @override
+  String get currentLocation => 'Current location';
+
+  @override
+  String get currentLocationSubtitle => 'Places around you';
+
+  @override
+  String get searchCity => 'Search city';
+
+  @override
+  String get popularDestinations => 'Popular destinations';
+
+  @override
+  String get noCityFound => 'No matching city';
+
+  @override
+  String get filtersTitle => 'Filters';
+
+  @override
+  String get interestsTitle => 'Interests';
+
+  @override
+  String get interestsHint => 'Shows places that match at least one.';
+
+  @override
+  String get radiusTitle => 'Distance';
+
+  @override
+  String radiusKm(int km) {
+    return '$km km';
+  }
+
+  @override
+  String get applyFilters => 'Show places';
+
+  @override
+  String get resetFilters => 'Reset';
+
+  @override
+  String get interestCulture => 'Culture & museums';
+
+  @override
+  String get interestNature => 'Nature & parks';
+
+  @override
+  String get interestHistory => 'Sights & history';
+
+  @override
+  String get interestBeach => 'Beaches';
+
+  @override
+  String get interestViews => 'Viewpoints';
+
+  @override
+  String get interestFamily => 'Family';
+
+  @override
+  String get interestNightlife => 'Nightlife';
+
+  @override
+  String get interestShopping => 'Shopping';
+
+  @override
+  String get emptyNoPlacesTitle => 'No places here yet';
+
+  @override
+  String emptyNoPlacesBody(String place) {
+    return 'We don\'t have places for $place yet. Try another destination.';
+  }
+
+  @override
+  String get emptyFilteredTitle => 'Nothing matches your filters';
+
+  @override
+  String get emptyFilteredBody => 'Try other interests or a larger distance.';
+
+  @override
+  String get changePlace => 'Change place';
+
+  @override
+  String get inviteCodeTitle => 'Invite code';
+
+  @override
+  String get promptBestTime => 'Best time';
+
+  @override
+  String get promptInsiderTip => 'Insider tip';
+
+  @override
+  String get promptDontMiss => 'Don\'t miss';
+
+  @override
+  String get promptGoodFor => 'Perfect for';
+
+  @override
+  String get promptFunFact => 'Did you know?';
+
+  @override
+  String photoCreditShort(String author) {
+    return 'Photo: $author';
+  }
+
+  @override
+  String get photoCreditsTitle => 'Photo credits';
+
+  @override
+  String get photoCreditsHint =>
+      'Photos belong to their authors and are shown under the terms listed.';
+
+  @override
+  String get photoCreditUnknownAuthor => 'Unknown author';
+
+  @override
+  String get photoCreditGoogle => 'Google Maps';
+
+  @override
+  String get photoCreditWikimedia => 'Wikimedia Commons';
+
+  @override
+  String photoCreditNumber(int number) {
+    return 'Photo $number';
+  }
+
+  @override
+  String get errorOpenLink => 'Couldn\'t open the link.';
+
+  @override
+  String get mapsChooseTitle => 'Get directions with';
+
+  @override
+  String get appleMaps => 'Apple Maps';
+
+  @override
+  String get googleMaps => 'Google Maps';
+
+  @override
+  String get fromCalendar => 'From calendar';
+
+  @override
+  String get calendarPickTitle => 'Pick a trip from your calendar';
+
+  @override
+  String get calendarPickHint =>
+      'We use the event\'s title, place and dates for the group. Nothing else leaves your phone.';
+
+  @override
+  String get calendarPermissionDenied =>
+      'SwipeTrip has no access to your calendar. You can allow it in the iPhone or Android settings.';
+
+  @override
+  String get errorLoadCalendar => 'Couldn\'t load your calendar.';
+
+  @override
+  String get calendarNoEvents => 'No upcoming events in your calendar.';
+
+  @override
+  String get calendarCityNotFound =>
+      'We couldn\'t recognise the city. Please pick it.';
+
+  @override
+  String get tripDatesLabel => 'Travel dates (optional)';
+
+  @override
+  String get clearTripDates => 'Remove dates';
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../common/models/place_model.dart';
@@ -61,6 +62,13 @@ class PlacesRepository {
       if (placeIds.isEmpty) return [];
       return loadPlacesByIds(placeIds);
     } on FirebaseFunctionsException catch (e) {
+      if (AppConfig.useDevPlacesFallback &&
+          const {'not-found', 'unavailable', 'internal'}.contains(e.code)) {
+        debugPrint('getCityPlaces unavailable (${e.code}); '
+            'using Firestore places near ${location.cityName}.');
+        final nearby = await loadNearbyPlaces(location.lat, location.lng);
+        return nearby.take(restrictedLimit).toList();
+      }
       throw Exception(e.message ?? 'Could not load places for this city.');
     }
   }
@@ -364,6 +372,14 @@ class PlacesRepository {
       timestamp: DateTime.now(),
     );
     await _db.collection('swipeResults').doc(docId).set(swipeResult.toJson());
+  }
+
+  /// Removes one swipe again (undo), so the place counts as unseen.
+  Future<void> deleteSwipe({
+    required String userId,
+    required String placeId,
+  }) async {
+    await _db.collection('swipeResults').doc('${userId}_$placeId').delete();
   }
 
   Future<List<SwipeResultModel>> getUserSwipes(String userId) async {

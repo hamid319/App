@@ -87,6 +87,10 @@ class GroupModel {
   final bool? joinEnabled;
   final GroupInvite? invite;
 
+  /// Travel dates, e.g. taken from a calendar event (both days inclusive).
+  final DateTime? tripStart;
+  final DateTime? tripEnd;
+
   const GroupModel({
     required this.groupId,
     this.groupName,
@@ -99,6 +103,8 @@ class GroupModel {
     this.location,
     this.joinEnabled,
     this.invite,
+    this.tripStart,
+    this.tripEnd,
   });
 
   GroupModel copyWith({
@@ -113,6 +119,8 @@ class GroupModel {
     GroupLocation? location,
     bool? joinEnabled,
     GroupInvite? invite,
+    DateTime? tripStart,
+    DateTime? tripEnd,
   }) {
     return GroupModel(
       groupId: groupId ?? this.groupId,
@@ -126,6 +134,8 @@ class GroupModel {
       location: location ?? this.location,
       joinEnabled: joinEnabled ?? this.joinEnabled,
       invite: invite ?? this.invite,
+      tripStart: tripStart ?? this.tripStart,
+      tripEnd: tripEnd ?? this.tripEnd,
     );
   }
 
@@ -155,7 +165,15 @@ class GroupModel {
       invite: json['invite'] != null
           ? GroupInvite.fromJson(Map<String, dynamic>.from(json['invite']))
           : null,
+      tripStart: _date(json['tripStart']),
+      tripEnd: _date(json['tripEnd']),
     );
+  }
+
+  static DateTime? _date(Object? value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is String) return DateTime.tryParse(value);
+    return null;
   }
 
   Map<String, dynamic> toJson() => {
@@ -170,5 +188,7 @@ class GroupModel {
         if (location != null) 'location': location!.toJson(),
         if (joinEnabled != null) 'joinEnabled': joinEnabled,
         if (invite != null) 'invite': invite!.toJson(),
+        if (tripStart != null) 'tripStart': Timestamp.fromDate(tripStart!),
+        if (tripEnd != null) 'tripEnd': Timestamp.fromDate(tripEnd!),
       };
 }

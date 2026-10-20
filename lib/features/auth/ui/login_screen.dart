@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../logic/auth_controller.dart';
 import '../../../l10n/l10n.dart';
+import '../../../common/widgets/wordmark.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -47,7 +48,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.loginButton)),
+      appBar: AppBar(),
       // Scrollable so the keyboard cannot push the form off a small screen.
       body: Center(
         child: SingleChildScrollView(
@@ -56,14 +57,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             key: _formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Wordmark(size: 22),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  context.l10n.loginHeadline,
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  context.l10n.loginSubtitle,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                const SizedBox(height: 32),
                 TextFormField(
                   controller: emailController,
                   keyboardType: TextInputType.emailAddress,
                   autocorrect: false,
                   enableSuggestions: false,
                   textInputAction: TextInputAction.next,
-                  decoration: InputDecoration(labelText: context.l10n.emailLabel),
+                  decoration: InputDecoration(
+                      labelText: context.l10n.emailLabel,
+                      prefixIcon: const Icon(Icons.mail_outline)),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return context.l10n.emailRequired;
@@ -77,7 +98,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: passwordController,
-                  decoration: InputDecoration(labelText: context.l10n.passwordLabel),
+                  decoration: InputDecoration(
+                      labelText: context.l10n.passwordLabel,
+                      prefixIcon: const Icon(Icons.lock_outline)),
                   obscureText: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -93,13 +116,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 // Error message
                 authState.when(
                   data: (_) => const SizedBox.shrink(),
-                  loading: () => const CircularProgressIndicator(),
-                  error: (error, stack) => Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
+                  loading: () => const SizedBox.shrink(),
+                  error: (error, stack) => Container(
+                    margin: const EdgeInsets.only(bottom: 16.0),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.errorContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: Text(
                       _getErrorMessage(error),
-                      style: const TextStyle(color: Colors.red),
-                      textAlign: TextAlign.center,
+                      style:
+                          TextStyle(color: Theme.of(context).colorScheme.error),
                     ),
                   ),
                 ),

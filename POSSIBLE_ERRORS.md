@@ -12,16 +12,20 @@ Status legend: **FIXED** = fixed on this branch · **OPEN** = still present ·
 
 ---
 
-## 0. Read this first: nothing backend is live yet
+## 0. Read this first: backend status
 
-The Firestore rules, indexes, Storage rules and Cloud Functions in this repo
-are **not deployed**. Until they are, the app behaves as if none of the fixes
-below exist.
+**Deployed on 2026-10-20:** Firestore rules, Firestore indexes and Storage
+rules (`firebase deploy --only firestore:rules,firestore:indexes,storage`).
+Firebase Storage was set up in the console the same day.
+
+**Still not deployed:** the Cloud Functions (`getCityPlaces`, photo caching,
+Gemini descriptions). They require the Blaze plan:
 
 ```bash
-firebase deploy --only firestore:rules,firestore:indexes,storage
-firebase deploy --only functions   # requires the Blaze plan
+firebase deploy --only functions --project travelapp-31255
 ```
+
+Until then group sessions use the dev fallback in 9.2.
 
 The Google Places API key in `.env` is a **13-character placeholder**, not a
 real key. A live probe returned `HTTP 400 — API key not valid`, which means
@@ -35,12 +39,12 @@ descriptions have always been `null`.
 
 | # | Problem | Where | Status |
 |---|---|---|---|
-| 1.1 | Firestore rules had **no rules at all** for `/places`, `/placeCacheMetadata`, `/swipeResults` and `sessions/*/userSwipes`. Unmatched paths are denied by default, so the place cache could never be written and solo swiping could never be recorded. | `firestore.rules` | **BLOCKED** (fixed, needs deploy) |
-| 1.2 | Vote rule required fields `upvotes` / `downvotes` / `votedUsers`, but the code writes `likes` / `dislikes` / `likedBy` / `dislikedBy`. Zero overlap, so **every vote write was denied**. | `firestore.rules` vs `group_repository.dart:338-353` | **BLOCKED** |
-| 1.3 | Session update rule allowed only `progressByUser` and `isCompleted`, but each swipe rewrites the whole session document including `swipeProgress` and `status`. Result: **only the group owner could swipe**. | `firestore.rules` vs `group_repository.dart:382` | **BLOCKED** |
+| 1.1 | Firestore rules had **no rules at all** for `/places`, `/placeCacheMetadata`, `/swipeResults` and `sessions/*/userSwipes`. Unmatched paths are denied by default, so the place cache could never be written and solo swiping could never be recorded. | `firestore.rules` | **FIXED** (deployed 2026-10-20) |
+| 1.2 | Vote rule required fields `upvotes` / `downvotes` / `votedUsers`, but the code writes `likes` / `dislikes` / `likedBy` / `dislikedBy`. Zero overlap, so **every vote write was denied**. | `firestore.rules` vs `group_repository.dart:338-353` | **FIXED** (deployed 2026-10-20) |
+| 1.3 | Session update rule allowed only `progressByUser` and `isCompleted`, but each swipe rewrites the whole session document including `swipeProgress` and `status`. Result: **only the group owner could swipe**. | `firestore.rules` vs `group_repository.dart:382` | **FIXED** (deployed 2026-10-20) |
 | 1.4 | The release Android manifest declared **no `INTERNET` permission** and no location permission — those existed only in the debug and profile manifests. A release APK would have had no network access at all: no Firebase, no Places, nothing. | `android/app/src/main/AndroidManifest.xml` | **FIXED** |
 | 1.5 | `firebase.json` referenced `firestore.indexes.json`, which did not exist. `firebase deploy` would fail outright. | `firebase.json` | **FIXED** |
-| 1.6 | The `swipeResults` history query needs a composite index that did not exist. It threw `FAILED_PRECONDITION`, which a `catch` block swallowed, silently clearing swipe history — so **users kept seeing places they had already swiped**. | `places_repository.dart:315-319`, `swipe_controller.dart:61-64` | **FIXED** (index added; needs deploy) |
+| 1.6 | The `swipeResults` history query needs a composite index that did not exist. It threw `FAILED_PRECONDITION`, which a `catch` block swallowed, silently clearing swipe history — so **users kept seeing places they had already swiped**. | `places_repository.dart:315-319`, `swipe_controller.dart:61-64` | **FIXED** (index deployed 2026-10-20; favorites no longer cleared when the history query fails) |
 | 1.7 | Storage rule matched `profile_images/{userId}.jpg` while the client uploaded `profile_images/profile_<uid>.jpg`, so **every profile picture upload was denied**. | `storage.rules` vs `image_service.dart:39` | **FIXED** |
 | 1.8 | Nearby Search sent `landmark` and `food` in `includedTypes`/`excludedTypes`. Those are Table B place types, which that field rejects, so the request would fail with `INVALID_ARGUMENT` **even with a valid API key**. Two tests asserted the invalid values, locking the bug in. | `places_repository.dart:78-88` | **FIXED** |
 | 1.9 | iOS had no `NSLocationWhenInUseUsageDescription`, so the location request failed on iOS. It also requested microphone access it never uses, and disabled App Transport Security app-wide. | `ios/Runner/Info.plist` | **FIXED** |
@@ -54,8 +58,8 @@ descriptions have always been `null`.
 |---|---|---|---|
 | 2.1 | **Place Photos are billed per view.** Every card, thumbnail and detail image was requested straight from Google with the API key in the URL, cached only on that one device. Cost scaled with views, not with places — roughly €420/month at 1,000 users. | `place_photo_url_builder.dart:12-21` | **FIXED** (Cloud Function now caches each photo once into Storage) |
 | 2.2 | `.env` is declared as a Flutter **asset**, so any key in it ships inside the APK/IPA and can be extracted with an unzip. Harmless today only because the key is a placeholder. | `pubspec.yaml:39-40` | **OPEN** — keys now live in Cloud Function secrets; remove `.env` from assets once the client no longer reads any key |
-| 2.3 | The join rule let **any authenticated user append any UIDs to any group** with joining enabled; the invite code was only checked client-side, and codes are enumerable because groups are readable. | `firestore.rules` | **BLOCKED** (now restricted to adding only yourself) |
-| 2.4 | Group creation allowed the creator to pre-add arbitrary UIDs, forcing strangers into a group. | `firestore.rules` | **BLOCKED** (now requires members == [creator]) |
+| 2.3 | The join rule let **any authenticated user append any UIDs to any group** with joining enabled; the invite code was only checked client-side, and codes are enumerable because groups are readable. | `firestore.rules` | **FIXED** (deployed 2026-10-20) (now restricted to adding only yourself) |
+| 2.4 | Group creation allowed the creator to pre-add arbitrary UIDs, forcing strangers into a group. | `firestore.rules` | **FIXED** (deployed 2026-10-20) (now requires members == [creator]) |
 | 2.5 | `/users` is readable by every authenticated user, exposing **all emails** and FCM tokens. Nothing currently reads another user's document, so tightening this is safe. | `firestore.rules:19-21` | **OPEN** — needs a `publicProfiles` collection for member names first |
 | 2.6 | No **Firebase App Check**. Without it, anyone with the public config can call the backend and the Cloud Function directly. | no `firebase_app_check` dependency | **OPEN** — `enforceAppCheck` is ready to switch on in `functions/index.js` |
 | 2.7 | Release builds are signed with the **debug keystore**. Not publishable, and it prevents per-app API key restriction. | `android/app/build.gradle.kts` | **OPEN** |
@@ -103,7 +107,7 @@ descriptions have always been `null`.
 | 5.2 | The Impressum shows **placeholder legal identity** ("Musterfirma GmbH", "Max Mustermann", "HRB 12345"), and the privacy dialog claims **end-to-end encryption**, which is false for a Firebase app. Both are a real risk if users see them. | `settings_screen.dart:99-124,214` | **FIXED** |
 | 5.3 | Login and register sit **inside the bottom-navigation shell**, so a logged-out user sees the Discover/Groups/Profile tab bar. Confirmed visually on the simulator. | `routes.dart:91-98` | **FIXED** |
 | 5.4 | The group member list shows **raw Firebase UIDs** instead of display names. | `simplified_group_screen.dart:630-636` | **FIXED** |
-| 5.5 | Dark theme is fully built but **never wired up**, and ~130 hardcoded `Colors.*` values would break it anyway. | `app.dart:13`, `theme.dart` | **OPEN** |
+| 5.5 | Dark theme is fully built but **never wired up**, and ~130 hardcoded `Colors.*` values would break it anyway. | `app.dart:13`, `theme.dart` | **FIXED** (hardcoded colours replaced by `colorScheme` / `context.swipeColors`; dark mode follows the device, switchable under Settings → Appearance) |
 | 5.6 | The city dropdown keeps a stale selected value when the country changes, causing a Flutter assertion in debug and a blank dropdown in release. | `simplified_group_screen.dart:57-71` | **FIXED** |
 | 5.7 | Login and register screens have no scroll view, so on a small screen with the keyboard open the layout **overflows**. | `login_screen.dart:53`, `register_screen.dart:38` | **FIXED** |
 | 5.8 | A destructive "reset all places and favourites" action sits permanently in the home app bar behind a single confirm. | `simplified_home_screen.dart:18-22` | **FIXED** |
@@ -119,7 +123,7 @@ descriptions have always been `null`.
 | 6.1 | **23 cross-feature imports** violate the layer rules. They use relative paths, so the lint hook that checks for `package:` imports never catches them. | `swipe_controller.dart`, `group_controller.dart`, several screens | **OPEN** |
 | 6.2 | `PlacesRepository()` and `LocationRepository()` are constructed directly inside controllers and widgets instead of injected via providers, which is why the favourites and like paths have no tests. | `swipe_controller.dart:27`, `group_controller.dart:42` | **OPEN** |
 | 6.3 | Providers and data-loading logic live inside UI files. | `group_matches_screen.dart:41-94`, `place_detail_screen.dart:11-15` | **OPEN** |
-| 6.4 | The home screen contains a ~400-line **duplicate** of the swipe card stack, which has already drifted from the real one. `PlaceCard` in `common/` is unused. | `simplified_home_screen.dart:176-581` | **OPEN** |
+| 6.4 | The home screen contains a ~400-line **duplicate** of the swipe card stack, which has already drifted from the real one. `PlaceCard` in `common/` is unused. | `simplified_home_screen.dart:176-581` | **FIXED** (both screens use the shared `SwipeDeck`) |
 | 6.5 | `analysis_options.yaml` has **zero custom lint rules**. `unawaited_futures` alone would have caught the transaction bug in section 4.9. | `analysis_options.yaml` | **OPEN** |
 | 6.6 | Tracked junk in the repo: `lib.rar`, `extract.py`, `extract.dart`. `.gitignore` is missing `*.jks`, `*.keystore`, `android/key.properties`. | repo root | **OPEN** |
 | 6.7 | `GroupRepository` has two parallel code paths (injected vs service), so tests exercise a different path than production. | `group_repository.dart:12,19,47,164` | **OPEN** |
@@ -170,3 +174,15 @@ must be reverted before a public release.
 | # | Shortcut | Where | What to do before launch |
 |---|---|---|---|
 | 9.1 | **Fixed dev location.** `AppConfig.useFixedDevLocation = true` skips GPS entirely and always uses `defaultLat` / `defaultLng` (currently Los Angeles, where the Firestore test places are). Real users would only ever see places around that point, and the app never asks for location permission. | `lib/core/config/app_config.dart`, used in `lib/core/services/location_service.dart` | Set `useFixedDevLocation` to `false`. Set `defaultLat`/`defaultLng` to the intended fallback for when GPS fails (planned: Hamburg, 53.5511 / 9.9937, once real Places data exists). |
+| 9.2 | **Dev places fallback.** `AppConfig.useDevPlacesFallback = true` builds group sessions from places already in Firestore near the group's city when the `getCityPlaces` Cloud Function is missing. Hides a broken backend in production. | `lib/core/config/app_config.dart`, used in `places_repository.dart` (`fetchPlacesForCity`) | Set to `false` once the Cloud Functions are deployed. |
+
+---
+
+## 10. Open product decisions
+
+Questions the product owner still has to answer. Features that depend on
+them are on hold until then.
+
+| # | Decision | Options | Blocks |
+|---|---|---|---|
+| 10.1 | **When does a place count as a group match?** Today the results screen lists every place with **at least 1 like** (`getQualifiedPlaces` in `group_repository.dart`), so a single person's like already counts. | (a) Majority of participants, minimum 2 · (b) all participants · (c) at least 2 likes regardless of group size · (d) keep 1 like. Whatever is chosen should apply to the live counter **and** the results list. | The live "3 matches so far" counter in a running group session (matches stay hidden until the end, only the number grows) from the design proposal. |

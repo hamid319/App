@@ -3,15 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../common/models/place_model.dart';
-import '../../places/data/place_photo_url_builder.dart';
+import '../../../common/utils/place_photo_url_builder.dart';
 import '../../../common/models/group_session_model.dart';
-import '../../../common/widgets/loading_spinner.dart';
 import '../../../common/widgets/error_view.dart';
 import '../logic/group_controller.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../swipe/data/places_repository.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
+import '../../../common/widgets/skeleton.dart';
+import '../widgets/match_celebration.dart';
+import '../../../app/theme.dart';
 
 class ResultItem {
   final PlaceModel place;
@@ -97,13 +99,41 @@ final sessionResultsProvider =
 
 class GroupMatchesScreen extends ConsumerStatefulWidget {
   final String groupId;
-  const GroupMatchesScreen({super.key, required this.groupId});
+
+  /// Show the match moment for the newest session once its results load.
+  final bool celebrate;
+
+  const GroupMatchesScreen({
+    super.key,
+    required this.groupId,
+    this.celebrate = false,
+  });
 
   @override
   ConsumerState<GroupMatchesScreen> createState() => _GroupMatchesScreenState();
 }
 
 class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
+  bool _celebrated = false;
+
+  void _maybeCelebrate(GroupSessionModel newest, String shownSessionId,
+      List<ResultItem> results) {
+    if (!widget.celebrate || _celebrated || results.isEmpty) return;
+    if (shownSessionId != newest.sessionId) return;
+    _celebrated = true;
+    final top = results.first;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      showMatchCelebration(
+        context,
+        place: top.place,
+        likes: top.likes,
+        participants: newest.participants,
+        onOpenPlace: () => context.push('/place/${top.place.id}'),
+      );
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -155,7 +185,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
         ],
       ),
       body: groupState.when(
-        loading: () => LoadingSpinner(message: context.l10n.loadingGroup),
+        loading: () => const SkeletonList(),
         error: (error, stack) => ErrorView(
           message: userMessage(error, fallback: context.l10n.errorGeneric, l10n: context.l10n),
           title: context.l10n.failedToLoadGroup,
@@ -173,7 +203,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
 
           return sessionsAsync.when(
             loading: () =>
-                LoadingSpinner(message: context.l10n.loadingSessionHistory),
+                const SkeletonList(),
             error: (error, stack) => ErrorView(
               message: userMessage(error, fallback: context.l10n.errorLoadSessions, l10n: context.l10n),
               onRetry: () =>
@@ -188,7 +218,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                       Icon(
                         Icons.history,
                         size: 80,
-                        color: Colors.grey[400],
+                        color: Theme.of(context).colorScheme.outline,
                       ),
                       const SizedBox(height: 24),
                       Text(
@@ -199,7 +229,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                       Text(
                         context.l10n.noCompletedSessionsBody,
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey[600]),
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                       const SizedBox(height: 32),
                       ElevatedButton.icon(
@@ -224,16 +254,18 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                 children: [
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(16.0),
+                    margin: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                    padding: const EdgeInsets.fromLTRB(16, 4, 12, 4),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      border: Border(
-                        bottom: BorderSide(color: Colors.blue.shade200),
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outlineVariant,
                       ),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.history, color: Colors.blue.shade700),
+                        Icon(Icons.history, color: Theme.of(context).colorScheme.primary),
                         const SizedBox(width: 12),
                         Expanded(
                           child: DropdownButton<String>(
@@ -267,7 +299,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                   Expanded(
                     child: resultsAsync.when(
                       loading: () =>
-                          LoadingSpinner(message: context.l10n.loadingResults),
+                          const SkeletonList(),
                       error: (error, stack) => ErrorView(
                         message: userMessage(error, fallback: context.l10n.errorLoadResults, l10n: context.l10n),
                         onRetry: () => ref.invalidate(sessionResultsProvider(
@@ -278,6 +310,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                         )),
                       ),
                       data: (results) {
+                        _maybeCelebrate(sessions.first, sessionId, results);
                         if (results.isEmpty) {
                           return Center(
                             child: Column(
@@ -286,7 +319,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                                 Icon(
                                   Icons.favorite_border,
                                   size: 80,
-                                  color: Colors.grey[400],
+                                  color: Theme.of(context).colorScheme.outline,
                                 ),
                                 const SizedBox(height: 24),
                                 Text(
@@ -298,7 +331,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                                 Text(
                                   context.l10n.noQualifiedPlacesBody,
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(color: Colors.grey[600]),
+                                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                                 ),
                               ],
                             ),
@@ -332,7 +365,7 @@ class _ResultThumbnail extends StatelessWidget {
   Widget build(BuildContext context) {
     final imageUrls = resolvePlacePhotoUrls(place);
     if (imageUrls.isEmpty) {
-      return _buildImagePlaceholder();
+      return _buildImagePlaceholder(context);
     }
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
@@ -341,24 +374,22 @@ class _ResultThumbnail extends StatelessWidget {
         width: 64,
         height: 64,
         fit: BoxFit.cover,
-        placeholder: (context, url) => const Center(
-          child: CircularProgressIndicator(),
-        ),
-        errorWidget: (context, url, error) => _buildImagePlaceholder(),
+        placeholder: (context, url) => const SkeletonImage(),
+        errorWidget: (context, url, error) => _buildImagePlaceholder(context),
       ),
     );
   }
 
-  Widget _buildImagePlaceholder() {
+  Widget _buildImagePlaceholder(BuildContext context) {
     return Container(
       width: 64,
       height: 64,
-      color: Colors.grey[300],
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: Center(
         child: Icon(
           Icons.place,
           size: 28,
-          color: Colors.grey[600],
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
     );
@@ -424,16 +455,17 @@ class _ResultsListState extends ConsumerState<_ResultsList> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final like = context.swipeColors.like;
     return ReorderableListView.builder(
       buildDefaultDragHandles: false,
       padding: const EdgeInsets.all(16.0),
       itemCount: _results.length,
-      onReorder: (oldIndex, newIndex) {
+      // onReorderItem already accounts for the removed item's index shift.
+      onReorderItem: (oldIndex, newIndex) {
         if (!widget.isAdmin) return;
         setState(() {
-          if (newIndex > oldIndex) {
-            newIndex -= 1;
-          }
           final item = _results.removeAt(oldIndex);
           _results.insert(newIndex, item);
         });
@@ -441,35 +473,98 @@ class _ResultsListState extends ConsumerState<_ResultsList> {
       },
       itemBuilder: (context, index) {
         final result = _results[index];
-        return ListTile(
+        final podium = index < 3;
+        return Padding(
           key: ValueKey(result.place.id),
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-          leading: _ResultThumbnail(place: result.place),
-          title: Text(result.place.name),
-          subtitle:
-              result.place.address != null ? Text(result.place.address!) : null,
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.favorite, color: Colors.red.shade400, size: 18),
-              const SizedBox(width: 6),
-              Text('${result.likes}',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              if (widget.isAdmin) ...[
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
-                  onPressed: () => _removeItem(index),
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Card(
+            child: InkWell(
+              borderRadius: BorderRadius.circular(24),
+              onTap: () => context.push('/place/${result.place.id}'),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 10, 6, 10),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 28,
+                      child: Text(
+                        '${index + 1}',
+                        textAlign: TextAlign.center,
+                        style: text.headlineSmall?.copyWith(
+                          color: podium ? scheme.primary : scheme.outline,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    _ResultThumbnail(place: result.place),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            result.place.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: text.titleMedium,
+                          ),
+                          if (result.place.address != null) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              result.place.address!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: text.bodySmall
+                                  ?.copyWith(color: scheme.onSurfaceVariant),
+                            ),
+                          ],
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: like.withValues(alpha: 0.14),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.favorite, size: 13, color: like),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${result.likes}',
+                                  style: text.labelMedium?.copyWith(
+                                    color: like,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (widget.isAdmin) ...[
+                      IconButton(
+                        tooltip: MaterialLocalizations.of(context)
+                            .deleteButtonTooltip,
+                        icon: Icon(Icons.close, color: scheme.onSurfaceVariant),
+                        onPressed: () => _removeItem(index),
+                      ),
+                      ReorderableDragStartListener(
+                        index: index,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Icon(Icons.drag_indicator,
+                              color: scheme.onSurfaceVariant),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-                ReorderableDragStartListener(
-                  index: index,
-                  child: const Icon(Icons.drag_handle, color: Colors.grey),
-                ),
-              ],
-            ],
+              ),
+            ),
           ),
-          onTap: () => context.push('/place/${result.place.id}'),
         );
       },
     );
