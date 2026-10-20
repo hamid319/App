@@ -8,6 +8,23 @@ import '../../profile/data/profile_repository.dart';
 import '../../group/logic/group_controller.dart';
 import '../../../main_providers.dart';
 import '../../../core/config/app_config.dart';
+import '../../../common/models/interest.dart';
+import 'discover_preferences_controller.dart';
+
+/// Why the deck has no card to show, so the UI can offer the right way out.
+enum DeckEmptyReason {
+  /// There are cards.
+  none,
+
+  /// No places at all around the chosen location.
+  noPlacesInArea,
+
+  /// Places exist, but none match the selected interests.
+  filteredOut,
+
+  /// Everything matching has been swiped already.
+  allSeen,
+}
 
 final swipeControllerProvider =
     AsyncNotifierProvider<SwipeController, List<PlaceModel>>(
@@ -34,7 +51,13 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
   static const int _maxUndo = 10;
   double _userLat = AppConfig.defaultLat;
   double _userLng = AppConfig.defaultLng;
-  static const double _defaultRadiusKm = 50.0;
+  DeckEmptyReason _emptyReason = DeckEmptyReason.none;
+
+  /// Meaningful once the deck has run out (see [currentPlace]).
+  DeckEmptyReason get emptyReason =>
+      currentPlace == null && _emptyReason == DeckEmptyReason.none
+          ? DeckEmptyReason.allSeen
+          : _emptyReason;
 
   @override
   Future<List<PlaceModel>> build() async {
@@ -44,13 +67,24 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     _favorites.clear();
     _swipedPlaceIds = {};
     _undoStack.clear();
+    _emptyReason = DeckEmptyReason.none;
 
-    try {
-      final position = await _locationService.getCurrentLocation();
-      _userLat = position.latitude;
-      _userLng = position.longitude;
-    } catch (e) {
-      // Use default location if location services fail
+    // Rebuilds the deck whenever place, radius or interests change.
+    final prefs = await ref.watch(discoverPreferencesProvider.future);
+
+    final city = prefs.city;
+    if (city != null) {
+      _userLat = city.lat;
+      _userLng = city.lng;
+    } else {
+      try {
+        final position = await _locationService.getCurrentLocation();
+        _userLat = position.latitude;
+        _userLng = position.longitude;
+      } catch (e) {
+        _userLat = AppConfig.defaultLat;
+        _userLng = AppConfig.defaultLng;
+      }
     }
 
     final groupState = ref.watch(groupControllerProvider).value;
@@ -103,6 +137,7 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
             .where((p) => !_swipedPlaceIds.contains(p.id))
             .toList();
         filtered.shuffle();
+        if (filtered.isEmpty) _emptyReason = DeckEmptyReason.allSeen;
         return filtered;
       }
     }
@@ -110,35 +145,23 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     final allPlaces = await _placesRepo.loadNearbyPlaces(
       _userLat,
       _userLng,
-      radiusKm: _defaultRadiusKm,
+      radiusKm: prefs.radiusKm.toDouble(),
     );
-    final unseenPlaces =
-        allPlaces.where((p) => !_swipedPlaceIds.contains(p.id)).toList();
-    return unseenPlaces;
+    final matching = allPlaces
+        .where((p) => placeMatchesInterests(p, prefs.interests))
+        .toList();
+    final unseen =
+        matching.where((p) => !_swipedPlaceIds.contains(p.id)).toList();
+    _emptyReason = allPlaces.isEmpty
+        ? DeckEmptyReason.noPlacesInArea
+        : matching.isEmpty
+            ? DeckEmptyReason.filteredOut
+            : unseen.isEmpty
+                ? DeckEmptyReason.allSeen
+                : DeckEmptyReason.none;
+    return unseen;
   }
 
-  Future<void> refreshWithLocation() async {
-    state = const AsyncLoading();
-    try {
-      final position = await _locationService.getCurrentLocation();
-      _userLat = position.latitude;
-      _userLng = position.longitude;
-
-      final allPlaces = await _placesRepo.loadNearbyPlaces(
-        _userLat,
-        _userLng,
-        radiusKm: _defaultRadiusKm,
-      );
-      final unseenPlaces =
-          allPlaces.where((p) => !_swipedPlaceIds.contains(p.id)).toList();
-      _currentIndex = 0;
-      state = AsyncData(unseenPlaces);
-    } catch (e, st) {
-      state = AsyncError(e, st);
-    }
-  }
-
-  /// The card waiting behind the current one, shown as a preview.
   PlaceModel? get nextPlaceInDeck {
     final data = state.value;
     final next = _currentIndex + 1;

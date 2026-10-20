@@ -396,5 +396,46 @@
   "loginSubtitle": "Log in to sync your favorites and groups.",
   "registerHeadline": "Create your account",
   "registerSubtitle": "Keep your favorites and plan trips with friends.",
-  "licenses": "Open source licenses"
+  "licenses": "Open source licenses",
+  "nearby": "Nearby",
+  "locationTitle": "Where to?",
+  "currentLocation": "Current location",
+  "currentLocationSubtitle": "Places around you",
+  "searchCity": "Search city",
+  "popularDestinations": "Popular destinations",
+  "noCityFound": "No matching city",
+  "filtersTitle": "Filters",
+  "interestsTitle": "Interests",
+  "interestsHint": "Shows places that match at least one.",
+  "radiusTitle": "Distance",
+  "radiusKm": "{km} km",
+  "applyFilters": "Show places",
+  "resetFilters": "Reset",
+  "interestCulture": "Culture & museums",
+  "interestNature": "Nature & parks",
+  "interestHistory": "Sights & history",
+  "interestBeach": "Beaches",
+  "interestViews": "Viewpoints",
+  "interestFamily": "Family",
+  "interestNightlife": "Nightlife",
+  "interestShopping": "Shopping",
+  "emptyNoPlacesTitle": "No places here yet",
+  "emptyNoPlacesBody": "We don't have places for {place} yet. Try another destination.",
+  "emptyFilteredTitle": "Nothing matches your filters",
+  "emptyFilteredBody": "Try other interests or a larger distance.",
+  "changePlace": "Change place",
+  "@radiusKm": {
+    "placeholders": {
+      "km": {
+        "type": "int"
+      }
+    }
+  },
+  "@emptyNoPlacesBody": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  }
 }

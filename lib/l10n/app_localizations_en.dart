@@ -948,4 +948,89 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get licenses => 'Open source licenses';
+
+  @override
+  String get nearby => 'Nearby';
+
+  @override
+  String get locationTitle => 'Where to?';
+
+  @override
+  String get currentLocation => 'Current location';
+
+  @override
+  String get currentLocationSubtitle => 'Places around you';
+
+  @override
+  String get searchCity => 'Search city';
+
+  @override
+  String get popularDestinations => 'Popular destinations';
+
+  @override
+  String get noCityFound => 'No matching city';
+
+  @override
+  String get filtersTitle => 'Filters';
+
+  @override
+  String get interestsTitle => 'Interests';
+
+  @override
+  String get interestsHint => 'Shows places that match at least one.';
+
+  @override
+  String get radiusTitle => 'Distance';
+
+  @override
+  String radiusKm(int km) {
+    return '$km km';
+  }
+
+  @override
+  String get applyFilters => 'Show places';
+
+  @override
+  String get resetFilters => 'Reset';
+
+  @override
+  String get interestCulture => 'Culture & museums';
+
+  @override
+  String get interestNature => 'Nature & parks';
+
+  @override
+  String get interestHistory => 'Sights & history';
+
+  @override
+  String get interestBeach => 'Beaches';
+
+  @override
+  String get interestViews => 'Viewpoints';
+
+  @override
+  String get interestFamily => 'Family';
+
+  @override
+  String get interestNightlife => 'Nightlife';
+
+  @override
+  String get interestShopping => 'Shopping';
+
+  @override
+  String get emptyNoPlacesTitle => 'No places here yet';
+
+  @override
+  String emptyNoPlacesBody(String place) {
+    return 'We don\'t have places for $place yet. Try another destination.';
+  }
+
+  @override
+  String get emptyFilteredTitle => 'Nothing matches your filters';
+
+  @override
+  String get emptyFilteredBody => 'Try other interests or a larger distance.';
+
+  @override
+  String get changePlace => 'Change place';
 }

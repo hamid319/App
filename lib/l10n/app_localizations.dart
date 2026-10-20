@@ -1837,6 +1837,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open source licenses'**
   String get licenses;
+
+  /// No description provided for @nearby.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby'**
+  String get nearby;
+
+  /// No description provided for @locationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where to?'**
+  String get locationTitle;
+
+  /// No description provided for @currentLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Current location'**
+  String get currentLocation;
+
+  /// No description provided for @currentLocationSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Places around you'**
+  String get currentLocationSubtitle;
+
+  /// No description provided for @searchCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Search city'**
+  String get searchCity;
+
+  /// No description provided for @popularDestinations.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular destinations'**
+  String get popularDestinations;
+
+  /// No description provided for @noCityFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching city'**
+  String get noCityFound;
+
+  /// No description provided for @filtersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get filtersTitle;
+
+  /// No description provided for @interestsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Interests'**
+  String get interestsTitle;
+
+  /// No description provided for @interestsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows places that match at least one.'**
+  String get interestsHint;
+
+  /// No description provided for @radiusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance'**
+  String get radiusTitle;
+
+  /// No description provided for @radiusKm.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km'**
+  String radiusKm(int km);
+
+  /// No description provided for @applyFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Show places'**
+  String get applyFilters;
+
+  /// No description provided for @resetFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get resetFilters;
+
+  /// No description provided for @interestCulture.
+  ///
+  /// In en, this message translates to:
+  /// **'Culture & museums'**
+  String get interestCulture;
+
+  /// No description provided for @interestNature.
+  ///
+  /// In en, this message translates to:
+  /// **'Nature & parks'**
+  String get interestNature;
+
+  /// No description provided for @interestHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Sights & history'**
+  String get interestHistory;
+
+  /// No description provided for @interestBeach.
+  ///
+  /// In en, this message translates to:
+  /// **'Beaches'**
+  String get interestBeach;
+
+  /// No description provided for @interestViews.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewpoints'**
+  String get interestViews;
+
+  /// No description provided for @interestFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get interestFamily;
+
+  /// No description provided for @interestNightlife.
+  ///
+  /// In en, this message translates to:
+  /// **'Nightlife'**
+  String get interestNightlife;
+
+  /// No description provided for @interestShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get interestShopping;
+
+  /// No description provided for @emptyNoPlacesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No places here yet'**
+  String get emptyNoPlacesTitle;
+
+  /// No description provided for @emptyNoPlacesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We don\'t have places for {place} yet. Try another destination.'**
+  String emptyNoPlacesBody(String place);
+
+  /// No description provided for @emptyFilteredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches your filters'**
+  String get emptyFilteredTitle;
+
+  /// No description provided for @emptyFilteredBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Try other interests or a larger distance.'**
+  String get emptyFilteredBody;
+
+  /// No description provided for @changePlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Change place'**
+  String get changePlace;
 }
 
 class _AppLocalizationsDelegate

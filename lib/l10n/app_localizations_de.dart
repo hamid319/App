@@ -972,4 +972,90 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get licenses => 'Open-Source-Lizenzen';
+
+  @override
+  String get nearby => 'In der Nähe';
+
+  @override
+  String get locationTitle => 'Wohin geht\'s?';
+
+  @override
+  String get currentLocation => 'Aktueller Standort';
+
+  @override
+  String get currentLocationSubtitle => 'Orte in deiner Umgebung';
+
+  @override
+  String get searchCity => 'Stadt suchen';
+
+  @override
+  String get popularDestinations => 'Beliebte Ziele';
+
+  @override
+  String get noCityFound => 'Keine passende Stadt';
+
+  @override
+  String get filtersTitle => 'Filter';
+
+  @override
+  String get interestsTitle => 'Interessen';
+
+  @override
+  String get interestsHint => 'Zeigt Orte, die zu mindestens einem passen.';
+
+  @override
+  String get radiusTitle => 'Umkreis';
+
+  @override
+  String radiusKm(int km) {
+    return '$km km';
+  }
+
+  @override
+  String get applyFilters => 'Orte anzeigen';
+
+  @override
+  String get resetFilters => 'Zurücksetzen';
+
+  @override
+  String get interestCulture => 'Kultur & Museen';
+
+  @override
+  String get interestNature => 'Natur & Parks';
+
+  @override
+  String get interestHistory => 'Sehenswürdigkeiten & Geschichte';
+
+  @override
+  String get interestBeach => 'Strände';
+
+  @override
+  String get interestViews => 'Aussichtspunkte';
+
+  @override
+  String get interestFamily => 'Familie';
+
+  @override
+  String get interestNightlife => 'Nachtleben';
+
+  @override
+  String get interestShopping => 'Shopping';
+
+  @override
+  String get emptyNoPlacesTitle => 'Hier gibt es noch keine Orte';
+
+  @override
+  String emptyNoPlacesBody(String place) {
+    return 'Für $place haben wir noch keine Orte. Probier ein anderes Ziel.';
+  }
+
+  @override
+  String get emptyFilteredTitle => 'Nichts passt zu deinen Filtern';
+
+  @override
+  String get emptyFilteredBody =>
+      'Probier andere Interessen oder einen größeren Umkreis.';
+
+  @override
+  String get changePlace => 'Ort ändern';
 }

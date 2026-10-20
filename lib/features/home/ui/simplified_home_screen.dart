@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/errors/user_message.dart';
 import '../../swipe/logic/swipe_controller.dart';
 import '../../swipe/widgets/swipe_deck.dart';
+import '../../swipe/widgets/discover_filters.dart';
+import '../../swipe/logic/discover_preferences_controller.dart';
 import '../../../common/widgets/wordmark.dart';
 import '../../../l10n/l10n.dart';
 import '../../../app/theme.dart';
@@ -16,6 +18,12 @@ class SimplifiedHomeScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Wordmark(),
+        actions: const [
+          DiscoverLocationChip(),
+          SizedBox(width: 6),
+          DiscoverFilterButton(),
+          SizedBox(width: 12),
+        ],
       ),
       body: const _SwipeContent(),
     );
@@ -62,33 +70,7 @@ class _SwipeContent extends ConsumerWidget {
       data: (places) {
         final current = ctrl.currentPlace;
         if (current == null) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.check_circle_outline,
-                    size: 80, color: context.swipeColors.like),
-                const SizedBox(height: 24),
-                Text(
-                  context.l10n.noMorePlacesTitle,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  context.l10n.seenAllPlaces,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                ),
-                const SizedBox(height: 32),
-                ElevatedButton.icon(
-                  onPressed: () => ref.refresh(swipeControllerProvider),
-                  icon: const Icon(Icons.refresh),
-                  label: Text(context.l10n.reload),
-                ),
-              ],
-            ),
-          );
+          return _EmptyDeck(reason: ctrl.emptyReason);
         }
         return SwipeDeck(
           place: current,
@@ -123,6 +105,90 @@ class _SwipeContent extends ConsumerWidget {
           },
         );
       },
+    );
+  }
+}
+
+/// What to show when the deck is empty, with the matching way out.
+class _EmptyDeck extends ConsumerWidget {
+  const _EmptyDeck({required this.reason});
+
+  final DeckEmptyReason reason;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final prefs = ref.watch(discoverPreferencesProvider).value ??
+        const DiscoverPreferences();
+
+    final (IconData icon, Color color, String title, String body, Widget action) =
+        switch (reason) {
+      DeckEmptyReason.noPlacesInArea => (
+          Icons.travel_explore,
+          scheme.primary,
+          l10n.emptyNoPlacesTitle,
+          l10n.emptyNoPlacesBody(placeLabel(context, prefs)),
+          FilledButton.icon(
+            onPressed: () => showLocationPicker(context, ref),
+            icon: const Icon(Icons.place_outlined),
+            label: Text(l10n.changePlace),
+          ),
+        ),
+      DeckEmptyReason.filteredOut => (
+          Icons.filter_alt_off_outlined,
+          scheme.primary,
+          l10n.emptyFilteredTitle,
+          l10n.emptyFilteredBody,
+          FilledButton.icon(
+            onPressed: () =>
+                ref.read(discoverPreferencesProvider.notifier).resetFilters(),
+            icon: const Icon(Icons.restart_alt),
+            label: Text(l10n.resetFilters),
+          ),
+        ),
+      _ => (
+          Icons.check_circle_outline,
+          context.swipeColors.like,
+          l10n.noMorePlacesTitle,
+          l10n.seenAllPlaces,
+          OutlinedButton.icon(
+            onPressed: () => ref.invalidate(swipeControllerProvider),
+            icon: const Icon(Icons.refresh),
+            label: Text(l10n.reload),
+          ),
+        ),
+    };
+
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 88,
+              height: 88,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 40, color: color),
+            ),
+            const SizedBox(height: 24),
+            Text(title, style: text.headlineSmall, textAlign: TextAlign.center),
+            const SizedBox(height: 8),
+            Text(
+              body,
+              textAlign: TextAlign.center,
+              style: text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(height: 48, child: action),
+          ],
+        ),
+      ),
     );
   }
 }
