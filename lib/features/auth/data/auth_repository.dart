@@ -17,6 +17,9 @@ class AuthRepository {
   Future<User?> upgradeGuest(String email, String password) =>
       _authService.linkGuestWithEmail(email, password);
 
+  Future<void> sendPasswordReset(String email, {String? languageCode}) =>
+      _authService.sendPasswordResetEmail(email, languageCode: languageCode);
+
   Future<void> updateDisplayName(String displayName) =>
       _authService.updateDisplayName(displayName);
 

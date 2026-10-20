@@ -66,6 +66,18 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const Divider(),
           _SectionHeader(l10n.settingsAccountSection),
+          if (hasAccount && user.email.isNotEmpty)
+            ListTile(
+              leading: const Icon(Icons.lock_reset),
+              title: Text(l10n.resetPasswordSetting),
+              subtitle: Text(l10n.resetPasswordSettingSubtitle),
+              onTap: () => context.push(
+                Uri(
+                  path: '/forgot-password',
+                  queryParameters: {'email': user.email, 'from': 'settings'},
+                ).toString(),
+              ),
+            ),
           if (hasAccount)
             ListTile(
               leading: Icon(Icons.logout, color: Theme.of(context).colorScheme.error),

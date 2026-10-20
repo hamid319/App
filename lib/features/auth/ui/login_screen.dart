@@ -112,7 +112,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 24),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => context.push(
+                      Uri(
+                        path: '/forgot-password',
+                        queryParameters: {
+                          if (emailController.text.trim().isNotEmpty)
+                            'email': emailController.text.trim(),
+                        },
+                      ).toString(),
+                    ),
+                    child: Text(context.l10n.forgotPasswordLink),
+                  ),
+                ),
+                const SizedBox(height: 8),
                 // Error message
                 authState.when(
                   data: (_) => const SizedBox.shrink(),

@@ -342,5 +342,18 @@
   "calendarNoEvents": "Keine kommenden Termine in deinem Kalender.",
   "calendarCityNotFound": "Die Stadt wurde nicht erkannt. Bitte wähle sie aus.",
   "tripDatesLabel": "Reisezeitraum (optional)",
-  "clearTripDates": "Zeitraum entfernen"
+  "clearTripDates": "Zeitraum entfernen",
+  "forgotPasswordLink": "Passwort vergessen?",
+  "forgotPasswordTitle": "Passwort vergessen?",
+  "forgotPasswordBody": "Gib deine E-Mail-Adresse ein. Wir schicken dir einen Link, mit dem du ein neues Passwort festlegst.",
+  "sendResetLink": "Link senden",
+  "backToLogin": "Zurück zum Login",
+  "resetLinkSentTitle": "Schau in dein Postfach",
+  "resetLinkSentBody": "Wenn es ein Konto für {email} gibt, ist ein Link zum Zurücksetzen unterwegs. Er ist eine Stunde gültig. Sieh auch im Spam-Ordner nach.",
+  "resendResetLink": "Erneut senden",
+  "resendIn": "Erneut senden in {seconds} s",
+  "useOtherEmail": "Andere E-Mail-Adresse verwenden",
+  "resetLinkFailed": "Der Link konnte nicht gesendet werden. Bitte versuch es noch einmal.",
+  "resetPasswordSetting": "Passwort zurücksetzen",
+  "resetPasswordSettingSubtitle": "Wir schicken dir einen Link für ein neues Passwort"
 }

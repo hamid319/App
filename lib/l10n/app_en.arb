@@ -477,5 +477,32 @@
   "calendarNoEvents": "No upcoming events in your calendar.",
   "calendarCityNotFound": "We couldn't recognise the city. Please pick it.",
   "tripDatesLabel": "Travel dates (optional)",
-  "clearTripDates": "Remove dates"
+  "clearTripDates": "Remove dates",
+  "forgotPasswordLink": "Forgot password?",
+  "forgotPasswordTitle": "Forgot your password?",
+  "forgotPasswordBody": "Enter your email and we'll send you a link to set a new password.",
+  "sendResetLink": "Send link",
+  "backToLogin": "Back to login",
+  "resetLinkSentTitle": "Check your inbox",
+  "resetLinkSentBody": "If there is an account for {email}, a link to reset your password is on its way. It is valid for one hour. Also check your spam folder.",
+  "resendResetLink": "Send again",
+  "resendIn": "Send again in {seconds} s",
+  "useOtherEmail": "Use a different email",
+  "resetLinkFailed": "The link could not be sent. Please try again.",
+  "@resetLinkSentBody": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "@resendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "resetPasswordSetting": "Reset password",
+  "resetPasswordSettingSubtitle": "We'll email you a link to set a new password"
 }

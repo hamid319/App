@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/onboarding/ui/onboarding_screen.dart';
 import '../features/auth/ui/login_screen.dart';
 import '../features/auth/ui/register_screen.dart';
+import '../features/auth/ui/forgot_password_screen.dart';
 import '../features/home/ui/simplified_home_screen.dart';
 import '../features/home/ui/favorites_screen.dart';
 import '../features/swipe/ui/swipe_screen.dart';
@@ -81,6 +82,13 @@ GoRouter createRouter(Ref ref) {
       GoRoute(
         path: '/register',
         builder: (ctx, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        builder: (ctx, state) => ForgotPasswordScreen(
+          initialEmail: state.uri.queryParameters['email'],
+          fromSettings: state.uri.queryParameters['from'] == 'settings',
+        ),
       ),
       // Full-screen, outside the shell: the photo uses the whole screen and
       // the bottom bar is the page's own action bar.
@@ -187,6 +195,8 @@ String? resolveAuthRedirect({
 }) {
   if (!hasSeenOnboarding) return null;
   final isGoingToAuth = path == '/login' || path == '/register';
+  // Also opened from settings by signed-in users, so never redirected away.
+  if (path == '/forgot-password') return null;
 
   // No session at all means guest sign-in failed (e.g. Anonymous Auth is
   // disabled), so fall back to requiring a login like before guest mode.
