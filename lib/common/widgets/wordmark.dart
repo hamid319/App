@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/typography.dart';
+import 'swipe_pin_mark.dart';
 
-/// "swipetrip" logotype: ink + brand orange, in the display font.
+/// SwipeTrip logo: the swipe-pin mark followed by the "swipetrip" logotype
+/// (ink + brand orange, in the display font).
 class Wordmark extends StatelessWidget {
-  const Wordmark({super.key, this.size = 24});
+  const Wordmark({super.key, this.size = 24, this.showMark = true});
 
   final double size;
+
+  /// False shows the logotype alone.
+  final bool showMark;
 
   @override
   Widget build(BuildContext context) {
@@ -15,14 +20,26 @@ class Wordmark extends StatelessWidget {
       label: 'SwipeTrip',
       header: true,
       child: ExcludeSemantics(
-        child: Text.rich(
-          TextSpan(
-            children: [
-              const TextSpan(text: 'swipe'),
-              TextSpan(text: 'trip', style: TextStyle(color: scheme.primary)),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (showMark) ...[
+              SwipePinMark(size: size * 1.35),
+              SizedBox(width: size * 0.35),
             ],
-          ),
-          style: style,
+            Text.rich(
+              TextSpan(
+                children: [
+                  const TextSpan(text: 'swipe'),
+                  TextSpan(
+                    text: 'trip',
+                    style: TextStyle(color: scheme.primary),
+                  ),
+                ],
+              ),
+              style: style,
+            ),
+          ],
         ),
       ),
     );
