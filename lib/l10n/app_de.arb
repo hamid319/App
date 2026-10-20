@@ -288,5 +288,6 @@
   "loginHeadline": "Willkommen zurück",
   "loginSubtitle": "Melde dich an, um Favoriten und Gruppen zu synchronisieren.",
   "registerHeadline": "Erstelle dein Konto",
-  "registerSubtitle": "Behalte deine Favoriten und plane Reisen mit Freunden."
+  "registerSubtitle": "Behalte deine Favoriten und plane Reisen mit Freunden.",
+  "licenses": "Open-Source-Lizenzen"
 }

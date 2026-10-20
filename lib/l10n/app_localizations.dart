@@ -1831,6 +1831,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Keep your favorites and plan trips with friends.'**
   String get registerSubtitle;
+
+  /// No description provided for @licenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Open source licenses'**
+  String get licenses;
 }
 
 class _AppLocalizationsDelegate

@@ -3,12 +3,12 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../common/models/place_model.dart';
 import '../../../common/widgets/member_avatar.dart';
 import '../../../common/widgets/place_photo.dart';
 import '../../../core/constants/sizes.dart';
+import '../../../core/constants/typography.dart';
 import '../../../l10n/l10n.dart';
 import '../logic/group_controller.dart';
 
@@ -96,11 +96,8 @@ class _MatchCelebration extends StatelessWidget {
                     Text(
                       l10n.matchTitle,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.bricolageGrotesque(
-                        fontSize: 38,
-                        height: 1,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -1,
+                      style: AppTypography.display(
+                        size: 38,
                         color: Colors.white,
                       ),
                     ),

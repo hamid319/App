@@ -945,4 +945,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get registerSubtitle =>
       'Keep your favorites and plan trips with friends.';
+
+  @override
+  String get licenses => 'Open source licenses';
 }

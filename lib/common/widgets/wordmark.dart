@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../core/constants/typography.dart';
 
 /// "swipetrip" logotype: ink + brand orange, in the display font.
 class Wordmark extends StatelessWidget {
@@ -10,12 +10,7 @@ class Wordmark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final style = GoogleFonts.bricolageGrotesque(
-      fontSize: size,
-      fontWeight: FontWeight.w800,
-      letterSpacing: -0.04 * size,
-      color: scheme.onSurface,
-    );
+    final style = AppTypography.display(size: size, color: scheme.onSurface);
     return Semantics(
       label: 'SwipeTrip',
       header: true,

@@ -395,5 +395,6 @@
   "loginHeadline": "Welcome back",
   "loginSubtitle": "Log in to sync your favorites and groups.",
   "registerHeadline": "Create your account",
-  "registerSubtitle": "Keep your favorites and plan trips with friends."
+  "registerSubtitle": "Keep your favorites and plan trips with friends.",
+  "licenses": "Open source licenses"
 }

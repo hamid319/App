@@ -56,6 +56,14 @@ class SettingsScreen extends ConsumerWidget {
             subtitle: Text(l10n.securitySubtitle),
             onTap: () => _showSecurity(context),
           ),
+          ListTile(
+            leading: const Icon(Icons.article_outlined),
+            title: Text(l10n.licenses),
+            onTap: () => showLicensePage(
+              context: context,
+              applicationName: 'SwipeTrip',
+            ),
+          ),
           const Divider(),
           _SectionHeader(l10n.settingsAccountSection),
           if (hasAccount)
