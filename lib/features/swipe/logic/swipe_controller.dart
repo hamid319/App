@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../common/models/place_model.dart';
 import '../../../core/services/location_service.dart';
@@ -103,10 +104,15 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     final authState = ref.read(authControllerProvider);
     if (authState.value != null) {
       final userId = authState.value!.uid;
+      // Loaded separately: a failing history query (e.g. a missing index)
+      // used to clear the favorites that had already loaded fine.
       try {
         final userProfile = await _profileRepo.getUserProfile(userId);
         _favorites.addAll(userProfile.favorites);
-
+      } catch (e) {
+        debugPrint('Loading favorites failed: $e');
+      }
+      try {
         if (groupState != null && sessionId != null) {
           final groupRepo = ref.read(groupRepositoryProvider);
           _swipedPlaceIds = await groupRepo.getUserSwipedPlaceIds(
@@ -118,7 +124,7 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
           _swipedPlaceIds = await _placesRepo.getSwipedPlaceIds(userId);
         }
       } catch (e) {
-        _favorites.clear();
+        debugPrint('Loading swipe history failed: $e');
         _swipedPlaceIds = {};
       }
     }
@@ -212,17 +218,24 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
         _favorites.add(place.id);
       }
 
+      // Favorite and swipe history are saved independently: a failing
+      // history write must not cost the user the favorite (it did, while
+      // /swipeResults had no deployed rule).
       Future<void> save() async {
+        try {
+          await _profileRepo.addFavorite(userId, place.id);
+          await _syncFavoritesWithGroup(userId);
+        } catch (e) {
+          debugPrint('Saving favorite ${place.id} failed: $e');
+        }
         try {
           await _placesRepo.recordSwipe(
             userId: userId,
             placeId: place.id,
             liked: true,
           );
-          await _profileRepo.addFavorite(userId, place.id);
-          await _syncFavoritesWithGroup(userId);
         } catch (e) {
-          // Continue even on error
+          debugPrint('Saving swipe ${place.id} failed: $e');
         }
       }
 

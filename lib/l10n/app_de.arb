@@ -138,7 +138,7 @@
   "notLoggedIn": "Nicht angemeldet",
   "loginToUseGroups": "Bitte melde dich an, um Gruppen zu nutzen",
   "groupNotFound": "Gruppe nicht gefunden",
-  "newGroupButton": "+ Neu",
+  "newGroupButton": "Neu",
   "statusLive": "Live",
   "statusDone": "Fertig",
   "statusStart": "Starten",
@@ -316,5 +316,6 @@
   "emptyNoPlacesBody": "Für {place} haben wir noch keine Orte. Probier ein anderes Ziel.",
   "emptyFilteredTitle": "Nichts passt zu deinen Filtern",
   "emptyFilteredBody": "Probier andere Interessen oder einen größeren Umkreis.",
-  "changePlace": "Ort ändern"
+  "changePlace": "Ort ändern",
+  "inviteCodeTitle": "Einladungscode"
 }

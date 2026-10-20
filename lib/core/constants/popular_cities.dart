@@ -19,6 +19,9 @@ class PopularCity {
 
   String nameFor(String languageCode) => languageCode == 'de' ? nameDe : nameEn;
 
+  /// English country name, as stored on a group's location.
+  String get countryNameEn => _countryNames[countryCode] ?? countryCode;
+
   static PopularCity? byId(String? id) {
     if (id == null) return null;
     for (final c in popularCities) {
@@ -57,3 +60,24 @@ const popularCities = [
   PopularCity(id: 'ae_dubai', nameEn: 'Dubai', nameDe: 'Dubai', countryCode: 'AE', lat: 25.2048, lng: 55.2708),
   PopularCity(id: 'sg_singapore', nameEn: 'Singapore', nameDe: 'Singapur', countryCode: 'SG', lat: 1.3521, lng: 103.8198),
 ];
+
+const _countryNames = {
+  'AE': 'United Arab Emirates',
+  'AT': 'Austria',
+  'CH': 'Switzerland',
+  'CZ': 'Czechia',
+  'DE': 'Germany',
+  'DK': 'Denmark',
+  'ES': 'Spain',
+  'FR': 'France',
+  'GB': 'United Kingdom',
+  'GR': 'Greece',
+  'IT': 'Italy',
+  'JP': 'Japan',
+  'NL': 'Netherlands',
+  'PT': 'Portugal',
+  'SG': 'Singapore',
+  'TH': 'Thailand',
+  'TR': 'Turkey',
+  'US': 'United States',
+};

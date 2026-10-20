@@ -89,6 +89,10 @@ Env.googlePlacesApiKey  // loaded from .env via flutter_dotenv
 - Password reset screen (not started)
 - Dark theme wired in `app.dart` (built in `theme.dart`, not applied yet)
 
+## Open product decisions
+Listed in `POSSIBLE_ERRORS.md` section 10 (e.g. the group match rule).
+Do not implement features that depend on them before the owner decides.
+
 ## Before launch
 Dev-only shortcuts that must be reverted before release are listed in
 `POSSIBLE_ERRORS.md` section 9 (e.g. `AppConfig.useFixedDevLocation`).

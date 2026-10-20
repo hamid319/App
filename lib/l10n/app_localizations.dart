@@ -929,7 +929,7 @@ abstract class AppLocalizations {
   /// No description provided for @newGroupButton.
   ///
   /// In en, this message translates to:
-  /// **'+ New'**
+  /// **'New'**
   String get newGroupButton;
 
   /// No description provided for @statusLive.
@@ -1999,6 +1999,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Change place'**
   String get changePlace;
+
+  /// No description provided for @inviteCodeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code'**
+  String get inviteCodeTitle;
 }
 
 class _AppLocalizationsDelegate

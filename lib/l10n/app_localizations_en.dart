@@ -442,7 +442,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get groupNotFound => 'Group not found';
 
   @override
-  String get newGroupButton => '+ New';
+  String get newGroupButton => 'New';
 
   @override
   String get statusLive => 'Live';
@@ -1033,4 +1033,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get changePlace => 'Change place';
+
+  @override
+  String get inviteCodeTitle => 'Invite code';
 }

@@ -28,9 +28,8 @@ class PrimaryButton extends StatelessWidget {
         backgroundColor: backgroundColor ?? Theme.of(context).colorScheme.primary,
         foregroundColor: textColor ?? Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        // Pill like every other button in the app (see AppTheme).
+        shape: const StadiumBorder(),
       ),
       child: isLoading
           ? const SizedBox(

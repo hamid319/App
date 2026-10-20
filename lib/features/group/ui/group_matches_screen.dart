@@ -254,11 +254,13 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                 children: [
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(16.0),
+                    margin: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                    padding: const EdgeInsets.fromLTRB(16, 4, 12, 4),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      border: Border(
-                        bottom: BorderSide(color: Theme.of(context).colorScheme.primaryContainer),
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outlineVariant,
                       ),
                     ),
                     child: Row(

@@ -152,7 +152,7 @@
   "notLoggedIn": "Not logged in",
   "loginToUseGroups": "Please login to use groups",
   "groupNotFound": "Group not found",
-  "newGroupButton": "+ New",
+  "newGroupButton": "New",
   "statusLive": "Live",
   "statusDone": "Done",
   "statusStart": "Start",
@@ -437,5 +437,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "inviteCodeTitle": "Invite code"
 }

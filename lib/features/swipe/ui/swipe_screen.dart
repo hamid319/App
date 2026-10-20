@@ -148,16 +148,24 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
                   await ref.read(groupControllerProvider.notifier).endSession();
                 }
               },
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
               child: Text(context.l10n.endSession),
             ),
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: Center(
-              child: Badge(
-                label: Text('${ctrl.favoritesList.length}'),
-                child: const Icon(Icons.favorite),
+          // Own progress in this session (favorites don't change here).
+          if (sessionValue != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: Center(
+                child: _ProgressChip(
+                  done: (sessionValue.progressByUser ??
+                          sessionValue.swipeProgress)[currentUser?.uid] ??
+                      0,
+                  total: sessionValue.swipeLimit ??
+                      sessionValue.totalPlacesToSwipe,
+                ),
               ),
-            ),
           ),
         ],
       ),
@@ -231,6 +239,32 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
             onDetail: () => context.push('/place/${current.id}'),
           );
         },
+      ),
+    );
+  }
+}
+
+class _ProgressChip extends StatelessWidget {
+  const _ProgressChip({required this.done, required this.total});
+
+  final int done;
+  final int total;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: scheme.primaryContainer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        '${done.clamp(0, total)}/$total',
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: scheme.primary,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
       ),
     );
   }

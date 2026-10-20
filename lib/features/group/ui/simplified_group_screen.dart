@@ -7,13 +7,14 @@ import '../../../common/models/group_model.dart';
 import '../../../common/widgets/primary_button.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../auth/logic/auth_controller.dart';
-import '../data/location_repository.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
 import '../../../app/theme.dart';
 import '../../../common/widgets/skeleton.dart';
 import '../../../common/widgets/member_avatar.dart';
 import '../widgets/session_progress_panel.dart';
+import '../../../common/widgets/city_picker.dart';
+import '../../../core/constants/popular_cities.dart';
 
 class SimplifiedGroupScreen extends ConsumerStatefulWidget {
   const SimplifiedGroupScreen({super.key});
@@ -34,49 +35,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
   bool _isTimeLimit = false;
   bool _showCreateGroup = false;
 
-  final _locationRepo = LocationRepository();
-  bool _isLoadingLocations = false;
-  List<Map<String, String>> _countries = [];
-  List<Map<String, dynamic>> _cities = [];
-  String? _selectedCountryCode;
-  String? _selectedCountryName;
-  Map<String, dynamic>? _selectedCity;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCountries();
-  }
-
-  Future<void> _loadCountries() async {
-    setState(() => _isLoadingLocations = true);
-    try {
-      final countries = await _locationRepo.getCountries();
-      if (mounted) setState(() => _countries = countries);
-    } catch (_) {
-    } finally {
-      if (mounted) setState(() => _isLoadingLocations = false);
-    }
-  }
-
-  Future<void> _loadCities(String countryCode, String countryName) async {
-    setState(() {
-      _selectedCountryCode = countryCode;
-      _selectedCountryName = countryName;
-      _selectedCity = null;
-      // Drop the old country's cities so the city field never offers, or
-      // holds, a value from another country while the new list loads.
-      _cities = [];
-      _isLoadingLocations = true;
-    });
-    try {
-      final cities = await _locationRepo.getCities(countryCode);
-      if (mounted) setState(() => _cities = cities);
-    } catch (_) {
-    } finally {
-      if (mounted) setState(() => _isLoadingLocations = false);
-    }
-  }
+  /// Destination of the group being created.
+  PopularCity? _city;
 
   @override
   void dispose() {
@@ -105,7 +65,9 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                 },
               )
             : null,
-        title: Text(selectedId != null ? context.l10n.groupDetailsTitle : context.l10n.groupsTitle),
+        title: Text(selectedId != null
+            ? context.l10n.groupDetailsTitle
+            : context.l10n.groupsTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -118,7 +80,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       body: authState.when(
         loading: () => const SkeletonList(),
         error: (e, st) => ErrorView(
-          message: userMessage(e, fallback: context.l10n.errorLoadAccount, l10n: context.l10n),
+          message: userMessage(e,
+              fallback: context.l10n.errorLoadAccount, l10n: context.l10n),
           onRetry: () => ref.refresh(authControllerProvider),
         ),
         data: (user) {
@@ -135,7 +98,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
             return groupState.when(
               loading: () => const SkeletonList(),
               error: (e, st) => ErrorView(
-                message: userMessage(e, fallback: context.l10n.errorLoadGroups, l10n: context.l10n),
+                message: userMessage(e,
+                    fallback: context.l10n.errorLoadGroups, l10n: context.l10n),
                 onRetry: () => ref.refresh(groupControllerProvider),
               ),
               data: (group) {
@@ -150,7 +114,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
           return userGroupsAsync.when(
             loading: () => const SkeletonList(),
             error: (e, st) => ErrorView(
-              message: userMessage(e, fallback: context.l10n.errorLoadGroups, l10n: context.l10n),
+              message: userMessage(e,
+                  fallback: context.l10n.errorLoadGroups, l10n: context.l10n),
               onRetry: () => ref.refresh(userGroupsProvider),
             ),
             data: (groups) {
@@ -242,34 +207,33 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
     void open() =>
         ref.read(selectedGroupIdProvider.notifier).updateState(group.groupId);
 
-    final (String label, Color fg, Color bg, VoidCallback onTap) status =
-        isLive
+    final (String label, Color fg, Color bg, VoidCallback onTap) status = isLive
+        ? (
+            l10n.statusLive,
+            context.swipeColors.like,
+            context.swipeColors.like.withValues(alpha: 0.14),
+            () => context.push('/swipe/${group.groupId}'),
+          )
+        : hasCompleted
             ? (
-                l10n.statusLive,
-                context.swipeColors.like,
-                context.swipeColors.like.withValues(alpha: 0.14),
-                () => context.push('/swipe/${group.groupId}'),
+                l10n.statusDone,
+                scheme.onSurfaceVariant,
+                scheme.surfaceContainerHighest,
+                () => context.push('/group-matches/${group.groupId}'),
               )
-            : hasCompleted
+            : isOwner
                 ? (
-                    l10n.statusDone,
+                    l10n.statusStart,
+                    scheme.primary,
+                    scheme.primaryContainer,
+                    open,
+                  )
+                : (
+                    l10n.statusIdle,
                     scheme.onSurfaceVariant,
                     scheme.surfaceContainerHighest,
-                    () => context.push('/group-matches/${group.groupId}'),
-                  )
-                : isOwner
-                    ? (
-                        l10n.statusStart,
-                        scheme.primary,
-                        scheme.primaryContainer,
-                        open,
-                      )
-                    : (
-                        l10n.statusIdle,
-                        scheme.onSurfaceVariant,
-                        scheme.surfaceContainerHighest,
-                        open,
-                      );
+                    open,
+                  );
     final subtitle = [
       if (group.location?.cityName.isNotEmpty == true) group.location!.cityName,
       l10n.memberCount(group.members.length),
@@ -369,27 +333,39 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
   }
 
   Widget _buildEmptyDashboard() {
+    final scheme = Theme.of(context).colorScheme;
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.group_add, size: 80, color: Theme.of(context).colorScheme.outline),
-          const SizedBox(height: 24),
-          Text(
-            context.l10n.noGroupsTitle,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            context.l10n.noGroupsBody,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 88,
+              height: 88,
+              decoration: BoxDecoration(
+                color: scheme.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child:
+                  Icon(Icons.groups_rounded, size: 40, color: scheme.primary),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              context.l10n.noGroupsTitle,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              context.l10n.noGroupsBody,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: scheme.onSurfaceVariant),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -398,12 +374,6 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          side: BorderSide(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest, width: 1, style: BorderStyle.solid),
-          borderRadius: BorderRadius.circular(12),
-        ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -425,62 +395,15 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              if (_isLoadingLocations && _countries.isEmpty)
-                const CircularProgressIndicator()
-              else
-                DropdownButtonFormField<String>(
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    labelText: context.l10n.countryLabel,
-                    border: OutlineInputBorder(),
-                  ),
-                  initialValue: _selectedCountryCode,
-                  items: _countries.map((c) {
-                    return DropdownMenuItem(
-                      value: c['countryCode'],
-                      child: Text(
-                        c['countryName'] ?? '',
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (code) {
-                    if (code != null) {
-                      final name = _countries.firstWhere(
-                          (c) => c['countryCode'] == code)['countryName']!;
-                      _loadCities(code, name);
-                    }
-                  },
+              _CityField(
+                city: _city,
+                onTap: () => showCityPicker(
+                  context,
+                  selectedId: _city?.id,
+                  offerCurrentLocation: false,
+                  onSelected: (city) => setState(() => _city = city),
                 ),
-              const SizedBox(height: 16),
-              if (_selectedCountryCode != null)
-                if (_isLoadingLocations && _cities.isEmpty)
-                  const CircularProgressIndicator()
-                else
-                  DropdownButtonFormField<Map<String, dynamic>>(
-                    // initialValue is only read once, so rebuild the field per
-                    // country; otherwise it keeps a city that is no longer in
-                    // the list and trips Flutter's dropdown assertion.
-                    key: ValueKey(_selectedCountryCode),
-                    isExpanded: true,
-                    decoration: InputDecoration(
-                      labelText: context.l10n.cityLabel,
-                      border: OutlineInputBorder(),
-                    ),
-                    initialValue: _selectedCity,
-                    items: _cities.map((c) {
-                      return DropdownMenuItem(
-                        value: c,
-                        child: Text(
-                          c['cityName'] ?? '',
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (city) {
-                      setState(() => _selectedCity = city);
-                    },
-                  ),
+              ),
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -529,38 +452,89 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                 children: [
                   Text(
                     group.groupName ?? context.l10n.unnamedGroup,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
-                  const SizedBox(height: 8),
-                  if (group.location != null)
-                    Text(
-                        context.l10n.groupLocation(group.location!.cityName, group.location!.countryName)),
-                  const SizedBox(height: 16),
-                  if (group.invite != null && group.joinEnabled == true) ...[
+                  if (group.location != null) ...[
+                    const SizedBox(height: 6),
                     Row(
                       children: [
+                        Icon(
+                          Icons.place_outlined,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            context.l10n.inviteCode(group.invite!.code),
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18),
+                            '${group.location!.cityName}, '
+                            '${group.location!.countryName}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.copy),
-                          onPressed: () {
-                            Clipboard.setData(
-                                ClipboardData(text: group.invite!.code));
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content:
-                                      Text(context.l10n.inviteCodeCopied)),
-                            );
-                          },
-                        ),
                       ],
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  if (group.invite != null && group.joinEnabled == true) ...[
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(16, 10, 6, 10),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  context.l10n.inviteCodeTitle.toUpperCase(),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                      ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  group.invite!.code,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall
+                                      ?.copyWith(letterSpacing: 3),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            tooltip: MaterialLocalizations.of(context)
+                                .copyButtonLabel,
+                            icon: const Icon(Icons.copy_rounded),
+                            onPressed: () {
+                              Clipboard.setData(
+                                  ClipboardData(text: group.invite!.code));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content:
+                                        Text(context.l10n.inviteCodeCopied)),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                   if (group.joinEnabled == false)
@@ -630,7 +604,9 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                                 decoration: InputDecoration(
                                   isDense: true,
                                   border: const OutlineInputBorder(),
-                                  suffixText: _isTimeLimit ? context.l10n.minutesSuffix : null,
+                                  suffixText: _isTimeLimit
+                                      ? context.l10n.minutesSuffix
+                                      : null,
                                 ),
                               ),
                             ),
@@ -648,7 +624,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                           icon: const Icon(Icons.stop),
                           label: Text(context.l10n.endSessionEarly),
                           style: OutlinedButton.styleFrom(
-                              foregroundColor: Theme.of(context).colorScheme.error),
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.error),
                         ),
                       ],
                     ],
@@ -682,7 +659,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                 final name =
                     ref.watch(groupMemberNameProvider(memberId)).value ??
                         context.l10n.memberFallback(index + 1);
-                final label = memberId == userId ? context.l10n.memberYou(name) : name;
+                final label =
+                    memberId == userId ? context.l10n.memberYou(name) : name;
                 return ListTile(
                   leading: MemberAvatar(id: memberId, name: name, size: 40),
                   title: Text(label),
@@ -705,7 +683,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                     width: double.infinity,
                     onPressed: () => context.push('/swipe/${group.groupId}'),
                   )
-                else
+                else if (group.hasCompletedSession == true)
                   PrimaryButton(
                     label: context.l10n.viewMatches,
                     icon: Icons.favorite,
@@ -722,7 +700,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                   ),
                   child: SizedBox(
                     width: double.infinity,
-                    child: Text(context.l10n.leaveGroup, textAlign: TextAlign.center),
+                    child: Text(context.l10n.leaveGroup,
+                        textAlign: TextAlign.center),
                   ),
                 ),
               ],
@@ -735,9 +714,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
 
   void _createGroup() async {
     final groupName = _groupNameController.text.trim();
-    if (groupName.isEmpty ||
-        _selectedCountryCode == null ||
-        _selectedCity == null) {
+    final city = _city;
+    if (groupName.isEmpty || city == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.enterNameAndLocation)),
       );
@@ -745,12 +723,13 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
     }
 
     final location = GroupLocation(
-      countryCode: _selectedCountryCode!,
-      countryName: _selectedCountryName!,
-      cityId: _selectedCity!['cityId'] as String,
-      cityName: _selectedCity!['cityName'] as String,
-      lat: _selectedCity!['lat'] as double,
-      lng: _selectedCity!['lng'] as double,
+      countryCode: city.countryCode,
+      countryName: city.countryNameEn,
+      // Stable key for the place cache, e.g. "los_angeles".
+      cityId: city.id.substring(city.id.indexOf('_') + 1),
+      cityName: city.nameEn,
+      lat: city.lat,
+      lng: city.lng,
     );
 
     try {
@@ -762,6 +741,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
         setState(() {
           _showCreateGroup = false;
           _groupNameController.clear();
+          _city = null;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -774,7 +754,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(userMessage(e, fallback: context.l10n.errorCreateGroup, l10n: context.l10n)),
+              content: Text(userMessage(e,
+                  fallback: context.l10n.errorCreateGroup, l10n: context.l10n)),
               backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
@@ -790,8 +771,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       timeLimit = int.tryParse(valStr) ?? 5;
       if (timeLimit < 1 || timeLimit > 120) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(context.l10n.timeLimitRange)),
+          SnackBar(content: Text(context.l10n.timeLimitRange)),
         );
         return;
       }
@@ -801,8 +781,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       swipeLimit = int.tryParse(limitStr) ?? 10;
       if (swipeLimit < 1 || swipeLimit > 100) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(context.l10n.swipeLimitRange)),
+          SnackBar(content: Text(context.l10n.swipeLimitRange)),
         );
         return;
       }
@@ -814,14 +793,17 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(context.l10n.sessionStarted), backgroundColor: context.swipeColors.like),
+              content: Text(context.l10n.sessionStarted),
+              backgroundColor: context.swipeColors.like),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(userMessage(e, fallback: context.l10n.errorStartSession, l10n: context.l10n)),
+              content: Text(userMessage(e,
+                  fallback: context.l10n.errorStartSession,
+                  l10n: context.l10n)),
               backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
@@ -833,18 +815,26 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(context.l10n.joinGroupViaInvite),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _inviteCodeController,
-              decoration: InputDecoration(
-                labelText: context.l10n.inviteCodeFieldLabel,
-                border: OutlineInputBorder(),
-              ),
-              textCapitalization: TextCapitalization.characters,
-            ),
-          ],
+        content: TextField(
+          controller: _inviteCodeController,
+          autofocus: true,
+          maxLength: 6,
+          textAlign: TextAlign.center,
+          textCapitalization: TextCapitalization.characters,
+          textInputAction: TextInputAction.done,
+          style: Theme.of(context)
+              .textTheme
+              .headlineSmall
+              ?.copyWith(letterSpacing: 6),
+          decoration: InputDecoration(
+            hintText: 'ABC123',
+            helperText: context.l10n.inviteCodeFieldLabel,
+            counterText: '',
+          ),
+          onSubmitted: (_) {
+            _joinGroup();
+            Navigator.pop(context);
+          },
         ),
         actions: [
           TextButton(
@@ -854,12 +844,13 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
             },
             child: Text(context.l10n.cancel),
           ),
-          PrimaryButton(
-            label: context.l10n.join,
+          FilledButton(
+            style: FilledButton.styleFrom(minimumSize: const Size(96, 44)),
             onPressed: () {
               _joinGroup();
               Navigator.pop(context);
             },
+            child: Text(context.l10n.join),
           ),
         ],
       ),
@@ -892,7 +883,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(userMessage(e, fallback: context.l10n.errorJoinGroup, l10n: context.l10n)),
+              content: Text(userMessage(e,
+                  fallback: context.l10n.errorJoinGroup, l10n: context.l10n)),
               backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
@@ -925,7 +917,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
                 );
               }
             },
-            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+            style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error),
             child: Text(context.l10n.leave),
           ),
         ],
@@ -938,8 +931,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(context.l10n.deleteGroupTitle),
-        content: Text(
-            context.l10n.deleteGroupBody(group.groupName ?? context.l10n.unnamedGroup)),
+        content: Text(context.l10n
+            .deleteGroupBody(group.groupName ?? context.l10n.unnamedGroup)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -958,12 +951,15 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
               } catch (e) {
                 if (mounted) {
                   scaffoldMessenger.showSnackBar(
-                    SnackBar(content: Text(userMessage(e, fallback: l10n.errorDeleteGroup, l10n: l10n))),
+                    SnackBar(
+                        content: Text(userMessage(e,
+                            fallback: l10n.errorDeleteGroup, l10n: l10n))),
                   );
                 }
               }
             },
-            child: Text(context.l10n.delete, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            child: Text(context.l10n.delete,
+                style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),
@@ -1010,7 +1006,8 @@ class _GroupJoinScreenState extends ConsumerState<GroupJoinScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(userMessage(e, fallback: context.l10n.errorJoinGroup, l10n: context.l10n)),
+              content: Text(userMessage(e,
+                  fallback: context.l10n.errorJoinGroup, l10n: context.l10n)),
               backgroundColor: Theme.of(context).colorScheme.error),
         );
         context.go('/group');
@@ -1063,6 +1060,34 @@ class _AvatarStack extends ConsumerWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Read-only field that opens the city picker, styled like a text field.
+class _CityField extends StatelessWidget {
+  const _CityField({required this.city, required this.onTap});
+
+  final PopularCity? city;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final lang = Localizations.localeOf(context).languageCode;
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: InputDecorator(
+        isEmpty: city == null,
+        decoration: InputDecoration(
+          labelText: context.l10n.cityLabel,
+          prefixIcon: const Icon(Icons.place_outlined),
+          suffixIcon: const Icon(Icons.expand_more),
+        ),
+        child: city == null
+            ? null
+            : Text('${city!.nameFor(lang)} · ${city!.countryCode}'),
       ),
     );
   }

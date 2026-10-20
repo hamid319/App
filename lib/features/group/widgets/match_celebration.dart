@@ -53,7 +53,8 @@ Future<void> showMatchCelebration(
 const _matchGradient = RadialGradient(
   center: Alignment(0, -0.4),
   radius: 1.2,
-  colors: [Color(0xF5FF7A45), Color(0xF0FF3D6E), Color(0xF76E2878)],
+  // Fully opaque: the results list loads behind it and must not show through.
+  colors: [Color(0xFFFF7A45), Color(0xFFFF3D6E), Color(0xFF6E2878)],
   stops: [0, 0.55, 1],
 );
 
