@@ -342,5 +342,6 @@
   "calendarNoEvents": "Keine kommenden Termine in deinem Kalender.",
   "calendarCityNotFound": "Die Stadt wurde nicht erkannt. Bitte wähle sie aus.",
   "tripDatesLabel": "Reisezeitraum (optional)",
-  "clearTripDates": "Zeitraum entfernen"
+  "clearTripDates": "Zeitraum entfernen",
+  "textSourceWikipedia": "Text: Wikipedia, CC BY-SA"
 }

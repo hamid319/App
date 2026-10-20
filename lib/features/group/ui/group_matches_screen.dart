@@ -503,7 +503,9 @@ class _ResultsListState extends ConsumerState<_ResultsList> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            result.place.name,
+                            result.place.nameFor(
+                              Localizations.localeOf(context).languageCode,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: text.titleMedium,

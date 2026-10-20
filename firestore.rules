@@ -37,7 +37,23 @@ service cloud.firestore {
     // ingestion Cloud Function owns these writes, set write to false.
     match /places/{placeId} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
+      // Curated places (source "wikidata") are written only by the import
+      // tool with admin credentials; the legacy client cache may still
+      // write its own documents.
+      allow create: if isAuthenticated()
+                    && request.resource.data.get('source', '') != 'wikidata';
+      allow update: if isAuthenticated()
+                    && resource.data.get('source', '') != 'wikidata'
+                    && request.resource.data.get('source', '') != 'wikidata';
+      allow delete: if isAuthenticated()
+                    && resource.data.get('source', '') != 'wikidata';
+    }
+
+    // Curated cities, written only by the import tool. importRuns has no
+    // rule, so clients can neither read nor write it.
+    match /cities/{cityId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
     }
 
     match /placeCacheMetadata/{cityKey} {

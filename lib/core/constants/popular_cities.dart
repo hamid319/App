@@ -1,3 +1,5 @@
+import '../../common/utils/geo_utils.dart';
+
 /// A destination the user can pick on Discover without GPS. City names are
 /// given per language because several differ (Munich / München).
 class PopularCity {
@@ -42,6 +44,20 @@ class PopularCity {
       }
     }
     return null;
+  }
+
+  /// The city closest to a position, if one lies within [maxKm].
+  static PopularCity? nearest(double lat, double lng, {required double maxKm}) {
+    PopularCity? best;
+    var bestKm = maxKm;
+    for (final city in popularCities) {
+      final km = GeoUtils.calculateDistance(lat, lng, city.lat, city.lng);
+      if (km <= bestKm) {
+        best = city;
+        bestKm = km;
+      }
+    }
+    return best;
   }
 
   static PopularCity? byId(String? id) {

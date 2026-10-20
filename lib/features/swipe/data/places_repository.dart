@@ -28,9 +28,31 @@ class PlacesRepository {
       _functions ??
       FirebaseFunctions.instanceFor(region: AppConfig.functionsRegion);
 
+  /// Curated places of a city from the batch import (tools/city-import):
+  /// active ones only, best-known first. One query per city instead of
+  /// reading the whole collection.
+  Future<List<PlaceModel>> loadCityPlaces(
+    String cityId, {
+    int limit = 150,
+  }) async {
+    final snapshot = await _db
+        .collection('places')
+        .where('cityId', isEqualTo: cityId)
+        .where('status', isEqualTo: 'active')
+        .orderBy('popularity', descending: true)
+        .limit(limit)
+        .get();
+    return snapshot.docs.map((d) => PlaceModel.fromJson(d.data())).toList();
+  }
+
+  /// App city id ("pt_lisbon") of a group location ("PT", "lisbon").
+  static String curatedCityId(GroupLocation location) =>
+      '${location.countryCode.toLowerCase()}_${location.cityId}';
+
   /// Loads the place pool for a city.
   ///
-  /// Delegates to the `getCityPlaces` Cloud Function, which owns the Google
+  /// Uses the curated import when the city has one. Otherwise delegates to
+  /// the `getCityPlaces` Cloud Function, which owns the Google
   /// API keys and caches photos in Cloud Storage, so no key ships in the app.
   /// Falls back to the legacy direct-HTTP path only when the Cloud Function is
   /// switched off in [AppConfig].
@@ -38,10 +60,20 @@ class PlacesRepository {
     GroupLocation location, {
     int limit = 20,
   }) async {
+    if (limit <= 0) return [];
+    try {
+      final curated = await loadCityPlaces(curatedCityId(location));
+      if (curated.isNotEmpty) {
+        // A mix of the best-known places, different for every session.
+        final top = curated.take(limit * 2).toList()..shuffle();
+        return top.take(limit).toList();
+      }
+    } catch (e) {
+      debugPrint('Curated places for ${location.cityName} failed: $e');
+    }
     if (!AppConfig.usePlacesCloudFunction) {
       return fetchAndCachePlacesForCity(location, limit: limit);
     }
-    if (limit <= 0) return [];
 
     final restrictedLimit = limit.clamp(1, AppConfig.maxPlacesLimit);
 

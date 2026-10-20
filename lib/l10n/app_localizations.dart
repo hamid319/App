@@ -2155,6 +2155,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove dates'**
   String get clearTripDates;
+
+  /// No description provided for @textSourceWikipedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Text: Wikipedia, CC BY-SA'**
+  String get textSourceWikipedia;
 }
 
 class _AppLocalizationsDelegate

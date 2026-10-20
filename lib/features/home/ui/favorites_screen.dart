@@ -276,7 +276,7 @@ class _Tile extends ConsumerWidget {
           ),
           const SizedBox(height: AppSizes.space8),
           Text(
-            place.name,
+            place.nameFor(Localizations.localeOf(context).languageCode),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w700),

@@ -1119,4 +1119,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clearTripDates => 'Remove dates';
+
+  @override
+  String get textSourceWikipedia => 'Text: Wikipedia, CC BY-SA';
 }

@@ -1,0 +1,28 @@
+{
+  "name": "swipetrip-city-import",
+  "private": true,
+  "type": "module",
+  "description": "Curated batch import of cities and places (Wikidata, Wikipedia, Wikimedia Commons) into Firestore and Cloudflare R2.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "collect": "tsx src/cli.ts collect",
+    "report": "tsx src/cli.ts report",
+    "publish": "tsx src/cli.ts publish",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm test"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.883.0",
+    "firebase-admin": "^13.4.0",
+    "sharp": "^0.34.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.30",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

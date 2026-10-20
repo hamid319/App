@@ -477,5 +477,6 @@
   "calendarNoEvents": "No upcoming events in your calendar.",
   "calendarCityNotFound": "We couldn't recognise the city. Please pick it.",
   "tripDatesLabel": "Travel dates (optional)",
-  "clearTripDates": "Remove dates"
+  "clearTripDates": "Remove dates",
+  "textSourceWikipedia": "Text: Wikipedia, CC BY-SA"
 }

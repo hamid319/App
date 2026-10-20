@@ -24,6 +24,16 @@ class PlaceModel {
   /// Author and licence per photo, in the same order as the photos.
   final List<PhotoCredit> photoCredits;
 
+  /// Name and description per language code from the curated import
+  /// (`names`, `descriptions`); [name] and [description] stay the
+  /// English or only text.
+  final Map<String, String> names;
+  final Map<String, String> descriptions;
+
+  /// Wikipedia article the description was taken from, per language.
+  /// The text is CC BY-SA, so the app links its source.
+  final Map<String, String> wikipediaUrls;
+
   const PlaceModel({
     required this.id,
     required this.name,
@@ -38,7 +48,23 @@ class PlaceModel {
     this.cityId,
     this.prompts = const [],
     this.photoCredits = const [],
+    this.names = const {},
+    this.descriptions = const {},
+    this.wikipediaUrls = const {},
   });
+
+  /// Name in [languageCode], else the default name.
+  String nameFor(String languageCode) => names[languageCode] ?? name;
+
+  /// Description in [languageCode], else the default description.
+  String? descriptionFor(String languageCode) =>
+      descriptions[languageCode] ?? description;
+
+  /// Wikipedia source of [descriptionFor], if the text came from there.
+  String? wikipediaUrlFor(String languageCode) =>
+      descriptions.containsKey(languageCode)
+          ? wikipediaUrls[languageCode]
+          : wikipediaUrls['en'] ?? wikipediaUrls[languageCode];
 
   PlaceModel copyWith({
     String? id,
@@ -89,7 +115,21 @@ class PlaceModel {
         cityId: json['cityId'] as String?,
         prompts: PlacePrompt.listFromJson(json['prompts']),
         photoCredits: PhotoCredit.listFromPlaceJson(json),
+        names: _stringMap(json['names']),
+        descriptions: _stringMap(json['descriptions']),
+        wikipediaUrls: _stringMap(json['wikipediaUrls']),
       );
+
+  static Map<String, String> _stringMap(Object? value) {
+    if (value is! Map) return const {};
+    return {
+      for (final entry in value.entries)
+        if (entry.key is String &&
+            entry.value is String &&
+            (entry.value as String).trim().isNotEmpty)
+          entry.key as String: (entry.value as String).trim(),
+    };
+  }
 
   static List<String> _imageUrls(Map<String, dynamic> json) {
     final urls =

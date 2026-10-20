@@ -1144,4 +1144,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get clearTripDates => 'Zeitraum entfernen';
+
+  @override
+  String get textSourceWikipedia => 'Text: Wikipedia, CC BY-SA';
 }

@@ -10,6 +10,7 @@ import '../../../common/widgets/skeleton.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/errors/user_message.dart';
+import '../../../core/services/link_launcher.dart';
 import '../../../core/services/maps_launcher.dart';
 import '../../../l10n/l10n.dart';
 import '../../swipe/data/places_repository.dart';
@@ -132,7 +133,10 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
     final text = Theme.of(context).textTheme;
     final l10n = context.l10n;
     final tags = placeTypeLabels(l10n, place.types);
-    final description = place.description?.trim() ?? '';
+    final lang = Localizations.localeOf(context).languageCode;
+    final name = place.nameFor(lang);
+    final description = place.descriptionFor(lang)?.trim() ?? '';
+    final wikipediaUrl = place.wikipediaUrlFor(lang);
     final heroHeight = MediaQuery.sizeOf(context).height * 0.46;
     final darkTheme = Theme.of(context).brightness == Brightness.dark;
 
@@ -141,12 +145,12 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
       if (isFav) {
         await swipeCtrl.removeFavorite(place.id);
         messenger.showSnackBar(
-          SnackBar(content: Text(l10n.placeRemovedFromFavorites(place.name))),
+          SnackBar(content: Text(l10n.placeRemovedFromFavorites(name))),
         );
       } else {
         await swipeCtrl.addFavorite(place.id);
         messenger.showSnackBar(
-          SnackBar(content: Text(l10n.placeAddedToFavorites(place.name))),
+          SnackBar(content: Text(l10n.placeAddedToFavorites(name))),
         );
       }
     }
@@ -234,7 +238,7 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
               ),
               sliver: SliverList.list(
                 children: [
-                  Text(place.name, style: text.headlineMedium),
+                  Text(name, style: text.headlineMedium),
                   const SizedBox(height: AppSizes.space8),
                   _MetaRow(place: place),
                   if (tags.isNotEmpty) ...[
@@ -258,6 +262,10 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
                         height: 1.6,
                       ),
                     ),
+                    if (wikipediaUrl != null) ...[
+                      const SizedBox(height: AppSizes.space8),
+                      _TextSource(url: wikipediaUrl),
+                    ],
                   ],
                 ],
               ),
@@ -275,7 +283,7 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
               : MapsApp.google;
           if (app == null) return;
           try {
-            await MapsLauncher.open(app, place.lat, place.lng, place.name);
+            await MapsLauncher.open(app, place.lat, place.lng, name);
           } catch (e) {
             if (!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
@@ -369,6 +377,51 @@ class _SoftTag extends StatelessWidget {
               fontWeight: FontWeight.w600,
               color: scheme.onSurface,
             ),
+      ),
+    );
+  }
+}
+
+/// Source line under a description taken from Wikipedia (CC BY-SA requires
+/// naming and linking it).
+class _TextSource extends StatelessWidget {
+  const _TextSource({required this.url});
+
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppSizes.radiusXs),
+        onTap: () async {
+          try {
+            await LinkLauncher.open(url);
+          } catch (e) {
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  userMessage(e, fallback: l10n.errorOpenLink, l10n: l10n),
+                ),
+              ),
+            );
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSizes.space4),
+          child: Text(
+            l10n.textSourceWikipedia,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  decoration: TextDecoration.underline,
+                  decorationColor: scheme.onSurfaceVariant,
+                ),
+          ),
+        ),
       ),
     );
   }

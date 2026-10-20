@@ -1,0 +1,12 @@
+[
+  { "id": "de_berlin", "wikidataId": "Q64", "nameEn": "Berlin", "nameDe": "Berlin", "countryCode": "DE" },
+  { "id": "de_hamburg", "wikidataId": "Q1055", "nameEn": "Hamburg", "nameDe": "Hamburg", "countryCode": "DE" },
+  { "id": "de_munich", "wikidataId": "Q1726", "nameEn": "Munich", "nameDe": "München", "countryCode": "DE" },
+  { "id": "at_vienna", "wikidataId": "Q1741", "nameEn": "Vienna", "nameDe": "Wien", "countryCode": "AT" },
+  { "id": "ch_zurich", "wikidataId": "Q72", "nameEn": "Zurich", "nameDe": "Zürich", "countryCode": "CH" },
+  { "id": "fr_paris", "wikidataId": "Q90", "nameEn": "Paris", "nameDe": "Paris", "countryCode": "FR" },
+  { "id": "pt_lisbon", "wikidataId": "Q597", "nameEn": "Lisbon", "nameDe": "Lissabon", "countryCode": "PT" },
+  { "id": "es_barcelona", "wikidataId": "Q1492", "nameEn": "Barcelona", "nameDe": "Barcelona", "countryCode": "ES" },
+  { "id": "it_rome", "wikidataId": "Q220", "nameEn": "Rome", "nameDe": "Rom", "countryCode": "IT" },
+  { "id": "nl_amsterdam", "wikidataId": "Q727", "nameEn": "Amsterdam", "nameDe": "Amsterdam", "countryCode": "NL" }
+]
