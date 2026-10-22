@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/theme.dart';
 import '../../../common/models/place_model.dart';
+import '../../../common/utils/opening_hours_format.dart';
 import '../../../common/utils/place_type_labels.dart';
 import '../../../common/widgets/place_photo.dart';
 import '../../../common/widgets/skeleton.dart';
@@ -495,7 +496,9 @@ class _PlaceFacts extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (hours != null) row(Icons.schedule, l10n.openingHoursLabel, hours),
+        if (hours != null)
+          row(Icons.schedule, l10n.openingHoursLabel,
+              formatOpeningHours(hours, l10n)),
         if (website != null)
           row(
             Icons.language,

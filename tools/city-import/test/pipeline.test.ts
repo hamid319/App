@@ -261,6 +261,19 @@ describe("publishCity", () => {
   });
 });
 
+describe("catalog texts", () => {
+  it("uses the catalog's German text when there is no German Wikipedia article", async () => {
+    const withDe = catalog.map((a) => (a.number === 5 ? { ...a, descriptionDe: "Aussichtspunkt zum Testen." } : a));
+    const collection = await collectCity(city, withDe, fakeSources());
+    const viewpoint = collection.places.find((p) => p.id === "osm_node_15")!;
+    expect(viewpoint.descriptions).toEqual({ en: "Catalog text for Miradouro Test.", de: "Aussichtspunkt zum Testen." });
+    expect(viewpoint.wikipediaUrls).toEqual({});
+    // A German Wikipedia lead still wins over the catalog text.
+    const tower = (await collectCity(city, catalog.map((a) => ({ ...a, descriptionDe: "Katalog." })), fakeSources())).places[0];
+    expect(tower.descriptions.de).toBe("de text for Ort_Q1.");
+  });
+});
+
 describe("selectPhotos", () => {
   it("uses the picks in order, ignores unknown ones and falls back to the first candidates", async () => {
     const place = (await collectCity(city, catalog, fakeSources())).places[0];

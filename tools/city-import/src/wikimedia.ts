@@ -120,7 +120,7 @@ export class WikimediaSource {
       }>(url);
       if (data.type !== "standard" || !data.extract?.trim()) return null;
       return {
-        text: shortenText(data.extract, DEFAULTS.descriptionMaxChars),
+        text: shortenText(stripPronunciation(plainText(data.extract)), DEFAULTS.descriptionMaxChars),
         url: data.content_urls?.desktop?.page ?? `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(title)}`,
       };
     } catch {
@@ -282,6 +282,24 @@ export function plainText(value: string | undefined): string {
     .replace(/&quot;/gi, '"')
     .replace(/&#0?39;/gi, "'")
     .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Characters that only occur in IPA transcriptions, not in the place names
+// themselves (ø, æ, œ are left out: they are letters in Danish and French).
+const IPA_CHARS = /[ˈˌːɐʃʒŋɲʎɾʁʀɛɔəɚɝɨʉʊɪɑɒʏɣθðχʔɫβɯɹʌɡ]/;
+
+/**
+ * Removes pronunciations in square brackets from a Wikipedia lead, e.g.
+ * "Der Parque das Nações [ˈpaɾkɯ dɐʃ nɐˈsõĩʃ], zu deutsch …", and tidies
+ * the punctuation left behind.
+ */
+export function stripPronunciation(text: string): string {
+  return text
+    .replace(/\s*\[[^\]]*\]/g, (group) => (IPA_CHARS.test(group) ? "" : group))
+    .replace(/,(\s*,)+/g, ",")
+    .replace(/\s+([,.;:])/g, "$1")
+    .replace(/\s{2,}/g, " ")
     .trim();
 }
 

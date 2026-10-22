@@ -346,5 +346,15 @@
   "textSourceWikipedia": "Text: Wikipedia, CC BY-SA",
   "openingHoursLabel": "Öffnungszeiten",
   "websiteLabel": "Website",
-  "osmAttribution": "Kartendaten: © OpenStreetMap-Mitwirkende"
+  "osmAttribution": "Kartendaten: © OpenStreetMap-Mitwirkende",
+  "openingHoursWeekdays": "Mo,Di,Mi,Do,Fr,Sa,So",
+  "openingHoursMonths": "Jan,Feb,Mär,Apr,Mai,Jun,Jul,Aug,Sep,Okt,Nov,Dez",
+  "openingHoursDaily": "Täglich",
+  "openingHoursAlwaysOpen": "Rund um die Uhr geöffnet",
+  "openingHoursClosed": "geschlossen",
+  "openingHoursPublicHolidays": "Feiertage",
+  "openingHoursSchoolHolidays": "Schulferien",
+  "openingHoursSunrise": "Sonnenaufgang",
+  "openingHoursSunset": "Sonnenuntergang",
+  "openingHoursEaster": "Ostern"
 }

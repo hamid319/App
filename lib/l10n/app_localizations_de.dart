@@ -1156,4 +1156,35 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get osmAttribution => 'Kartendaten: © OpenStreetMap-Mitwirkende';
+
+  @override
+  String get openingHoursWeekdays => 'Mo,Di,Mi,Do,Fr,Sa,So';
+
+  @override
+  String get openingHoursMonths =>
+      'Jan,Feb,Mär,Apr,Mai,Jun,Jul,Aug,Sep,Okt,Nov,Dez';
+
+  @override
+  String get openingHoursDaily => 'Täglich';
+
+  @override
+  String get openingHoursAlwaysOpen => 'Rund um die Uhr geöffnet';
+
+  @override
+  String get openingHoursClosed => 'geschlossen';
+
+  @override
+  String get openingHoursPublicHolidays => 'Feiertage';
+
+  @override
+  String get openingHoursSchoolHolidays => 'Schulferien';
+
+  @override
+  String get openingHoursSunrise => 'Sonnenaufgang';
+
+  @override
+  String get openingHoursSunset => 'Sonnenuntergang';
+
+  @override
+  String get openingHoursEaster => 'Ostern';
 }

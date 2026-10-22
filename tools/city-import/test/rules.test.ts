@@ -8,7 +8,7 @@ import { interestsFor, typesFor } from "../src/mapping.js";
 import { catalogNameVariants, matchAttraction, nameScore, normalizeName } from "../src/match.js";
 import { osmAddress, osmCommonsFile } from "../src/osm.js";
 import type { OsmPlace } from "../src/osm.js";
-import { shortenText } from "../src/wikimedia.js";
+import { shortenText, stripPronunciation } from "../src/wikimedia.js";
 import type { PhotoMetadata } from "../src/wikimedia.js";
 
 describe("licences", () => {
@@ -120,6 +120,17 @@ describe("description text", () => {
 
   it("cuts at a word boundary when the first sentence is too long", () => {
     expect(shortenText("A very long first sentence without any break", 20)).toBe("A very long first…");
+  });
+
+  it("removes pronunciations in brackets and the punctuation they leave", () => {
+    expect(stripPronunciation("Der Parque das Nações [ˈpaɾkɯ dɐʃ nɐˈsõĩʃ], zu deutsch Park der Nationen."))
+      .toBe("Der Parque das Nações, zu deutsch Park der Nationen.");
+    expect(stripPronunciation("Der Rossio, [ʀu'siw], offiziell Praça de D. Pedro IV, ['prasɐ də dõ], ist ein Platz."))
+      .toBe("Der Rossio, offiziell Praça de D. Pedro IV, ist ein Platz.");
+    expect(stripPronunciation("Der Louvre [ˈluːvrə] , ist ein Museum.")).toBe("Der Louvre, ist ein Museum.");
+    // Brackets without IPA and Danish letters stay.
+    expect(stripPronunciation("Im Stadtteil Nørrebro [Kopenhagen] liegt der Park."))
+      .toBe("Im Stadtteil Nørrebro [Kopenhagen] liegt der Park.");
   });
 });
 

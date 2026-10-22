@@ -32,6 +32,8 @@ export interface CatalogAttraction {
   name: string;
   category: string;
   description: string;
+  /** German version of [description], for places without a German Wikipedia article. */
+  descriptionDe?: string;
 }
 
 export interface Coordinates {

@@ -232,8 +232,8 @@ function toDraft(
     ...(tags.opening_hours ? { openingHours: tags.opening_hours } : {}),
     ...(website ? { website } : {}),
     names,
-    // The catalog's short English text until a Wikipedia lead is found.
-    descriptions: { en: l.seed.description },
+    // The catalog's own short texts until a Wikipedia lead is found.
+    descriptions: { en: l.seed.description, ...(l.seed.descriptionDe ? { de: l.seed.descriptionDe } : {}) },
     wikipediaUrls: {},
     coordinates: l.coordinates,
     types,

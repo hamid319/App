@@ -2179,6 +2179,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Map data: © OpenStreetMap contributors'**
   String get osmAttribution;
+
+  /// No description provided for @openingHoursWeekdays.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon,Tue,Wed,Thu,Fri,Sat,Sun'**
+  String get openingHoursWeekdays;
+
+  /// No description provided for @openingHoursMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec'**
+  String get openingHoursMonths;
+
+  /// No description provided for @openingHoursDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get openingHoursDaily;
+
+  /// No description provided for @openingHoursAlwaysOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open 24 hours'**
+  String get openingHoursAlwaysOpen;
+
+  /// No description provided for @openingHoursClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'closed'**
+  String get openingHoursClosed;
+
+  /// No description provided for @openingHoursPublicHolidays.
+  ///
+  /// In en, this message translates to:
+  /// **'public holidays'**
+  String get openingHoursPublicHolidays;
+
+  /// No description provided for @openingHoursSchoolHolidays.
+  ///
+  /// In en, this message translates to:
+  /// **'school holidays'**
+  String get openingHoursSchoolHolidays;
+
+  /// No description provided for @openingHoursSunrise.
+  ///
+  /// In en, this message translates to:
+  /// **'sunrise'**
+  String get openingHoursSunrise;
+
+  /// No description provided for @openingHoursSunset.
+  ///
+  /// In en, this message translates to:
+  /// **'sunset'**
+  String get openingHoursSunset;
+
+  /// No description provided for @openingHoursEaster.
+  ///
+  /// In en, this message translates to:
+  /// **'Easter'**
+  String get openingHoursEaster;
 }
 
 class _AppLocalizationsDelegate
