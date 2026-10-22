@@ -2161,6 +2161,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Text: Wikipedia, CC BY-SA'**
   String get textSourceWikipedia;
+
+  /// No description provided for @openingHoursLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening hours'**
+  String get openingHoursLabel;
+
+  /// No description provided for @websiteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Website'**
+  String get websiteLabel;
+
+  /// No description provided for @osmAttribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Map data: © OpenStreetMap contributors'**
+  String get osmAttribution;
 }
 
 class _AppLocalizationsDelegate

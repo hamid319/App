@@ -2,23 +2,25 @@
 // (one radius query per class, then exclusion pass) and the Commons photo
 // lookup are adapted from the city pipeline's wikimedia.ts.
 
-import { DEFAULTS, DISCOVERY_CLASSES, EXCLUDED_CLASSES } from "./config.js";
+import { DEFAULTS } from "./config.js";
 import type { WikimediaHttp } from "./http.js";
 import type { Coordinates, Lang, Localized } from "./model.js";
 
-export interface Candidate {
+/** A place whose photos to look up: its Wikidata id and files already known (P18, OSM tags). */
+export interface PhotoLookup {
   wikidataId: string;
-  coordinates: Coordinates;
-  sitelinks: number;
-  distanceKm: number;
-  classQids: string[];
-  p18Files: string[];
+  knownFiles: string[];
 }
 
 export interface EntityInfo {
   labels: Localized;
   descriptions: Localized;
   wikipediaTitles: Localized;
+  /** Main image (P18) file titles. */
+  imageFiles: string[];
+  /** Commons category with more photos (P373), without the "Category:" prefix. */
+  commonsCategory?: string;
+  coordinates?: Coordinates;
 }
 
 export interface WikipediaSummary {
@@ -44,91 +46,17 @@ export interface PhotoMetadata {
 /** Depicting files checked per place; most are skipped for size or licence. */
 const DEPICTS_PER_PLACE = 12;
 
-interface SparqlResponse {
-  results?: { bindings?: Array<Record<string, { value: string } | undefined>> };
-}
-
 export class WikimediaSource {
   constructor(private readonly http: WikimediaHttp) {}
 
-  async cityLocation(qid: string): Promise<{ coordinates: Coordinates; countryQid: string }> {
-    const url = apiUrl("https://www.wikidata.org/w/api.php", {
-      action: "wbgetentities",
-      ids: qid,
-      props: "claims",
-    });
-    const data = await this.http.json<{ entities?: Record<string, { claims?: Record<string, Claim[]> }> }>(url);
-    const claims = data.entities?.[qid]?.claims ?? {};
-    const coord = bestClaim(claims.P625)?.mainsnak?.datavalue?.value as
-      | { latitude?: number; longitude?: number }
-      | undefined;
-    const country = (bestClaim(claims.P17)?.mainsnak?.datavalue?.value as { id?: string } | undefined)?.id;
-    if (typeof coord?.latitude !== "number" || typeof coord.longitude !== "number" || !country) {
-      throw new Error(`${qid} has no coordinates or country on Wikidata`);
-    }
-    return { coordinates: { lat: coord.latitude, lng: coord.longitude }, countryQid: country };
-  }
-
-  /** Places of the configured classes around a city, best-known first. */
-  async findCandidates(
-    center: Coordinates,
-    countryQid: string,
-    options: { radiusKm: number; minSitelinks: number; limit: number },
-  ): Promise<Candidate[]> {
-    const byId = new Map<string, Candidate>();
-    for (const cls of DISCOVERY_CLASSES) {
-      const query = `
-SELECT DISTINCT ?item ?coord ?image ?sitelinks ?distance WHERE {
-  SERVICE wikibase:around {
-    ?item wdt:P625 ?coord.
-    bd:serviceParam wikibase:center "Point(${center.lng} ${center.lat})"^^geo:wktLiteral;
-                    wikibase:radius "${options.radiusKm}";
-                    wikibase:distance ?distance.
-  }
-  ?item wdt:P31/wdt:P279? wd:${cls.qid}.
-  ?item wikibase:sitelinks ?sitelinks.
-  FILTER(?sitelinks >= ${options.minSitelinks})
-  ?item wdt:P17 wd:${countryQid}.
-  OPTIONAL { ?item wdt:P18 ?image. }
-}
-ORDER BY DESC(?sitelinks)
-LIMIT ${options.limit}`;
-      for (const row of await this.sparql(query)) {
-        const id = entityId(row.item?.value);
-        const coordinates = parseWktPoint(row.coord?.value);
-        if (!id || !coordinates) continue;
-        const image = commonsTitleFromUri(row.image?.value);
-        const existing = byId.get(id);
-        if (existing) {
-          if (!existing.classQids.includes(cls.qid)) existing.classQids.push(cls.qid);
-          if (image && !existing.p18Files.includes(image)) existing.p18Files.push(image);
-          continue;
-        }
-        byId.set(id, {
-          wikidataId: id,
-          coordinates,
-          sitelinks: Number(row.sitelinks?.value ?? 0),
-          distanceKm: Number(row.distance?.value ?? 0),
-          classQids: [cls.qid],
-          p18Files: image ? [image] : [],
-        });
-      }
-    }
-    const ranked = [...byId.values()]
-      .sort((a, b) => b.sitelinks - a.sitelinks || a.distanceKm - b.distanceKm)
-      .slice(0, options.limit);
-    const excluded = await this.excludedIds(ranked.map((c) => c.wikidataId));
-    return ranked.filter((c) => !excluded.has(c.wikidataId));
-  }
-
-  /** Labels, short descriptions and Wikipedia titles in English and German. */
+  /** Labels, short descriptions, Wikipedia titles (EN/DE), main image and coordinates. */
   async entityInfo(qids: string[]): Promise<Map<string, EntityInfo>> {
     const result = new Map<string, EntityInfo>();
     for (let i = 0; i < qids.length; i += 50) {
       const url = apiUrl("https://www.wikidata.org/w/api.php", {
         action: "wbgetentities",
         ids: qids.slice(i, i + 50).join("|"),
-        props: "labels|descriptions|sitelinks",
+        props: "labels|descriptions|sitelinks|claims",
         languages: "en|de",
         sitefilter: "enwiki|dewiki",
       });
@@ -137,17 +65,46 @@ LIMIT ${options.limit}`;
           labels?: Record<string, { value?: string }>;
           descriptions?: Record<string, { value?: string }>;
           sitelinks?: Record<string, { title?: string }>;
+          claims?: Record<string, Claim[]>;
         }>;
-      }>(url);
+      }>(url, 30_000, 16 * 1024 * 1024);
       for (const [id, entity] of Object.entries(data.entities ?? {})) {
+        const coord = bestClaim(entity.claims?.P625)?.mainsnak?.datavalue?.value as
+          | { latitude?: number; longitude?: number }
+          | undefined;
         result.set(id, {
           labels: pick({ en: entity.labels?.en?.value, de: entity.labels?.de?.value }),
           descriptions: pick({ en: entity.descriptions?.en?.value, de: entity.descriptions?.de?.value }),
           wikipediaTitles: pick({ en: entity.sitelinks?.enwiki?.title, de: entity.sitelinks?.dewiki?.title }),
+          imageFiles: (entity.claims?.P18 ?? [])
+            .filter((c) => c.rank !== "deprecated")
+            .map((c) => c.mainsnak?.datavalue?.value)
+            .filter((v): v is string => typeof v === "string")
+            .map(normalizeFileTitle),
+          ...(typeof bestClaim(entity.claims?.P373)?.mainsnak?.datavalue?.value === "string"
+            ? { commonsCategory: bestClaim(entity.claims?.P373)!.mainsnak!.datavalue!.value as string }
+            : {}),
+          ...(typeof coord?.latitude === "number" && typeof coord.longitude === "number"
+            ? { coordinates: { lat: coord.latitude, lng: coord.longitude } }
+            : {}),
         });
       }
     }
     return result;
+  }
+
+  /** Wikidata items whose label matches [name] (English search), best first. */
+  async searchEntities(name: string, limit = 20): Promise<string[]> {
+    const url = apiUrl("https://www.wikidata.org/w/api.php", {
+      action: "wbsearchentities",
+      search: name,
+      language: "en",
+      uselang: "en",
+      type: "item",
+      limit: String(limit),
+    });
+    const data = await this.http.json<{ search?: Array<{ id?: string }> }>(url);
+    return (data.search ?? []).map((hit) => hit.id).filter((id): id is string => Boolean(id && /^Q\d+$/.test(id)));
   }
 
   /** Lead paragraph of a Wikipedia article (CC BY-SA), or null for missing/disambiguation pages. */
@@ -177,8 +134,8 @@ LIMIT ${options.limit}`;
    * photographed place fill all result slots, and every hit of a
    * single-place search depicts that place, so no extra lookup is needed.
    */
-  async photoFiles(candidates: Candidate[]): Promise<Map<string, string[]>> {
-    const result = new Map(candidates.map((c) => [c.wikidataId, [...c.p18Files]]));
+  async photoFiles(candidates: PhotoLookup[]): Promise<Map<string, string[]>> {
+    const result = new Map(candidates.map((c) => [c.wikidataId, [...c.knownFiles]]));
     for (const candidate of candidates) {
       const url = apiUrl("https://commons.wikimedia.org/w/api.php", {
         action: "query",
@@ -198,12 +155,27 @@ LIMIT ${options.limit}`;
     return result;
   }
 
+  /** Image files in a Commons category (first [limit]), e.g. "Miradouro de Santa Luzia". */
+  async categoryFiles(category: string, limit = 15): Promise<string[]> {
+    const url = apiUrl("https://commons.wikimedia.org/w/api.php", {
+      action: "query",
+      list: "categorymembers",
+      cmtitle: `Category:${category.replace(/^Category:/, "")}`,
+      cmtype: "file",
+      cmlimit: String(limit),
+    });
+    const data = await this.http.json<{ query?: { categorymembers?: Array<{ title: string }> } }>(url);
+    return (data.query?.categorymembers ?? [])
+      .map((m) => normalizeFileTitle(m.title))
+      .filter((t) => /\.(jpe?g|png|webp)$/i.test(t));
+  }
+
   async photoMetadata(fileTitles: string[]): Promise<Map<string, PhotoMetadata>> {
     const result = new Map<string, PhotoMetadata>();
-    for (let i = 0; i < fileTitles.length; i += 50) {
+    for (const batch of urlSafeBatches(fileTitles, 50, 6000)) {
       const url = apiUrl("https://commons.wikimedia.org/w/api.php", {
         action: "query",
-        titles: fileTitles.slice(i, i + 50).join("|"),
+        titles: batch.join("|"),
         prop: "imageinfo|categories",
         iiprop: "url|size|mime|mediatype|extmetadata",
         iiurlwidth: String(DEFAULTS.outputLongEdge),
@@ -249,36 +221,34 @@ LIMIT ${options.limit}`;
     return result;
   }
 
-  private async excludedIds(qids: string[]): Promise<Set<string>> {
-    const excluded = new Set<string>();
-    const roots = EXCLUDED_CLASSES.map((q) => `wd:${q}`).join(" ");
-    for (let i = 0; i < qids.length; i += 80) {
-      const query = `
-SELECT DISTINCT ?item WHERE {
-  VALUES ?item { ${qids.slice(i, i + 80).map((q) => `wd:${q}`).join(" ")} }
-  VALUES ?root { ${roots} }
-  ?item wdt:P31/wdt:P279?/wdt:P279?/wdt:P279? ?root.
-}`;
-      for (const row of await this.sparql(query)) {
-        const id = entityId(row.item?.value);
-        if (id) excluded.add(id);
-      }
-    }
-    return excluded;
-  }
-
-  private async sparql(query: string) {
-    const url = new URL("https://query.wikidata.org/sparql");
-    url.searchParams.set("query", query);
-    url.searchParams.set("format", "json");
-    const data = await this.http.json<SparqlResponse>(url, 65_000);
-    return data.results?.bindings ?? [];
-  }
 }
 
 interface Claim {
   rank?: "preferred" | "normal" | "deprecated";
   mainsnak?: { snaktype?: string; datavalue?: { value?: unknown } };
+}
+
+/**
+ * Groups titles so each request has at most [maxCount] of them and stays
+ * under [maxEncodedChars] once URL-encoded: long non-Latin file names
+ * (Thai, Japanese) otherwise produce "414 URI too long".
+ */
+export function urlSafeBatches(titles: string[], maxCount: number, maxEncodedChars: number): string[][] {
+  const batches: string[][] = [];
+  let current: string[] = [];
+  let length = 0;
+  for (const title of titles) {
+    const size = encodeURIComponent(title).length + 3;
+    if (current.length > 0 && (current.length >= maxCount || length + size > maxEncodedChars)) {
+      batches.push(current);
+      current = [];
+      length = 0;
+    }
+    current.push(title);
+    length += size;
+  }
+  if (current.length > 0) batches.push(current);
+  return batches;
 }
 
 function bestClaim(claims: Claim[] | undefined): Claim | undefined {
@@ -330,24 +300,8 @@ export function shortenText(text: string, maxChars: number): string {
   return `${cut.slice(0, cut.lastIndexOf(" "))}…`;
 }
 
-function entityId(uri: string | undefined): string | null {
-  return uri?.match(/\/(Q[1-9][0-9]*)$/)?.[1] ?? null;
-}
 
-function parseWktPoint(value: string | undefined): Coordinates | null {
-  const match = value?.match(/^Point\((-?[0-9.]+) (-?[0-9.]+)\)$/);
-  return match ? { lng: Number(match[1]), lat: Number(match[2]) } : null;
-}
 
-function commonsTitleFromUri(value: string | undefined): string | null {
-  if (!value) return null;
-  try {
-    const name = decodeURIComponent(new URL(value).pathname).split("/").pop();
-    return name ? normalizeFileTitle(name) : null;
-  } catch {
-    return null;
-  }
-}
 
 export function normalizeFileTitle(value: string): string {
   const normalized = value.replace(/_/g, " ").trim();

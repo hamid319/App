@@ -343,5 +343,8 @@
   "calendarCityNotFound": "Die Stadt wurde nicht erkannt. Bitte wähle sie aus.",
   "tripDatesLabel": "Reisezeitraum (optional)",
   "clearTripDates": "Zeitraum entfernen",
-  "textSourceWikipedia": "Text: Wikipedia, CC BY-SA"
+  "textSourceWikipedia": "Text: Wikipedia, CC BY-SA",
+  "openingHoursLabel": "Öffnungszeiten",
+  "websiteLabel": "Website",
+  "osmAttribution": "Kartendaten: © OpenStreetMap-Mitwirkende"
 }

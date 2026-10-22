@@ -3,7 +3,11 @@ import { describe, expect, it } from "vitest";
 import { INTEREST_TYPES } from "../src/config.js";
 import { isUsablePhoto, choosePhotos } from "../src/collect.js";
 import { normalizeLicense } from "../src/licenses.js";
-import { appTypesFor, interestsFor } from "../src/mapping.js";
+import { CATEGORY_TYPES } from "../src/config.js";
+import { interestsFor, typesFor } from "../src/mapping.js";
+import { catalogNameVariants, matchAttraction, nameScore, normalizeName } from "../src/match.js";
+import { osmAddress, osmCommonsFile } from "../src/osm.js";
+import type { OsmPlace } from "../src/osm.js";
 import { shortenText } from "../src/wikimedia.js";
 import type { PhotoMetadata } from "../src/wikimedia.js";
 
@@ -31,10 +35,20 @@ describe("licences", () => {
 });
 
 describe("type and interest mapping", () => {
-  it("maps Wikidata classes to app types and interests", () => {
-    const types = appTypesFor(["Q33506", "Q22698", "Q2977"]);
-    expect(types).toEqual(["museum", "church", "park"]);
-    expect(interestsFor(types)).toEqual(["culture", "nature", "history"]);
+  it("maps catalog categories and OSM tags to app types and interests", () => {
+    expect(typesFor("Museum")).toEqual(["museum"]);
+    expect(typesFor("Park", { tourism: "zoo" })).toEqual(["park", "zoo"]);
+    expect(typesFor("Something new")).toEqual(["tourist_attraction"]);
+    expect(interestsFor(typesFor("Religious Site"))).toEqual(["history"]);
+    expect(interestsFor(["museum", "park"])).toEqual(["culture", "nature"]);
+  });
+
+  it("covers every category used in the catalog", () => {
+    const catalog = JSON.parse(readFileSync(new URL("../catalog.json", import.meta.url), "utf8")) as {
+      cities: Array<{ attractions: Array<{ category: string }> }>;
+    };
+    const used = new Set(catalog.cities.flatMap((c) => c.attractions.map((a) => a.category)));
+    expect([...used].filter((c) => !(c in CATEGORY_TYPES))).toEqual([]);
   });
 
   it("stays in sync with the Interest enum of the app", () => {
@@ -80,15 +94,20 @@ describe("photo selection", () => {
     expect(isUsablePhoto(meta({ mime: "image/svg+xml" }))).toBe(false);
   });
 
-  it("takes at most three photos and never reuses a file in the same city", () => {
+  it("keeps up to ten candidates, files used earlier in the city last", () => {
     const all = new Map(
-      [1, 2, 3, 4].map((id) => [`File:${id}.jpg`, meta({ fileTitle: `File:${id}.jpg`, pageId: id })]),
+      Array.from({ length: 12 }, (_, i) => i + 1)
+        .map((id) => [`File:${id}.jpg`, meta({ fileTitle: `File:${id}.jpg`, pageId: id })]),
     );
     const used = new Set<number>([2]);
     const chosen = choosePhotos([...all.keys()], all, used);
-    expect(chosen.map((p) => p.pageId)).toEqual([1, 3, 4]);
+    expect(chosen.map((p) => p.pageId)).toEqual([1, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
     expect(chosen[0].filePageUrl).toBe("https://commons.wikimedia.org/wiki/File%3A1.jpg");
+    // Only the default selection (first three) is reserved for this place.
     expect(used).toEqual(new Set([1, 2, 3, 4]));
+
+    const few = choosePhotos(["File:2.jpg", "File:12.jpg"], all, used);
+    expect(few.map((p) => p.pageId)).toEqual([12, 2]);
   });
 });
 
@@ -101,5 +120,71 @@ describe("description text", () => {
 
   it("cuts at a word boundary when the first sentence is too long", () => {
     expect(shortenText("A very long first sentence without any break", 20)).toBe("A very long first…");
+  });
+});
+
+const osm = (name: string, tags: Record<string, string> = {}, lat = 38.7, lng = -9.14): OsmPlace => ({
+  type: "way",
+  id: Math.floor(Math.random() * 1e6),
+  coordinates: { lat, lng },
+  tags: { name, ...tags },
+});
+
+describe("name matching", () => {
+  it("normalises accents, case and punctuation", () => {
+    expect(normalizeName("Praça do Comércio")).toBe("praca do comercio");
+    expect(normalizeName("St. Paul's Cathedral")).toBe("st pauls cathedral");
+    expect(normalizeName("Straße")).toBe("strasse");
+  });
+
+  it("splits catalog names into their variants", () => {
+    expect(catalogNameVariants("Grüngürtel (Cologne Green Belt)")).toEqual([
+      "grungurtel cologne green belt",
+      "grungurtel",
+      "cologne green belt",
+    ]);
+  });
+
+  it("accepts a longer name only when the extra words name the kind of place", () => {
+    expect(nameScore("sagrada familia", "basilica de la sagrada familia")).toBeGreaterThanOrEqual(0.85);
+    expect(nameScore("parque das nacoes", "teleferico do parque das nacoes")).toBeLessThan(0.85);
+    expect(nameScore("alfama", "alfama")).toBe(1);
+  });
+
+  it("finds the place by its English or local name and prefers the one with Wikidata", () => {
+    const center = { lat: 38.72, lng: -9.14 };
+    const places = [
+      osm("Torre de Belém", { "name:en": "Belém Tower" }),
+      osm("Torre de Belém", { "name:en": "Belém Tower", wikidata: "Q215003", tourism: "attraction" }),
+      osm("Teleférico do Parque das Nações"),
+    ];
+    expect(matchAttraction("Belém Tower (Torre de Belém)", places, center)?.place.tags.wikidata).toBe("Q215003");
+    expect(matchAttraction("Parque das Nações", places, center)).toBeNull();
+  });
+});
+
+describe("OSM tags", () => {
+  it("builds an address", () => {
+    expect(osmAddress({ "addr:street": "Rua Augusta", "addr:housenumber": "24", "addr:postcode": "1100-053", "addr:city": "Lisboa" }))
+      .toBe("Rua Augusta 24, 1100-053 Lisboa");
+    expect(osmAddress({})).toBeNull();
+  });
+
+  it("reads Commons files from wikimedia_commons and image tags", () => {
+    expect(osmCommonsFile({ wikimedia_commons: "File:Belem_Tower.jpg" })).toBe("File:Belem Tower.jpg");
+    expect(osmCommonsFile({ image: "https://commons.wikimedia.org/wiki/File:Torre_de_Bel%C3%A9m.jpg" })).toBe("File:Torre de Belém.jpg");
+    expect(osmCommonsFile({ wikimedia_commons: "Category:Belém Tower" })).toBeNull();
+  });
+});
+
+describe("request batching", () => {
+  it("splits long titles so URLs stay short", async () => {
+    const { urlSafeBatches } = await import("../src/wikimedia.js");
+    const thai = Array.from({ length: 30 }, (_, i) => `File:วัดพระศรีรัตนศาสดาราม ${i}.jpg`);
+    const batches = urlSafeBatches(thai, 50, 2000);
+    expect(batches.length).toBeGreaterThan(1);
+    expect(batches.flat()).toEqual(thai);
+    for (const b of batches) expect(encodeURIComponent(b.join("|")).length).toBeLessThan(2100);
+    expect(urlSafeBatches(["a", "b", "c"], 2, 1000)).toEqual([["a", "b"], ["c"]]);
   });
 });

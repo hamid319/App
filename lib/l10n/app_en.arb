@@ -478,5 +478,8 @@
   "calendarCityNotFound": "We couldn't recognise the city. Please pick it.",
   "tripDatesLabel": "Travel dates (optional)",
   "clearTripDates": "Remove dates",
-  "textSourceWikipedia": "Text: Wikipedia, CC BY-SA"
+  "textSourceWikipedia": "Text: Wikipedia, CC BY-SA",
+  "openingHoursLabel": "Opening hours",
+  "websiteLabel": "Website",
+  "osmAttribution": "Map data: © OpenStreetMap contributors"
 }

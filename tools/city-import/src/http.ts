@@ -12,6 +12,7 @@ const METADATA_HOSTS = new Set([
   "commons.wikimedia.org",
   "en.wikipedia.org",
   "de.wikipedia.org",
+  "overpass-api.de",
 ]);
 const MEDIA_HOSTS = new Set(["upload.wikimedia.org", "thumb.wikimedia.org"]);
 const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -44,10 +45,10 @@ export class WikimediaHttp {
     this.sleep = options.sleep ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
   }
 
-  async json<T>(url: URL, timeoutMs = 30_000): Promise<T> {
+  async json<T>(url: URL, timeoutMs = 30_000, maxBytes = 4 * 1024 * 1024): Promise<T> {
     assertHost(url, METADATA_HOSTS);
     const response = await this.request(url, { Accept: "application/json" }, timeoutMs);
-    const text = await readLimited(response, 4 * 1024 * 1024);
+    const text = await readLimited(response, maxBytes);
     try {
       return JSON.parse(text.toString("utf8")) as T;
     } catch {

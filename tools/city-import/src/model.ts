@@ -11,17 +11,27 @@
 export type Lang = "en" | "de";
 export type Localized = Partial<Record<Lang, string>>;
 
-/** One entry of cities.json: what the team decided to import. */
+/** One entry of cities.json: a city the team decided to offer. */
 export interface CityConfig {
   id: string;
-  wikidataId: string;
+  /** City id in catalog.json (the curated attraction list). */
+  catalogId: string;
   nameEn: string;
   nameDe: string;
   countryCode: string;
-  /** Overrides the defaults in config.ts for this city. */
+  lat: number;
+  lng: number;
+  /** Overrides DEFAULTS.radiusKm for this city. */
   radiusKm?: number;
-  targetPlaces?: number;
-  minSitelinks?: number;
+}
+
+/** One curated attraction from catalog.json. */
+export interface CatalogAttraction {
+  id: string;
+  number: number;
+  name: string;
+  category: string;
+  description: string;
 }
 
 export interface Coordinates {
@@ -44,9 +54,18 @@ export interface PhotoDraft {
 
 /** A place as collected; written to out/<cityId>.json for review. */
 export interface PlaceDraft {
+  /** wd_<QID> when the place has a Wikidata item, else osm_<type>_<id>. */
   id: string;
-  wikidataId: string;
+  wikidataId?: string;
   cityId: string;
+  /** Position in the curated catalog (1 = first). */
+  rank: number;
+  catalogName: string;
+  category: string;
+  osm?: { type: string; id: number; url: string };
+  address?: string;
+  openingHours?: string;
+  website?: string;
   names: Localized;
   descriptions: Localized;
   wikipediaUrls: Localized;
@@ -55,19 +74,24 @@ export interface PlaceDraft {
   types: string[];
   /** App interests derived from types, e.g. "culture", "nature". */
   interests: string[];
-  /** Number of Wikipedia language editions: our popularity signal. */
+  /** Higher = earlier in the curated catalog. */
   popularity: number;
   distanceKm: number;
+  /** Photo candidates, best guess first. publish takes the ones picked in
+   *  review (photo-picks.json), else the first DEFAULTS.photosPerPlace. */
   photos: PhotoDraft[];
 }
 
 export interface CityCollection {
-  city: CityConfig & { coordinates: Coordinates; countryQid: string };
+  city: CityConfig;
   collectedAt: string;
+  /** Size of the curated list for this city. */
   candidateCount: number;
+  /** How many catalog names were found on OpenStreetMap. */
+  osmMatched: number;
   places: PlaceDraft[];
-  /** Candidates dropped and why, for the report. */
-  skipped: Array<{ wikidataId: string; name: string; reason: string }>;
+  /** Catalog entries dropped and why, for the report. */
+  skipped: Array<{ rank: number; name: string; reason: string }>;
 }
 
 /** Stored photo, as read by the app's PhotoCredit (lib/common/models/photo_credit.dart). */
@@ -87,7 +111,9 @@ export interface StoredPhoto {
 /** places/{placeId}. Field names follow the app's PlaceModel. */
 export interface PlaceDoc {
   id: string;
+  /** "wikidata" for every curated place (also those found only on OSM), so rules treat them alike. */
   source: "wikidata";
+  /** Wikidata QID, or the OSM element ("way/123") when there is none. */
   sourceId: string;
   cityId: string;
   status: "active" | "hidden";
@@ -103,6 +129,11 @@ export interface PlaceDoc {
   types: string[];
   interests: string[];
   popularity: number;
+  address: string | null;
+  openingHours: string | null;
+  website: string | null;
+  /** OpenStreetMap element the facts come from; the app credits © OpenStreetMap. */
+  osmUrl: string | null;
   imageUrls: string[];
   photos: StoredPhoto[];
   importRunId: string;
@@ -112,7 +143,6 @@ export interface PlaceDoc {
 /** cities/{cityId}. */
 export interface CityDoc {
   id: string;
-  wikidataId: string;
   nameEn: string;
   nameDe: string;
   countryCode: string;

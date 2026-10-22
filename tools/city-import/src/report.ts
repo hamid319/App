@@ -1,12 +1,17 @@
 import type { CityCollection } from "./model.js";
+import { selectPhotos, type PhotoPicks } from "./picks.js";
 
 /** One self-contained HTML page to review all collected cities before publishing. */
-export function renderReport(collections: CityCollection[], excluded: Record<string, string[]>): string {
+export function renderReport(
+  collections: CityCollection[],
+  excluded: Record<string, string[]>,
+  picks: PhotoPicks = {},
+): string {
   const total = collections.reduce((sum, c) => sum + c.places.length, 0);
   const nav = collections
     .map((c) => `<a href="#${esc(c.city.id)}">${esc(c.city.nameDe)} <span>${c.places.length}</span></a>`)
     .join("");
-  const sections = collections.map((c) => renderCity(c, new Set(excluded[c.city.id] ?? []))).join("");
+  const sections = collections.map((c) => renderCity(c, new Set(excluded[c.city.id] ?? []), picks)).join("");
   return `<!doctype html>
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -32,36 +37,44 @@ code{font-size:12px;background:var(--bg);padding:1px 6px;border-radius:6px}
 details{margin-top:12px}summary{cursor:pointer;color:var(--muted)}
 </style></head><body>
 <header><h1>Import-Bericht</h1>
-<p class="muted">${collections.length} Städte · ${total} Orte · Orte, die nicht passen, mit ihrer Wikidata-ID in <code>exclusions.json</code> eintragen und neu berichten.</p>
+<p class="muted">${collections.length} Städte · ${total} Orte · Orte, die nicht passen, mit ihrer ID (z. B. <code>wd_Q123</code>) in <code>exclusions.json</code> eintragen und neu berichten.</p>
 <nav>${nav}</nav></header>
 <main>${sections}</main></body></html>`;
 }
 
-function renderCity(c: CityCollection, excluded: Set<string>): string {
+function renderCity(c: CityCollection, excluded: Set<string>, picks: PhotoPicks): string {
   const cards = c.places.map((p) => {
-    const [main, ...rest] = p.photos;
+    // The photos that would be published: picked in review, else the first candidates.
+    const selected = selectPhotos(p, picks);
+    const [main, ...rest] = selected;
     const img = (url: string) => `<img loading="lazy" src="${esc(url)}" alt="">`;
-    const credits = p.photos.map((ph) => `${esc(ph.creator)} (${esc(ph.licenseName)})`).join(" · ");
+    const credits = selected.map((ph) => `${esc(ph.creator)} (${esc(ph.licenseName)})`).join(" · ");
     const tags = [
       ...p.interests.map((i) => `<span class="tag i">${esc(i)}</span>`),
       ...p.types.map((t) => `<span class="tag">${esc(t)}</span>`),
     ].join("");
-    return `<article class="card${excluded.has(p.wikidataId) ? " excluded" : ""}">
+    const links = [
+      p.wikidataId ? `<a href="https://www.wikidata.org/wiki/${esc(p.wikidataId)}" target="_blank" rel="noopener">Wikidata</a>` : "",
+      p.osm ? `<a href="${esc(p.osm.url)}" target="_blank" rel="noopener">OSM</a>` : "",
+    ].filter(Boolean).join(" · ");
+    const facts = [p.address, p.openingHours ? `🕒 ${p.openingHours}` : ""].filter(Boolean).map((f) => esc(f!)).join("<br>");
+    return `<article class="card${excluded.has(p.id) ? " excluded" : ""}">
 <div class="photos">${main ? img(main.thumbnailUrl) : ""}<div class="side">${rest.map((r) => img(r.thumbnailUrl)).join("")}</div></div>
-<div class="body"><div class="name">${esc(p.names.de ?? p.names.en ?? p.wikidataId)}</div>
+<div class="body"><div class="name">${p.rank}. ${esc(p.names.de ?? p.names.en ?? p.catalogName)}</div>
 ${p.names.en && p.names.en !== p.names.de ? `<div class="muted">${esc(p.names.en)}</div>` : ""}
 <div class="tags">${tags}</div>
 <p>${esc(p.descriptions.de ?? p.descriptions.en ?? "— keine Beschreibung —")}</p>
-<div class="credit">Beliebtheit ${p.popularity} · ${p.distanceKm} km · <a href="https://www.wikidata.org/wiki/${esc(p.wikidataId)}" target="_blank" rel="noopener"><code>${esc(p.wikidataId)}</code></a></div>
+${facts ? `<div class="credit">${facts}</div>` : ""}
+<div class="credit">${p.distanceKm} km · ${links} · <code>${esc(p.id)}</code></div>
 <div class="credit">Fotos: ${credits}</div></div></article>`;
   }).join("");
   const skipped = c.skipped.length
-    ? `<details><summary>${c.skipped.length} Kandidaten ohne brauchbares Foto oder Namen</summary><p class="muted">${
-      c.skipped.map((s) => `${esc(s.name)} (${esc(s.wikidataId)}: ${esc(s.reason)})`).join(" · ")
+    ? `<details><summary>${c.skipped.length} Einträge aus dem Katalog nicht übernommen</summary><p class="muted">${
+      c.skipped.map((s) => `${s.rank}. ${esc(s.name)} (${esc(s.reason)})`).join(" · ")
     }</p></details>`
     : "";
   return `<section id="${esc(c.city.id)}"><h2>${esc(c.city.nameDe)}</h2>
-<p class="muted">${c.places.length} Orte aus ${c.candidateCount} Kandidaten · gesammelt ${esc(c.collectedAt.slice(0, 16).replace("T", " "))}</p>
+<p class="muted">${c.places.length} von ${c.candidateCount} Katalog-Orten · ${c.osmMatched} in OpenStreetMap gefunden · gesammelt ${esc(c.collectedAt.slice(0, 16).replace("T", " "))}</p>
 ${skipped}<div class="grid">${cards}</div></section>`;
 }
 

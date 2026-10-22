@@ -1,6 +1,8 @@
+import { BudgetExceeded } from "./budget.js";
 import { DEFAULTS } from "./config.js";
 import type { ProcessedImage } from "./images.js";
 import type { CityCollection, CityDoc, PlaceDoc, PlaceDraft, StoredPhoto } from "./model.js";
+import { selectPhotos, type PhotoPicks } from "./picks.js";
 import type { DataStore, PhotoStore } from "./stores.js";
 
 export interface PublishDeps {
@@ -8,8 +10,12 @@ export interface PublishDeps {
   data: DataStore;
   download: (url: string, maxBytes: number) => Promise<Buffer>;
   convert: (source: Buffer) => Promise<ProcessedImage>;
+  /** Photos picked in review (photo-picks.json); unpicked places use the first candidates. */
+  picks?: PhotoPicks;
   log?: (line: string) => void;
   now?: () => Date;
+  /** Throws BudgetExceeded before an upload would leave the R2 free tier. */
+  reserveUpload?: (bytes: number) => void;
 }
 
 export interface CityPublishResult {
@@ -29,7 +35,8 @@ export interface CityPublishResult {
  */
 export async function publishCity(
   collection: CityCollection,
-  excludedWikidataIds: ReadonlySet<string>,
+  /** Place ids (wd_Q123 / osm_way_456) the team removed after review. */
+  excludedIds: ReadonlySet<string>,
   importRunId: string,
   deps: PublishDeps,
 ): Promise<CityPublishResult> {
@@ -47,9 +54,9 @@ export async function publishCity(
 
   const docs: PlaceDoc[] = [];
   for (const draft of collection.places) {
-    if (excludedWikidataIds.has(draft.wikidataId)) continue;
+    if (excludedIds.has(draft.id)) continue;
     const photos: StoredPhoto[] = [];
-    for (const photo of draft.photos) {
+    for (const photo of selectPhotos(draft, deps.picks ?? {})) {
       const key = `places/${cityId}/${draft.id}/${photo.pageId}.webp`;
       try {
         let info = await deps.photos.head(key);
@@ -58,6 +65,7 @@ export async function publishCity(
         } else {
           const image = await deps.convert(await deps.download(photo.thumbnailUrl, DEFAULTS.maxImageBytes));
           info = { width: image.width, height: image.height, sha256: image.sha256 };
+          deps.reserveUpload?.(image.bytes.length);
           await deps.photos.put(key, image.bytes, info, {
             "commons-page-id": String(photo.pageId),
             license: photo.licenseName,
@@ -77,6 +85,7 @@ export async function publishCity(
           sha256: info.sha256,
         });
       } catch (error) {
+        if (error instanceof BudgetExceeded) throw error;
         log(`  photo skipped (${draft.id}, ${photo.fileTitle}): ${(error as Error).message}`);
       }
     }
@@ -100,12 +109,11 @@ export async function publishCity(
 
   const city: CityDoc = {
     id: cityId,
-    wikidataId: collection.city.wikidataId,
     nameEn: collection.city.nameEn,
     nameDe: collection.city.nameDe,
     countryCode: collection.city.countryCode,
-    lat: collection.city.coordinates.lat,
-    lng: collection.city.coordinates.lng,
+    lat: collection.city.lat,
+    lng: collection.city.lng,
     placeCount: docs.length,
     status: "active",
     importRunId,
@@ -121,10 +129,10 @@ export function toPlaceDoc(draft: PlaceDraft, photos: StoredPhoto[], importRunId
   return {
     id: draft.id,
     source: "wikidata",
-    sourceId: draft.wikidataId,
+    sourceId: draft.wikidataId ?? `${draft.osm?.type}/${draft.osm?.id}`,
     cityId: draft.cityId,
     status: "active",
-    name: draft.names.en ?? draft.names.de ?? draft.wikidataId,
+    name: draft.names.en ?? draft.names.de ?? draft.catalogName,
     description: draft.descriptions.en ?? draft.descriptions.de ?? null,
     names: draft.names,
     descriptions: draft.descriptions,
@@ -134,6 +142,10 @@ export function toPlaceDoc(draft: PlaceDraft, photos: StoredPhoto[], importRunId
     types: draft.types,
     interests: draft.interests,
     popularity: draft.popularity,
+    address: draft.address ?? null,
+    openingHours: draft.openingHours ?? null,
+    website: draft.website ?? null,
+    osmUrl: draft.osm?.url ?? null,
     imageUrls: photos.map((photo) => photo.publicUrl),
     photos,
     importRunId,

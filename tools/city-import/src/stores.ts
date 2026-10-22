@@ -1,7 +1,7 @@
 // Where publish writes: Cloudflare R2 for photos, Firestore for data.
 // Both behind small interfaces so publish can be tested with fakes.
 
-import { HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { HeadObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { Firestore } from "firebase-admin/firestore";
 import type { CityDoc, PlaceDoc } from "./model.js";
 
@@ -68,6 +68,21 @@ export class R2PhotoStore implements PhotoStore {
       CacheControl: "public, max-age=31536000, immutable",
       Metadata: { ...meta, sha256: info.sha256, width: String(info.width), height: String(info.height) },
     }));
+  }
+
+  /** Total size of all objects in the bucket (one list call per 1000 objects). */
+  async totalBytes(): Promise<number> {
+    let total = 0;
+    let token: string | undefined;
+    do {
+      const page = await this.client.send(new ListObjectsV2Command({
+        Bucket: this.settings.bucket,
+        ContinuationToken: token,
+      }));
+      for (const object of page.Contents ?? []) total += object.Size ?? 0;
+      token = page.IsTruncated ? page.NextContinuationToken : undefined;
+    } while (token);
+    return total;
   }
 
   publicUrl(key: string): string {

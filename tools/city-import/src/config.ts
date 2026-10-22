@@ -1,15 +1,13 @@
 export const USER_AGENT =
   "SwipeTrip-CityImport/1.0 (https://github.com/hamid319/App; curated city import)";
 
-/** Defaults; cities.json can override radiusKm, targetPlaces and minSitelinks per city. */
+/** Defaults; cities.json can override radiusKm per city. */
 export const DEFAULTS = Object.freeze({
-  radiusKm: 15,
-  targetPlaces: 60,
-  /** Candidates kept per city before photos are checked. */
-  candidateLimit: 250,
-  /** Minimum Wikipedia language editions: filters out obscure places. */
-  minSitelinks: 3,
+  /** Catalog places farther than this from the city centre are not matched. */
+  radiusKm: 25,
   photosPerPlace: 3,
+  /** Usable photos kept per place for the review to choose from. */
+  photoCandidates: 10,
   /** Commons files smaller than this are skipped (blurry on a phone). */
   minLongEdge: 800,
   minShortEdge: 500,
@@ -20,51 +18,30 @@ export const DEFAULTS = Object.freeze({
 });
 
 /**
- * Wikidata classes we search for, each mapped to the app's place type
- * (the strings Interest in lib/common/models/interest.dart understands).
- * Order is the tie-breaker when a place matches several classes.
+ * App place types for the catalog's categories (strings the Interest enum
+ * in lib/common/models/interest.dart understands).
  */
-export const DISCOVERY_CLASSES: ReadonlyArray<{ qid: string; label: string; appType: string }> = [
-  { qid: "Q33506", label: "museum", appType: "museum" },
-  { qid: "Q1007870", label: "art gallery", appType: "art_gallery" },
-  { qid: "Q24354", label: "theatre", appType: "performing_arts_theater" },
-  { qid: "Q23413", label: "castle", appType: "historical_landmark" },
-  { qid: "Q16560", label: "palace", appType: "historical_landmark" },
-  { qid: "Q839954", label: "archaeological site", appType: "historical_landmark" },
-  { qid: "Q57821", label: "fortification", appType: "historical_landmark" },
-  { qid: "Q44613", label: "monastery", appType: "historical_landmark" },
-  { qid: "Q4989906", label: "monument", appType: "monument" },
-  { qid: "Q2977", label: "cathedral", appType: "church" },
-  { qid: "Q16970", label: "church", appType: "church" },
-  { qid: "Q32815", label: "mosque", appType: "church" },
-  { qid: "Q34627", label: "synagogue", appType: "church" },
-  { qid: "Q44539", label: "temple", appType: "church" },
-  { qid: "Q12280", label: "bridge", appType: "landmark" },
-  { qid: "Q12518", label: "tower", appType: "landmark" },
-  { qid: "Q174782", label: "square", appType: "landmark" },
-  { qid: "Q22698", label: "park", appType: "park" },
-  { qid: "Q1107656", label: "garden", appType: "garden" },
-  { qid: "Q6017969", label: "viewpoint", appType: "viewpoint" },
-  { qid: "Q40080", label: "beach", appType: "beach" },
-  { qid: "Q43501", label: "zoo", appType: "zoo" },
-  { qid: "Q2281788", label: "aquarium", appType: "aquarium" },
-  { qid: "Q194195", label: "amusement park", appType: "amusement_park" },
-  { qid: "Q132510", label: "market", appType: "market" },
-  { qid: "Q570116", label: "tourist attraction", appType: "tourist_attraction" },
-];
+export const CATEGORY_TYPES: Readonly<Record<string, ReadonlyArray<string>>> = {
+  "Museum": ["museum"],
+  "Gallery": ["art_gallery"],
+  "Historic Site": ["historical_landmark"],
+  "Religious Site": ["church"],
+  "Monument": ["monument"],
+  "Park": ["park"],
+  "Garden": ["garden"],
+  "Viewpoint": ["viewpoint"],
+  "Natural Scenery": ["natural_feature"],
+};
 
-/** Never imported even when they match a class above (businesses). */
-export const EXCLUDED_CLASSES: ReadonlyArray<string> = [
-  "Q213441", // shop
-  "Q11707", // restaurant
-  "Q30022", // cafe
-  "Q187456", // bar
-  "Q27686", // hotel
-  "Q11315", // shopping mall
-  "Q3914", // school
-  "Q3918", // university
-  "Q16917", // hospital
-  "Q55488", // railway station
+/** Extra app types from OSM tags, e.g. a park that is also a zoo. */
+export const OSM_TAG_TYPES: ReadonlyArray<{ key: string; value: string; type: string }> = [
+  { key: "tourism", value: "zoo", type: "zoo" },
+  { key: "tourism", value: "aquarium", type: "aquarium" },
+  { key: "tourism", value: "theme_park", type: "amusement_park" },
+  { key: "tourism", value: "viewpoint", type: "viewpoint" },
+  { key: "natural", value: "beach", type: "beach" },
+  { key: "amenity", value: "marketplace", type: "market" },
+  { key: "amenity", value: "theatre", type: "performing_arts_theater" },
 ];
 
 /**

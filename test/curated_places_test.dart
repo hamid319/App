@@ -53,6 +53,22 @@ void main() {
       expect(place.wikipediaUrlFor('fr'), contains('en.wikipedia.org'));
     });
 
+    test('reads opening hours, website and the OSM source', () {
+      final osm = PlaceModel.fromJson({
+        ..._curated('wd_Q5'),
+        'openingHours': 'Tu-Su 10:00-18:00',
+        'website': 'https://torre.example/',
+        'osmUrl': 'https://www.openstreetmap.org/way/11',
+        'address': 'Avenida Brasília, Lisboa',
+      });
+      expect(osm.openingHours, 'Tu-Su 10:00-18:00');
+      expect(osm.website, 'https://torre.example/');
+      expect(osm.osmUrl, contains('openstreetmap.org'));
+      expect(osm.address, 'Avenida Brasília, Lisboa');
+      expect(place.openingHours, isNull);
+      expect(place.osmUrl, isNull);
+    });
+
     test('older documents without languages still work', () {
       final legacy =
           PlaceModel.fromJson({'id': 'p', 'name': 'Park', 'lat': 0, 'lng': 0});

@@ -34,6 +34,14 @@ class PlaceModel {
   /// The text is CC BY-SA, so the app links its source.
   final Map<String, String> wikipediaUrls;
 
+  /// OpenStreetMap opening_hours value, e.g. "Tu-Su 10:00-18:00".
+  final String? openingHours;
+  final String? website;
+
+  /// OpenStreetMap element the facts come from (address, hours); the
+  /// app must credit "© OpenStreetMap contributors" (ODbL).
+  final String? osmUrl;
+
   const PlaceModel({
     required this.id,
     required this.name,
@@ -51,6 +59,9 @@ class PlaceModel {
     this.names = const {},
     this.descriptions = const {},
     this.wikipediaUrls = const {},
+    this.openingHours,
+    this.website,
+    this.osmUrl,
   });
 
   /// Name in [languageCode], else the default name.
@@ -118,7 +129,13 @@ class PlaceModel {
         names: _stringMap(json['names']),
         descriptions: _stringMap(json['descriptions']),
         wikipediaUrls: _stringMap(json['wikipediaUrls']),
+        openingHours: _text(json['openingHours']),
+        website: _text(json['website']),
+        osmUrl: _text(json['osmUrl']),
       );
+
+  static String? _text(Object? value) =>
+      value is String && value.trim().isNotEmpty ? value.trim() : null;
 
   static Map<String, String> _stringMap(Object? value) {
     if (value is! Map) return const {};

@@ -9,6 +9,7 @@
   "scripts": {
     "collect": "tsx src/cli.ts collect",
     "report": "tsx src/cli.ts report",
+    "review": "tsx src/cli.ts review",
     "publish": "tsx src/cli.ts publish",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",

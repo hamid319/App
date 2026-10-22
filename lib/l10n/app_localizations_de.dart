@@ -1147,4 +1147,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get textSourceWikipedia => 'Text: Wikipedia, CC BY-SA';
+
+  @override
+  String get openingHoursLabel => 'Öffnungszeiten';
+
+  @override
+  String get websiteLabel => 'Website';
+
+  @override
+  String get osmAttribution => 'Kartendaten: © OpenStreetMap-Mitwirkende';
 }

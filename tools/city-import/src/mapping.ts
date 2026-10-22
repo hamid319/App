@@ -1,11 +1,10 @@
-import { DISCOVERY_CLASSES, INTEREST_TYPES } from "./config.js";
+import { CATEGORY_TYPES, INTEREST_TYPES, OSM_TAG_TYPES } from "./config.js";
 
-/** App place types for the Wikidata classes a place matched, in config order. */
-export function appTypesFor(classQids: Iterable<string>): string[] {
-  const matched = new Set(classQids);
-  const types: string[] = [];
-  for (const entry of DISCOVERY_CLASSES) {
-    if (matched.has(entry.qid) && !types.includes(entry.appType)) types.push(entry.appType);
+/** App place types for a catalog category plus what the OSM tags add. */
+export function typesFor(category: string, osmTags: Record<string, string> = {}): string[] {
+  const types = [...(CATEGORY_TYPES[category] ?? ["tourist_attraction"])];
+  for (const { key, value, type } of OSM_TAG_TYPES) {
+    if (osmTags[key] === value && !types.includes(type)) types.push(type);
   }
   return types;
 }
