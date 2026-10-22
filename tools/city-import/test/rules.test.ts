@@ -8,7 +8,7 @@ import { interestsFor, typesFor } from "../src/mapping.js";
 import { catalogNameVariants, matchAttraction, nameScore, normalizeName } from "../src/match.js";
 import { osmAddress, osmCommonsFile } from "../src/osm.js";
 import type { OsmPlace } from "../src/osm.js";
-import { shortenText, stripPronunciation } from "../src/wikimedia.js";
+import { shortenText, splitSentences, stripPronunciation } from "../src/wikimedia.js";
 import type { PhotoMetadata } from "../src/wikimedia.js";
 
 describe("licences", () => {
@@ -120,6 +120,19 @@ describe("description text", () => {
 
   it("cuts at a word boundary when the first sentence is too long", () => {
     expect(shortenText("A very long first sentence without any break", 20)).toBe("A very long first…");
+  });
+
+  it("does not end sentences at ordinals, Roman numerals or abbreviations", () => {
+    const text = "Die Schule entstand im 19. Jahrhundert unter Karl IV. als Neubau. Sie liegt z. B. am 29. Mai offen. Danach folgt viel mehr Text.";
+    expect(shortenText(text, 100)).toBe("Die Schule entstand im 19. Jahrhundert unter Karl IV. als Neubau. Sie liegt z. B. am 29. Mai offen.");
+    expect(shortenText("Built in 1755. Rebuilt later by St. John and others in the next years.", 30)).toBe("Built in 1755.");
+  });
+
+  it("keeps closing quotes with their sentence", () => {
+    expect(splitSentences('Er hieß „der Pate.“ Danach kam mehr.')).toEqual({
+      sentences: ["Er hieß „der Pate.“", " Danach kam mehr."],
+      rest: "",
+    });
   });
 
   it("removes pronunciations in brackets and the punctuation they leave", () => {

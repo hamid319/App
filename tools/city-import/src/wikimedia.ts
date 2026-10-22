@@ -303,11 +303,30 @@ export function stripPronunciation(text: string): string {
     .trim();
 }
 
+// A period after these does not end a sentence: ordinals ("am 29. Mai",
+// "im 19. Jahrhundert"), Roman numerals ("Karl IV."), single letters and
+// abbreviations ("z. B.", "St.", "e.g.").
+const NO_SENTENCE_END =
+  /(?:^|[\s(„"'])(?:\d{1,2}|[IVXLC]+|[A-Za-zÄÖÜäöü]|(?:[A-Za-z]\.)+[A-Za-z]|bzw|ca|Chr|St|Dr|Jh|Jhd|Nr|vgl|sog|geb|gest|Hl|hl|Mio|Mrd|Str|Mt|Jr|Mr|Mrs|Ms)\.$/;
+
+/** Complete sentences, and the unfinished rest after the last one. */
+export function splitSentences(text: string): { sentences: string[]; rest: string } {
+  const sentences: string[] = [];
+  let start = 0;
+  for (const match of text.matchAll(/[.!?]+["“”»']*(?=\s|$)/g)) {
+    const end = match.index + match[0].length;
+    if (match[0] === "." && NO_SENTENCE_END.test(text.slice(start, end))) continue;
+    sentences.push(text.slice(start, end));
+    start = end;
+  }
+  return { sentences, rest: text.slice(start) };
+}
+
 /** Whole sentences up to [maxChars]; falls back to a word boundary. */
 export function shortenText(text: string, maxChars: number): string {
   const clean = plainText(text);
   if (clean.length <= maxChars) return clean;
-  const sentences = clean.match(/[^.!?]+[.!?]+(\s|$)/g) ?? [];
+  const { sentences } = splitSentences(clean);
   let out = "";
   for (const sentence of sentences) {
     if ((out + sentence).trim().length > maxChars) break;
