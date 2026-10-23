@@ -1162,4 +1162,82 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get openingHoursEaster => 'Easter';
+
+  @override
+  String get reviewsTitle => 'Reviews';
+
+  @override
+  String get reviewsNone => 'No reviews yet.';
+
+  @override
+  String get reviewsFew =>
+      'Only a few reviews so far. The average appears from 3 reviews.';
+
+  @override
+  String reviewsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reviews',
+      one: '1 review',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewWrite => 'Write a review';
+
+  @override
+  String get reviewEdit => 'Edit your review';
+
+  @override
+  String get reviewSignInToWrite => 'Sign in to write a review';
+
+  @override
+  String get reviewSheetTitle => 'Your review';
+
+  @override
+  String get reviewTextHint => 'What did you like? (optional)';
+
+  @override
+  String get reviewRatingRequired => 'Choose 1 to 5 stars.';
+
+  @override
+  String get reviewSaved => 'Thanks for your review!';
+
+  @override
+  String get reviewDeleted => 'Review deleted.';
+
+  @override
+  String get reviewDeleteButton => 'Delete review';
+
+  @override
+  String get reviewReport => 'Report';
+
+  @override
+  String get reviewReportTitle => 'Report this review?';
+
+  @override
+  String get reviewReportBody =>
+      'The text will be hidden until we have checked it.';
+
+  @override
+  String get reviewReported => 'Thanks. The review is hidden for now.';
+
+  @override
+  String get reviewAnonymousAuthor => 'Anonymous';
+
+  @override
+  String get reviewYou => 'You';
+
+  @override
+  String reviewStarsLabel(int stars) {
+    return '$stars of 5 stars';
+  }
+
+  @override
+  String get errorSaveReview => 'Your review could not be saved.';
+
+  @override
+  String get errorLoadReviews => 'Reviews could not be loaded.';
 }

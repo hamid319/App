@@ -1187,4 +1187,83 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get openingHoursEaster => 'Ostern';
+
+  @override
+  String get reviewsTitle => 'Bewertungen';
+
+  @override
+  String get reviewsNone => 'Noch keine Bewertungen.';
+
+  @override
+  String get reviewsFew =>
+      'Bisher nur wenige Bewertungen. Der Durchschnitt erscheint ab 3 Bewertungen.';
+
+  @override
+  String reviewsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Bewertungen',
+      one: '1 Bewertung',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewWrite => 'Bewerten';
+
+  @override
+  String get reviewEdit => 'Deine Bewertung bearbeiten';
+
+  @override
+  String get reviewSignInToWrite => 'Melde dich an, um zu bewerten';
+
+  @override
+  String get reviewSheetTitle => 'Deine Bewertung';
+
+  @override
+  String get reviewTextHint => 'Was hat dir gefallen? (optional)';
+
+  @override
+  String get reviewRatingRequired => 'Wähle 1 bis 5 Sterne.';
+
+  @override
+  String get reviewSaved => 'Danke für deine Bewertung!';
+
+  @override
+  String get reviewDeleted => 'Bewertung gelöscht.';
+
+  @override
+  String get reviewDeleteButton => 'Bewertung löschen';
+
+  @override
+  String get reviewReport => 'Melden';
+
+  @override
+  String get reviewReportTitle => 'Diese Bewertung melden?';
+
+  @override
+  String get reviewReportBody =>
+      'Der Text wird ausgeblendet, bis wir ihn geprüft haben.';
+
+  @override
+  String get reviewReported => 'Danke. Die Bewertung ist vorerst ausgeblendet.';
+
+  @override
+  String get reviewAnonymousAuthor => 'Anonym';
+
+  @override
+  String get reviewYou => 'Du';
+
+  @override
+  String reviewStarsLabel(int stars) {
+    return '$stars von 5 Sternen';
+  }
+
+  @override
+  String get errorSaveReview =>
+      'Deine Bewertung konnte nicht gespeichert werden.';
+
+  @override
+  String get errorLoadReviews => 'Bewertungen konnten nicht geladen werden.';
 }

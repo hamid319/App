@@ -16,6 +16,28 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid in groupData.members;
     }
 
+    // Signed in with an account, not as a guest (anonymous auth).
+    function isRegistered() {
+      return isAuthenticated()
+             && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+
+    // Shape of places/{placeId}/reviews/{uid}; text length matches
+    // PlaceReview.maxTextLength.
+    function isValidReview(placeId, uid) {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['uid', 'placeId', 'rating', 'text', 'authorName',
+                                  'language', 'hidden', 'createdAt', 'updatedAt'])
+             && data.uid == uid
+             && data.placeId == placeId
+             && data.rating is int && data.rating >= 1 && data.rating <= 5
+             && data.text is string && data.text.size() <= 500
+             && data.authorName is string && data.authorName.size() <= 80
+             && data.language is string && data.language.size() <= 8
+             && data.hidden is bool
+             && data.updatedAt == request.time;
+    }
+
     function groupData(groupId) {
       return get(/databases/$(database)/documents/groups/$(groupId)).data;
     }
@@ -47,6 +69,39 @@ service cloud.firestore {
                     && request.resource.data.get('source', '') != 'wikidata';
       allow delete: if isAuthenticated()
                     && resource.data.get('source', '') != 'wikidata';
+
+      // One review per signed-in (non-guest) user, under their uid. Others
+      // may only hide a review by reporting it; moderators clear the flag
+      // or delete the review in the Firebase console.
+      match /reviews/{uid} {
+        allow read: if isAuthenticated();
+        allow create: if isRegistered()
+                      && request.auth.uid == uid
+                      && isValidReview(placeId, uid)
+                      && request.resource.data.hidden == false;
+        allow update: if isRegistered() && (
+          (
+            request.auth.uid == uid
+            && isValidReview(placeId, uid)
+            && request.resource.data.hidden == resource.data.hidden
+            && request.resource.data.createdAt == resource.data.createdAt
+          ) ||
+          (
+            request.auth.uid != uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hidden'])
+            && request.resource.data.hidden == true
+          )
+        );
+        allow delete: if isRegistered() && request.auth.uid == uid;
+
+        // Reports are read only in the console.
+        match /reports/{reporterUid} {
+          allow create: if isRegistered()
+                        && request.auth.uid == reporterUid
+                        && reporterUid != uid
+                        && request.resource.data.keys().hasOnly(['createdAt']);
+        }
+      }
     }
 
     // Curated cities, written only by the import tool. importRuns has no

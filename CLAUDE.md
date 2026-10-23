@@ -71,6 +71,9 @@ Env.googlePlacesApiKey  // loaded from .env via flutter_dotenv
                        curated (tools/city-import): id wd_<QID> or osm_<type>_<id>, source 'wikidata', cityId, status,
                        names/descriptions/wikipediaUrls per language, interests, popularity,
                        address/openingHours/website/osmUrl (OpenStreetMap, ODbL: credit it in the UI)
+  /reviews/{uid}       rating 1-5, text ≤500, authorName, language, hidden, createdAt, updatedAt
+                       (signed-in non-guests only; a report sets hidden=true, moderate in the console)
+    /reports/{uid}     createdAt (write-only for clients)
 /cities/{cityId}       curated cities (read-only for clients); cityId = PopularCity id
                        prompts: [{kind, text: {en, de}}]   (prompt tiles; kinds in PlacePromptKind)
                        photos: [{publicUrl, creator, licenseName, licenseUrl, commonsFilePageUrl}]  (Wikidata pipeline)

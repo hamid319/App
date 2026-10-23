@@ -18,6 +18,7 @@ import '../../swipe/data/places_repository.dart';
 import '../../swipe/logic/swipe_controller.dart';
 import '../widgets/maps_app_sheet.dart';
 import '../widgets/photo_credits.dart';
+import '../widgets/place_reviews_section.dart';
 import '../widgets/prompt_tile.dart';
 
 final placeDetailProvider =
@@ -275,6 +276,8 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
                     const SizedBox(height: AppSizes.groupGap),
                     _PlaceFacts(place: place),
                   ],
+                  const SizedBox(height: AppSizes.groupGap),
+                  PlaceReviewsSection(placeId: place.id),
                   if (place.osmUrl != null) ...[
                     const SizedBox(height: AppSizes.space16),
                     _TextSource(

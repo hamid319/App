@@ -2239,6 +2239,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Easter'**
   String get openingHoursEaster;
+
+  /// No description provided for @reviewsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews'**
+  String get reviewsTitle;
+
+  /// No description provided for @reviewsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews yet.'**
+  String get reviewsNone;
+
+  /// No description provided for @reviewsFew.
+  ///
+  /// In en, this message translates to:
+  /// **'Only a few reviews so far. The average appears from 3 reviews.'**
+  String get reviewsFew;
+
+  /// No description provided for @reviewsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 review} other{{count} reviews}}'**
+  String reviewsCount(int count);
+
+  /// No description provided for @reviewWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a review'**
+  String get reviewWrite;
+
+  /// No description provided for @reviewEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit your review'**
+  String get reviewEdit;
+
+  /// No description provided for @reviewSignInToWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to write a review'**
+  String get reviewSignInToWrite;
+
+  /// No description provided for @reviewSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your review'**
+  String get reviewSheetTitle;
+
+  /// No description provided for @reviewTextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What did you like? (optional)'**
+  String get reviewTextHint;
+
+  /// No description provided for @reviewRatingRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose 1 to 5 stars.'**
+  String get reviewRatingRequired;
+
+  /// No description provided for @reviewSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for your review!'**
+  String get reviewSaved;
+
+  /// No description provided for @reviewDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Review deleted.'**
+  String get reviewDeleted;
+
+  /// No description provided for @reviewDeleteButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete review'**
+  String get reviewDeleteButton;
+
+  /// No description provided for @reviewReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get reviewReport;
+
+  /// No description provided for @reviewReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report this review?'**
+  String get reviewReportTitle;
+
+  /// No description provided for @reviewReportBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The text will be hidden until we have checked it.'**
+  String get reviewReportBody;
+
+  /// No description provided for @reviewReported.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks. The review is hidden for now.'**
+  String get reviewReported;
+
+  /// No description provided for @reviewAnonymousAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous'**
+  String get reviewAnonymousAuthor;
+
+  /// No description provided for @reviewYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get reviewYou;
+
+  /// No description provided for @reviewStarsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{stars} of 5 stars'**
+  String reviewStarsLabel(int stars);
+
+  /// No description provided for @errorSaveReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Your review could not be saved.'**
+  String get errorSaveReview;
+
+  /// No description provided for @errorLoadReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews could not be loaded.'**
+  String get errorLoadReviews;
 }
 
 class _AppLocalizationsDelegate

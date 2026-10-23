@@ -491,5 +491,41 @@
   "openingHoursSchoolHolidays": "school holidays",
   "openingHoursSunrise": "sunrise",
   "openingHoursSunset": "sunset",
-  "openingHoursEaster": "Easter"
+  "openingHoursEaster": "Easter",
+  "reviewsTitle": "Reviews",
+  "reviewsNone": "No reviews yet.",
+  "reviewsFew": "Only a few reviews so far. The average appears from 3 reviews.",
+  "reviewsCount": "{count, plural, =1{1 review} other{{count} reviews}}",
+  "@reviewsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewWrite": "Write a review",
+  "reviewEdit": "Edit your review",
+  "reviewSignInToWrite": "Sign in to write a review",
+  "reviewSheetTitle": "Your review",
+  "reviewTextHint": "What did you like? (optional)",
+  "reviewRatingRequired": "Choose 1 to 5 stars.",
+  "reviewSaved": "Thanks for your review!",
+  "reviewDeleted": "Review deleted.",
+  "reviewDeleteButton": "Delete review",
+  "reviewReport": "Report",
+  "reviewReportTitle": "Report this review?",
+  "reviewReportBody": "The text will be hidden until we have checked it.",
+  "reviewReported": "Thanks. The review is hidden for now.",
+  "reviewAnonymousAuthor": "Anonymous",
+  "reviewYou": "You",
+  "reviewStarsLabel": "{stars} of 5 stars",
+  "@reviewStarsLabel": {
+    "placeholders": {
+      "stars": {
+        "type": "int"
+      }
+    }
+  },
+  "errorSaveReview": "Your review could not be saved.",
+  "errorLoadReviews": "Reviews could not be loaded."
 }

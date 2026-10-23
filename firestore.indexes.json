@@ -32,6 +32,14 @@
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "popularity", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "reviews",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "hidden", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []
