@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -9,9 +11,9 @@ plugins {
 }
 
 // Maps SDK key from local.properties (git-ignored), never from the repo.
-val localProperties = java.util.Properties().apply {
+val localProperties = Properties().apply {
     val file = rootProject.file("local.properties")
-    if (file.exists()) file.inputStream().use { load(it) }
+    if (file.exists()) file.inputStream().use { this.load(it) }
 }
 
 android {

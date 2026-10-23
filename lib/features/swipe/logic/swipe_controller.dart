@@ -110,7 +110,12 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
       // used to clear the favorites that had already loaded fine.
       try {
         final userProfile = await _profileRepo.getUserProfile(userId);
-        _favorites.addAll(userProfile.favorites);
+        // Replace rather than append: build() can run again while an
+        // earlier run is still awaiting (city, group and auth all trigger
+        // it), and appending then counted every favorite several times.
+        _favorites
+          ..clear()
+          ..addAll(userProfile.favorites.toSet());
       } catch (e) {
         debugPrint('Loading favorites failed: $e');
       }
