@@ -2371,6 +2371,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reviews could not be loaded.'**
   String get errorLoadReviews;
+
+  /// No description provided for @favoritesMapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get favoritesMapTitle;
+
+  /// No description provided for @favoritesShowMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Show on map'**
+  String get favoritesShowMap;
+
+  /// No description provided for @favoritesMapEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Your favorites will appear here as pins.'**
+  String get favoritesMapEmpty;
+
+  /// No description provided for @mapsNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'The map is not set up in this build yet (Google Maps key missing).'**
+  String get mapsNotConfigured;
 }
 
 class _AppLocalizationsDelegate

@@ -82,3 +82,6 @@ implementation_plan.md
 .env*
 !.env.example
 .worktrees/
+
+# Google Maps SDK keys (see ios/Flutter/Secrets.xcconfig.example)
+ios/Flutter/Secrets.xcconfig

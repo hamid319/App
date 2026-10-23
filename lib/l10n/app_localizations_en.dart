@@ -1240,4 +1240,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorLoadReviews => 'Reviews could not be loaded.';
+
+  @override
+  String get favoritesMapTitle => 'Map';
+
+  @override
+  String get favoritesShowMap => 'Show on map';
+
+  @override
+  String get favoritesMapEmpty => 'Your favorites will appear here as pins.';
+
+  @override
+  String get mapsNotConfigured =>
+      'The map is not set up in this build yet (Google Maps key missing).';
 }

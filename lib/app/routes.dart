@@ -5,6 +5,7 @@ import '../features/onboarding/ui/onboarding_screen.dart';
 import '../features/auth/ui/login_screen.dart';
 import '../features/auth/ui/register_screen.dart';
 import '../features/home/ui/simplified_home_screen.dart';
+import '../features/home/ui/favorites_map_screen.dart';
 import '../features/home/ui/favorites_screen.dart';
 import '../features/swipe/ui/swipe_screen.dart';
 import '../features/places/ui/place_detail_screen.dart';
@@ -84,6 +85,14 @@ GoRouter createRouter(Ref ref) {
       ),
       // Full-screen, outside the shell: the photo uses the whole screen and
       // the bottom bar is the page's own action bar.
+      GoRoute(
+        path: '/favorites-map',
+        builder: (ctx, state) => const AccountGate(
+          reason: GateReason.favorites,
+          icon: Icons.map_outlined,
+          child: FavoritesMapScreen(),
+        ),
+      ),
       GoRoute(
         path: '/place/:id',
         builder: (ctx, state) => const PlaceDetailScreen(),

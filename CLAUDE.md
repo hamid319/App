@@ -48,16 +48,17 @@ routerProvider           // Provider<GoRouter>
 /onboarding   /login   /register
 /home         /swipe/:groupId   /place/:id
 /group        /group/join?groupId=&code=   /group-matches/:groupId
-/profile      /settings   /favorites
+/profile      /settings   /favorites   /favorites-map
 ```
 - Always use `context.go()` or `context.push()`. Never `Navigator.push()`.
 - New routes go in `app/routes.dart` only. Path format: lowercase kebab-case.
 
 ## Env / secrets
 ```dart
-Env.googlePlacesApiKey  // loaded from .env via flutter_dotenv
+Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so empty in builds
 ```
-- Never hardcode API keys or base URLs in `.dart` files.
+- Never hardcode API keys or base URLs in `.dart` files. Never add `.env` to pubspec assets (bundled files can be extracted).
+- Google Maps SDK key: iOS `ios/Flutter/Secrets.xcconfig`, Android `android/local.properties` (`MAPS_API_KEY`), both git-ignored.
 - App-wide constants → `AppConfig` / `core/constants/`.
 
 ## Firestore structure (short form)

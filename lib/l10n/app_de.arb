@@ -378,5 +378,9 @@
   "reviewYou": "Du",
   "reviewStarsLabel": "{stars} von 5 Sternen",
   "errorSaveReview": "Deine Bewertung konnte nicht gespeichert werden.",
-  "errorLoadReviews": "Bewertungen konnten nicht geladen werden."
+  "errorLoadReviews": "Bewertungen konnten nicht geladen werden.",
+  "favoritesMapTitle": "Karte",
+  "favoritesShowMap": "Auf der Karte zeigen",
+  "favoritesMapEmpty": "Deine Favoriten erscheinen hier als Pins.",
+  "mapsNotConfigured": "Die Karte ist in dieser Version noch nicht eingerichtet (Google-Maps-Schlüssel fehlt)."
 }

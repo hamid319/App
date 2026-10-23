@@ -527,5 +527,9 @@
     }
   },
   "errorSaveReview": "Your review could not be saved.",
-  "errorLoadReviews": "Reviews could not be loaded."
+  "errorLoadReviews": "Reviews could not be loaded.",
+  "favoritesMapTitle": "Map",
+  "favoritesShowMap": "Show on map",
+  "favoritesMapEmpty": "Your favorites will appear here as pins.",
+  "mapsNotConfigured": "The map is not set up in this build yet (Google Maps key missing)."
 }

@@ -45,6 +45,12 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
       appBar: AppBar(
         title: Text(l10n.navFavorites),
         actions: [
+          if (ids.isNotEmpty)
+            IconButton(
+              tooltip: l10n.favoritesShowMap,
+              icon: const Icon(Icons.map_outlined),
+              onPressed: () => context.push('/favorites-map'),
+            ),
           // Destructive reset lives behind a menu here rather than as a
           // one-tap red button on the Discover screen.
           PopupMenuButton<String>(

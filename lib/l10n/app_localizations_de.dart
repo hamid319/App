@@ -1266,4 +1266,17 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get errorLoadReviews => 'Bewertungen konnten nicht geladen werden.';
+
+  @override
+  String get favoritesMapTitle => 'Karte';
+
+  @override
+  String get favoritesShowMap => 'Auf der Karte zeigen';
+
+  @override
+  String get favoritesMapEmpty => 'Deine Favoriten erscheinen hier als Pins.';
+
+  @override
+  String get mapsNotConfigured =>
+      'Die Karte ist in dieser Version noch nicht eingerichtet (Google-Maps-Schlüssel fehlt).';
 }
