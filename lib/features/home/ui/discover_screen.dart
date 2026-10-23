@@ -6,18 +6,22 @@ import '../../swipe/logic/swipe_controller.dart';
 import '../../swipe/widgets/swipe_deck.dart';
 import '../../swipe/widgets/discover_filters.dart';
 import '../../swipe/logic/discover_preferences_controller.dart';
-import '../../../common/widgets/wordmark.dart';
 import '../../../l10n/l10n.dart';
-import '../../../app/theme.dart';
+import '../../../common/widgets/ticket.dart';
 
-class SimplifiedHomeScreen extends ConsumerWidget {
-  const SimplifiedHomeScreen({super.key});
+/// The solo swipe deck, opened full screen from the home feed's
+/// "Start swiping" ticket. Place and filters sit in its app bar.
+class DiscoverScreen extends ConsumerWidget {
+  const DiscoverScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Wordmark(),
+        leading: BackButton(
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go('/home'),
+        ),
         actions: const [
           DiscoverLocationChip(),
           SizedBox(width: 6),
@@ -25,7 +29,9 @@ class SimplifiedHomeScreen extends ConsumerWidget {
           SizedBox(width: 12),
         ],
       ),
-      body: const _SwipeContent(),
+      // Outside the shell there is no nav bar, so keep the buttons clear of
+      // the home indicator.
+      body: const SafeArea(top: false, child: _SwipeContent()),
     );
   }
 }
@@ -123,11 +129,11 @@ class _EmptyDeck extends ConsumerWidget {
     final prefs = ref.watch(discoverPreferencesProvider).value ??
         const DiscoverPreferences();
 
-    final (IconData icon, Color color, String title, String body, Widget action) =
+    final (IconData icon, ChipTone tone, String title, String body, Widget action) =
         switch (reason) {
       DeckEmptyReason.noPlacesInArea => (
           Icons.travel_explore,
-          scheme.primary,
+          ChipTone.sky,
           l10n.emptyNoPlacesTitle,
           l10n.emptyNoPlacesBody(placeLabel(context, prefs)),
           FilledButton.icon(
@@ -138,7 +144,7 @@ class _EmptyDeck extends ConsumerWidget {
         ),
       DeckEmptyReason.filteredOut => (
           Icons.filter_alt_off_outlined,
-          scheme.primary,
+          ChipTone.peach,
           l10n.emptyFilteredTitle,
           l10n.emptyFilteredBody,
           FilledButton.icon(
@@ -150,7 +156,7 @@ class _EmptyDeck extends ConsumerWidget {
         ),
       _ => (
           Icons.check_circle_outline,
-          context.swipeColors.like,
+          ChipTone.mint,
           l10n.noMorePlacesTitle,
           l10n.seenAllPlaces,
           OutlinedButton.icon(
@@ -167,15 +173,7 @@ class _EmptyDeck extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 88,
-              height: 88,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, size: 40, color: color),
-            ),
+            IconBadge(icon: icon, tone: tone),
             const SizedBox(height: 24),
             Text(title, style: text.headlineSmall, textAlign: TextAlign.center),
             const SizedBox(height: 8),

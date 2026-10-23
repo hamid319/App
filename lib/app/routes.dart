@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/onboarding/ui/onboarding_screen.dart';
 import '../features/auth/ui/login_screen.dart';
 import '../features/auth/ui/register_screen.dart';
-import '../features/home/ui/simplified_home_screen.dart';
+import '../features/home/ui/collection_screen.dart';
+import '../features/home/ui/discover_screen.dart';
+import '../features/home/ui/home_screen.dart';
 import '../features/home/ui/favorites_map_screen.dart';
 import '../features/home/ui/favorites_screen.dart';
 import '../features/swipe/ui/swipe_screen.dart';
@@ -94,6 +96,12 @@ GoRouter createRouter(Ref ref) {
           child: FavoritesMapScreen(),
         ),
       ),
+      // The solo swipe deck, full screen with a back button; opened from
+      // the home feed's hero ticket.
+      GoRoute(
+        path: '/discover',
+        builder: (ctx, state) => const DiscoverScreen(),
+      ),
       GoRoute(
         path: '/place/:id',
         builder: (ctx, state) => const PlaceDetailScreen(),
@@ -104,11 +112,17 @@ GoRouter createRouter(Ref ref) {
         routes: [
           GoRoute(
             path: '/',
-            builder: (ctx, state) => const SimplifiedHomeScreen(),
+            builder: (ctx, state) => const HomeScreen(),
           ),
           GoRoute(
             path: '/home',
-            builder: (ctx, state) => const SimplifiedHomeScreen(),
+            builder: (ctx, state) => const HomeScreen(),
+          ),
+          // "All" of a home row: must-sees | tonight | hidden-gems.
+          GoRoute(
+            path: '/collection/:theme',
+            builder: (ctx, state) =>
+                CollectionScreen(theme: state.pathParameters['theme']!),
           ),
           GoRoute(
             path: '/swipe/:groupId',

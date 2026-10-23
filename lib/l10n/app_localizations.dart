@@ -2509,6 +2509,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{meters} m'**
   String distanceMetersValue(int meters);
+
+  /// No description provided for @matchStamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Match'**
+  String get matchStamp;
+
+  /// No description provided for @limitTimeShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get limitTimeShort;
+
+  /// No description provided for @sessionSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New session'**
+  String get sessionSetupTitle;
+
+  /// No description provided for @sessionSwipesValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 swipe} other{{count} swipes}}'**
+  String sessionSwipesValue(int count);
+
+  /// No description provided for @sessionMinutesValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min'**
+  String sessionMinutesValue(int count);
+
+  /// No description provided for @sessionLimitLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Less'**
+  String get sessionLimitLess;
+
+  /// No description provided for @sessionLimitMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get sessionLimitMore;
+
+  /// No description provided for @dayPlanEndShort.
+  ///
+  /// In en, this message translates to:
+  /// **'End near me'**
+  String get dayPlanEndShort;
+
+  /// No description provided for @dayPlanStartShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Start near me'**
+  String get dayPlanStartShort;
+
+  /// No description provided for @placeSectionInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get placeSectionInfo;
+
+  /// No description provided for @placeSectionSources.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources'**
+  String get placeSectionSources;
+
+  /// No description provided for @tagRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant'**
+  String get tagRestaurant;
+
+  /// No description provided for @tagCafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Café'**
+  String get tagCafe;
+
+  /// No description provided for @tagBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Bar'**
+  String get tagBar;
+
+  /// No description provided for @tagPub.
+  ///
+  /// In en, this message translates to:
+  /// **'Pub'**
+  String get tagPub;
+
+  /// No description provided for @tagBiergarten.
+  ///
+  /// In en, this message translates to:
+  /// **'Beer garden'**
+  String get tagBiergarten;
+
+  /// No description provided for @tagNightClub.
+  ///
+  /// In en, this message translates to:
+  /// **'Club'**
+  String get tagNightClub;
+
+  /// No description provided for @interestFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food & drink'**
+  String get interestFood;
+
+  /// No description provided for @homeHeadlineCity.
+  ///
+  /// In en, this message translates to:
+  /// **'What are we doing in {city} today?'**
+  String homeHeadlineCity(String city);
+
+  /// No description provided for @homeHeadlineNearby.
+  ///
+  /// In en, this message translates to:
+  /// **'What are we doing today?'**
+  String get homeHeadlineNearby;
+
+  /// No description provided for @homeStartSwiping.
+  ///
+  /// In en, this message translates to:
+  /// **'Start swiping'**
+  String get homeStartSwiping;
+
+  /// No description provided for @homeStartSwipingCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No places yet} =1{1 place waiting for you} other{{count} places waiting for you}}'**
+  String homeStartSwipingCount(int count);
+
+  /// No description provided for @homeSectionMustSees.
+  ///
+  /// In en, this message translates to:
+  /// **'Must-sees'**
+  String get homeSectionMustSees;
+
+  /// No description provided for @homeSectionTonight.
+  ///
+  /// In en, this message translates to:
+  /// **'Tonight'**
+  String get homeSectionTonight;
+
+  /// No description provided for @homeSectionHiddenGems.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden gems'**
+  String get homeSectionHiddenGems;
+
+  /// No description provided for @homeSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get homeSeeAll;
+
+  /// No description provided for @homeVenuesComingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bars & restaurants coming soon'**
+  String get homeVenuesComingTitle;
+
+  /// No description provided for @homeVenuesComingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'re collecting the best spots for your evening.'**
+  String get homeVenuesComingBody;
+
+  /// No description provided for @collectionEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here yet. Try another city.'**
+  String get collectionEmpty;
 }
 
 class _AppLocalizationsDelegate

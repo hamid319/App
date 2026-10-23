@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../common/models/calendar_trip.dart';
 import '../../../common/utils/trip_dates.dart';
 import '../../../common/widgets/skeleton.dart';
+import '../../../common/widgets/ticket.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../core/services/calendar_service.dart';
@@ -40,12 +41,12 @@ class _CalendarTripSheetState extends State<_CalendarTripSheet> {
     final text = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
 
-    Widget message(IconData icon, String body) => Padding(
+    Widget message(IconData icon, String body) => SingleChildScrollView(
           padding: const EdgeInsets.all(AppSizes.space24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 40, color: scheme.onSurfaceVariant),
+              IconBadge(icon: icon, tone: ChipTone.sky, size: 64),
               const SizedBox(height: AppSizes.space12),
               Text(
                 body,
@@ -97,11 +98,11 @@ class _CalendarTripSheetState extends State<_CalendarTripSheet> {
                         horizontal: AppSizes.screenEdge,
                       ),
                       children: const [
-                        SkeletonBox(height: 64, radius: AppSizes.radiusMd),
+                        SkeletonBox(height: 64, radius: AppSizes.radiusTicket),
                         SizedBox(height: AppSizes.space8),
-                        SkeletonBox(height: 64, radius: AppSizes.radiusMd),
+                        SkeletonBox(height: 64, radius: AppSizes.radiusTicket),
                         SizedBox(height: AppSizes.space8),
-                        SkeletonBox(height: 64, radius: AppSizes.radiusMd),
+                        SkeletonBox(height: 64, radius: AppSizes.radiusTicket),
                       ],
                     ),
                   );
@@ -132,17 +133,15 @@ class _CalendarTripSheetState extends State<_CalendarTripSheet> {
                   ),
                   itemCount: trips.length,
                   separatorBuilder: (_, __) =>
-                      const SizedBox(height: AppSizes.space8),
+                      const SizedBox(height: AppSizes.space12),
                   itemBuilder: (context, i) {
                     final trip = trips[i];
                     final details = [
                       formatTripDates(trip.start, trip.end, locale),
                       if (trip.location != null) trip.location!,
                     ].join(' · ');
-                    return Material(
-                      color: scheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                      clipBehavior: Clip.antiAlias,
+                    return Ticket(
+                      onTap: () => Navigator.of(context).pop(trip),
                       child: ListTile(
                         leading: const Icon(Icons.event_outlined),
                         title: Text(
@@ -157,7 +156,6 @@ class _CalendarTripSheetState extends State<_CalendarTripSheet> {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        onTap: () => Navigator.of(context).pop(trip),
                       ),
                     );
                   },

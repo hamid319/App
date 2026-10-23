@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:swipetrip/app/theme.dart';
 import 'package:swipetrip/core/services/maps_launcher.dart';
 import 'package:swipetrip/features/places/widgets/maps_app_sheet.dart';
 import 'package:swipetrip/l10n/l10n.dart';
@@ -30,6 +31,7 @@ void main() {
     MapsApp? picked;
     await tester.pumpWidget(
       MaterialApp(
+        theme: AppTheme.light,
         locale: const Locale('de'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,

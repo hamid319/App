@@ -8,7 +8,8 @@ import '../../../common/utils/opening_hours_format.dart';
 import '../../../common/utils/place_type_labels.dart';
 import '../../../common/widgets/place_photo.dart';
 import '../../../common/widgets/skeleton.dart';
-import '../../../core/constants/colors.dart';
+import '../../../common/widgets/ticket.dart';
+import '../../../core/constants/popular_cities.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../core/services/link_launcher.dart';
@@ -38,8 +39,8 @@ class PlaceDetailScreen extends ConsumerWidget {
     return placeAsync.when(
       loading: () => const Scaffold(body: SkeletonDetail()),
       error: (error, stack) => _Message(
-        icon: Icons.error_outline,
-        iconColor: Theme.of(context).colorScheme.error,
+        icon: Icons.error_outline_rounded,
+        tone: ChipTone.peach,
         text: userMessage(
           error,
           fallback: context.l10n.errorLoadPlace,
@@ -48,8 +49,8 @@ class PlaceDetailScreen extends ConsumerWidget {
       ),
       data: (place) => place == null
           ? _Message(
-              icon: Icons.place,
-              iconColor: Theme.of(context).colorScheme.onSurfaceVariant,
+              icon: Icons.wrong_location_outlined,
+              tone: ChipTone.sky,
               text: context.l10n.placeNotFound,
             )
           : _PlaceDetailContent(place: place),
@@ -60,12 +61,12 @@ class PlaceDetailScreen extends ConsumerWidget {
 class _Message extends StatelessWidget {
   const _Message({
     required this.icon,
-    required this.iconColor,
+    required this.tone,
     required this.text,
   });
 
   final IconData icon;
-  final Color iconColor;
+  final ChipTone tone;
   final String text;
 
   @override
@@ -78,8 +79,8 @@ class _Message extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 64, color: iconColor),
-              const SizedBox(height: AppSizes.space16),
+              IconBadge(icon: icon, tone: tone),
+              const SizedBox(height: AppSizes.space24),
               Text(text, textAlign: TextAlign.center),
               const SizedBox(height: AppSizes.space16),
               OutlinedButton(
@@ -95,7 +96,8 @@ class _Message extends StatelessWidget {
 }
 
 /// Big photo that shrinks as you scroll (the card's photo flies in via
-/// Hero), floating glass buttons, and the main action pinned at the bottom.
+/// Hero), round ink-rimmed buttons on it, the place as a perforated ticket
+/// below, and the main action pinned at the bottom.
 class _PlaceDetailContent extends ConsumerStatefulWidget {
   const _PlaceDetailContent({required this.place});
 
@@ -139,8 +141,13 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
     final name = place.nameFor(lang);
     final description = place.descriptionFor(lang)?.trim() ?? '';
     final wikipediaUrl = place.wikipediaUrlFor(lang);
-    final heroHeight = MediaQuery.sizeOf(context).height * 0.46;
+    final heroHeight = MediaQuery.sizeOf(context).height * 0.42;
     final darkTheme = Theme.of(context).brightness == Brightness.dark;
+    const tones = [ChipTone.mint, ChipTone.sky, ChipTone.peach];
+    final hasFacts = place.openingHours != null || place.website != null;
+    final hasSources = wikipediaUrl != null ||
+        place.osmUrl != null ||
+        place.photoCredits.isNotEmpty;
 
     Future<void> toggleFavorite() async {
       final messenger = ScaffoldMessenger.of(context);
@@ -175,20 +182,24 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
               stretch: true,
               backgroundColor: scheme.surfaceContainerLowest,
               automaticallyImplyLeading: false,
-              leading: Padding(
-                padding: const EdgeInsets.all(8),
-                child: _GlassButton(
+              leadingWidth: 64,
+              leading: Center(
+                child: InkActionButton(
                   icon: Icons.arrow_back_rounded,
+                  size: 42,
                   tooltip: MaterialLocalizations.of(context).backButtonTooltip,
                   onPressed: () => context.pop(),
                 ),
               ),
               actions: [
                 Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: _GlassButton(
-                    icon: isFav ? Icons.favorite : Icons.favorite_border,
-                    color: isFav ? scheme.primary : null,
+                  padding: const EdgeInsets.only(right: AppSizes.screenEdge),
+                  child: InkActionButton(
+                    icon: isFav
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    size: 42,
+                    iconColor: isFav ? context.swipeColors.like : null,
                     tooltip:
                         isFav ? l10n.removeFromFavorites : l10n.addToFavorites,
                     onPressed: toggleFavorite,
@@ -208,7 +219,7 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
                       Positioned(
                         left: AppSizes.screenEdge,
                         right: AppSizes.screenEdge * 3,
-                        bottom: AppSizes.radiusLg + AppSizes.space8,
+                        bottom: AppSizes.space12,
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: PhotoCreditChip(credits: place.photoCredits),
@@ -217,73 +228,77 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
                   ],
                 ),
               ),
-              // Rounded top edge of the content sheet, overlapping the photo.
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(AppSizes.radiusLg),
-                child: Container(
-                  height: AppSizes.radiusLg,
-                  decoration: BoxDecoration(
-                    color: scheme.surfaceContainerLowest,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(AppSizes.radiusLg),
-                    ),
-                  ),
-                ),
-              ),
             ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(
-                AppSizes.screenEdge + 2,
-                0,
-                AppSizes.screenEdge + 2,
+                AppSizes.screenEdge,
+                AppSizes.space16,
+                AppSizes.screenEdge,
                 AppSizes.space32,
               ),
               sliver: SliverList.list(
                 children: [
-                  Text(name, style: text.headlineMedium),
-                  const SizedBox(height: AppSizes.space8),
-                  _MetaRow(place: place),
-                  if (tags.isNotEmpty) ...[
-                    const SizedBox(height: AppSizes.space16),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: [for (final t in tags) _SoftTag(label: t)],
+                  _PerforatedTicket(
+                    header: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSizes.space16 + 4,
+                        AppSizes.space16 + 4,
+                        AppSizes.space16 + 4,
+                        AppSizes.space16 + 2,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(name, style: text.headlineMedium),
+                          _MetaRow(place: place),
+                          if (tags.isNotEmpty) ...[
+                            const SizedBox(height: AppSizes.space12),
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 6,
+                              children: [
+                                for (final (i, t) in tags.indexed)
+                                  TagChip(
+                                      label: t, tone: tones[i % tones.length]),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
-                  ],
+                    body: description.isEmpty
+                        ? null
+                        : Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              AppSizes.space16 + 4,
+                              AppSizes.space16 + 2,
+                              AppSizes.space16 + 4,
+                              AppSizes.space16 + 4,
+                            ),
+                            child: Text(
+                              description,
+                              style: text.bodyLarge?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                                height: 1.6,
+                              ),
+                            ),
+                          ),
+                  ),
                   for (final prompt in place.prompts) ...[
                     const SizedBox(height: AppSizes.space12),
                     PromptTile(prompt: prompt),
                   ],
-                  if (description.isNotEmpty) ...[
+                  if (hasFacts) ...[
                     const SizedBox(height: AppSizes.groupGap),
-                    Text(
-                      description,
-                      style: text.bodyLarge?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                        height: 1.6,
-                      ),
-                    ),
-                    if (wikipediaUrl != null) ...[
-                      const SizedBox(height: AppSizes.space8),
-                      _TextSource(
-                        url: wikipediaUrl,
-                        label: l10n.textSourceWikipedia,
-                      ),
-                    ],
-                  ],
-                  if (place.openingHours != null || place.website != null) ...[
-                    const SizedBox(height: AppSizes.groupGap),
+                    SectionLabel(l10n.placeSectionInfo),
                     _PlaceFacts(place: place),
                   ],
                   const SizedBox(height: AppSizes.groupGap),
                   PlaceReviewsSection(placeId: place.id),
-                  if (place.osmUrl != null) ...[
-                    const SizedBox(height: AppSizes.space16),
-                    _TextSource(
-                      url: place.osmUrl!,
-                      label: l10n.osmAttribution,
-                    ),
+                  if (hasSources) ...[
+                    const SizedBox(height: AppSizes.groupGap),
+                    SectionLabel(l10n.placeSectionSources),
+                    _Sources(place: place, wikipediaUrl: wikipediaUrl),
                   ],
                 ],
               ),
@@ -318,6 +333,55 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
   }
 }
 
+/// A ticket whose perforation sits exactly between [header] and [body]. The
+/// header is measured after layout, so the notch follows its real height.
+class _PerforatedTicket extends StatefulWidget {
+  const _PerforatedTicket({required this.header, this.body});
+
+  final Widget header;
+  final Widget? body;
+
+  @override
+  State<_PerforatedTicket> createState() => _PerforatedTicketState();
+}
+
+class _PerforatedTicketState extends State<_PerforatedTicket> {
+  final _headerKey = GlobalKey();
+  double? _notch;
+
+  void _measure() {
+    final box = _headerKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return;
+    final y = box.size.height;
+    if (_notch == null || (y - _notch!).abs() > 0.5) {
+      setState(() => _notch = y);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final body = widget.body;
+    if (body != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _measure();
+      });
+    }
+    return Ticket(
+      raised: true,
+      notchFromTop: body == null ? null : _notch,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          KeyedSubtree(key: _headerKey, child: widget.header),
+          if (body != null) body,
+        ],
+      ),
+    );
+  }
+}
+
+/// Rating and where the place is: the street address when the import has
+/// one, otherwise the city. Never raw coordinates.
 class _MetaRow extends StatelessWidget {
   const _MetaRow({required this.place});
 
@@ -332,115 +396,141 @@ class _MetaRow extends StatelessWidget {
         ?.copyWith(color: scheme.onSurfaceVariant);
     final rating = place.averageRating;
     final address = place.address?.trim();
-    return Wrap(
-      spacing: AppSizes.space12,
-      runSpacing: AppSizes.space4,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        if (rating != null && rating > 0)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.star_rounded,
-                  size: 18, color: context.swipeColors.gold),
-              const SizedBox(width: 2),
-              Text(
-                rating.toStringAsFixed(1),
-                style: style?.copyWith(
-                  color: scheme.onSurface,
-                  fontWeight: FontWeight.w700,
+    final location = (address != null && address.isNotEmpty)
+        ? address
+        : PopularCity.byId(place.cityId)
+            ?.nameFor(Localizations.localeOf(context).languageCode);
+    final showRating = rating != null && rating > 0;
+    if (!showRating && location == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSizes.space8),
+      child: Wrap(
+        spacing: AppSizes.space12,
+        runSpacing: AppSizes.space4,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          if (showRating)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.star_rounded,
+                    size: 18, color: context.swipeColors.gold),
+                const SizedBox(width: 2),
+                Text(
+                  rating.toStringAsFixed(1),
+                  style: style?.copyWith(
+                    color: scheme.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
+          if (location != null)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.place_outlined,
+                    size: 16, color: scheme.onSurfaceVariant),
+                const SizedBox(width: 4),
+                Flexible(child: Text(location, style: style)),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+Future<void> _openLink(BuildContext context, String url) async {
+  final l10n = context.l10n;
+  try {
+    await LinkLauncher.open(url);
+  } catch (e) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(userMessage(e, fallback: l10n.errorOpenLink, l10n: l10n)),
+      ),
+    );
+  }
+}
+
+/// One row inside an info ticket: icon, small label, value.
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({
+    required this.icon,
+    required this.value,
+    this.label,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final String? label;
+  final String value;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final content = Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.space16,
+        vertical: AppSizes.space12,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: scheme.onSurface),
+          const SizedBox(width: AppSizes.space12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (label != null) ...[
+                  Text(label!,
+                      style: text.labelMedium
+                          ?.copyWith(color: scheme.onSurfaceVariant)),
+                  const SizedBox(height: 2),
+                ],
+                Text(
+                  value,
+                  style: text.bodyMedium?.copyWith(
+                    color: scheme.onSurface,
+                    decoration: onTap == null ? null : TextDecoration.underline,
+                    decorationColor: scheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
           ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.place_outlined,
+          if (onTap != null)
+            Icon(Icons.north_east_rounded,
                 size: 16, color: scheme.onSurfaceVariant),
-            const SizedBox(width: 4),
-            Flexible(
-              child: Text(
-                (address != null && address.isNotEmpty)
-                    ? address
-                    : '${place.lat.toStringAsFixed(4)}, '
-                        '${place.lng.toStringAsFixed(4)}',
-                style: style,
-              ),
-            ),
+        ],
+      ),
+    );
+    return onTap == null ? content : InkWell(onTap: onTap, child: content);
+  }
+}
+
+/// Rows separated by hairlines inside one ticket.
+class _RowsTicket extends StatelessWidget {
+  const _RowsTicket({required this.rows});
+
+  final List<Widget> rows;
+
+  @override
+  Widget build(BuildContext context) {
+    return Ticket(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final (i, row) in rows.indexed) ...[
+            if (i > 0) const Divider(height: 1),
+            row,
           ],
-        ),
-      ],
-    );
-  }
-}
-
-class _SoftTag extends StatelessWidget {
-  const _SoftTag({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: scheme.onSurface,
-            ),
-      ),
-    );
-  }
-}
-
-/// Source line under a description taken from Wikipedia (CC BY-SA requires
-/// naming and linking it).
-class _TextSource extends StatelessWidget {
-  const _TextSource({required this.url, required this.label});
-
-  final String url;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final scheme = Theme.of(context).colorScheme;
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppSizes.radiusXs),
-        onTap: () async {
-          try {
-            await LinkLauncher.open(url);
-          } catch (e) {
-            if (!context.mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  userMessage(e, fallback: l10n.errorOpenLink, l10n: l10n),
-                ),
-              ),
-            );
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSizes.space4),
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                  decoration: TextDecoration.underline,
-                  decorationColor: scheme.onSurfaceVariant,
-                ),
-          ),
-        ),
+        ],
       ),
     );
   }
@@ -455,102 +545,63 @@ class _PlaceFacts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final scheme = Theme.of(context).colorScheme;
-    final text = Theme.of(context).textTheme;
     final hours = place.openingHours;
     final website = place.website;
-    Widget row(IconData icon, String label, String value, {VoidCallback? onTap}) {
-      final content = Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSizes.space8),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, size: 20, color: scheme.onSurfaceVariant),
-            const SizedBox(width: AppSizes.space12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(label,
-                      style: text.labelMedium
-                          ?.copyWith(color: scheme.onSurfaceVariant)),
-                  const SizedBox(height: 2),
-                  Text(
-                    value,
-                    style: text.bodyMedium?.copyWith(
-                      color: onTap == null ? scheme.onSurface : scheme.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-      return onTap == null
-          ? content
-          : InkWell(
-              borderRadius: BorderRadius.circular(AppSizes.radiusXs),
-              onTap: onTap,
-              child: content,
-            );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+    return _RowsTicket(
+      rows: [
         if (hours != null)
-          row(Icons.schedule, l10n.openingHoursLabel,
-              formatOpeningHours(hours, l10n)),
+          _InfoRow(
+            icon: Icons.schedule_rounded,
+            label: l10n.openingHoursLabel,
+            value: formatOpeningHours(hours, l10n),
+          ),
         if (website != null)
-          row(
-            Icons.language,
-            l10n.websiteLabel,
-            Uri.tryParse(website)?.host.replaceFirst('www.', '') ?? website,
-            onTap: () async {
-              try {
-                await LinkLauncher.open(website);
-              } catch (e) {
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      userMessage(e, fallback: l10n.errorOpenLink, l10n: l10n),
-                    ),
-                  ),
-                );
-              }
-            },
+          _InfoRow(
+            icon: Icons.language_rounded,
+            label: l10n.websiteLabel,
+            value:
+                Uri.tryParse(website)?.host.replaceFirst('www.', '') ?? website,
+            onTap: () => _openLink(context, website),
           ),
       ],
     );
   }
 }
 
-/// Round, light button that floats on top of the photo.
-class _GlassButton extends StatelessWidget {
-  const _GlassButton({
-    required this.icon,
-    required this.tooltip,
-    required this.onPressed,
-    this.color,
-  });
+/// Where text, photos and facts come from (Wikipedia CC BY-SA, photo
+/// licences, OpenStreetMap ODbL all require naming and linking them).
+class _Sources extends StatelessWidget {
+  const _Sources({required this.place, required this.wikipediaUrl});
 
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onPressed;
-  final Color? color;
+  final PlaceModel place;
+  final String? wikipediaUrl;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: PhotoColors.glass,
-      shape: const CircleBorder(),
-      child: IconButton(
-        tooltip: tooltip,
-        icon: Icon(icon, color: color ?? PhotoColors.onGlass, size: 20),
-        onPressed: onPressed,
-      ),
+    final l10n = context.l10n;
+    final wiki = wikipediaUrl;
+    final osm = place.osmUrl;
+    return _RowsTicket(
+      rows: [
+        if (place.photoCredits.isNotEmpty)
+          _InfoRow(
+            icon: Icons.photo_camera_outlined,
+            value: l10n.photoCreditsTitle,
+            onTap: () => showPhotoCredits(context, place.photoCredits),
+          ),
+        if (wiki != null)
+          _InfoRow(
+            icon: Icons.article_outlined,
+            value: l10n.textSourceWikipedia,
+            onTap: () => _openLink(context, wiki),
+          ),
+        if (osm != null)
+          _InfoRow(
+            icon: Icons.map_outlined,
+            value: l10n.osmAttribution,
+            onTap: () => _openLink(context, osm),
+          ),
+      ],
     );
   }
 }
@@ -572,7 +623,7 @@ class _ActionBar extends StatelessWidget {
     final l10n = context.l10n;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: scheme.surface,
+        color: Theme.of(context).scaffoldBackgroundColor,
         border: Border(top: BorderSide(color: scheme.outlineVariant)),
       ),
       child: SafeArea(
@@ -586,31 +637,19 @@ class _ActionBar extends StatelessWidget {
           ),
           child: Row(
             children: [
-              SizedBox(
-                width: 52,
-                height: 52,
-                child: OutlinedButton(
-                  onPressed: onToggleFavorite,
-                  style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: const Size(52, 52),
-                  ),
-                  child: Icon(
-                    isFav ? Icons.favorite : Icons.favorite_border,
-                    color: scheme.primary,
-                    semanticLabel:
-                        isFav ? l10n.removeFromFavorites : l10n.addToFavorites,
-                  ),
-                ),
+              InkActionButton(
+                icon: isFav
+                    ? Icons.favorite_rounded
+                    : Icons.favorite_border_rounded,
+                size: 52,
+                iconColor: isFav ? context.swipeColors.like : null,
+                tooltip: isFav ? l10n.removeFromFavorites : l10n.addToFavorites,
+                onPressed: onToggleFavorite,
               ),
-              const SizedBox(width: AppSizes.space8),
+              const SizedBox(width: AppSizes.space12),
               Expanded(
-                child: FilledButton.icon(
+                child: ElevatedButton.icon(
                   onPressed: onOpenMaps,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: scheme.onSurface,
-                    foregroundColor: scheme.surface,
-                  ),
                   icon: const Icon(Icons.map_outlined),
                   label: Text(l10n.openInMaps),
                 ),

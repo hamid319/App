@@ -8,7 +8,8 @@ import '../logic/swipe_controller.dart';
 import '../widgets/swipe_deck.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
-import '../../../app/theme.dart';
+import '../../../common/widgets/ticket.dart';
+import '../../../core/constants/sizes.dart';
 
 /// Main Swipe Screen - displays the card stack and handles state
 class SwipeScreen extends ConsumerStatefulWidget {
@@ -106,15 +107,20 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(12),
+                  color: Theme.of(context).colorScheme.tertiary,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline,
+                    width: AppSizes.edge,
+                  ),
                 ),
                 child: Text(
                   '${_timeRemaining.inMinutes.toString().padLeft(2, '0')}:${(_timeRemaining.inSeconds % 60).toString().padLeft(2, '0')}',
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onTertiary,
+                    fontWeight: FontWeight.w800,
                     fontSize: 14,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
               ),
@@ -196,8 +202,10 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.check_circle_outline,
-                      size: 80, color: context.swipeColors.like),
+                  const IconBadge(
+                    icon: Icons.check_circle_outline,
+                    tone: ChipTone.mint,
+                  ),
                   const SizedBox(height: 24),
                   Text(
                     (sessionValue?.endTime != null &&
@@ -256,13 +264,15 @@ class _ProgressChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: scheme.primaryContainer,
+        color: scheme.surface,
         borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: scheme.outline, width: AppSizes.edge),
       ),
       child: Text(
         '${done.clamp(0, total)}/$total',
         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: scheme.primary,
+              color: scheme.onSurface,
+              fontWeight: FontWeight.w800,
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
       ),

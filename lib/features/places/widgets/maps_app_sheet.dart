@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../common/widgets/ticket.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/services/maps_launcher.dart';
 import '../../../l10n/l10n.dart';
@@ -60,35 +61,24 @@ class _MapsOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Material(
-      color: scheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.space16,
-            vertical: AppSizes.space16,
+    return Ticket(
+      onTap: onTap,
+      padding: const EdgeInsets.all(AppSizes.space16),
+      child: Row(
+        children: [
+          Icon(icon, color: scheme.onSurface),
+          const SizedBox(width: AppSizes.space12),
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w600),
+            ),
           ),
-          child: Row(
-            children: [
-              Icon(icon, color: scheme.onSurface),
-              const SizedBox(width: AppSizes.space12),
-              Expanded(
-                child: Text(
-                  label,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w600),
-                ),
-              ),
-              Icon(Icons.chevron_right_rounded,
-                  color: scheme.onSurfaceVariant),
-            ],
-          ),
-        ),
+          Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
+        ],
       ),
     );
   }

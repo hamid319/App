@@ -58,7 +58,8 @@ class _ReviewSheetState extends ConsumerState<_ReviewSheet> {
       if (!mounted) return;
       setState(() => _busy = false);
       messenger.showSnackBar(SnackBar(
-        content: Text(userMessage(e, fallback: l10n.errorSaveReview, l10n: l10n)),
+        content:
+            Text(userMessage(e, fallback: l10n.errorSaveReview, l10n: l10n)),
       ));
     }
   }
@@ -148,7 +149,7 @@ class _ReviewSheetState extends ConsumerState<_ReviewSheet> {
                 decoration: InputDecoration(hintText: l10n.reviewTextHint),
               ),
               const SizedBox(height: AppSizes.space8),
-              FilledButton(
+              ElevatedButton(
                 onPressed: _busy ? null : _save,
                 child: Text(l10n.save),
               ),

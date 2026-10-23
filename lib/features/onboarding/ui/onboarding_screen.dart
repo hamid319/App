@@ -3,41 +3,39 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/locale_controller.dart';
+import '../../../app/theme.dart';
+import '../../../common/widgets/ticket.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/services/preferences_service.dart';
 import '../../../l10n/l10n.dart';
 
-/// A scene is a warm gradient with two tilted "photo" cards floating on it.
-/// Placeholders until real destination photos are bundled.
+/// A scene is two tilted paper "tickets" on the cream page. Placeholders
+/// until real destination photos are bundled.
 class _Scene {
-  const _Scene(this.colors, this.cardA, this.cardB, this.iconA, this.iconB);
+  const _Scene(this.toneA, this.toneB, this.iconA, this.iconB);
 
-  final List<Color> colors;
-  final List<Color> cardA;
-  final List<Color> cardB;
+  final ChipTone toneA;
+  final ChipTone toneB;
   final IconData iconA;
   final IconData iconB;
 }
 
 const _scenes = [
   _Scene(
-    [Color(0xFFFFB98A), Color(0xFFFF6F6B), Color(0xFF5B4E9E)],
-    [Color(0xFF7FD1C7), Color(0xFF2A7FA8)],
-    [Color(0xFFFFD39A), Color(0xFFE2725B)],
+    ChipTone.sky,
+    ChipTone.peach,
     Icons.landscape_rounded,
     Icons.beach_access_rounded,
   ),
   _Scene(
-    [Color(0xFFFFC371), Color(0xFFFF5F6D), Color(0xFFB0306A)],
-    [Color(0xFFA1C4FD), Color(0xFF5A6FD6)],
-    [Color(0xFFFFE29F), Color(0xFFFF9A6A)],
+    ChipTone.peach,
+    ChipTone.mint,
     Icons.museum_rounded,
     Icons.local_florist_rounded,
   ),
   _Scene(
-    [Color(0xFF7FD1C7), Color(0xFF3B8EA5), Color(0xFF2B3A67)],
-    [Color(0xFFFFB98A), Color(0xFFFF6F6B)],
-    [Color(0xFFD4FC79), Color(0xFF51B17F)],
+    ChipTone.mint,
+    ChipTone.gold,
     Icons.location_city_rounded,
     Icons.hiking_rounded,
   ),
@@ -87,8 +85,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       (l10n.onboarding3Lead, l10n.onboarding3Accent, l10n.onboarding3Body),
     ];
 
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
+      value: dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       child: Scaffold(
         body: Stack(
           children: [
@@ -103,7 +102,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 body: pages[i].$3,
               ),
             ),
-            // Sits on the photo so it is visible on every page.
+            // Top right on every page.
             const Positioned(
               top: 0,
               right: AppSizes.screenEdge,
@@ -125,7 +124,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       const SizedBox(height: AppSizes.space24),
                       SizedBox(
                         width: double.infinity,
-                        child: FilledButton(
+                        child: ElevatedButton(
                           onPressed: _next,
                           child: Text(
                             _isLast
@@ -170,27 +169,16 @@ class _OnboardingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
+    final colors = context.swipeColors;
     return LayoutBuilder(builder: (context, box) {
-      final sheetHeight = box.maxHeight * 0.48;
+      final textHeight = box.maxHeight * 0.46;
       return Stack(
         children: [
-          Positioned.fill(
-            bottom: sheetHeight - AppSizes.radiusLg,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: scene.colors,
-                ),
-              ),
-            ),
-          ),
           Positioned(
             left: 26,
             top: box.maxHeight * 0.17,
             child: _FloatingCard(
-              colors: scene.cardA,
+              tone: scene.toneA,
               icon: scene.iconA,
               angle: -0.1,
               width: 128,
@@ -200,27 +188,22 @@ class _OnboardingPage extends StatelessWidget {
             right: 28,
             top: box.maxHeight * 0.12,
             child: _FloatingCard(
-              colors: scene.cardB,
+              tone: scene.toneB,
               icon: scene.iconB,
               angle: 0.12,
               width: 116,
+              stamp: context.l10n.likeStamp,
             ),
           ),
           Positioned(
             left: 0,
             right: 0,
             bottom: 0,
-            height: sheetHeight,
-            child: Container(
-              decoration: BoxDecoration(
-                color: scheme.surface,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(30),
-                ),
-              ),
+            height: textHeight,
+            child: Padding(
               padding: const EdgeInsets.fromLTRB(
                 AppSizes.space24,
-                AppSizes.space32,
+                AppSizes.space24,
                 AppSizes.space24,
                 0,
               ),
@@ -231,9 +214,14 @@ class _OnboardingPage extends StatelessWidget {
                     TextSpan(
                       children: [
                         TextSpan(text: '$lead '),
+                        // Gold underline: the orange is kept for the button.
                         TextSpan(
                           text: accent,
-                          style: TextStyle(color: scheme.primary),
+                          style: TextStyle(
+                            decoration: TextDecoration.underline,
+                            decorationColor: colors.gold,
+                            decorationThickness: 3,
+                          ),
                         ),
                       ],
                     ),
@@ -255,44 +243,74 @@ class _OnboardingPage extends StatelessWidget {
   }
 }
 
+/// A tilted pastel ticket with an ink rim and print shadow.
 class _FloatingCard extends StatelessWidget {
   const _FloatingCard({
-    required this.colors,
+    required this.tone,
     required this.icon,
     required this.angle,
     required this.width,
+    this.stamp,
   });
 
-  final List<Color> colors;
+  final ChipTone tone;
   final IconData icon;
   final double angle;
   final double width;
+  final String? stamp;
 
   @override
   Widget build(BuildContext context) {
+    final c = context.swipeColors;
+    final scheme = Theme.of(context).colorScheme;
+    final fill = switch (tone) {
+      ChipTone.neutral => scheme.surfaceContainerHigh,
+      ChipTone.mint => c.mint,
+      ChipTone.peach => c.peach,
+      ChipTone.sky => c.sky,
+      ChipTone.gold => c.gold.withValues(alpha: 0.45),
+    };
     return Transform.rotate(
       angle: angle,
-      child: Container(
+      child: SizedBox(
         width: width,
         height: width * 1.28,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.white, width: 3),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: colors,
-          ),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x66000000),
-              blurRadius: 30,
-              spreadRadius: -10,
-              offset: Offset(0, 16),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: ShapeDecoration(
+                  shape: TicketBorder(
+                    color: c.edge,
+                    notchFromBottom: width * 0.34,
+                  ),
+                  shadows: printShadow(c.edge),
+                ),
+                child: Material(
+                  color: fill,
+                  shape: TicketBorder(
+                    color: c.edge,
+                    notchFromBottom: width * 0.34,
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: width * 0.34),
+                    child: Center(
+                      child: Icon(icon,
+                          size: width * 0.38, color: scheme.onSurface),
+                    ),
+                  ),
+                ),
+              ),
             ),
+            if (stamp != null)
+              Positioned(
+                left: -14,
+                bottom: width * 0.06,
+                child: Stamp(text: stamp!, color: c.like, size: 18),
+              ),
           ],
         ),
-        child: Icon(icon, size: width * 0.38, color: Colors.white70),
       ),
     );
   }
@@ -325,19 +343,24 @@ class _Dots extends StatelessWidget {
   }
 }
 
-/// DE | EN pill on dark glass, readable on every scene.
+/// DE | EN pill with an ink rim; the current language is filled with ink.
 class _LanguageChip extends ConsumerWidget {
   const _LanguageChip();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final current = Localizations.localeOf(context).languageCode;
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(top: AppSizes.space8),
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.32),
+        color: scheme.surface,
         borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: context.swipeColors.edge,
+          width: AppSizes.edge,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -355,7 +378,9 @@ class _LanguageChip extends ConsumerWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                   decoration: BoxDecoration(
-                    color: code == current ? Colors.white : Colors.transparent,
+                    color: code == current
+                        ? scheme.inverseSurface
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
@@ -364,8 +389,8 @@ class _LanguageChip extends ConsumerWidget {
                       fontWeight: FontWeight.w800,
                       fontSize: 12,
                       color: code == current
-                          ? const Color(0xFF15171C)
-                          : Colors.white,
+                          ? scheme.onInverseSurface
+                          : scheme.onSurface,
                     ),
                   ),
                 ),

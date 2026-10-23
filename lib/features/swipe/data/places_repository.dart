@@ -10,6 +10,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:swipetrip/core/config/env.dart';
 import 'package:swipetrip/core/config/app_config.dart';
+import 'package:swipetrip/core/constants/popular_cities.dart';
 
 class PlacesRepository {
   final FirebaseFirestore _db;
@@ -45,6 +46,58 @@ class PlacesRepository {
     return snapshot.docs.map((d) => PlaceModel.fromJson(d.data())).toList();
   }
 
+  /// Venues of a city (restaurants, cafés, bars from the OpenStreetMap
+  /// import), best-known first. Returns an empty list while the composite
+  /// index (cityId, kind, status, popularity) is not deployed yet, so the
+  /// app shows its "coming soon" placeholder instead of an error.
+  Future<List<PlaceModel>> loadCityVenues(
+    String cityId, {
+    int limit = 30,
+  }) async {
+    try {
+      final snapshot = await _db
+          .collection('places')
+          .where('cityId', isEqualTo: cityId)
+          .where('kind', isEqualTo: 'venue')
+          .where('status', isEqualTo: 'active')
+          .orderBy('popularity', descending: true)
+          .limit(limit)
+          .get();
+      return snapshot.docs.map((d) => PlaceModel.fromJson(d.data())).toList();
+    } on FirebaseException catch (e) {
+      if (e.code != 'failed-precondition') rethrow;
+      debugPrint('Venue index for $cityId not ready yet: ${e.message}');
+      return const [];
+    }
+  }
+
+  /// Places for solo discovery around a position: the curated places of
+  /// [cityId] (or of the nearest curated city) within [radiusKm], falling
+  /// back to the legacy nearby query while a city has no curated places.
+  Future<List<PlaceModel>> loadPlacesAround({
+    String? cityId,
+    required double lat,
+    required double lng,
+    required double radiusKm,
+  }) async {
+    final id =
+        cityId ?? PopularCity.nearest(lat, lng, maxKm: radiusKm)?.id;
+    if (id != null) {
+      try {
+        final curated = await loadCityPlaces(id);
+        if (curated.isNotEmpty) {
+          return curated
+              .where((p) =>
+                  GeoUtils.isWithinRadius(lat, lng, p.lat, p.lng, radiusKm))
+              .toList();
+        }
+      } catch (e) {
+        debugPrint('Loading curated places for $id failed: $e');
+      }
+    }
+    return loadNearbyPlaces(lat, lng, radiusKm: radiusKm);
+  }
+
   /// App city id ("pt_lisbon") of a group location ("PT", "lisbon").
   static String curatedCityId(GroupLocation location) =>
       '${location.countryCode.toLowerCase()}_${location.cityId}';
@@ -62,7 +115,10 @@ class PlacesRepository {
   }) async {
     if (limit <= 0) return [];
     try {
-      final curated = await loadCityPlaces(curatedCityId(location));
+      // Sights only: the swipe decks do not show venues yet.
+      final curated = (await loadCityPlaces(curatedCityId(location)))
+          .where((p) => !p.isVenue)
+          .toList();
       if (curated.isNotEmpty) {
         // A mix of the best-known places, different for every session.
         final top = curated.take(limit * 2).toList()..shuffle();

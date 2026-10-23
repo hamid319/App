@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/popular_cities.dart';
 import '../../core/constants/sizes.dart';
 import '../../l10n/l10n.dart';
+import 'ticket.dart';
 
 /// "Where to?" sheet: optional "Current location", a search field and the
 /// popular destinations. Returns the chosen city, or null for the current
@@ -63,7 +64,8 @@ class _CityPickerState extends State<_CityPicker> {
       ..sort((a, b) => a.nameFor(lang).compareTo(b.nameFor(lang)));
 
     Widget check(bool on) =>
-        on ? Icon(Icons.check, color: scheme.primary) : const SizedBox.shrink();
+        on ? Icon(Icons.check_rounded, color: scheme.onSurface) : const SizedBox.shrink();
+    final edge = BorderSide(color: scheme.outline, width: AppSizes.edge);
 
     return DraggableScrollableSheet(
       expand: false,
@@ -92,7 +94,7 @@ class _CityPickerState extends State<_CityPicker> {
                   onChanged: (v) => setState(() => _query = v),
                   decoration: InputDecoration(
                     hintText: l10n.searchCity,
-                    prefixIcon: const Icon(Icons.search),
+                    prefixIcon: const Icon(Icons.search_rounded),
                   ),
                 ),
               ],
@@ -103,30 +105,37 @@ class _CityPickerState extends State<_CityPicker> {
               controller: scroll,
               children: [
                 if (widget.offerCurrentLocation && q.isEmpty)
-                  ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: scheme.primaryContainer,
-                      child: Icon(Icons.near_me, color: scheme.primary),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSizes.screenEdge,
                     ),
-                    title: Text(l10n.currentLocation),
-                    subtitle: Text(l10n.currentLocationSubtitle),
-                    trailing: check(widget.selectedId == null),
-                    onTap: () => _choose(null),
+                    child: Ticket(
+                      child: ListTile(
+                        leading: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: ShapeDecoration(
+                            color: scheme.primaryContainer,
+                            shape: CircleBorder(side: edge),
+                          ),
+                          child: Icon(Icons.near_me_rounded,
+                              size: 20, color: scheme.onSurface),
+                        ),
+                        title: Text(l10n.currentLocation),
+                        subtitle: Text(l10n.currentLocationSubtitle),
+                        trailing: check(widget.selectedId == null),
+                        onTap: () => _choose(null),
+                      ),
+                    ),
                   ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                     AppSizes.screenEdge,
-                    AppSizes.space16,
+                    AppSizes.groupGap,
                     AppSizes.screenEdge,
-                    AppSizes.space4,
+                    0,
                   ),
-                  child: Text(
-                    l10n.popularDestinations.toUpperCase(),
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelSmall
-                        ?.copyWith(color: scheme.onSurfaceVariant),
-                  ),
+                  child: SectionLabel(l10n.popularDestinations),
                 ),
                 if (cities.isEmpty)
                   Padding(
@@ -138,14 +147,20 @@ class _CityPickerState extends State<_CityPicker> {
                   ),
                 for (final c in cities)
                   ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: scheme.surfaceContainerHighest,
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      alignment: Alignment.center,
+                      decoration: ShapeDecoration(
+                        color: scheme.surfaceContainerHighest,
+                        shape: CircleBorder(side: edge),
+                      ),
                       child: Text(
                         c.countryCode,
                         style:
                             Theme.of(context).textTheme.labelMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  color: scheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w800,
+                                  color: scheme.onSurface,
                                 ),
                       ),
                     ),

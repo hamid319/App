@@ -10,8 +10,6 @@ import '../../group/logic/group_controller.dart';
 import '../../../main_providers.dart';
 import '../../../core/config/app_config.dart';
 import '../../../common/models/interest.dart';
-import '../../../common/utils/geo_utils.dart';
-import '../../../core/constants/popular_cities.dart';
 import 'discover_preferences_controller.dart';
 
 /// Why the deck has no card to show, so the UI can offer the right way out.
@@ -28,6 +26,11 @@ enum DeckEmptyReason {
   /// Everything matching has been swiped already.
   allSeen,
 }
+
+/// Places the solo deck may show: sights only for now, venues
+/// (restaurants, bars ...) live on the home feed.
+List<PlaceModel> soloDeckCandidates(Iterable<PlaceModel> places) =>
+    places.where((p) => !p.isVenue).toList();
 
 final swipeControllerProvider =
     AsyncNotifierProvider<SwipeController, List<PlaceModel>>(
@@ -175,28 +178,19 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
   /// browsing near the user, within the chosen radius. Falls back to the
   /// legacy nearby query while a city has no curated places yet.
   Future<List<PlaceModel>> _loadSoloPlaces(DiscoverPreferences prefs) async {
-    final radiusKm = prefs.radiusKm.toDouble();
-    final cityId = prefs.city?.id ??
-        PopularCity.nearest(_userLat, _userLng, maxKm: radiusKm)?.id;
-    if (cityId != null) {
-      try {
-        final curated = await _placesRepo.loadCityPlaces(cityId);
-        if (curated.isNotEmpty) {
-          return curated
-              .where((p) => GeoUtils.isWithinRadius(
-                    _userLat,
-                    _userLng,
-                    p.lat,
-                    p.lng,
-                    radiusKm,
-                  ))
-              .toList();
-        }
-      } catch (e) {
-        debugPrint('Loading curated places for $cityId failed: $e');
-      }
-    }
-    return _placesRepo.loadNearbyPlaces(_userLat, _userLng, radiusKm: radiusKm);
+    final places = await _placesRepo.loadPlacesAround(
+      cityId: prefs.city?.id,
+      lat: _userLat,
+      lng: _userLng,
+      radiusKm: prefs.radiusKm.toDouble(),
+    );
+    return soloDeckCandidates(places);
+  }
+
+  /// Cards still ahead in the deck, the current one included.
+  int get remainingCount {
+    final length = state.value?.length ?? 0;
+    return length > _currentIndex ? length - _currentIndex : 0;
   }
 
   PlaceModel? get nextPlaceInDeck {

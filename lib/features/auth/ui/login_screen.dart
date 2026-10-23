@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../logic/auth_controller.dart';
+import '../../../common/widgets/ticket.dart';
+import '../../../core/constants/sizes.dart';
 import '../../../l10n/l10n.dart';
 import '../../../common/widgets/wordmark.dart';
 
@@ -75,7 +77,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 28),
+                Ticket(
+                  raised: true,
+                  padding: const EdgeInsets.all(AppSizes.space16 + 4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
                 TextFormField(
                   controller: emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -112,7 +120,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
                 // Error message
                 authState.when(
                   data: (_) => const SizedBox.shrink(),
@@ -122,7 +130,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.errorContainer,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.error,
+                        width: AppSizes.edge,
+                      ),
                     ),
                     child: Text(
                       _getErrorMessage(error),
@@ -131,7 +143,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -145,7 +156,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         : Text(context.l10n.loginButton),
                   ),
                 ),
-                const SizedBox(height: 12),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSizes.space16),
                 TextButton(
                   onPressed: () => context.pushReplacement('/register'),
                   child: Text(context.l10n.noAccountRegister),

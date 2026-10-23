@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../common/models/place_model.dart';
+import '../../../common/widgets/ticket.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../core/services/maps_availability.dart';
@@ -36,24 +37,32 @@ class FavoritesMapScreen extends ConsumerWidget {
     final configured = ref.watch(_mapsConfiguredProvider);
     final places = ref.watch(_favoritePlacesProvider(key));
 
-    Widget message(String text) => Center(
+    Widget message(String text, IconData icon) => Center(
           child: Padding(
             padding: const EdgeInsets.all(AppSizes.space24),
-            child: Text(text, textAlign: TextAlign.center),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconBadge(icon: icon, tone: ChipTone.sky),
+                const SizedBox(height: AppSizes.space24),
+                Text(text, textAlign: TextAlign.center),
+              ],
+            ),
           ),
         );
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.favoritesMapTitle)),
       body: switch (configured) {
-        AsyncData(value: false) => message(l10n.mapsNotConfigured),
+        AsyncData(value: false) => message(l10n.mapsNotConfigured, Icons.map_outlined),
         AsyncData() => places.when(
             data: (list) => list.isEmpty
-                ? message(l10n.favoritesMapEmpty)
+                ? message(l10n.favoritesMapEmpty, Icons.place_outlined)
                 : _FavoritesMap(places: list),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => message(
               userMessage(e, fallback: l10n.errorLoadFavorites, l10n: l10n),
+              Icons.cloud_off_rounded,
             ),
           ),
         _ => const Center(child: CircularProgressIndicator()),

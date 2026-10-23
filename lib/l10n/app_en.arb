@@ -585,5 +585,62 @@
         "type": "int"
       }
     }
-  }
+  },
+  "matchStamp": "Match",
+  "limitTimeShort": "Time",
+  "sessionSetupTitle": "New session",
+  "sessionSwipesValue": "{count, plural, =1{1 swipe} other{{count} swipes}}",
+  "@sessionSwipesValue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionMinutesValue": "{count} min",
+  "@sessionMinutesValue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionLimitLess": "Less",
+  "sessionLimitMore": "More",
+  "dayPlanEndShort": "End near me",
+  "dayPlanStartShort": "Start near me",
+  "placeSectionInfo": "Info",
+  "placeSectionSources": "Sources",
+  "tagRestaurant": "Restaurant",
+  "tagCafe": "Café",
+  "tagBar": "Bar",
+  "tagPub": "Pub",
+  "tagBiergarten": "Beer garden",
+  "tagNightClub": "Club",
+  "interestFood": "Food & drink",
+  "homeHeadlineCity": "What are we doing in {city} today?",
+  "@homeHeadlineCity": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "homeHeadlineNearby": "What are we doing today?",
+  "homeStartSwiping": "Start swiping",
+  "homeStartSwipingCount": "{count, plural, =0{No places yet} =1{1 place waiting for you} other{{count} places waiting for you}}",
+  "@homeStartSwipingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeSectionMustSees": "Must-sees",
+  "homeSectionTonight": "Tonight",
+  "homeSectionHiddenGems": "Hidden gems",
+  "homeSeeAll": "All",
+  "homeVenuesComingTitle": "Bars & restaurants coming soon",
+  "homeVenuesComingBody": "We're collecting the best spots for your evening.",
+  "collectionEmpty": "Nothing here yet. Try another city."
 }

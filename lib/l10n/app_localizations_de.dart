@@ -1358,4 +1358,114 @@ class AppLocalizationsDe extends AppLocalizations {
   String distanceMetersValue(int meters) {
     return '$meters m';
   }
+
+  @override
+  String get matchStamp => 'Match';
+
+  @override
+  String get limitTimeShort => 'Zeit';
+
+  @override
+  String get sessionSetupTitle => 'Neue Session';
+
+  @override
+  String sessionSwipesValue(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Swipes',
+      one: '1 Swipe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sessionMinutesValue(int count) {
+    return '$count Min.';
+  }
+
+  @override
+  String get sessionLimitLess => 'Weniger';
+
+  @override
+  String get sessionLimitMore => 'Mehr';
+
+  @override
+  String get dayPlanEndShort => 'Ende bei mir';
+
+  @override
+  String get dayPlanStartShort => 'Start bei mir';
+
+  @override
+  String get placeSectionInfo => 'Infos';
+
+  @override
+  String get placeSectionSources => 'Quellen';
+
+  @override
+  String get tagRestaurant => 'Restaurant';
+
+  @override
+  String get tagCafe => 'Café';
+
+  @override
+  String get tagBar => 'Bar';
+
+  @override
+  String get tagPub => 'Kneipe';
+
+  @override
+  String get tagBiergarten => 'Biergarten';
+
+  @override
+  String get tagNightClub => 'Club';
+
+  @override
+  String get interestFood => 'Essen & Trinken';
+
+  @override
+  String homeHeadlineCity(String city) {
+    return 'Was machen wir heute in $city?';
+  }
+
+  @override
+  String get homeHeadlineNearby => 'Was machen wir heute?';
+
+  @override
+  String get homeStartSwiping => 'Swipen starten';
+
+  @override
+  String homeStartSwipingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Orte warten auf dich',
+      one: '1 Ort wartet auf dich',
+      zero: 'Noch keine Orte',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeSectionMustSees => 'Must-sees';
+
+  @override
+  String get homeSectionTonight => 'Heute Abend';
+
+  @override
+  String get homeSectionHiddenGems => 'Geheimtipps';
+
+  @override
+  String get homeSeeAll => 'Alle';
+
+  @override
+  String get homeVenuesComingTitle => 'Bars und Restaurants kommen bald';
+
+  @override
+  String get homeVenuesComingBody =>
+      'Wir sammeln gerade die besten Adressen für deinen Abend.';
+
+  @override
+  String get collectionEmpty =>
+      'Hier ist noch nichts. Probier eine andere Stadt.';
 }

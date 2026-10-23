@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:intl/intl.dart';
 import '../../../common/models/place_model.dart';
 import '../../../common/utils/place_photo_url_builder.dart';
 import '../../../common/models/group_session_model.dart';
@@ -13,7 +14,8 @@ import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
 import '../../../common/widgets/skeleton.dart';
 import '../widgets/match_celebration.dart';
-import '../../../app/theme.dart';
+import '../../../common/widgets/ticket.dart';
+import '../../../core/constants/sizes.dart';
 
 class ResultItem {
   final PlaceModel place;
@@ -213,17 +215,16 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
             data: (sessions) {
               if (sessions.isEmpty) {
                 return Center(
+                  child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(AppSizes.space32),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.history,
-                        size: 80,
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
+                      const IconBadge(icon: Icons.history, tone: ChipTone.sky),
                       const SizedBox(height: 24),
                       Text(
                         context.l10n.noCompletedSessionsTitle,
+                        textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       const SizedBox(height: 8),
@@ -240,6 +241,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                       ),
                     ],
                   ),
+                  ),
                 );
               }
 
@@ -253,48 +255,47 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
 
               return Column(
                 children: [
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-                    padding: const EdgeInsets.fromLTRB(16, 4, 12, 4),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.outlineVariant,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.history, color: Theme.of(context).colorScheme.primary),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: DropdownButton<String>(
-                            value: sessionId,
-                            isExpanded: true,
-                            underline: const SizedBox.shrink(),
-                            onChanged: (value) {
-                              if (value == null) return;
-                              ref
-                                  .read(
-                                      selectedSessionIdProvider(widget.groupId)
-                                          .notifier)
-                                  .updateState(value);
-                            },
-                            items: sessions
-                                .map(
-                                  (session) => DropdownMenuItem(
-                                    value: session.sessionId,
-                                    child: Text(
-                                      _formatSessionLabel(context, session),
-                                      overflow: TextOverflow.ellipsis,
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(AppSizes.screenEdge,
+                        AppSizes.space4, AppSizes.screenEdge, 0),
+                    child: Ticket(
+                      padding: const EdgeInsets.fromLTRB(
+                          AppSizes.space16, 0, AppSizes.space8, 0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.history,
+                              color: Theme.of(context).colorScheme.onSurface),
+                          const SizedBox(width: AppSizes.space12),
+                          Expanded(
+                            child: DropdownButton<String>(
+                              value: sessionId,
+                              isExpanded: true,
+                              underline: const SizedBox.shrink(),
+                              borderRadius: BorderRadius.circular(
+                                  AppSizes.radiusTicket),
+                              onChanged: (value) {
+                                if (value == null) return;
+                                ref
+                                    .read(selectedSessionIdProvider(
+                                            widget.groupId)
+                                        .notifier)
+                                    .updateState(value);
+                              },
+                              items: sessions
+                                  .map(
+                                    (session) => DropdownMenuItem(
+                                      value: session.sessionId,
+                                      child: Text(
+                                        _formatSessionLabel(context, session),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
-                                  ),
-                                )
-                                .toList(),
+                                  )
+                                  .toList(),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   Expanded(
@@ -314,17 +315,19 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                         _maybeCelebrate(sessions.first, sessionId, results);
                         if (results.isEmpty) {
                           return Center(
+                            child: SingleChildScrollView(
+                            padding: const EdgeInsets.all(AppSizes.space32),
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(
-                                  Icons.favorite_border,
-                                  size: 80,
-                                  color: Theme.of(context).colorScheme.outline,
+                                const IconBadge(
+                                  icon: Icons.favorite_border,
+                                  tone: ChipTone.peach,
                                 ),
                                 const SizedBox(height: 24),
                                 Text(
                                   context.l10n.noQualifiedPlacesTitle,
+                                  textAlign: TextAlign.center,
                                   style:
                                       Theme.of(context).textTheme.headlineSmall,
                                 ),
@@ -335,6 +338,7 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                                   style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                                 ),
                               ],
+                            ),
                             ),
                           );
                         }
@@ -373,7 +377,7 @@ class _ResultThumbnail extends StatelessWidget {
       return _buildImagePlaceholder(context);
     }
     return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(AppSizes.radiusSm),
       child: CachedNetworkImage(
         imageUrl: imageUrls.first,
         width: 64,
@@ -389,7 +393,10 @@ class _ResultThumbnail extends StatelessWidget {
     return Container(
       width: 64,
       height: 64,
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+      ),
       child: Center(
         child: Icon(
           Icons.place,
@@ -405,7 +412,8 @@ String _formatSessionLabel(BuildContext context, GroupSessionModel session) {
   final endedAt = session.endedAt;
   final dateLabel = endedAt == null
       ? context.l10n.sessionInProgress
-      : endedAt.toLocal().toIso8601String().split('T').first;
+      : DateFormat.yMMMd(Localizations.localeOf(context).toLanguageTag())
+          .format(endedAt.toLocal());
   return '${session.destination} · $dateLabel';
 }
 
@@ -484,13 +492,15 @@ class _ResultsListState extends ConsumerState<_ResultsList> {
     final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
-    final like = context.swipeColors.like;
     final hasPlan = widget.session.dayPlan?.placeIds.isNotEmpty ?? false;
+    final participants = widget.session.participants.length;
+    final lang = Localizations.localeOf(context).languageCode;
     return Column(
       children: [
         if (widget.isAdmin)
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            padding: const EdgeInsets.fromLTRB(
+                AppSizes.screenEdge, AppSizes.space12, AppSizes.screenEdge, 0),
             child: Text(
               l10n.dayPlanSelectHint,
               style: text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
@@ -498,101 +508,95 @@ class _ResultsListState extends ConsumerState<_ResultsList> {
           ),
         Expanded(
           child: ListView.builder(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(AppSizes.screenEdge),
             itemCount: widget.results.length,
             itemBuilder: (context, index) {
               final result = widget.results[index];
-              final podium = index < 3;
               final selected = _selected.contains(result.place.id);
+              // Everyone in the session liked it.
+              final isMatch = participants > 0 && result.likes >= participants;
               return Padding(
                 key: ValueKey(result.place.id),
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Card(
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(24),
-                    onTap: () => context.push('/place/${result.place.id}'),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(14, 10, 6, 10),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 28,
-                            child: Text(
-                              '${index + 1}',
-                              textAlign: TextAlign.center,
-                              style: text.headlineSmall?.copyWith(
-                                color: podium ? scheme.primary : scheme.outline,
-                              ),
-                            ),
+                padding: const EdgeInsets.only(bottom: AppSizes.space12),
+                child: Ticket(
+                  onTap: () => context.push('/place/${result.place.id}'),
+                  padding: EdgeInsets.fromLTRB(AppSizes.space12,
+                      AppSizes.space12, widget.isAdmin ? 4 : 12, 12),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 24,
+                        child: Text(
+                          '${index + 1}',
+                          textAlign: TextAlign.center,
+                          style: text.titleLarge?.copyWith(
+                            color: index < 3
+                                ? scheme.onSurface
+                                : scheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w800,
                           ),
-                          const SizedBox(width: 10),
-                          _ResultThumbnail(place: result.place),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                        ),
+                      ),
+                      const SizedBox(width: AppSizes.space8),
+                      _ResultThumbnail(place: result.place),
+                      const SizedBox(width: AppSizes.space12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              result.place.nameFor(lang),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: text.titleMedium,
+                            ),
+                            if (result.place.address != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                result.place.address!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: text.bodySmall
+                                    ?.copyWith(color: scheme.onSurfaceVariant),
+                              ),
+                            ],
+                            const SizedBox(height: AppSizes.space8),
+                            Row(
                               children: [
-                                Text(
-                                  result.place.nameFor(
-                                    Localizations.localeOf(context).languageCode,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: text.titleMedium,
+                                TagChip(
+                                  label: '${result.likes}',
+                                  tone: ChipTone.peach,
+                                  icon: Icons.favorite_rounded,
                                 ),
-                                if (result.place.address != null) ...[
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    result.place.address!,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: text.bodySmall
-                                        ?.copyWith(color: scheme.onSurfaceVariant),
+                                if (isMatch) ...[
+                                  const SizedBox(width: AppSizes.space12),
+                                  Stamp(
+                                    text: l10n.matchStamp,
+                                    color: scheme.onSurface,
+                                    size: 12,
+                                    angle: -0.12,
                                   ),
                                 ],
-                                const SizedBox(height: 6),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: like.withValues(alpha: 0.14),
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.favorite, size: 13, color: like),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '${result.likes}',
-                                        style: text.labelMedium?.copyWith(
-                                          color: like,
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
                               ],
                             ),
-                          ),
-                          if (widget.isAdmin)
-                            Checkbox(
-                              value: selected,
-                              semanticLabel: l10n.dayPlanSelectPlace,
-                              onChanged: _busy
-                                  ? null
-                                  : (value) => setState(() {
-                                        if (value == true) {
-                                          _selected.add(result.place.id);
-                                        } else {
-                                          _selected.remove(result.place.id);
-                                        }
-                                      }),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
+                      if (widget.isAdmin)
+                        Checkbox(
+                          value: selected,
+                          semanticLabel: l10n.dayPlanSelectPlace,
+                          onChanged: _busy
+                              ? null
+                              : (value) => setState(() {
+                                    if (value == true) {
+                                      _selected.add(result.place.id);
+                                    } else {
+                                      _selected.remove(result.place.id);
+                                    }
+                                  }),
+                        ),
+                    ],
                   ),
                 ),
               );
@@ -603,32 +607,38 @@ class _ResultsListState extends ConsumerState<_ResultsList> {
           SafeArea(
             top: false,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (widget.isAdmin)
-                    FilledButton.icon(
-                      icon: _busy
-                          ? const SizedBox.square(
-                              dimension: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.route),
-                      label: Text(l10n.dayPlanCreate(_selected.length)),
-                      onPressed:
-                          _selected.isEmpty || _busy ? null : _createPlan,
-                    ),
-                  if (hasPlan) ...[
-                    if (widget.isAdmin) const SizedBox(height: 8),
-                    OutlinedButton.icon(
+              padding: const EdgeInsets.fromLTRB(AppSizes.screenEdge, 0,
+                  AppSizes.screenEdge, AppSizes.space12),
+              // One orange action: create for the admin, otherwise view.
+              child: widget.isAdmin
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        ElevatedButton.icon(
+                          icon: _busy
+                              ? const SizedBox.square(
+                                  dimension: 18,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Icon(Icons.route),
+                          label: Text(l10n.dayPlanCreate(_selected.length)),
+                          onPressed:
+                              _selected.isEmpty || _busy ? null : _createPlan,
+                        ),
+                        if (hasPlan)
+                          TextButton.icon(
+                            icon: const Icon(Icons.map_outlined),
+                            label: Text(l10n.dayPlanView),
+                            onPressed: _openPlan,
+                          ),
+                      ],
+                    )
+                  : ElevatedButton.icon(
                       icon: const Icon(Icons.map_outlined),
                       label: Text(l10n.dayPlanView),
                       onPressed: _openPlan,
                     ),
-                  ],
-                ],
-              ),
             ),
           ),
       ],

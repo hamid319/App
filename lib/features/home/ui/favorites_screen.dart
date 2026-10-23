@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../app/theme.dart';
 import '../../../common/models/place_model.dart';
 import '../../../common/utils/place_type_labels.dart';
-import '../../../common/widgets/place_photo.dart';
 import '../../../common/widgets/skeleton.dart';
+import '../../../common/widgets/ticket.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
 import '../../../main_providers.dart';
 import '../../swipe/logic/swipe_controller.dart';
+import '../widgets/place_ticket_tile.dart';
 
 /// Two-column photo grid of saved places with category chips as filters.
 class FavoritesScreen extends ConsumerStatefulWidget {
@@ -79,12 +81,20 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                   return Center(
                     child: Padding(
                       padding: const EdgeInsets.all(AppSizes.space24),
-                      child: Text(
-                        userMessage(
-                          snapshot.error!,
-                          fallback: l10n.errorLoadFavorites,
-                          l10n: l10n,
-                        ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const IconBadge(icon: Icons.cloud_off_rounded),
+                          const SizedBox(height: AppSizes.space24),
+                          Text(
+                            userMessage(
+                              snapshot.error!,
+                              fallback: l10n.errorLoadFavorites,
+                              l10n: l10n,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     ),
                   );
@@ -175,7 +185,7 @@ class _Grid extends ConsumerWidget {
         if (categories.length > 1)
           SliverToBoxAdapter(
             child: SizedBox(
-              height: 48,
+              height: 52,
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(
@@ -209,12 +219,15 @@ class _Grid extends ConsumerWidget {
               crossAxisCount: 2,
               mainAxisSpacing: AppSizes.space16,
               crossAxisSpacing: AppSizes.space12,
-              childAspectRatio: 0.72,
+              childAspectRatio: 0.7,
             ),
             itemCount: shown.length,
             itemBuilder: (context, i) => _Tile(
               place: shown[i],
               subtitle: category(shown[i]),
+              tone: _tones[
+                  (categories.indexOf(category(shown[i]) ?? '') + 1) %
+                      _tones.length],
             ),
           ),
         ),
@@ -223,80 +236,37 @@ class _Grid extends ConsumerWidget {
   }
 }
 
+const _tones = placeTicketTones;
+
 class _Tile extends ConsumerWidget {
-  const _Tile({required this.place, this.subtitle});
+  const _Tile({required this.place, required this.tone, this.subtitle});
 
   final PlaceModel place;
   final String? subtitle;
+  final ChipTone tone;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final text = Theme.of(context).textTheme;
-    return InkWell(
-      onTap: () => context.push('/place/${place.id}'),
-      borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Hero(
-                    tag: placePhotoHeroTag(place.id),
-                    child: PlacePhoto(place: place),
-                  ),
-                  Positioned(
-                    top: 4,
-                    right: 4,
-                    child: IconButton(
-                      tooltip: l10n.removeFromFavoritesTooltip,
-                      icon: const Icon(
-                        Icons.favorite,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(color: Color(0x80000000), blurRadius: 6),
-                        ],
-                      ),
-                      onPressed: () {
-                        ref
-                            .read(swipeControllerProvider.notifier)
-                            .removeFavorite(place.id);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              l10n.placeRemovedFromFavorites(place.name),
-                            ),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
+    final name = place.nameFor(Localizations.localeOf(context).languageCode);
+    return PlaceTicketTile(
+      place: place,
+      subtitle: subtitle,
+      tone: tone,
+      overlay: InkActionButton(
+        icon: Icons.favorite_rounded,
+        size: 36,
+        iconColor: context.swipeColors.like,
+        tooltip: l10n.removeFromFavoritesTooltip,
+        onPressed: () {
+          ref.read(swipeControllerProvider.notifier).removeFavorite(place.id);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.placeRemovedFromFavorites(name)),
+              duration: const Duration(seconds: 2),
             ),
-          ),
-          const SizedBox(height: AppSizes.space8),
-          Text(
-            place.nameFor(Localizations.localeOf(context).languageCode),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-          ),
-          if (subtitle != null)
-            Text(
-              subtitle!,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: text.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -317,29 +287,17 @@ class _FilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(right: 6, top: 6, bottom: 6),
-      child: Material(
-        color: selected ? scheme.onSurface : scheme.surface,
-        shape: StadiumBorder(
-          side: BorderSide(
-            color: selected ? scheme.onSurface : scheme.outlineVariant,
-          ),
-        ),
-        child: InkWell(
-          customBorder: const StadiumBorder(),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            child: Center(
-              child: Text(
-                label,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: selected ? scheme.surface : scheme.onSurface,
-                    ),
+      padding: const EdgeInsets.only(right: 6),
+      child: Center(
+        child: ChoiceChip(
+          label: Text(label),
+          selected: selected,
+          showCheckmark: false,
+          onSelected: (_) => onTap(),
+          labelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: selected ? scheme.onInverseSurface : scheme.onSurface,
               ),
-            ),
-          ),
         ),
       ),
     );
@@ -359,7 +317,7 @@ class _GridSkeleton extends StatelessWidget {
           crossAxisCount: 2,
           mainAxisSpacing: AppSizes.space16,
           crossAxisSpacing: AppSizes.space12,
-          childAspectRatio: 0.72,
+          childAspectRatio: 0.7,
         ),
         itemCount: 6,
         itemBuilder: (_, __) => const Column(
@@ -368,7 +326,7 @@ class _GridSkeleton extends StatelessWidget {
             Expanded(
               child: SkeletonBox(
                 width: double.infinity,
-                radius: AppSizes.radiusMd,
+                radius: AppSizes.radiusTicket,
               ),
             ),
             SizedBox(height: AppSizes.space8),
@@ -401,16 +359,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 88,
-              height: 88,
-              decoration: BoxDecoration(
-                color: scheme.primaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child:
-                  Icon(Icons.favorite_rounded, size: 40, color: scheme.primary),
-            ),
+            const IconBadge(icon: Icons.favorite_rounded),
             const SizedBox(height: AppSizes.space24),
             Text(
               l10n.noFavoritesTitle,
@@ -426,10 +375,9 @@ class _EmptyState extends StatelessWidget {
                   ?.copyWith(color: scheme.onSurfaceVariant),
             ),
             const SizedBox(height: AppSizes.space24),
-            FilledButton.icon(
+            ElevatedButton.icon(
               onPressed: () => context.go('/home'),
-              style: FilledButton.styleFrom(minimumSize: const Size(0, 48)),
-              icon: const Icon(Icons.explore),
+              icon: const Icon(Icons.explore_rounded),
               label: Text(l10n.navDiscover),
             ),
           ],

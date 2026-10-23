@@ -6,7 +6,7 @@ import '../../../common/models/place_model.dart';
 import '../../../common/utils/place_type_labels.dart';
 import '../../../common/widgets/place_photo.dart';
 import '../../../common/widgets/skeleton.dart';
-import '../../../core/constants/colors.dart';
+import '../../../common/widgets/ticket.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/constants/typography.dart';
 import '../../../l10n/l10n.dart';
@@ -213,35 +213,37 @@ class _SwipeDeckState extends State<SwipeDeck>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (widget.onUndo != null) ...[
-                _RoundAction(
+                InkActionButton(
+                  size: 46,
                   icon: Icons.undo_rounded,
-                  color: colors.gold,
+                  fill: colors.gold,
+                  iconColor: _onGold,
                   tooltip: l10n.undo,
                   onPressed:
                       _animating || !widget.canUndo ? null : widget.onUndo,
                 ),
                 const SizedBox(width: AppSizes.space16),
               ],
-              _RoundAction(
-                large: true,
+              InkActionButton(
+                size: 64,
                 icon: Icons.close_rounded,
-                color: colors.nope,
+                iconColor: colors.nope,
                 tooltip: l10n.skip,
                 onPressed: () => _buttonSwipe(toRight: false),
               ),
               const SizedBox(width: AppSizes.space16),
-              _RoundAction(
-                large: true,
-                filled: true,
+              InkActionButton(
+                size: 64,
                 icon: Icons.favorite_rounded,
-                color: colors.like,
+                fill: colors.like,
+                iconColor: Theme.of(context).colorScheme.onPrimary,
                 tooltip: l10n.like,
                 onPressed: () => _buttonSwipe(toRight: true),
               ),
               const SizedBox(width: AppSizes.space16),
-              _RoundAction(
+              InkActionButton(
+                size: 46,
                 icon: Icons.info_outline_rounded,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 tooltip: l10n.details,
                 onPressed: widget.onDetail,
               ),
@@ -253,15 +255,12 @@ class _SwipeDeckState extends State<SwipeDeck>
   }
 }
 
-/// Card shadow from the design tokens (s3 · swipe).
-const _cardShadow = [
-  BoxShadow(
-    color: Color(0x59101218),
-    blurRadius: 28,
-    spreadRadius: -10,
-    offset: Offset(0, 10),
-  ),
-];
+/// Ink on the gold undo button in both modes.
+const _onGold = Color(0xFF221A14);
+
+/// Height of the ticket stub under the perforation: name, one line of
+/// description and the tags.
+const double _stubHeight = 140;
 
 class _CardFace extends StatelessWidget {
   const _CardFace({
@@ -277,98 +276,99 @@ class _CardFace extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.swipeColors;
+    final theme = Theme.of(context);
     final tags = placeTypeLabels(context.l10n, place.types).take(3).toList();
     final lang = Localizations.localeOf(context).languageCode;
     final description = place.descriptionFor(lang)?.trim() ?? '';
+    const tones = [ChipTone.mint, ChipTone.sky, ChipTone.peach];
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        boxShadow: _cardShadow,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Hero(
-              tag: placePhotoHeroTag(place.id),
-              child: PlacePhoto(place: place),
-            ),
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: [0, 0.22, 0.42, 0.78, 1],
-                  colors: [
-                    PhotoColors.scrimTop,
-                    Colors.transparent,
-                    Colors.transparent,
-                    Color(0xC7080A0E),
-                    PhotoColors.scrimBottom,
-                  ],
+    return Ticket(
+      raised: true,
+      notchFromBottom: _stubHeight,
+      child: Column(
+        children: [
+          Expanded(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Hero(
+                  tag: placePhotoHeroTag(place.id),
+                  child: PlacePhoto(place: place),
                 ),
-              ),
+                Positioned(
+                  top: 28,
+                  left: 18,
+                  child: _FadingStamp(
+                    opacity: likeOpacity,
+                    child: Stamp(
+                      text: context.l10n.likeStamp,
+                      color: colors.like,
+                      filled: true,
+                      angle: -0.22,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 28,
+                  right: 18,
+                  child: _FadingStamp(
+                    opacity: nopeOpacity,
+                    child: Stamp(
+                      text: context.l10n.nopeStamp,
+                      color: colors.nope,
+                      filled: true,
+                      angle: 0.22,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            Positioned(
-              left: AppSizes.space16,
-              right: AppSizes.space16,
-              bottom: AppSizes.space16,
+          ),
+          SizedBox(
+            height: _stubHeight,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSizes.space16 + 4,
+                AppSizes.space16 + 2,
+                AppSizes.space16 + 4,
+                AppSizes.space12,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     place.nameFor(lang),
-                    style: AppTypography.cardTitle(),
-                    maxLines: 2,
+                    style: AppTypography.cardTitle()
+                        .copyWith(color: theme.colorScheme.onSurface),
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (description.isNotEmpty) ...[
-                    const SizedBox(height: AppSizes.space8),
+                    const SizedBox(height: AppSizes.space4),
                     Text(
                       description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.9),
-                          ),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
-                  if (tags.isNotEmpty) ...[
-                    const SizedBox(height: AppSizes.space12),
+                  const Spacer(),
+                  if (tags.isNotEmpty)
                     Wrap(
                       spacing: 6,
                       runSpacing: 6,
-                      children: [for (final t in tags) PhotoChip(label: t)],
+                      children: [
+                        for (final (i, t) in tags.indexed)
+                          TagChip(label: t, tone: tones[i % tones.length]),
+                      ],
                     ),
-                  ],
                 ],
               ),
             ),
-            Positioned(
-              top: 30,
-              left: 18,
-              child: _Stamp(
-                text: context.l10n.likeStamp,
-                color: colors.like,
-                angle: -0.24,
-                opacity: likeOpacity,
-              ),
-            ),
-            Positioned(
-              top: 30,
-              right: 18,
-              child: _Stamp(
-                text: context.l10n.nopeStamp,
-                color: colors.nope,
-                angle: 0.24,
-                opacity: nopeOpacity,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -386,17 +386,16 @@ class _BackCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scale = AppSizes.backCardScale + (1 - AppSizes.backCardScale) * lift;
     return Transform.translate(
-      offset: Offset(0, 10 * (1 - lift)),
+      offset: Offset(0, 14 * (1 - lift)),
       child: Transform.scale(
         scale: scale,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-          child: ColorFiltered(
-            colorFilter: ColorFilter.mode(
-              Colors.black.withValues(alpha: 0.18 * (1 - lift)),
-              BlendMode.darken,
-            ),
-            child: PlacePhoto(place: place),
+        child: Ticket(
+          notchFromBottom: _stubHeight,
+          child: Column(
+            children: [
+              Expanded(child: PlacePhoto(place: place)),
+              const SizedBox(height: _stubHeight),
+            ],
           ),
         ),
       ),
@@ -404,96 +403,19 @@ class _BackCard extends StatelessWidget {
   }
 }
 
-class _Stamp extends StatelessWidget {
-  const _Stamp({
-    required this.text,
-    required this.color,
-    required this.angle,
-    required this.opacity,
-  });
+class _FadingStamp extends StatelessWidget {
+  const _FadingStamp({required this.opacity, required this.child});
 
-  final String text;
-  final Color color;
-  final double angle;
   final double opacity;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
     if (opacity <= 0) return const SizedBox.shrink();
+    // Stamps land a little bigger, like they are pressed onto the ticket.
     return Opacity(
       opacity: opacity,
-      child: Transform.rotate(
-        angle: angle,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-          decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.08),
-            border: Border.all(color: color, width: 3.5),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Text(text, style: AppTypography.stamp(color)),
-        ),
-      ),
-    );
-  }
-}
-
-class _RoundAction extends StatelessWidget {
-  const _RoundAction({
-    required this.icon,
-    required this.color,
-    required this.tooltip,
-    required this.onPressed,
-    this.large = false,
-    this.filled = false,
-  });
-
-  final IconData icon;
-  final Color color;
-  final String tooltip;
-  final VoidCallback? onPressed;
-  final bool large;
-  final bool filled;
-
-  @override
-  Widget build(BuildContext context) {
-    final size = large ? 64.0 : 46.0;
-    final surface = Theme.of(context).colorScheme.surface;
-    return Tooltip(
-      message: tooltip,
-      child: AnimatedOpacity(
-        opacity: onPressed != null ? 1 : 0.4,
-        duration: const Duration(milliseconds: 150),
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: filled ? color : surface,
-            shape: BoxShape.circle,
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x4D000000),
-                blurRadius: 16,
-                spreadRadius: -6,
-                offset: Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Material(
-            type: MaterialType.transparency,
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: onPressed,
-              child: Icon(
-                icon,
-                size: large ? 30 : 22,
-                color: filled ? Colors.white : color,
-                semanticLabel: tooltip,
-              ),
-            ),
-          ),
-        ),
-      ),
+      child: Transform.scale(scale: 1.25 - 0.25 * opacity, child: child),
     );
   }
 }
@@ -518,7 +440,7 @@ class SwipeDeckSkeleton extends StatelessWidget {
               child: SkeletonBox(
                 width: double.infinity,
                 height: double.infinity,
-                radius: AppSizes.radiusCard,
+                radius: AppSizes.radiusTicket,
               ),
             ),
           ),

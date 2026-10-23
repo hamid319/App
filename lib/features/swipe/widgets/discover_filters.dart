@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../common/models/interest.dart';
 import '../../../common/widgets/city_picker.dart';
+import '../../../common/widgets/ticket.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../l10n/l10n.dart';
 import '../logic/discover_preferences_controller.dart';
@@ -16,6 +17,7 @@ String interestLabel(AppLocalizations l10n, Interest interest) =>
       Interest.views => l10n.interestViews,
       Interest.family => l10n.interestFamily,
       Interest.nightlife => l10n.interestNightlife,
+      Interest.food => l10n.interestFood,
       Interest.shopping => l10n.interestShopping,
     };
 
@@ -27,6 +29,7 @@ IconData interestIcon(Interest interest) => switch (interest) {
       Interest.views => Icons.landscape_outlined,
       Interest.family => Icons.family_restroom_outlined,
       Interest.nightlife => Icons.nightlife_outlined,
+      Interest.food => Icons.restaurant_outlined,
       Interest.shopping => Icons.shopping_bag_outlined,
     };
 
@@ -51,7 +54,9 @@ class DiscoverLocationChip extends ConsumerWidget {
       label: '${context.l10n.locationTitle} ${placeLabel(context, prefs)}',
       child: Material(
         color: scheme.surface,
-        shape: StadiumBorder(side: BorderSide(color: scheme.outlineVariant)),
+        shape: StadiumBorder(
+          side: BorderSide(color: scheme.outline, width: AppSizes.edge),
+        ),
         child: InkWell(
           customBorder: const StadiumBorder(),
           onTap: () => showLocationPicker(context, ref),
@@ -66,7 +71,7 @@ class DiscoverLocationChip extends ConsumerWidget {
                         ? Icons.near_me_outlined
                         : Icons.place_outlined,
                     size: 16,
-                    color: scheme.primary,
+                    color: scheme.onSurface,
                   ),
                   const SizedBox(width: 4),
                   ConstrainedBox(
@@ -78,7 +83,7 @@ class DiscoverLocationChip extends ConsumerWidget {
                       style: Theme.of(context)
                           .textTheme
                           .labelLarge
-                          ?.copyWith(fontWeight: FontWeight.w600),
+                          ?.copyWith(fontWeight: FontWeight.w800),
                     ),
                   ),
                   Icon(Icons.expand_more,
@@ -106,10 +111,8 @@ class DiscoverFilterButton extends ConsumerWidget {
     return IconButton(
       tooltip: context.l10n.filtersTitle,
       style: IconButton.styleFrom(
-        backgroundColor: active > 0 ? scheme.primaryContainer : scheme.surface,
-        side: BorderSide(
-          color: active > 0 ? scheme.primaryContainer : scheme.outlineVariant,
-        ),
+        backgroundColor: active > 0 ? scheme.onSurface : scheme.surface,
+        side: BorderSide(color: scheme.outline, width: AppSizes.edge),
       ),
       onPressed: () => showFilterSheet(context, ref),
       icon: Badge(
@@ -118,7 +121,7 @@ class DiscoverFilterButton extends ConsumerWidget {
         child: Icon(
           Icons.tune,
           size: 20,
-          color: active > 0 ? scheme.primary : scheme.onSurface,
+          color: active > 0 ? scheme.surface : scheme.onSurface,
         ),
       ),
     );
@@ -184,8 +187,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
           children: [
             Text(l10n.filtersTitle, style: text.headlineSmall),
             const SizedBox(height: AppSizes.space24),
-            Text(l10n.interestsTitle, style: text.titleMedium),
-            const SizedBox(height: AppSizes.space4),
+            SectionLabel(l10n.interestsTitle),
             Text(
               l10n.interestsHint,
               style: text.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
@@ -195,27 +197,31 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                for (final i in Interest.values)
-                  FilterChip(
-                    avatar: Icon(interestIcon(i), size: 18),
-                    label: Text(interestLabel(l10n, i)),
-                    selected: _interests.contains(i),
-                    showCheckmark: false,
-                    selectedColor: scheme.primaryContainer,
-                    side: BorderSide(
-                      color: _interests.contains(i)
-                          ? scheme.primary
-                          : scheme.outlineVariant,
-                    ),
-                    onSelected: (on) => setState(() {
-                      on ? _interests.add(i) : _interests.remove(i);
-                    }),
-                  ),
+                // The deck shows sights only, so a food filter could never
+                // match there.
+                for (final i in Interest.values.where((i) => i != Interest.food))
+                  Builder(builder: (context) {
+                    final on = _interests.contains(i);
+                    final fg =
+                        on ? scheme.onInverseSurface : scheme.onSurface;
+                    return FilterChip(
+                      avatar: Icon(interestIcon(i), size: 18, color: fg),
+                      label: Text(interestLabel(l10n, i)),
+                      labelStyle: text.labelLarge?.copyWith(
+                        color: fg,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      selected: on,
+                      showCheckmark: false,
+                      onSelected: (on) => setState(() {
+                        on ? _interests.add(i) : _interests.remove(i);
+                      }),
+                    );
+                  }),
               ],
             ),
             const SizedBox(height: AppSizes.groupGap),
-            Text(l10n.radiusTitle, style: text.titleMedium),
-            const SizedBox(height: AppSizes.space12),
+            SectionLabel(l10n.radiusTitle),
             SizedBox(
               width: double.infinity,
               child: SegmentedButton<int>(
@@ -240,7 +246,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
                 ),
                 const SizedBox(width: AppSizes.space12),
                 Expanded(
-                  child: FilledButton(
+                  child: ElevatedButton(
                     onPressed: () {
                       ref.read(discoverPreferencesProvider.notifier).setFilters(
                             interests: _interests,

@@ -43,3 +43,19 @@ class MemberAvatar extends StatelessWidget {
     );
   }
 }
+
+/// A member's name as shown in the group: never a full email address.
+/// Some profiles store the email as display name; then only its local part
+/// before '+' or '@' is shown ("anna+trip@x.de" → "anna"). Returns null
+/// when nothing usable is left, so callers can use their own fallback.
+String? friendlyMemberName(String? name) {
+  var value = name?.trim() ?? '';
+  final at = value.indexOf('@');
+  if (at >= 0) {
+    value = value.substring(0, at);
+    final plus = value.indexOf('+');
+    if (plus >= 0) value = value.substring(0, plus);
+    value = value.trim();
+  }
+  return value.isEmpty ? null : value;
+}

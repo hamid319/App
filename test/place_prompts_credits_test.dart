@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:swipetrip/app/theme.dart';
 import 'package:swipetrip/common/models/photo_credit.dart';
 import 'package:swipetrip/common/models/place_model.dart';
 import 'package:swipetrip/common/models/place_prompt.dart';
@@ -16,6 +17,7 @@ Map<String, dynamic> _place(Map<String, dynamic> extra) => {
     };
 
 Widget _app(Widget child, {Locale locale = const Locale('en')}) => MaterialApp(
+      theme: AppTheme.light,
       locale: locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

@@ -34,7 +34,8 @@ class PhotoCreditChip extends StatelessWidget {
       label: l10n.photoCreditsTitle,
       child: Material(
         color: PhotoColors.chip,
-        shape: const StadiumBorder(side: BorderSide(color: PhotoColors.chipBorder)),
+        shape: const StadiumBorder(
+            side: BorderSide(color: PhotoColors.chipBorder)),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () => showPhotoCredits(context, credits),
@@ -80,7 +81,8 @@ Future<void> showPhotoCredits(BuildContext context, List<PhotoCredit> credits) {
     } catch (e) {
       messenger.showSnackBar(
         SnackBar(
-          content: Text(userMessage(e, fallback: l10n.errorOpenLink, l10n: l10n)),
+          content:
+              Text(userMessage(e, fallback: l10n.errorOpenLink, l10n: l10n)),
         ),
       );
     }
@@ -111,7 +113,8 @@ Future<void> showPhotoCredits(BuildContext context, List<PhotoCredit> credits) {
               const SizedBox(height: AppSizes.space4),
               Text(
                 l10n.photoCreditsHint,
-                style: text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                style:
+                    text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
               ),
               for (final (index, credit) in credits.indexed) ...[
                 const SizedBox(height: AppSizes.space16),
@@ -184,9 +187,10 @@ class _CreditLink extends StatelessWidget {
         child: Text(
           label,
           style: base?.copyWith(
-            color: scheme.primary,
+            color: scheme.onSurface,
+            fontWeight: FontWeight.w600,
             decoration: TextDecoration.underline,
-            decorationColor: scheme.primary,
+            decorationColor: scheme.onSurface,
           ),
         ),
       ),

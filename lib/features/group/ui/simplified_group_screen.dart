@@ -4,20 +4,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../logic/group_controller.dart';
 import '../../../common/models/group_model.dart';
-import '../../../common/widgets/primary_button.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../../core/errors/user_message.dart';
+import '../../../core/constants/sizes.dart';
 import '../../../l10n/l10n.dart';
-import '../../../app/theme.dart';
 import '../../../common/widgets/skeleton.dart';
 import '../../../common/widgets/member_avatar.dart';
+import '../../../common/widgets/ticket.dart';
 import '../widgets/session_progress_panel.dart';
 import '../../../common/widgets/city_picker.dart';
 import '../../../core/constants/popular_cities.dart';
 import '../../../common/utils/trip_dates.dart';
 import '../../../main_providers.dart';
 import '../widgets/calendar_trip_sheet.dart';
+
+/// Swipe limits the admin can step through when starting a session.
+const _swipeLimitSteps = [5, 10, 15, 20, 25, 30, 40, 50];
+
+/// Time limits (minutes) the admin can step through.
+const _timeLimitSteps = [1, 2, 3, 5, 10, 15, 20, 30, 45, 60];
 
 class SimplifiedGroupScreen extends ConsumerStatefulWidget {
   const SimplifiedGroupScreen({super.key});
@@ -30,10 +36,9 @@ class SimplifiedGroupScreen extends ConsumerStatefulWidget {
 class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
   final TextEditingController _inviteCodeController = TextEditingController();
   final TextEditingController _groupNameController = TextEditingController();
-  final TextEditingController _swipeLimitController =
-      TextEditingController(text: '10');
-  final TextEditingController _timeLimitController =
-      TextEditingController(text: '5');
+
+  int _swipeLimit = 10;
+  int _timeLimit = 5;
 
   bool _isTimeLimit = false;
   bool _showCreateGroup = false;
@@ -48,8 +53,6 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
   void dispose() {
     _inviteCodeController.dispose();
     _groupNameController.dispose();
-    _swipeLimitController.dispose();
-    _timeLimitController.dispose();
     super.dispose();
   }
 
@@ -63,9 +66,10 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        // The details view is a state of this screen, not a route, so the
+        // back button clears the selection; its icon comes from the theme.
         leading: selectedId != null
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back),
+            ? BackButton(
                 onPressed: () {
                   ref.read(selectedGroupIdProvider.notifier).updateState(null);
                 },
@@ -134,8 +138,21 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
   }
 
   Widget _buildDashboardView(List<GroupModel> groups, String userId) {
+    // While the create form is open its "Create" is the one orange button.
+    final newGroupButton = _showCreateGroup
+        ? OutlinedButton.icon(
+            onPressed: null,
+            icon: const Icon(Icons.add),
+            label: Text(context.l10n.newGroupButton),
+          )
+        : ElevatedButton.icon(
+            onPressed: () => setState(() => _showCreateGroup = true),
+            icon: const Icon(Icons.add),
+            label: Text(context.l10n.newGroupButton),
+          );
     final header = Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.fromLTRB(AppSizes.screenEdge, AppSizes.space8,
+          AppSizes.screenEdge, AppSizes.space16),
       child: Row(
         children: [
           Expanded(
@@ -145,14 +162,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
               label: Text(context.l10n.join),
             ),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: PrimaryButton(
-              onPressed: () => setState(() => _showCreateGroup = true),
-              icon: Icons.add,
-              label: context.l10n.newGroupButton,
-            ),
-          ),
+          const SizedBox(width: AppSizes.space12),
+          Expanded(child: newGroupButton),
         ],
       ),
     );
@@ -165,12 +176,13 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
             _buildCreateGroupCard(),
             if (groups.isEmpty)
               Padding(
-                padding: const EdgeInsets.only(top: 24.0),
+                padding: const EdgeInsets.only(top: AppSizes.space24),
                 child: _buildEmptyDashboard(),
               )
             else
               ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.fromLTRB(AppSizes.screenEdge,
+                    AppSizes.space16, AppSizes.screenEdge, AppSizes.space16),
                 itemCount: groups.length,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -191,7 +203,8 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
           child: groups.isEmpty
               ? _buildEmptyDashboard()
               : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.fromLTRB(AppSizes.screenEdge, 0,
+                      AppSizes.screenEdge, AppSizes.space16),
                   itemCount: groups.length,
                   itemBuilder: (context, index) {
                     final group = groups[index];
@@ -213,33 +226,29 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
     void open() =>
         ref.read(selectedGroupIdProvider.notifier).updateState(group.groupId);
 
-    final (String label, Color fg, Color bg, VoidCallback onTap) status = isLive
-        ? (
-            l10n.statusLive,
-            context.swipeColors.like,
-            context.swipeColors.like.withValues(alpha: 0.14),
-            () => context.push('/swipe/${group.groupId}'),
-          )
-        : hasCompleted
+    final (String label, ChipTone tone, IconData? icon, VoidCallback onTap)
+        status = isLive
             ? (
-                l10n.statusDone,
-                scheme.onSurfaceVariant,
-                scheme.surfaceContainerHighest,
-                () => context.push('/group-matches/${group.groupId}'),
+                l10n.statusLive,
+                ChipTone.peach,
+                Icons.bolt_rounded,
+                () => context.push('/swipe/${group.groupId}'),
               )
-            : isOwner
+            : hasCompleted
                 ? (
-                    l10n.statusStart,
-                    scheme.primary,
-                    scheme.primaryContainer,
-                    open,
+                    l10n.statusDone,
+                    ChipTone.mint,
+                    Icons.check_rounded,
+                    () => context.push('/group-matches/${group.groupId}'),
                   )
-                : (
-                    l10n.statusIdle,
-                    scheme.onSurfaceVariant,
-                    scheme.surfaceContainerHighest,
-                    open,
-                  );
+                : isOwner
+                    ? (
+                        l10n.statusStart,
+                        ChipTone.sky,
+                        Icons.play_arrow_rounded,
+                        open,
+                      )
+                    : (l10n.statusIdle, ChipTone.neutral, null, open);
     final subtitle = [
       if (group.location?.cityName.isNotEmpty == true) group.location!.cityName,
       if (group.tripStart != null)
@@ -249,93 +258,67 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
     ].join(' · ');
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Card(
-        child: InkWell(
-          borderRadius: BorderRadius.circular(24),
-          onTap: open,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 4, 14),
-            child: Row(
-              children: [
-                _AvatarStack(memberIds: group.members),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        group.groupName ?? l10n.unnamedGroup,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: text.titleMedium,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: text.bodySmall
-                            ?.copyWith(color: scheme.onSurfaceVariant),
-                      ),
-                    ],
-                  ),
-                ),
-                InkWell(
-                  borderRadius: BorderRadius.circular(999),
-                  onTap: status.$4,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: status.$3,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (isLive) ...[
-                          Container(
-                            width: 7,
-                            height: 7,
-                            decoration: BoxDecoration(
-                              color: status.$2,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                        ],
-                        Text(
-                          status.$1,
-                          style: text.labelMedium?.copyWith(
-                            color: status.$2,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (isOwner)
-                  PopupMenuButton<String>(
-                    tooltip: l10n.moreOptions,
-                    icon: Icon(Icons.more_vert, color: scheme.onSurfaceVariant),
-                    onSelected: (_) => _confirmDeleteGroup(group),
-                    itemBuilder: (_) => [
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Text(
-                          l10n.deleteGroupTitle,
-                          style: TextStyle(color: scheme.error),
-                        ),
-                      ),
-                    ],
-                  )
-                else
-                  const SizedBox(width: 12),
-              ],
+      padding: const EdgeInsets.only(bottom: AppSizes.space12),
+      child: Ticket(
+        onTap: open,
+        padding: EdgeInsets.fromLTRB(
+            AppSizes.space16, AppSizes.space12, isOwner ? 0 : AppSizes.space16,
+            AppSizes.space12),
+        child: Row(
+          children: [
+            // Fixed width, so titles line up whether a group has one
+            // member or many.
+            SizedBox(
+              width: _AvatarStack.width,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: _AvatarStack(memberIds: group.members),
+              ),
             ),
-          ),
+            const SizedBox(width: AppSizes.space12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    group.groupName ?? l10n.unnamedGroup,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: text.titleMedium,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style:
+                        text.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSizes.space8),
+            InkWell(
+              borderRadius: BorderRadius.circular(999),
+              onTap: status.$4,
+              child: TagChip(label: status.$1, tone: status.$2, icon: status.$3),
+            ),
+            if (isOwner)
+              PopupMenuButton<String>(
+                tooltip: l10n.moreOptions,
+                icon: Icon(Icons.more_vert, color: scheme.onSurfaceVariant),
+                onSelected: (_) => _confirmDeleteGroup(group),
+                itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Text(
+                      l10n.deleteGroupTitle,
+                      style: TextStyle(color: scheme.error),
+                    ),
+                  ),
+                ],
+              ),
+          ],
         ),
       ),
     );
@@ -345,26 +328,18 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
     final scheme = Theme.of(context).colorScheme;
     return Center(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(AppSizes.space32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 88,
-              height: 88,
-              decoration: BoxDecoration(
-                color: scheme.primaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child:
-                  Icon(Icons.groups_rounded, size: 40, color: scheme.primary),
-            ),
-            const SizedBox(height: 24),
+            const IconBadge(icon: Icons.groups_rounded, tone: ChipTone.sky),
+            const SizedBox(height: AppSizes.space24),
             Text(
               context.l10n.noGroupsTitle,
+              textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSizes.space8),
             Text(
               context.l10n.noGroupsBody,
               style: Theme.of(context)
@@ -381,81 +356,70 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
 
   Widget _buildCreateGroupCard() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                context.l10n.createNewGroup,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.screenEdge),
+      child: Ticket(
+        padding: const EdgeInsets.all(AppSizes.space16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SectionLabel(
+              context.l10n.createNewGroup,
+              trailing: TextButton.icon(
+                onPressed: _fillFromCalendar,
+                icon: const Icon(Icons.event_outlined),
+                label: Text(context.l10n.fromCalendar),
               ),
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: _fillFromCalendar,
-                  icon: const Icon(Icons.event_outlined),
-                  label: Text(context.l10n.fromCalendar),
-                ),
+            ),
+            TextField(
+              controller: _groupNameController,
+              decoration: InputDecoration(
+                labelText: context.l10n.groupNameLabel,
+                hintText: context.l10n.groupNameHint,
               ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _groupNameController,
-                decoration: InputDecoration(
-                  labelText: context.l10n.groupNameLabel,
-                  hintText: context.l10n.groupNameHint,
-                  border: OutlineInputBorder(),
-                ),
+            ),
+            const SizedBox(height: AppSizes.space12),
+            _CityField(
+              city: _city,
+              onTap: () => showCityPicker(
+                context,
+                selectedId: _city?.id,
+                offerCurrentLocation: false,
+                onSelected: (city) => setState(() => _city = city),
               ),
-              const SizedBox(height: 16),
-              _CityField(
-                city: _city,
-                onTap: () => showCityPicker(
-                  context,
-                  selectedId: _city?.id,
-                  offerCurrentLocation: false,
-                  onSelected: (city) => setState(() => _city = city),
-                ),
-              ),
-              const SizedBox(height: 16),
-              _TripDatesField(
-                dates: _tripDates,
-                onTap: _pickTripDates,
-                onClear: () => setState(() => _tripDates = null),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        setState(() {
-                          _showCreateGroup = false;
-                          _groupNameController.clear();
-                          _city = null;
-                          _tripDates = null;
-                        });
-                      },
-                      child: Text(context.l10n.cancel),
-                    ),
+            ),
+            const SizedBox(height: AppSizes.space12),
+            _TripDatesField(
+              dates: _tripDates,
+              onTap: _pickTripDates,
+              onClear: () => setState(() => _tripDates = null),
+            ),
+            const SizedBox(height: AppSizes.space16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {
+                      setState(() {
+                        _showCreateGroup = false;
+                        _groupNameController.clear();
+                        _city = null;
+                        _tripDates = null;
+                      });
+                    },
+                    child: Text(context.l10n.cancel),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: PrimaryButton(
-                      label: context.l10n.create,
-                      onPressed: _createGroup,
-                      isLoading: ref.watch(groupControllerProvider).isLoading,
-                    ),
+                ),
+                const SizedBox(width: AppSizes.space12),
+                Expanded(
+                  child: _LoadingElevatedButton(
+                    label: context.l10n.create,
+                    onPressed: _createGroup,
+                    isLoading: ref.watch(groupControllerProvider).isLoading,
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -465,281 +429,117 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       GroupModel group, String userId, GroupController controller) {
     final isAdmin = group.ownerUid == userId;
     final hasActiveSession = group.activeSessionId != null;
+    final hasCompleted = group.hasCompletedSession == true;
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final l10n = context.l10n;
+
+    // Exactly one orange call to action, picked by the group's state.
+    final Widget? primaryAction = hasActiveSession
+        ? ElevatedButton.icon(
+            icon: const Icon(Icons.swipe),
+            label: Text(l10n.continueSwiping),
+            onPressed: () => context.push('/swipe/${group.groupId}'),
+          )
+        : isAdmin
+            ? ElevatedButton.icon(
+                icon: const Icon(Icons.play_arrow_rounded),
+                label: Text(l10n.startSession),
+                onPressed: _startSession,
+              )
+            : hasCompleted
+                ? ElevatedButton.icon(
+                    icon: const Icon(Icons.favorite),
+                    label: Text(l10n.viewMatches),
+                    onPressed: () =>
+                        context.push('/group-matches/${group.groupId}'),
+                  )
+                : null;
+    final Widget? secondaryAction = hasActiveSession && isAdmin
+        ? TextButton.icon(
+            onPressed: () => controller.endSession(),
+            icon: const Icon(Icons.stop_rounded),
+            label: Text(l10n.endSessionEarly),
+            style: TextButton.styleFrom(foregroundColor: scheme.error),
+          )
+        : !hasActiveSession && isAdmin && hasCompleted
+            ? OutlinedButton.icon(
+                icon: const Icon(Icons.favorite_border),
+                label: Text(l10n.viewMatches),
+                onPressed: () =>
+                    context.push('/group-matches/${group.groupId}'),
+              )
+            : null;
 
     return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(AppSizes.screenEdge, AppSizes.space8,
+          AppSizes.screenEdge, AppSizes.space24),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Card(
-            margin: const EdgeInsets.all(16),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
+          _GroupHeroTicket(
+            group: group,
+            hasActiveSession: hasActiveSession,
+            waitingForAdmin: !isAdmin && !hasActiveSession && !hasCompleted,
+          ),
+          const SizedBox(height: AppSizes.groupGap),
+          if (isAdmin && !hasActiveSession) ...[
+            SectionLabel(l10n.sessionSetupTitle),
+            _SessionSetup(
+              isTimeLimit: _isTimeLimit,
+              value: _isTimeLimit ? _timeLimit : _swipeLimit,
+              onModeChanged: (time) => setState(() => _isTimeLimit = time),
+              onValueChanged: (v) => setState(() {
+                if (_isTimeLimit) {
+                  _timeLimit = v;
+                } else {
+                  _swipeLimit = v;
+                }
+              }),
+            ),
+            const SizedBox(height: AppSizes.space16),
+          ],
+          if (hasActiveSession) SessionProgressPanel(userId: userId),
+          if (primaryAction != null) primaryAction,
+          if (secondaryAction != null) ...[
+            const SizedBox(height: AppSizes.space8),
+            secondaryAction,
+          ],
+          if (group.members.isNotEmpty) ...[
+            const SizedBox(height: AppSizes.groupGap),
+            SectionLabel(l10n.membersHeader(group.members.length)),
+            Ticket(
+              padding: const EdgeInsets.symmetric(vertical: AppSizes.space4),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    group.groupName ?? context.l10n.unnamedGroup,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  if (group.location != null) ...[
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.place_outlined,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            [
-                              '${group.location!.cityName}, '
-                                  '${group.location!.countryName}',
-                              if (group.tripStart != null)
-                                formatTripDates(
-                                  group.tripStart!,
-                                  group.tripEnd,
-                                  Localizations.localeOf(context)
-                                      .toLanguageTag(),
-                                ),
-                            ].join(' · '),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
-                          ),
-                        ),
-                      ],
+                  for (final (index, memberId) in group.members.indexed) ...[
+                    if (index > 0)
+                      Divider(
+                        height: 1,
+                        indent: AppSizes.space16 + 40 + AppSizes.space12,
+                        color: scheme.outlineVariant,
+                      ),
+                    _MemberRow(
+                      memberId: memberId,
+                      fallbackName: l10n.memberFallback(index + 1),
+                      isMe: memberId == userId,
+                      isAdmin: memberId == group.ownerUid,
                     ),
                   ],
-                  const SizedBox(height: 16),
-                  if (group.invite != null && group.joinEnabled == true) ...[
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(16, 10, 6, 10),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  context.l10n.inviteCodeTitle.toUpperCase(),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelSmall
-                                      ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurfaceVariant,
-                                      ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  group.invite!.code,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineSmall
-                                      ?.copyWith(letterSpacing: 3),
-                                ),
-                              ],
-                            ),
-                          ),
-                          IconButton(
-                            tooltip: MaterialLocalizations.of(context)
-                                .copyButtonLabel,
-                            icon: const Icon(Icons.copy_rounded),
-                            onPressed: () {
-                              Clipboard.setData(
-                                  ClipboardData(text: group.invite!.code));
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content:
-                                        Text(context.l10n.inviteCodeCopied)),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                  if (group.joinEnabled == false)
-                    Text(context.l10n.joiningDisabled),
-                  if (!isAdmin && !hasActiveSession)
-                    Padding(
-                      padding: EdgeInsets.only(top: 8.0),
-                      child: Text(context.l10n.waitingForAdmin),
-                    ),
                 ],
               ),
             ),
-          ),
-          if (isAdmin) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Card(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        context.l10n.adminControls,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                      ),
-                      const SizedBox(height: 16),
-                      if (!hasActiveSession) ...[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(context.l10n.limitType),
-                            const SizedBox(width: 8),
-                            ChoiceChip(
-                              label: Text(context.l10n.limitSwipes),
-                              selected: !_isTimeLimit,
-                              onSelected: (val) {
-                                if (val) setState(() => _isTimeLimit = false);
-                              },
-                            ),
-                            const SizedBox(width: 8),
-                            ChoiceChip(
-                              label: Text(context.l10n.limitTime),
-                              selected: _isTimeLimit,
-                              onSelected: (val) {
-                                if (val) setState(() => _isTimeLimit = true);
-                              },
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Text(_isTimeLimit
-                                ? context.l10n.timeLimitLabel
-                                : context.l10n.swipeLimitLabel),
-                            Expanded(
-                              child: TextField(
-                                controller: _isTimeLimit
-                                    ? _timeLimitController
-                                    : _swipeLimitController,
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  border: const OutlineInputBorder(),
-                                  suffixText: _isTimeLimit
-                                      ? context.l10n.minutesSuffix
-                                      : null,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        PrimaryButton(
-                          label: context.l10n.startSession,
-                          icon: Icons.play_arrow,
-                          onPressed: _startSession,
-                        ),
-                      ] else ...[
-                        OutlinedButton.icon(
-                          onPressed: () => controller.endSession(),
-                          icon: const Icon(Icons.stop),
-                          label: Text(context.l10n.endSessionEarly),
-                          style: OutlinedButton.styleFrom(
-                              foregroundColor:
-                                  Theme.of(context).colorScheme.error),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ),
           ],
-          if (hasActiveSession) SessionProgressPanel(userId: userId),
-          if (group.members.isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  context.l10n.membersHeader(group.members.length),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
+          const SizedBox(height: AppSizes.groupGap),
+          Center(
+            child: TextButton.icon(
+              onPressed: () => _leaveGroup(group.groupId),
+              icon: const Icon(Icons.logout_rounded, size: 18),
+              label: Text(l10n.leaveGroup),
+              style: TextButton.styleFrom(
+                foregroundColor: scheme.error,
+                textStyle: text.labelLarge,
               ),
-            ),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              itemCount: group.members.length,
-              itemBuilder: (context, index) {
-                final memberId = group.members[index];
-                final isMemberAdmin = memberId == group.ownerUid;
-                final name =
-                    ref.watch(groupMemberNameProvider(memberId)).value ??
-                        context.l10n.memberFallback(index + 1);
-                final label =
-                    memberId == userId ? context.l10n.memberYou(name) : name;
-                return ListTile(
-                  leading: MemberAvatar(id: memberId, name: name, size: 40),
-                  title: Text(label),
-                  subtitle: isMemberAdmin ? Text(context.l10n.admin) : null,
-                  trailing: isMemberAdmin
-                      ? Icon(Icons.star, color: context.swipeColors.gold)
-                      : null,
-                );
-              },
-            ),
-          ],
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                if (hasActiveSession)
-                  PrimaryButton(
-                    label: context.l10n.continueSwiping,
-                    icon: Icons.swipe,
-                    width: double.infinity,
-                    onPressed: () => context.push('/swipe/${group.groupId}'),
-                  )
-                else if (group.hasCompletedSession == true)
-                  PrimaryButton(
-                    label: context.l10n.viewMatches,
-                    icon: Icons.favorite,
-                    width: double.infinity,
-                    onPressed: () =>
-                        context.push('/group-matches/${group.groupId}'),
-                  ),
-                const SizedBox(height: 12),
-                OutlinedButton(
-                  onPressed: () => _leaveGroup(group.groupId),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Theme.of(context).colorScheme.error,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Text(context.l10n.leaveGroup,
-                        textAlign: TextAlign.center),
-                  ),
-                ),
-              ],
             ),
           ),
         ],
@@ -818,7 +618,6 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(context.l10n.groupCreated),
-            backgroundColor: context.swipeColors.like,
           ),
         );
       }
@@ -839,8 +638,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
     int? timeLimit;
 
     if (_isTimeLimit) {
-      final valStr = _timeLimitController.text.trim();
-      timeLimit = int.tryParse(valStr) ?? 5;
+      timeLimit = _timeLimit;
       if (timeLimit < 1 || timeLimit > 120) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n.timeLimitRange)),
@@ -849,8 +647,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       }
       swipeLimit = 100; // Large arbitrary limit when using time
     } else {
-      final limitStr = _swipeLimitController.text.trim();
-      swipeLimit = int.tryParse(limitStr) ?? 10;
+      swipeLimit = _swipeLimit;
       if (swipeLimit < 1 || swipeLimit > 100) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n.swipeLimitRange)),
@@ -865,8 +662,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(context.l10n.sessionStarted),
-              backgroundColor: context.swipeColors.like),
+              content: Text(context.l10n.sessionStarted)),
         );
       }
     } catch (e) {
@@ -947,8 +743,7 @@ class _SimplifiedGroupScreenState extends ConsumerState<SimplifiedGroupScreen> {
         _inviteCodeController.clear();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(context.l10n.joinedGroup),
-              backgroundColor: context.swipeColors.like),
+              content: Text(context.l10n.joinedGroup)),
         );
       }
     } catch (e) {
@@ -1069,8 +864,7 @@ class _GroupJoinScreenState extends ConsumerState<GroupJoinScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(context.l10n.joinedViaLink),
-              backgroundColor: context.swipeColors.like),
+              content: Text(context.l10n.joinedViaLink)),
         );
         context.go('/group');
       }
@@ -1110,29 +904,351 @@ class _AvatarStack extends ConsumerWidget {
 
   final List<String> memberIds;
 
+  static const _size = 30.0;
+  static const _overlap = 12.0;
+
+  /// Width of a full stack of three, used as the fixed leading width.
+  static const width = _size + 2 * (_size - _overlap);
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    const size = 34.0;
-    const overlap = 12.0;
     final shown = memberIds.take(3).toList();
     final ring = Theme.of(context).colorScheme.surface;
     return SizedBox(
-      width: size + (shown.length - 1).clamp(0, 2) * (size - overlap),
-      height: size,
+      width: _size + (shown.length - 1).clamp(0, 2) * (_size - _overlap),
+      height: _size,
       child: Stack(
         children: [
           for (final (i, id) in shown.indexed)
             Positioned(
-              left: i * (size - overlap),
+              left: i * (_size - _overlap),
               child: MemberAvatar(
                 id: id,
-                name: ref.watch(groupMemberNameProvider(id)).value ?? '',
-                size: size,
+                name: friendlyMemberName(
+                        ref.watch(groupMemberNameProvider(id)).value) ??
+                    '',
+                size: _size,
                 borderColor: ring,
               ),
             ),
         ],
       ),
+    );
+  }
+}
+
+/// The group as a raised ticket: name, place and dates on top, the invite
+/// code on a perforated stub below.
+class _GroupHeroTicket extends StatelessWidget {
+  const _GroupHeroTicket({
+    required this.group,
+    required this.hasActiveSession,
+    required this.waitingForAdmin,
+  });
+
+  final GroupModel group;
+  final bool hasActiveSession;
+  final bool waitingForAdmin;
+
+  static const _stubHeight = 76.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final muted = text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant);
+    final location = group.location;
+    // The code only works while joining is open (the repository refuses
+    // joins otherwise), so the stub is shown only then.
+    final showInvite = group.invite != null && group.joinEnabled == true;
+    // Joining closes when a session starts; only then say so.
+    final String? status = hasActiveSession
+        ? l10n.joiningDisabled
+        : waitingForAdmin
+            ? l10n.waitingForAdmin
+            : null;
+
+    return Ticket(
+      raised: true,
+      notchFromBottom: showInvite ? _stubHeight : null,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(AppSizes.space16,
+                AppSizes.space16, AppSizes.space16, AppSizes.space16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        group.groupName ?? l10n.unnamedGroup,
+                        style: text.headlineSmall,
+                      ),
+                    ),
+                    if (hasActiveSession) ...[
+                      const SizedBox(width: AppSizes.space8),
+                      TagChip(
+                        label: l10n.statusLive,
+                        tone: ChipTone.peach,
+                        icon: Icons.bolt_rounded,
+                      ),
+                    ],
+                  ],
+                ),
+                if (location != null) ...[
+                  const SizedBox(height: AppSizes.space8),
+                  _IconLine(
+                    icon: Icons.place_outlined,
+                    text: '${location.cityName}, ${location.countryName}',
+                    style: muted,
+                  ),
+                ],
+                if (group.tripStart != null) ...[
+                  const SizedBox(height: AppSizes.space4),
+                  _IconLine(
+                    icon: Icons.date_range_outlined,
+                    text: formatTripDates(group.tripStart!, group.tripEnd,
+                        Localizations.localeOf(context).toLanguageTag()),
+                    style: muted,
+                  ),
+                ],
+                const SizedBox(height: AppSizes.space4),
+                _IconLine(
+                  icon: Icons.group_outlined,
+                  text: l10n.memberCount(group.members.length),
+                  style: muted,
+                ),
+                if (status != null) ...[
+                  const SizedBox(height: AppSizes.space12),
+                  Text(status, style: text.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    fontStyle: FontStyle.italic,
+                  )),
+                ],
+              ],
+            ),
+          ),
+          if (showInvite)
+            SizedBox(
+              height: _stubHeight,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                    AppSizes.space24, AppSizes.space12, AppSizes.space8, 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.inviteCodeTitle.toUpperCase(),
+                            style: text.labelSmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                              letterSpacing: 1.1,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(
+                            group.invite!.code,
+                            style: text.headlineSmall
+                                ?.copyWith(letterSpacing: 4),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: MaterialLocalizations.of(context).copyButtonLabel,
+                      icon: const Icon(Icons.copy_rounded),
+                      onPressed: () {
+                        Clipboard.setData(
+                            ClipboardData(text: group.invite!.code));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.inviteCodeCopied)),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _IconLine extends StatelessWidget {
+  const _IconLine({required this.icon, required this.text, this.style});
+
+  final IconData icon;
+  final String text;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: style?.color),
+        const SizedBox(width: AppSizes.space8),
+        Expanded(child: Text(text, style: style)),
+      ],
+    );
+  }
+}
+
+/// Compact session setup: limit type plus a stepper for its value.
+class _SessionSetup extends StatelessWidget {
+  const _SessionSetup({
+    required this.isTimeLimit,
+    required this.value,
+    required this.onModeChanged,
+    required this.onValueChanged,
+  });
+
+  final bool isTimeLimit;
+  final int value;
+  final ValueChanged<bool> onModeChanged;
+  final ValueChanged<int> onValueChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final text = Theme.of(context).textTheme;
+    final steps = isTimeLimit ? _timeLimitSteps : _swipeLimitSteps;
+    final index = steps.indexOf(value);
+    final label = isTimeLimit
+        ? l10n.sessionMinutesValue(value)
+        : l10n.sessionSwipesValue(value);
+
+    return Ticket(
+      padding: const EdgeInsets.all(AppSizes.space12),
+      child: Row(
+        children: [
+          Expanded(
+            child: SegmentedButton<bool>(
+              showSelectedIcon: false,
+              segments: [
+                ButtonSegment(
+                  value: false,
+                  label: Text(l10n.limitSwipes),
+                ),
+                ButtonSegment(
+                  value: true,
+                  label: Text(l10n.limitTimeShort),
+                ),
+              ],
+              selected: {isTimeLimit},
+              onSelectionChanged: (s) => onModeChanged(s.first),
+            ),
+          ),
+          const SizedBox(width: AppSizes.space8),
+          IconButton(
+            tooltip: l10n.sessionLimitLess,
+            visualDensity: VisualDensity.compact,
+            icon: const Icon(Icons.remove_circle_outline),
+            onPressed:
+                index > 0 ? () => onValueChanged(steps[index - 1]) : null,
+          ),
+          ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 64),
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: text.titleSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+          ),
+          IconButton(
+            tooltip: l10n.sessionLimitMore,
+            visualDensity: VisualDensity.compact,
+            icon: const Icon(Icons.add_circle_outline),
+            onPressed: index >= 0 && index < steps.length - 1
+                ? () => onValueChanged(steps[index + 1])
+                : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One member: avatar, friendly name (never an email), admin chip.
+class _MemberRow extends ConsumerWidget {
+  const _MemberRow({
+    required this.memberId,
+    required this.fallbackName,
+    required this.isMe,
+    required this.isAdmin,
+  });
+
+  final String memberId;
+  final String fallbackName;
+  final bool isMe;
+  final bool isAdmin;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final name = friendlyMemberName(
+            ref.watch(groupMemberNameProvider(memberId)).value) ??
+        fallbackName;
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.space16, vertical: AppSizes.space8),
+      child: Row(
+        children: [
+          MemberAvatar(id: memberId, name: name, size: 40),
+          const SizedBox(width: AppSizes.space12),
+          Expanded(
+            child: Text(
+              isMe ? l10n.memberYou(name) : name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          if (isAdmin)
+            TagChip(
+              label: l10n.admin,
+              tone: ChipTone.gold,
+              icon: Icons.star_rounded,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The theme's orange button with a spinner while [isLoading].
+class _LoadingElevatedButton extends StatelessWidget {
+  const _LoadingElevatedButton({
+    required this.label,
+    required this.onPressed,
+    required this.isLoading,
+  });
+
+  final String label;
+  final VoidCallback onPressed;
+  final bool isLoading;
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: isLoading ? null : onPressed,
+      child: isLoading
+          ? const SizedBox.square(
+              dimension: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Text(label),
     );
   }
 }

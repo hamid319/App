@@ -6,6 +6,9 @@ import '../../../app/language_picker.dart';
 import '../../../app/locale_controller.dart';
 import '../../../app/theme_mode_controller.dart';
 import '../../../app/theme_mode_picker.dart';
+import '../../../app/theme.dart';
+import '../../../common/widgets/ticket.dart';
+import '../../../core/constants/sizes.dart';
 import '../../../l10n/l10n.dart';
 import '../../../common/widgets/member_avatar.dart';
 import '../../group/logic/group_controller.dart';
@@ -29,63 +32,87 @@ class SettingsScreen extends ConsumerWidget {
         title: Text(l10n.settingsTitle),
       ),
       body: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          AppSizes.screenEdge,
+          AppSizes.space8,
+          AppSizes.screenEdge,
+          AppSizes.space32,
+        ),
         children: [
           _ProfileCard(hasAccount: hasAccount),
-          _SectionHeader(l10n.settingsAppSection),
-          ListTile(
-            leading: const Icon(Icons.language),
-            title: Text(l10n.languageTitle),
-            subtitle: Text(languageName(l10n, languageCode)),
-            onTap: () => showLanguagePicker(context, ref),
+          const SizedBox(height: AppSizes.groupGap),
+          _SettingsGroup(
+            label: l10n.settingsAppSection,
+            tiles: [
+              ListTile(
+                leading: const Icon(Icons.language_rounded),
+                title: Text(l10n.languageTitle),
+                subtitle: Text(languageName(l10n, languageCode)),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => showLanguagePicker(context, ref),
+              ),
+              ListTile(
+                leading: const Icon(Icons.dark_mode_outlined),
+                title: Text(l10n.appearanceTitle),
+                subtitle: Text(themeModeName(l10n, themeMode)),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => showThemeModePicker(context, ref),
+              ),
+              ListTile(
+                leading: const Icon(Icons.privacy_tip_outlined),
+                title: Text(l10n.privacy),
+                subtitle: Text(l10n.privacySubtitle),
+                onTap: () => _showDataPrivacy(context),
+              ),
+              ListTile(
+                leading: const Icon(Icons.security_outlined),
+                title: Text(l10n.security),
+                subtitle: Text(l10n.securitySubtitle),
+                onTap: () => _showSecurity(context),
+              ),
+              ListTile(
+                leading: const Icon(Icons.article_outlined),
+                title: Text(l10n.licenses),
+                onTap: () => showLicensePage(
+                  context: context,
+                  applicationName: 'SwipeTrip',
+                ),
+              ),
+            ],
           ),
-          ListTile(
-            leading: const Icon(Icons.dark_mode_outlined),
-            title: Text(l10n.appearanceTitle),
-            subtitle: Text(themeModeName(l10n, themeMode)),
-            onTap: () => showThemeModePicker(context, ref),
+          const SizedBox(height: AppSizes.groupGap),
+          _SettingsGroup(
+            label: l10n.settingsAccountSection,
+            tiles: hasAccount
+                ? [
+                    ListTile(
+                      leading: Icon(Icons.logout_rounded,
+                          color: Theme.of(context).colorScheme.error),
+                      title: Text(
+                        l10n.logout,
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.error),
+                      ),
+                      subtitle: Text(l10n.logoutSubtitle),
+                      onTap: () => _showLogoutDialog(context, ref),
+                    ),
+                  ]
+                : [
+                    ListTile(
+                      leading: const Icon(Icons.person_add_alt_1_outlined),
+                      title: Text(l10n.gateCreateAccount),
+                      subtitle: Text(l10n.createAccountToManage),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () => context.push('/register'),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.login_rounded),
+                      title: Text(l10n.gateHaveAccount),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () => context.push('/login'),
+                    ),
+                  ],
           ),
-          ListTile(
-            leading: const Icon(Icons.privacy_tip_outlined),
-            title: Text(l10n.privacy),
-            subtitle: Text(l10n.privacySubtitle),
-            onTap: () => _showDataPrivacy(context),
-          ),
-          ListTile(
-            leading: const Icon(Icons.security_outlined),
-            title: Text(l10n.security),
-            subtitle: Text(l10n.securitySubtitle),
-            onTap: () => _showSecurity(context),
-          ),
-          ListTile(
-            leading: const Icon(Icons.article_outlined),
-            title: Text(l10n.licenses),
-            onTap: () => showLicensePage(
-              context: context,
-              applicationName: 'SwipeTrip',
-            ),
-          ),
-          const Divider(),
-          _SectionHeader(l10n.settingsAccountSection),
-          if (hasAccount)
-            ListTile(
-              leading: Icon(Icons.logout, color: Theme.of(context).colorScheme.error),
-              title: Text(l10n.logout),
-              subtitle: Text(l10n.logoutSubtitle),
-              onTap: () => _showLogoutDialog(context, ref),
-            )
-          else ...[
-            ListTile(
-              leading: const Icon(Icons.person_add_alt_1),
-              title: Text(l10n.gateCreateAccount),
-              subtitle: Text(l10n.createAccountToManage),
-              onTap: () => context.push('/register'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.login),
-              title: Text(l10n.gateHaveAccount),
-              onTap: () => context.push('/login'),
-            ),
-          ],
         ],
       ),
     );
@@ -200,20 +227,30 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  final String text;
-  const _SectionHeader(this.text);
+/// A [SectionLabel] above a ticket holding [tiles], split by hairlines.
+class _SettingsGroup extends StatelessWidget {
+  const _SettingsGroup({required this.label, required this.tiles});
+
+  final String label;
+  final List<Widget> tiles;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-            ),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionLabel(label),
+        Ticket(
+          child: Column(
+            children: [
+              for (final (i, tile) in tiles.indexed) ...[
+                if (i > 0) const Divider(height: 1, indent: 56),
+                tile,
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -240,24 +277,30 @@ class _ProfileCard extends ConsumerWidget {
             : (user?.email ?? l10n.userFallbackName))
         : l10n.guestName;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      child: Card(
-        child: InkWell(
-          borderRadius: BorderRadius.circular(24),
-          onTap: () => context.go('/profile'),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
+    return Ticket(
+      raised: true,
+      onTap: () => context.go('/profile'),
+      padding: const EdgeInsets.all(AppSizes.space16),
+      child: Row(
               children: [
-                hasAccount
-                    ? MemberAvatar(id: user?.uid ?? '', name: name, size: 48)
-                    : CircleAvatar(
-                        radius: 24,
-                        backgroundColor: scheme.surfaceContainerHighest,
-                        child: Icon(Icons.person_outline,
-                            color: scheme.onSurfaceVariant),
-                      ),
+                Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: context.swipeColors.edge,
+                      width: AppSizes.edge,
+                    ),
+                  ),
+                  child: hasAccount
+                      ? MemberAvatar(id: user?.uid ?? '', name: name, size: 48)
+                      : CircleAvatar(
+                          radius: 24,
+                          backgroundColor: scheme.surfaceContainerHighest,
+                          child: Icon(Icons.person_outline,
+                              color: scheme.onSurface),
+                        ),
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -280,12 +323,9 @@ class _ProfileCard extends ConsumerWidget {
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
+                Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
               ],
             ),
-          ),
-        ),
-      ),
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../app/theme.dart';
 import '../../../common/models/place_review.dart';
+import '../../../common/widgets/ticket.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
@@ -32,43 +33,65 @@ class PlaceReviewsSection extends ConsumerWidget {
     final mine = ref.watch(myReviewProvider(placeId)).value;
     final reviews = ref.watch(placeReviewsProvider(placeId));
 
+    final list = reviews.value ?? const <PlaceReview>[];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.reviewsTitle, style: text.titleLarge),
-        const SizedBox(height: AppSizes.space8),
-        _SummaryLine(summary: summary),
-        const SizedBox(height: AppSizes.space12),
-        OutlinedButton.icon(
-          icon: Icon(signedIn
-              ? (mine == null ? Icons.rate_review_outlined : Icons.edit_outlined)
-              : Icons.login_rounded),
-          label: Text(!signedIn
-              ? l10n.reviewSignInToWrite
-              : mine == null
-                  ? l10n.reviewWrite
-                  : l10n.reviewEdit),
-          onPressed: signedIn
-              ? () => showReviewSheet(context, placeId: placeId, existing: mine)
-              : () => context.push('/login'),
-        ),
-        ...reviews.when(
-          data: (list) => [
-            for (final review in list) ...[
-              const SizedBox(height: AppSizes.space16),
-              _ReviewTile(
-                review: review,
-                isMine: review.uid == user?.uid,
-                canReport: signedIn && review.uid != user.uid,
+        SectionLabel(l10n.reviewsTitle),
+        Ticket(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(AppSizes.space16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _SummaryLine(summary: summary),
+                    const SizedBox(height: AppSizes.space12),
+                    OutlinedButton.icon(
+                      icon: Icon(signedIn
+                          ? (mine == null
+                              ? Icons.rate_review_outlined
+                              : Icons.edit_outlined)
+                          : Icons.login_rounded),
+                      label: Text(!signedIn
+                          ? l10n.reviewSignInToWrite
+                          : mine == null
+                              ? l10n.reviewWrite
+                              : l10n.reviewEdit),
+                      onPressed: signedIn
+                          ? () => showReviewSheet(context,
+                              placeId: placeId, existing: mine)
+                          : () => context.push('/login'),
+                    ),
+                    if (reviews.hasError && !reviews.hasValue) ...[
+                      const SizedBox(height: AppSizes.space12),
+                      Text(l10n.errorLoadReviews,
+                          style:
+                              text.bodyMedium?.copyWith(color: scheme.error)),
+                    ],
+                  ],
+                ),
               ),
+              for (final review in list) ...[
+                const Divider(height: 1),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSizes.space16,
+                    AppSizes.space12,
+                    AppSizes.space12,
+                    AppSizes.space16,
+                  ),
+                  child: _ReviewTile(
+                    review: review,
+                    isMine: review.uid == user?.uid,
+                    canReport: signedIn && review.uid != user.uid,
+                  ),
+                ),
+              ],
             ],
-          ],
-          loading: () => const [],
-          error: (_, __) => [
-            const SizedBox(height: AppSizes.space12),
-            Text(l10n.errorLoadReviews,
-                style: text.bodyMedium?.copyWith(color: scheme.error)),
-          ],
+          ),
         ),
       ],
     );
@@ -84,8 +107,10 @@ class _SummaryLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
-    final style =
-        Theme.of(context).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant);
+    final style = Theme.of(context)
+        .textTheme
+        .bodyMedium
+        ?.copyWith(color: scheme.onSurfaceVariant);
     if (summary.count == 0) return Text(l10n.reviewsNone, style: style);
     if (!summary.showsAverage) return Text(l10n.reviewsFew, style: style);
     final locale = Localizations.localeOf(context).toLanguageTag();
@@ -143,7 +168,8 @@ class _ReviewTile extends ConsumerWidget {
       messenger.showSnackBar(SnackBar(content: Text(l10n.reviewReported)));
     } catch (e) {
       messenger.showSnackBar(SnackBar(
-        content: Text(userMessage(e, fallback: l10n.errorSaveReview, l10n: l10n)),
+        content:
+            Text(userMessage(e, fallback: l10n.errorSaveReview, l10n: l10n)),
       ));
     }
   }
@@ -171,8 +197,8 @@ class _ReviewTile extends ConsumerWidget {
             ),
             if (date != null)
               Text(DateFormat.yMMMd(locale).format(date),
-                  style: text.bodySmall
-                      ?.copyWith(color: scheme.onSurfaceVariant)),
+                  style:
+                      text.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
             if (canReport)
               PopupMenuButton<void>(
                 iconSize: 20,
@@ -215,7 +241,9 @@ class _Stars extends StatelessWidget {
           children: [
             for (var star = 1; star <= 5; star++)
               Icon(
-                star <= rating ? Icons.star_rounded : Icons.star_outline_rounded,
+                star <= rating
+                    ? Icons.star_rounded
+                    : Icons.star_outline_rounded,
                 size: size,
                 color: star <= rating
                     ? context.swipeColors.gold

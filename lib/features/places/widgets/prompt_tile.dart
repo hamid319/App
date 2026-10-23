@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../common/models/place_prompt.dart';
+import '../../../common/widgets/ticket.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/constants/typography.dart';
 import '../../../l10n/l10n.dart';
@@ -25,34 +26,23 @@ class PromptTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final label = placePromptLabel(context.l10n, prompt.kind);
-    final answer =
-        prompt.textFor(Localizations.localeOf(context).languageCode);
-    return Container(
-      width: double.infinity,
+    final answer = prompt.textFor(Localizations.localeOf(context).languageCode);
+    return Ticket(
       padding: const EdgeInsets.fromLTRB(
         AppSizes.space16,
         AppSizes.space12,
         AppSizes.space16,
         AppSizes.space16,
       ),
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-        border: Border.all(color: scheme.outlineVariant),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label.toUpperCase(),
-            style: Theme.of(context)
-                .textTheme
-                .labelSmall
-                ?.copyWith(color: scheme.onSurfaceVariant),
-          ),
-          const SizedBox(height: AppSizes.space4),
-          Text(answer, style: AppTypography.prompt(scheme.onSurface)),
-        ],
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SectionLabel(label),
+            Text(answer, style: AppTypography.prompt(scheme.onSurface)),
+          ],
+        ),
       ),
     );
   }

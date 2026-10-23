@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/theme.dart';
 import '../../../common/models/group_session_model.dart';
 import '../../../common/widgets/member_avatar.dart';
+import '../../../common/widgets/ticket.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../l10n/l10n.dart';
 import '../logic/group_controller.dart';
@@ -30,86 +30,75 @@ class SessionProgressPanel extends ConsumerWidget {
     final text = Theme.of(context).textTheme;
     final l10n = context.l10n;
 
+    // Sits inside the group screen's 16 px edges, so no side padding here.
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSizes.screenEdge,
-        0,
-        AppSizes.screenEdge,
-        AppSizes.space16,
-      ),
+      padding: const EdgeInsets.only(bottom: AppSizes.space16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              _LiveDot(color: context.swipeColors.like),
-              const SizedBox(width: AppSizes.space8),
-              Text(
-                l10n.sessionLive.toUpperCase(),
-                style: text.labelSmall?.copyWith(color: scheme.primary),
-              ),
-              if (session.endTime != null) ...[
-                const Spacer(),
-                _TimeLeft(endTime: session.endTime!),
-              ],
-            ],
+          SectionLabel(
+            l10n.sessionLive,
+            trailing: session.endTime == null
+                ? null
+                : _TimeLeft(endTime: session.endTime!),
           ),
-          const SizedBox(height: AppSizes.space8),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSizes.space16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
+          Ticket(
+            notchFromTop: 76,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  height: 76,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSizes.space16,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text('$mine', style: text.headlineMedium),
+                            Text(
+                              ' / $limit',
+                              style: text.titleMedium
+                                  ?.copyWith(color: scheme.onSurfaceVariant),
+                            ),
+                            const Spacer(),
+                            Text(
+                              l10n.yourProgress,
+                              style: text.bodyMedium
+                                  ?.copyWith(color: scheme.onSurfaceVariant),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSizes.space8),
+                        _Bar(value: limit == 0 ? 0 : mine / limit, height: 8),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(AppSizes.space16,
+                      AppSizes.space12, AppSizes.space16, AppSizes.space8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('$mine', style: text.headlineMedium),
-                      Text(
-                        ' / $limit',
-                        style: text.titleMedium
-                            ?.copyWith(color: scheme.onSurfaceVariant),
-                      ),
-                      const Spacer(),
-                      Text(
-                        l10n.yourProgress,
-                        style: text.bodyMedium
-                            ?.copyWith(color: scheme.onSurfaceVariant),
-                      ),
+                      Text(l10n.whoIsSwiping, style: text.titleSmall),
+                      for (final uid in session.participants)
+                        _MemberProgress(
+                          uid: uid,
+                          isMe: uid == userId,
+                          count: countFor(uid),
+                          limit: limit,
+                        ),
                     ],
                   ),
-                  const SizedBox(height: AppSizes.space8),
-                  _Bar(value: limit == 0 ? 0 : mine / limit, height: 8),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSizes.space12),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSizes.space16,
-                vertical: AppSizes.space8,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: AppSizes.space8,
-                    ),
-                    child: Text(l10n.whoIsSwiping, style: text.titleMedium),
-                  ),
-                  for (final uid in session.participants)
-                    _MemberProgress(
-                      uid: uid,
-                      isMe: uid == userId,
-                      count: countFor(uid),
-                      limit: limit,
-                    ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
@@ -136,9 +125,10 @@ class _MemberProgress extends ConsumerWidget {
     final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
-    final name = ref.watch(groupMemberNameProvider(uid)).value ?? '…';
+    final name =
+        friendlyMemberName(ref.watch(groupMemberNameProvider(uid)).value) ??
+            '…';
     final done = limit > 0 && count >= limit;
-    final like = context.swipeColors.like;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSizes.space8),
@@ -155,22 +145,25 @@ class _MemberProgress extends ConsumerWidget {
                   style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: AppSizes.space4),
-                _Bar(
-                  value: limit == 0 ? 0 : count / limit,
-                  height: 5,
-                  color: done ? like : null,
-                ),
+                _Bar(value: limit == 0 ? 0 : count / limit, height: 5),
               ],
             ),
           ),
           const SizedBox(width: AppSizes.space12),
-          Text(
-            done ? l10n.memberDone : '$count/$limit',
-            style: text.labelLarge?.copyWith(
-              color: done ? like : scheme.onSurfaceVariant,
-              fontFeatures: const [FontFeature.tabularFigures()],
+          if (done)
+            TagChip(
+              label: l10n.memberDone,
+              tone: ChipTone.mint,
+              icon: Icons.check_rounded,
+            )
+          else
+            Text(
+              '$count/$limit',
+              style: text.labelLarge?.copyWith(
+                color: scheme.onSurfaceVariant,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -178,11 +171,10 @@ class _MemberProgress extends ConsumerWidget {
 }
 
 class _Bar extends StatelessWidget {
-  const _Bar({required this.value, required this.height, this.color});
+  const _Bar({required this.value, required this.height});
 
   final double value;
   final double height;
-  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -197,24 +189,9 @@ class _Bar extends StatelessWidget {
           value: v,
           minHeight: height,
           backgroundColor: scheme.surfaceContainerHighest,
-          color: color ?? scheme.primary,
+          color: scheme.onSurface,
         ),
       ),
-    );
-  }
-}
-
-class _LiveDot extends StatelessWidget {
-  const _LiveDot({required this.color});
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 8,
-      height: 8,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 }

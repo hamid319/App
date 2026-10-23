@@ -24,6 +24,18 @@ class AppSizes {
   static const double radiusLg = 24;
   static const double radiusCard = 28;
 
+  /// Corner of tickets: swipe cards, list tickets, sheets' inner cards.
+  static const double radiusTicket = 18;
+
+  /// Width of the ink outline around tickets, buttons and stamps.
+  static const double edge = 1.5;
+
+  /// Radius of the half-circle notches where a ticket is perforated.
+  static const double notch = 9;
+
+  /// Vertical offset of the hard "print" shadow under raised controls.
+  static const double printShadow = 3;
+
   // Motion
   static const Duration snapBack = Duration(milliseconds: 320);
   static const Duration cardOut = Duration(milliseconds: 260);

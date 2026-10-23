@@ -22,22 +22,21 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Orange pill with an ink rim from AppTheme; colours only when given.
     final button = ElevatedButton(
       onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor ?? Theme.of(context).colorScheme.primary,
-        foregroundColor: textColor ?? Colors.white,
+        backgroundColor: backgroundColor,
+        foregroundColor: textColor,
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-        // Pill like every other button in the app (see AppTheme).
-        shape: const StadiumBorder(),
       ),
       child: isLoading
-          ? const SizedBox(
+          ? SizedBox(
               height: 20,
               width: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                color: textColor ?? Theme.of(context).colorScheme.onSurface,
               ),
             )
           : icon != null

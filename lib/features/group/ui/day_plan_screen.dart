@@ -9,6 +9,7 @@ import '../../../common/models/place_model.dart';
 import '../../../common/utils/day_route.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../../common/widgets/place_photo.dart';
+import '../../../common/widgets/ticket.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../core/services/maps_launcher.dart';
@@ -101,7 +102,17 @@ class _DayPlanScreenState extends ConsumerState<DayPlanScreen> {
         data: (s) {
           final plan = s?.dayPlan;
           if (plan == null || plan.placeIds.isEmpty) {
-            return Center(child: Text(l10n.dayPlanNone));
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const IconBadge(icon: Icons.route, tone: ChipTone.sky),
+                  const SizedBox(height: AppSizes.space16),
+                  Text(l10n.dayPlanNone,
+                      style: Theme.of(context).textTheme.titleMedium),
+                ],
+              ),
+            );
           }
           final places =
               ref.watch(_planPlacesProvider(plan.placeIds.join('|')));
@@ -193,16 +204,27 @@ class _PlanBodyState extends ConsumerState<_PlanBody> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SegmentedButton<bool>(
+            showSelectedIcon: false,
             segments: [
               ButtonSegment(
                 value: true,
-                icon: const Icon(Icons.hotel_outlined),
-                label: Text(l10n.dayPlanEndNearMe),
+                icon: const Icon(Icons.sports_score_outlined),
+                tooltip: l10n.dayPlanEndNearMe,
+                label: Text(
+                  l10n.dayPlanEndShort,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               ButtonSegment(
                 value: false,
-                icon: const Icon(Icons.near_me_outlined),
-                label: Text(l10n.dayPlanStartNearMe),
+                icon: const Icon(Icons.my_location_outlined),
+                tooltip: l10n.dayPlanStartNearMe,
+                label: Text(
+                  l10n.dayPlanStartShort,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
             selected: {widget.plan.endNearOrigin},
@@ -252,51 +274,60 @@ class _PlanBodyState extends ConsumerState<_PlanBody> {
               final leg = index == 0
                   ? null
                   : legKm(routeStops[index - 1], routeStops[index]);
-              return Card(
+              return Padding(
                 key: ValueKey(place.id),
-                margin: const EdgeInsets.only(bottom: AppSizes.space8),
-                child: ListTile(
+                padding: const EdgeInsets.only(bottom: AppSizes.space12),
+                child: Ticket(
                   onTap: () => context.push('/place/${place.id}'),
-                  leading: Stack(
-                    clipBehavior: Clip.none,
+                  padding: EdgeInsets.fromLTRB(AppSizes.space12,
+                      AppSizes.space12, widget.isAdmin ? 0 : 12, 12),
+                  child: Row(
                     children: [
+                      _StopNumber(index + 1),
+                      const SizedBox(width: AppSizes.space12),
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(AppSizes.radiusXs),
+                        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                         child: SizedBox(
                           width: 52,
                           height: 52,
                           child: PlacePhoto(place: place),
                         ),
                       ),
-                      Positioned(
-                        left: -6,
-                        top: -6,
-                        child: CircleAvatar(
-                          radius: 11,
-                          backgroundColor: scheme.primary,
-                          child: Text(
-                            '${index + 1}',
-                            style: text.labelSmall
-                                ?.copyWith(color: scheme.onPrimary),
-                          ),
+                      const SizedBox(width: AppSizes.space12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              place.nameFor(lang),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: text.titleMedium,
+                            ),
+                            if (leg != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                l10n.dayPlanLeg(_distance(context, l10n, leg)),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: text.bodySmall
+                                    ?.copyWith(color: scheme.onSurfaceVariant),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
+                      if (widget.isAdmin)
+                        ReorderableDragStartListener(
+                          index: index,
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: AppSizes.space12),
+                            child: Icon(Icons.drag_indicator),
+                          ),
+                        ),
                     ],
                   ),
-                  title: Text(
-                    place.nameFor(lang),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: leg == null
-                      ? null
-                      : Text(l10n.dayPlanLeg(_distance(context, l10n, leg))),
-                  trailing: widget.isAdmin
-                      ? ReorderableDragStartListener(
-                          index: index,
-                          child: const Icon(Icons.drag_indicator),
-                        )
-                      : null,
                 ),
               );
             },
@@ -306,45 +337,128 @@ class _PlanBodyState extends ConsumerState<_PlanBody> {
           top: false,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(AppSizes.screenEdge,
-                AppSizes.space8, AppSizes.screenEdge, AppSizes.space16),
+                AppSizes.space4, AppSizes.screenEdge, AppSizes.space16),
+            child: _RouteStub(
+              total: _stops.length > 1
+                  ? l10n.dayPlanTotal(_distance(context, l10n, total))
+                  : null,
+              capped: _stops.length > MapsLauncher.maxRouteStops,
+              onOpen: () async {
+                final messenger = ScaffoldMessenger.of(context);
+                try {
+                  await MapsLauncher.openRoute(
+                      [for (final p in _stops) (lat: p.lat, lng: p.lng)]);
+                } catch (e) {
+                  messenger.showSnackBar(SnackBar(
+                    content: Text(userMessage(e,
+                        fallback: l10n.errorOpenMaps, l10n: l10n)),
+                  ));
+                }
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Small ink disc with the stop's number.
+class _StopNumber extends StatelessWidget {
+  const _StopNumber(this.number);
+
+  final int number;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      width: 26,
+      height: 26,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(color: scheme.onSurface, shape: BoxShape.circle),
+      child: Text(
+        '$number',
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: scheme.surface,
+              fontWeight: FontWeight.w800,
+            ),
+      ),
+    );
+  }
+}
+
+/// The route's ticket stub: total distance above the perforation, the
+/// one orange "open route" action below it.
+class _RouteStub extends StatelessWidget {
+  const _RouteStub({
+    required this.total,
+    required this.capped,
+    required this.onOpen,
+  });
+
+  final String? total;
+  final bool capped;
+  final VoidCallback onOpen;
+
+  static const _topHeight = 48.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final text = Theme.of(context).textTheme;
+    final scheme = Theme.of(context).colorScheme;
+    final button = ElevatedButton.icon(
+      icon: const Icon(Icons.directions_walk),
+      label: Text(l10n.dayPlanOpenRoute),
+      onPressed: onOpen,
+    );
+    if (total == null && !capped) return button;
+    return Ticket(
+      notchFromTop: total == null ? null : _topHeight,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (total != null)
+            SizedBox(
+              height: _topHeight,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.route, size: 18, color: scheme.onSurface),
+                  const SizedBox(width: AppSizes.space8),
+                  Flexible(
+                    child: Text(
+                      total!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: text.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.all(AppSizes.space12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (_stops.length > 1)
-                  Text(
-                    l10n.dayPlanTotal(_distance(context, l10n, total)),
-                    textAlign: TextAlign.center,
-                    style: text.bodyMedium,
-                  ),
-                if (_stops.length > MapsLauncher.maxRouteStops)
+                if (capped) ...[
                   Text(
                     l10n.dayPlanRouteCapped,
                     textAlign: TextAlign.center,
                     style: text.bodySmall
                         ?.copyWith(color: scheme.onSurfaceVariant),
                   ),
-                const SizedBox(height: AppSizes.space8),
-                FilledButton.icon(
-                  icon: const Icon(Icons.directions_walk),
-                  label: Text(l10n.dayPlanOpenRoute),
-                  onPressed: () async {
-                    final messenger = ScaffoldMessenger.of(context);
-                    try {
-                      await MapsLauncher.openRoute(
-                          [for (final p in _stops) (lat: p.lat, lng: p.lng)]);
-                    } catch (e) {
-                      messenger.showSnackBar(SnackBar(
-                        content: Text(userMessage(e,
-                            fallback: l10n.errorOpenMaps, l10n: l10n)),
-                      ));
-                    }
-                  },
-                ),
+                  const SizedBox(height: AppSizes.space8),
+                ],
+                button,
               ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

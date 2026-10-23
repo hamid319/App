@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:swipetrip/app/theme.dart';
 import 'package:swipetrip/common/models/calendar_trip.dart';
 import 'package:swipetrip/common/models/group_model.dart';
 import 'package:swipetrip/common/utils/trip_dates.dart';
@@ -17,6 +18,7 @@ import 'package:swipetrip/l10n/l10n.dart';
 class _MockFirestoreService extends Mock implements FirestoreService {}
 
 Widget _app(Widget child) => MaterialApp(
+      theme: AppTheme.light,
       locale: const Locale('de'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

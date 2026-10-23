@@ -34,7 +34,8 @@ enum Interest {
   beach({'beach'}),
   views({'viewpoint', 'observation_deck', 'photo_spot'}),
   family({'family', 'zoo', 'aquarium', 'amusement_park', 'playground'}),
-  nightlife({'nightlife', 'bar', 'night_club'}),
+  nightlife({'nightlife', 'bar', 'pub', 'night_club'}),
+  food({'restaurant', 'cafe', 'biergarten'}),
   shopping({'shopping', 'market', 'shopping_mall'});
 
   const Interest(this.placeTypes);

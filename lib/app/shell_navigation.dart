@@ -19,7 +19,7 @@ class ShellNavigation extends ConsumerWidget {
     if (location.startsWith('/profile') || location.startsWith('/settings')) {
       return 3;
     }
-    return 0; // /home, /swipe, /place
+    return 0; // /home, /collection, /swipe, /place
   }
 
   @override
@@ -33,7 +33,16 @@ class ShellNavigation extends ConsumerWidget {
 
     return Scaffold(
       body: child,
-      bottomNavigationBar: NavigationBar(
+      // Hairline on top so the bar separates from the cream content.
+      bottomNavigationBar: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
+          ),
+        ),
+        child: NavigationBar(
         selectedIndex: _indexFor(location),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         onDestinationSelected: (index) => context.go(_tabs[index]),
@@ -52,12 +61,12 @@ class ShellNavigation extends ConsumerWidget {
             icon: Badge(
               isLabelVisible: favoritesCount > 0,
               label: Text('$favoritesCount'),
-              child: const Icon(Icons.favorite_border),
+              child: const Icon(Icons.favorite_border_rounded),
             ),
             selectedIcon: Badge(
               isLabelVisible: favoritesCount > 0,
               label: Text('$favoritesCount'),
-              child: const Icon(Icons.favorite),
+              child: const Icon(Icons.favorite_rounded),
             ),
             label: l10n.navFavorites,
           ),
@@ -67,6 +76,7 @@ class ShellNavigation extends ConsumerWidget {
             label: l10n.navProfile,
           ),
         ],
+        ),
       ),
     );
   }

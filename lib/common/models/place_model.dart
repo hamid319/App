@@ -3,6 +3,17 @@ import 'package:meta/meta.dart';
 import 'photo_credit.dart';
 import 'place_prompt.dart';
 
+/// What a place is: a sight from the Wikidata import, or a venue
+/// (restaurant, café, bar ...) from OpenStreetMap. Docs without `kind` are
+/// sights.
+enum PlaceKind {
+  sight,
+  venue;
+
+  static PlaceKind fromJson(Object? value) =>
+      value == 'venue' ? PlaceKind.venue : PlaceKind.sight;
+}
+
 @immutable
 class PlaceModel {
   final String id;
@@ -42,6 +53,16 @@ class PlaceModel {
   /// app must credit "© OpenStreetMap contributors" (ODbL).
   final String? osmUrl;
 
+  final PlaceKind kind;
+
+  /// Import ranking, higher is better known (sights >= 950, venues 0..499).
+  final int? popularity;
+
+  /// OpenStreetMap cuisine of a venue, e.g. "italian;pizza".
+  final String? cuisine;
+
+  bool get isVenue => kind == PlaceKind.venue;
+
   const PlaceModel({
     required this.id,
     required this.name,
@@ -62,6 +83,9 @@ class PlaceModel {
     this.openingHours,
     this.website,
     this.osmUrl,
+    this.kind = PlaceKind.sight,
+    this.popularity,
+    this.cuisine,
   });
 
   /// Name in [languageCode], else the default name.
@@ -106,6 +130,15 @@ class PlaceModel {
       cityId: cityId ?? this.cityId,
       prompts: prompts ?? this.prompts,
       photoCredits: photoCredits ?? this.photoCredits,
+      names: names,
+      descriptions: descriptions,
+      wikipediaUrls: wikipediaUrls,
+      openingHours: openingHours,
+      website: website,
+      osmUrl: osmUrl,
+      kind: kind,
+      popularity: popularity,
+      cuisine: cuisine,
     );
   }
 
@@ -132,7 +165,17 @@ class PlaceModel {
         openingHours: _text(json['openingHours']),
         website: _text(json['website']),
         osmUrl: _text(json['osmUrl']),
+        kind: PlaceKind.fromJson(json['kind']),
+        popularity: _int(json['popularity']),
+        cuisine: _text(json['cuisine']),
       );
+
+  static int? _int(Object? value) => switch (value) {
+        final int v => v,
+        final num v when v.isFinite => v.round(),
+        final String v => int.tryParse(v.trim()),
+        _ => null,
+      };
 
   static String? _text(Object? value) =>
       value is String && value.trim().isNotEmpty ? value.trim() : null;
@@ -165,5 +208,8 @@ class PlaceModel {
         'averageRating': averageRating,
         'types': types,
         'cityId': cityId,
+        'kind': kind.name,
+        if (popularity != null) 'popularity': popularity,
+        if (cuisine != null) 'cuisine': cuisine,
       };
 }

@@ -13,11 +13,16 @@ class AppPalette {
     required this.ink2,
     required this.ink3,
     required this.line,
+    required this.edge,
     required this.primary,
     required this.primarySoft,
     required this.like,
     required this.nope,
     required this.gold,
+    required this.danger,
+    required this.mint,
+    required this.peach,
+    required this.sky,
   });
 
   final Brightness brightness;
@@ -34,8 +39,12 @@ class AppPalette {
   /// Primary, secondary and tertiary text.
   final Color ink, ink2, ink3;
 
-  /// Hairlines and borders.
+  /// Hairlines and dividers.
   final Color line;
+
+  /// The ticket outline: the strong border around tickets, buttons and
+  /// stamps that gives the "Ticket und Stempel" look its print feel.
+  final Color edge;
 
   /// "Sunset" brand orange: the one accent per screen.
   final Color primary, primarySoft;
@@ -43,39 +52,55 @@ class AppPalette {
   /// Swipe outcomes. Used for like/nope only, never as general accents.
   final Color like, nope;
 
-  /// Secondary actions such as undo, and ratings.
+  /// Super-like, undo and ratings.
   final Color gold;
+
+  /// Errors and destructive actions (nope is ink, so it cannot be the error).
+  final Color danger;
+
+  /// Pastel chip fills, picked by category; text on them is always [ink].
+  final Color mint, peach, sky;
 
   static const light = AppPalette(
     brightness: Brightness.light,
-    bg: Color(0xFFF6F7F9),
+    bg: Color(0xFFFFF7EC),
     surface: Color(0xFFFFFFFF),
-    surface2: Color(0xFFEEF0F3),
-    ink: Color(0xFF15171C),
-    ink2: Color(0xFF5B616E),
-    ink3: Color(0xFF9097A3),
-    line: Color(0xFFE7E9EE),
+    surface2: Color(0xFFF7EBDA),
+    ink: Color(0xFF221A14),
+    ink2: Color(0xFF6B5D50),
+    ink3: Color(0xFFA3958A),
+    line: Color(0xFFEADCC8),
+    edge: Color(0xFF221A14),
     primary: Color(0xFFFF5A36),
-    primarySoft: Color(0xFFFFECE6),
-    like: Color(0xFF12B886),
-    nope: Color(0xFFF03E5A),
-    gold: Color(0xFFF5A524),
+    primarySoft: Color(0xFFFFE3D9),
+    like: Color(0xFFFF5A36),
+    nope: Color(0xFF221A14),
+    gold: Color(0xFFFFC93C),
+    danger: Color(0xFFD7263D),
+    mint: Color(0xFFDDF2D1),
+    peach: Color(0xFFFFE3D9),
+    sky: Color(0xFFDCEBFA),
   );
 
   static const dark = AppPalette(
     brightness: Brightness.dark,
-    bg: Color(0xFF0E0F12),
-    surface: Color(0xFF17191E),
-    surface2: Color(0xFF20232A),
-    ink: Color(0xFFF2F3F5),
-    ink2: Color(0xFFA9AFBB),
-    ink3: Color(0xFF6B7280),
-    line: Color(0xFF2A2E37),
-    primary: Color(0xFFFF6B4A),
-    primarySoft: Color(0xFF3A1E17),
-    like: Color(0xFF2BD4A4),
-    nope: Color(0xFFFF5C74),
-    gold: Color(0xFFF7B955),
+    bg: Color(0xFF17120E),
+    surface: Color(0xFF221B15),
+    surface2: Color(0xFF2E251E),
+    ink: Color(0xFFFFF3E4),
+    ink2: Color(0xFFC9B8A6),
+    ink3: Color(0xFF8C7B6B),
+    line: Color(0xFF3A3027),
+    edge: Color(0xFFE9D9C6),
+    primary: Color(0xFFFF6A47),
+    primarySoft: Color(0xFF45241A),
+    like: Color(0xFFFF6A47),
+    nope: Color(0xFFFFF3E4),
+    gold: Color(0xFFFFCF52),
+    danger: Color(0xFFFF5D6E),
+    mint: Color(0xFF243A22),
+    peach: Color(0xFF45241A),
+    sky: Color(0xFF1E3044),
   );
 }
 

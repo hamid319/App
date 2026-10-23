@@ -45,6 +45,12 @@ String placeTypeLabel(AppLocalizations l10n, String type) => switch (type) {
     'music' => l10n.tagMusic,
     'architecture' => l10n.tagArchitecture,
     'photo_spot' => l10n.tagPhotoSpot,
+    'restaurant' => l10n.tagRestaurant,
+    'cafe' => l10n.tagCafe,
+    'bar' => l10n.tagBar,
+    'pub' => l10n.tagPub,
+    'biergarten' => l10n.tagBiergarten,
+    'night_club' => l10n.tagNightClub,
     _ => _humanize(type),
   };
 
