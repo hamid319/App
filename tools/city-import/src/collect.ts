@@ -4,7 +4,7 @@
 //   names and texts). Catalog entries that cannot be placed on the map or
 //   have no usable photo are reported as skipped.
 
-import { DEFAULTS } from "./config.js";
+import { DEFAULTS, VENUES } from "./config.js";
 import { normalizeLicense } from "./licenses.js";
 import { interestsFor, typesFor } from "./mapping.js";
 import { distanceKm, matchAttraction } from "./match.js";
@@ -18,12 +18,15 @@ import type {
   PhotoDraft,
   PlaceDraft,
 } from "./model.js";
-import { osmAddress, osmCommonsFile, osmUrl, type OsmPlace } from "./osm.js";
+import { isQid, osmAddress, osmCommonsFile, osmUrl, safeWebsite, type OsmPlace } from "./osm.js";
+import { selectVenues, venueCandidates, venueDraft, venuePopularity, venueScore, type VenueCandidate } from "./venues.js";
 import type { EntityInfo, PhotoMetadata, WikimediaSource } from "./wikimedia.js";
 
 /** What collect needs from the outside world (fakes in tests). */
 export interface CollectSources {
   osmPlaces(center: Coordinates, radiusKm: number): Promise<OsmPlace[]>;
+  /** Restaurants, cafés, bars ... (one extra Overpass request). Without it no venues are collected. */
+  osmVenues?(center: Coordinates, radiusKm: number): Promise<OsmPlace[]>;
   wikimedia: Pick<
     WikimediaSource,
     "entityInfo" | "searchEntities" | "wikipediaSummary" | "photoFiles" | "photoMetadata" | "categoryFiles"
@@ -45,6 +48,8 @@ export async function collectCity(
   catalog: CatalogAttraction[],
   sources: CollectSources,
   log: (line: string) => void = () => undefined,
+  /** Place ids in exclusions.json for this city; excluded venues free their slot. */
+  excludedIds: ReadonlySet<string> = new Set(),
 ): Promise<CityCollection> {
   const center = { lat: city.lat, lng: city.lng };
   const radiusKm = city.radiusKm ?? DEFAULTS.radiusKm;
@@ -54,6 +59,10 @@ export async function collectCity(
   // 1. Find every catalog name on OpenStreetMap.
   const osmPlaces = await sources.osmPlaces(center, radiusKm);
   log(`${city.id}: ${osmPlaces.length} OSM places within ${radiusKm} km`);
+  // Venues right away too, so a failed request stops before the long part.
+  const venueRadiusKm = city.venueRadiusKm ?? VENUES.radiusKm;
+  const osmVenues = sources.osmVenues ? await sources.osmVenues(center, venueRadiusKm) : null;
+  if (osmVenues) log(`${city.id}: ${osmVenues.length} OSM venues within ${venueRadiusKm} km`);
   const located: Located[] = [];
   const unmatched: CatalogAttraction[] = [];
   for (const seed of seeds) {
@@ -146,6 +155,18 @@ export async function collectCity(
   places.sort((a, b) => a.rank - b.rank);
   log(`${city.id}: ${places.length} places, ${skipped.length} skipped`);
 
+  // 6. Evening/food venues: scored from OSM tags, photos optional.
+  let venues: PlaceDraft[] | undefined;
+  let venueStats: CityCollection["venueCandidates"];
+  if (osmVenues) {
+    const skipIds = new Set([...excludedIds, ...usedIds]);
+    const candidates = venueCandidates(osmVenues, center, venueRadiusKm, skipIds);
+    venues = await enrichVenues(city, selectVenues(candidates), venueRadiusKm, sources.wikimedia, usedPages);
+    venueStats = { downloaded: osmVenues.length, eligible: candidates.length };
+    log(`${city.id}: ${venues.length} venues (${venues.filter((v) => v.photos.length).length} with photos) ` +
+      `of ${candidates.length} eligible`);
+  }
+
   return {
     city,
     collectedAt: new Date().toISOString(),
@@ -153,7 +174,70 @@ export async function collectCity(
     osmMatched,
     places,
     skipped,
+    ...(venues ? { venues, venueCandidates: venueStats } : {}),
   };
+}
+
+/**
+ * Photos (Wikidata main image, OSM image tags, Commons depicts/category)
+ * and texts (Wikipedia lead, else the Wikidata description) for the
+ * selected venues. Venues without a usable photo are kept. Popularity is
+ * scored again with the real photo result; best first.
+ */
+async function enrichVenues(
+  city: CityConfig,
+  selected: VenueCandidate[],
+  radiusKm: number,
+  wikimedia: CollectSources["wikimedia"],
+  usedPages: Set<number>,
+): Promise<PlaceDraft[]> {
+  const drafts = selected.map((c, i) => ({ candidate: c, draft: venueDraft(city, c, i + 1) }));
+  const qids = [...new Set(drafts.flatMap((d) => (d.draft.wikidataId ? [d.draft.wikidataId] : [])))];
+  const info = qids.length ? await wikimedia.entityInfo(qids) : new Map<string, EntityInfo>();
+
+  const known = (d: (typeof drafts)[number]) => {
+    const entity = d.draft.wikidataId ? info.get(d.draft.wikidataId) : undefined;
+    const files = [...(entity?.imageFiles ?? [])];
+    const osmFile = osmCommonsFile(d.candidate.place.tags);
+    if (osmFile && !files.includes(osmFile)) files.push(osmFile);
+    return files;
+  };
+  const withQid = drafts.filter((d) => d.draft.wikidataId);
+  const depicted = withQid.length
+    ? await wikimedia.photoFiles(withQid.map((d) => ({ wikidataId: d.draft.wikidataId!, knownFiles: known(d) })))
+    : new Map<string, string[]>();
+  const files = new Map<string, string[]>();
+  for (const d of drafts) {
+    const list = [...(d.draft.wikidataId ? depicted.get(d.draft.wikidataId) ?? known(d) : known(d))];
+    const tag = d.candidate.place.tags.wikimedia_commons;
+    const entity = d.draft.wikidataId ? info.get(d.draft.wikidataId) : undefined;
+    const category = tag?.startsWith("Category:") ? tag.slice("Category:".length) : entity?.commonsCategory;
+    if (category) for (const f of await wikimedia.categoryFiles(category)) if (!list.includes(f)) list.push(f);
+    files.set(d.draft.id, list);
+  }
+  const allFiles = [...new Set([...files.values()].flat())];
+  const metadata = allFiles.length ? await wikimedia.photoMetadata(allFiles) : new Map<string, PhotoMetadata>();
+
+  for (const { candidate, draft } of drafts) {
+    draft.photos = choosePhotos(files.get(draft.id) ?? [], metadata, usedPages);
+    draft.popularity = venuePopularity(
+      venueScore(candidate.place.tags, candidate.distanceKm, radiusKm, draft.photos.length > 0),
+    );
+    const entity = draft.wikidataId ? info.get(draft.wikidataId) : undefined;
+    for (const lang of ["en", "de"] as Lang[]) {
+      const title = entity?.wikipediaTitles[lang];
+      const summary = title ? await wikimedia.wikipediaSummary(lang, title) : null;
+      if (summary) {
+        draft.descriptions[lang] = summary.text;
+        draft.wikipediaUrls[lang] = summary.url;
+      } else if (entity?.descriptions[lang]) {
+        draft.descriptions[lang] = entity.descriptions[lang];
+      }
+    }
+  }
+  const venues = drafts.map((d) => d.draft).sort((a, b) => b.popularity - a.popularity || a.rank - b.rank);
+  venues.forEach((v, i) => (v.rank = i + 1));
+  return venues;
 }
 
 /**
@@ -222,6 +306,7 @@ function toDraft(
   const website = safeWebsite(tags.website ?? tags["contact:website"]);
   return {
     id,
+    kind: "sight",
     ...(l.qid ? { wikidataId: l.qid } : {}),
     cityId: city.id,
     rank: l.seed.number,
@@ -242,20 +327,6 @@ function toDraft(
     distanceKm: Math.round(distanceKm(center, l.coordinates) * 10) / 10,
     photos,
   };
-}
-
-function safeWebsite(value: string | undefined): string | null {
-  if (!value) return null;
-  try {
-    const url = new URL(value.trim());
-    return url.protocol === "https:" || url.protocol === "http:" ? url.toString() : null;
-  } catch {
-    return null;
-  }
-}
-
-function isQid(value: string | undefined): value is string {
-  return Boolean(value && /^Q[1-9]\d*$/.test(value));
 }
 
 /**

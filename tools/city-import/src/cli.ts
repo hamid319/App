@@ -20,7 +20,7 @@ import { WikimediaHttp } from "./http.js";
 import { DEFAULT_LIMITS, UploadBudget, gb } from "./budget.js";
 import { toWebp } from "./images.js";
 import type { CatalogAttraction, CityCollection, CityConfig } from "./model.js";
-import { fetchCityPlaces } from "./osm.js";
+import { fetchCityPlaces, fetchCityVenues } from "./osm.js";
 import { selectPhotos } from "./picks.js";
 import { publishCity } from "./publish.js";
 import { renderReport } from "./report.js";
@@ -79,6 +79,7 @@ async function collect(cities: CityConfig[]) {
   const http = new WikimediaHttp();
   const wikimedia = new WikimediaSource(http);
   const catalog = readJson<{ cities: Array<{ id: string; attractions: CatalogAttraction[] }> }>(join(ROOT, "catalog.json"));
+  const excluded = exclusions();
   for (const city of cities) {
     try {
       const attractions = catalog.cities.find((c) => c.id === city.catalogId)?.attractions;
@@ -86,7 +87,8 @@ async function collect(cities: CityConfig[]) {
       const collection = await collectCity(city, attractions, {
         wikimedia,
         osmPlaces: (center, radiusKm) => fetchCityPlaces(http, center, radiusKm),
-      }, console.log);
+        osmVenues: (center, radiusKm) => fetchCityVenues(http, center, radiusKm),
+      }, console.log, new Set(excluded[city.id] ?? []));
       writeFileSync(join(OUT, `${city.id}.json`), JSON.stringify(collection, null, 2));
     } catch (error) {
       console.error(`${city.id}: failed – ${(error as Error).message}`);
@@ -122,10 +124,18 @@ async function publish(cities: CityConfig[], dryRun: boolean) {
     for (const c of collections) {
       const skip = new Set(excluded[c.city.id] ?? []);
       const places = c.places.filter((p) => !skip.has(p.id));
-      const photos = places.reduce((sum, p) => sum + selectPhotos(p, picks).length, 0);
-      const picked = places.filter((p) => picks[p.id]?.length).length;
-      console.log(`${c.city.id}: would publish ${places.length} places with up to ${photos} photos ` +
-        `(${picked} with photos picked in review)`);
+      const sightIds = new Set(c.places.map((p) => p.id));
+      const venues = (c.venues ?? []).filter((v) => !skip.has(v.id) && !sightIds.has(v.id));
+      const photos = [...places, ...venues].reduce((sum, p) => sum + selectPhotos(p, picks).length, 0);
+      const picked = [...places, ...venues].filter((p) => picks[p.id]?.length).length;
+      const byType = Object.entries(
+        venues.reduce<Record<string, number>>((acc, v) => ({ ...acc, [v.category]: (acc[v.category] ?? 0) + 1 }), {}),
+      ).map(([type, n]) => `${n} ${type}`).join(", ");
+      const venuePhotos = venues.filter((v) => v.photos.length > 0).length;
+      console.log(`${c.city.id}: would publish ${places.length} places and ${venues.length} venues ` +
+        `(${venuePhotos} with photos${byType ? `; ${byType}` : ""}) with up to ${photos} photos ` +
+        `(${picked} with photos picked in review)` +
+        (c.venues ? "" : " – no venues collected yet, run collect again"));
     }
     return;
   }

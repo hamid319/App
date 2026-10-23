@@ -25,6 +25,9 @@ export interface CityPublishResult {
   photosUploaded: number;
   photosReused: number;
   placesWithoutPhotos: number;
+  /** Venues published (included in [published]) and how many of them have no photo. */
+  venues: number;
+  venuesWithoutPhotos: number;
 }
 
 /**
@@ -50,11 +53,21 @@ export async function publishCity(
     photosUploaded: 0,
     photosReused: 0,
     placesWithoutPhotos: 0,
+    venues: 0,
+    venuesWithoutPhotos: 0,
   };
 
   const docs: PlaceDoc[] = [];
-  for (const draft of collection.places) {
+  const venueIds = new Set((collection.venues ?? []).map((v) => v.id));
+  const sightIds = new Set(collection.places.map((p) => p.id));
+  const drafts = [
+    ...collection.places,
+    // A venue that is also a sight is published once, as the sight.
+    ...(collection.venues ?? []).filter((v) => !sightIds.has(v.id)),
+  ];
+  for (const draft of drafts) {
     if (excludedIds.has(draft.id)) continue;
+    const isVenue = draft.kind === "venue" && venueIds.has(draft.id);
     const photos: StoredPhoto[] = [];
     for (const photo of selectPhotos(draft, deps.picks ?? {})) {
       const key = `places/${cityId}/${draft.id}/${photo.pageId}.webp`;
@@ -89,7 +102,11 @@ export async function publishCity(
         log(`  photo skipped (${draft.id}, ${photo.fileTitle}): ${(error as Error).message}`);
       }
     }
-    if (photos.length === 0) {
+    if (isVenue) {
+      // The app draws a placeholder for venues without a photo.
+      result.venues += 1;
+      if (photos.length === 0) result.venuesWithoutPhotos += 1;
+    } else if (photos.length === 0) {
       result.placesWithoutPhotos += 1;
       continue;
     }
@@ -98,6 +115,7 @@ export async function publishCity(
 
   await deps.data.writePlaces(docs);
   result.published = docs.length;
+  const sightCount = docs.filter((d) => d.kind === "sight").length;
 
   const keep = new Set(docs.map((doc) => doc.id));
   const existing = await deps.data.existingPlaces(cityId);
@@ -114,13 +132,13 @@ export async function publishCity(
     countryCode: collection.city.countryCode,
     lat: collection.city.lat,
     lng: collection.city.lng,
-    placeCount: docs.length,
+    placeCount: sightCount,
     status: "active",
     importRunId,
     updatedAt: now,
   };
   await deps.data.writeCity(city);
-  log(`${cityId}: ${result.published} published, ${result.hidden} hidden, ` +
+  log(`${cityId}: ${result.published} published (${result.venues} venues), ${result.hidden} hidden, ` +
     `${result.photosUploaded} photos uploaded, ${result.photosReused} reused`);
   return result;
 }
@@ -132,6 +150,9 @@ export function toPlaceDoc(draft: PlaceDraft, photos: StoredPhoto[], importRunId
     sourceId: draft.wikidataId ?? `${draft.osm?.type}/${draft.osm?.id}`,
     cityId: draft.cityId,
     status: "active",
+    kind: draft.kind ?? "sight",
+    // No undefined fields: Firestore rejects them.
+    ...(draft.kind === "venue" && draft.cuisine ? { cuisine: draft.cuisine } : {}),
     name: draft.names.en ?? draft.names.de ?? draft.catalogName,
     description: draft.descriptions.en ?? draft.descriptions.de ?? null,
     names: draft.names,

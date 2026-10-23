@@ -24,12 +24,16 @@ For each catalog entry, `collect`:
    Wikipedia lead paragraph; without a Wikipedia article the catalog's own
    description is used.
 
+5. collects up to 40 **evening/food venues** per city from OpenStreetMap
+   (see [Venues](#venues)).
+
 Sources, all free and storable long-term:
 
 | What | Source | Licence / notice in the app |
 |---|---|---|
 | Which places, order, categories, fallback text | `catalog.json` (team) | – |
 | Coordinates, address, opening hours, website | OpenStreetMap | ODbL, "© OpenStreetMap contributors" on the detail page |
+| Venues (restaurants, cafés, bars ...), cuisine | OpenStreetMap | ODbL, same notice |
 | Names (EN/DE), Wikidata link | Wikidata | CC0 |
 | Descriptions (EN/DE) | Wikipedia lead paragraph | CC BY-SA, "Text: Wikipedia" link |
 | Photos (up to 3 per place) | Wikimedia Commons | author + licence per photo |
@@ -102,30 +106,70 @@ safe:
 Every publish writes a log entry to `importRuns/{runId}` (not readable by
 the app).
 
-OpenStreetMap is read through the public Overpass API (one request per
-city). For many cities or frequent refreshes, switch to regional extracts
+OpenStreetMap is read through the public Overpass API (two requests per
+city: sights and venues). For many cities or frequent refreshes, switch to regional extracts
 (e.g. Geofabrik) to stay within the API's fair-use limits.
+
+## Venues
+
+For the app's "Heute Abend" slider, `collect` also picks evening and food
+venues, without a hand-made catalog (`src/venues.ts`):
+
+1. one extra Overpass request per city: named `amenity=restaurant|cafe|bar|pub|biergarten|nightclub`
+   within 5 km of the centre (`VENUES.radiusKm`; `venueRadiusKm` in
+   `cities.json` overrides), without `brand`, `brand:wikidata` or
+   `operator:wikidata` tags (chains). Fast food is not asked for. A name
+   found 3+ times in the area also counts as a chain; of two elements
+   with the same name the better one is kept.
+2. notability score, each criterion outweighing all later ones together:
+   Wikidata item > Commons photo (tag) > opening hours > website >
+   cuisine or description > closeness to the centre.
+3. best first, at most 40 per city (`VENUES.maxPerCity`) and per type
+   ≤ 15 restaurants, ≤ 10 cafés, ≤ 12 bars + pubs, ≤ 5 beer gardens,
+   ≤ 5 night clubs (`VENUE_CAPS` in `src/config.ts`).
+4. photos like sights (Wikidata image, OSM `image`/`wikimedia_commons`,
+   Commons depicts/category, same licence rules), but a venue **without a
+   usable photo is kept**; the app draws a placeholder. Texts only for
+   venues with a Wikidata item (Wikipedia lead, else the Wikidata
+   description), otherwise none.
+
+Ids in `exclusions.json` are skipped at collect time (the next-best venue
+takes the slot) and never published. A venue that is also a catalog sight
+is published once, as the sight. `report` and `review` show venues in
+their own section; `publish -- --dry-run` prints the counts per type.
 
 ## Data model
 
 `cities/{cityId}`: `nameEn`, `nameDe`, `countryCode`, `lat`, `lng`,
 `placeCount`, `updatedAt`.
 
-`places/{id}`: `cityId`, `status` (`active`/`hidden`), `name` and
+`places/{id}`: `cityId`, `status` (`active`/`hidden`), `kind`
+(`sight`/`venue`; the app reads a missing kind as `sight`), `name` and
 `description` (English), `names`/`descriptions`/`wikipediaUrls` per
 language, `lat`, `lng`, `address`, `openingHours`, `website`, `osmUrl`,
 `types` (app place types), `interests` (app interests), `popularity`
 (higher = earlier in the catalog), `imageUrls`, `photos` (with author and
 licence), `importRunId`, `updatedAt`.
 
+Venues have the same fields plus: exactly one type (`restaurant`, `cafe`,
+`bar`, `pub`, `biergarten`, `night_club`), `interests` `["food"]`
+(restaurant, café, beer garden) or `["nightlife"]` (bar, pub, night club),
+optional `cuisine` (first value of the OSM tag, e.g. `portuguese`),
+`popularity` 0..499 from the score (sights: 1000 − rank, so ≥ 950),
+`names` from OSM `name` (or `name:en`/`name:de`), possibly empty
+`descriptions` and `photos`. `cities/{id}.placeCount` counts sights only.
+
 The app loads one city with `cityId == X && status == active`, ordered by
-`popularity` (index in `firestore.indexes.json`).
+`popularity`, and the venues with `cityId == X && kind == venue && status
+== active` ordered by `popularity` desc. Both indexes are in
+`firestore.indexes.json`; deploy them before the app uses the venue
+query (`firebase deploy --only firestore:indexes`).
 
 ## Tuning
 
 `src/config.ts`: catalog categories → app place types, extra types from
 OSM tags, default radius (25 km; `cities.json` overrides per city), photo
-size limits. `src/osm.ts`: which OSM objects are downloaded.
+size limits, venue limits, caps and score weights. `src/osm.ts`: which OSM objects are downloaded.
 `src/match.ts`: how names are compared.
 
 Accepted photo licences: CC0, public domain, CC BY and CC BY-SA of any

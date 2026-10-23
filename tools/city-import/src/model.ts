@@ -23,6 +23,8 @@ export interface CityConfig {
   lng: number;
   /** Overrides DEFAULTS.radiusKm for this city. */
   radiusKm?: number;
+  /** Overrides VENUES.radiusKm for this city. */
+  venueRadiusKm?: number;
 }
 
 /** One curated attraction from catalog.json. */
@@ -54,15 +56,24 @@ export interface PhotoDraft {
   height: number;
 }
 
+/** "sight": curated catalog attraction; "venue": restaurant, café, bar ... picked from OSM. */
+export type PlaceKind = "sight" | "venue";
+
 /** A place as collected; written to out/<cityId>.json for review. */
 export interface PlaceDraft {
   /** wd_<QID> when the place has a Wikidata item, else osm_<type>_<id>. */
   id: string;
+  /** Missing in files collected before venues existed: a sight. */
+  kind?: PlaceKind;
+  /** Venues: first value of the OSM cuisine tag, e.g. "portuguese". */
+  cuisine?: string;
   wikidataId?: string;
   cityId: string;
-  /** Position in the curated catalog (1 = first). */
+  /** Position in the curated catalog (1 = first); venues: position by score. */
   rank: number;
+  /** Venues: the OSM name. */
   catalogName: string;
+  /** Venues: the app type (restaurant, cafe, ...). */
   category: string;
   osm?: { type: string; id: number; url: string };
   address?: string;
@@ -76,7 +87,7 @@ export interface PlaceDraft {
   types: string[];
   /** App interests derived from types, e.g. "culture", "nature". */
   interests: string[];
-  /** Higher = earlier in the curated catalog. */
+  /** Sights: 1000 - rank (>= 950). Venues: 0..499 from the notability score. */
   popularity: number;
   distanceKm: number;
   /** Photo candidates, best guess first. publish takes the ones picked in
@@ -94,6 +105,10 @@ export interface CityCollection {
   places: PlaceDraft[];
   /** Catalog entries dropped and why, for the report. */
   skipped: Array<{ rank: number; name: string; reason: string }>;
+  /** Evening/food venues from OSM (missing in files collected before venues existed). */
+  venues?: PlaceDraft[];
+  /** How many OSM venues were downloaded and how many survived the chain filter. */
+  venueCandidates?: { downloaded: number; eligible: number };
 }
 
 /** Stored photo, as read by the app's PhotoCredit (lib/common/models/photo_credit.dart). */
@@ -119,6 +134,10 @@ export interface PlaceDoc {
   sourceId: string;
   cityId: string;
   status: "active" | "hidden";
+  /** The app treats a missing kind as "sight". */
+  kind: PlaceKind;
+  /** Venues only: OSM cuisine (first value). */
+  cuisine?: string;
   /** English name/description for older app versions; names/descriptions per language. */
   name: string;
   description: string | null;

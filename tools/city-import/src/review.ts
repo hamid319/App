@@ -4,7 +4,7 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { readFileSync, writeFileSync } from "node:fs";
 import { DEFAULTS } from "./config.js";
-import type { CityCollection } from "./model.js";
+import type { CityCollection, PlaceDraft } from "./model.js";
 import { previewUrl, selectPhotos, type PhotoPicks } from "./picks.js";
 
 export interface ReviewFiles {
@@ -44,8 +44,8 @@ async function handle(files: ReviewFiles, port: number, req: IncomingMessage, re
   } catch {
     return send(res, 400, "text/plain", "invalid json");
   }
-  const place = collections
-    .find((c) => c.city.id === body.cityId)?.places
+  const collection = collections.find((c) => c.city.id === body.cityId);
+  const place = (collection ? allDrafts(collection) : [])
     .find((p) => p.id === body.placeId && PLACE_ID.test(p.id));
   if (!place) return send(res, 400, "text/plain", "unknown place");
   const candidates = new Set(place.photos.map((p) => p.pageId));
@@ -68,6 +68,11 @@ async function handle(files: ReviewFiles, port: number, req: IncomingMessage, re
     writeJson(files.exclusionsPath, { ...readRaw(files.exclusionsPath), places: sortKeys(exclusions) });
   }
   send(res, 204, "text/plain", "");
+}
+
+/** Sights and venues of a city. */
+function allDrafts(c: CityCollection): PlaceDraft[] {
+  return [...c.places, ...(c.venues ?? [])];
 }
 
 export function readPicks(path: string): PhotoPicks {
@@ -125,13 +130,13 @@ export function renderReviewPage(
 ): string {
   const reviewed = (c: CityCollection) => {
     const excluded = new Set(exclusions[c.city.id] ?? []);
-    return c.places.filter((p) => picks[p.id]?.length || excluded.has(p.id)).length;
+    return allDrafts(c).filter((p) => picks[p.id]?.length || excluded.has(p.id)).length;
   };
   const nav = collections.map((c) =>
-    `<a href="/?city=${esc(c.city.id)}"${c === current ? ' class="on"' : ""}>${esc(c.city.nameDe)} <span>${reviewed(c)}/${c.places.length}</span></a>`,
+    `<a href="/?city=${esc(c.city.id)}"${c === current ? ' class="on"' : ""}>${esc(c.city.nameDe)} <span>${reviewed(c)}/${allDrafts(c).length}</span></a>`,
   ).join("");
   const excluded = new Set(exclusions[current.city.id] ?? []);
-  const cards = current.places.map((p) => {
+  const card = (p: PlaceDraft) => {
     const selected = selectPhotos(p, picks).map((ph) => ph.pageId);
     const thumbs = p.photos.map((ph) => {
       const order = selected.indexOf(ph.pageId);
@@ -141,12 +146,17 @@ export function renderReviewPage(
     const state = excluded.has(p.id) ? "excluded" : picks[p.id]?.length ? "picked" : "auto";
     return `<article class="card ${state}" data-id="${esc(p.id)}" data-selected="${selected.join(",")}">
 <div class="head"><div><div class="name">${p.rank}. ${esc(p.names.de ?? p.names.en ?? p.catalogName)}</div>
-<div class="muted">${esc(p.category)} · ${p.photos.length} Fotos · <a href="${p.wikidataId ? `https://www.wikidata.org/wiki/${esc(p.wikidataId)}` : esc(p.osm?.url ?? "#")}" target="_blank" rel="noopener">Quelle</a> · <code>${esc(p.id)}</code></div></div>
+<div class="muted">${esc(p.category)}${p.cuisine ? ` · ${esc(p.cuisine)}` : ""} · ${p.photos.length} Fotos · <a href="${p.wikidataId ? `https://www.wikidata.org/wiki/${esc(p.wikidataId)}` : esc(p.osm?.url ?? "#")}" target="_blank" rel="noopener">Quelle</a> · <code>${esc(p.id)}</code></div></div>
 <span class="state"></span></div>
 <div class="thumbs">${thumbs}</div>
 <div class="actions"><button data-act="ok">✓ Passt so</button><button data-act="reset">Zurücksetzen</button><button data-act="exclude">Ausschließen</button></div>
 </article>`;
-  }).join("");
+  };
+  const venues = current.venues ?? [];
+  const cards = `<h2>Sehenswürdigkeiten</h2>${current.places.map(card).join("")}
+<h2>Lokale (Heute Abend)</h2>${venues.length
+    ? `<p class="muted">Ohne Foto zeigt die App einen Platzhalter. Ausgeschlossene Lokale werden beim nächsten collect durch die nächstbesten ersetzt.</p>${venues.map(card).join("")}`
+    : '<p class="muted">Keine Lokale gesammelt.</p>'}`;
   const skipped = current.skipped.length
     ? `<details><summary>${current.skipped.length} Katalog-Einträge fehlen</summary><p class="muted">${
       current.skipped.map((s) => `${s.rank}. ${esc(s.name)} (${esc(s.reason)})`).join(" · ")}</p></details>`
@@ -157,7 +167,7 @@ export function renderReviewPage(
 :root{--bg:#F6F7F9;--card:#fff;--ink:#15171C;--muted:#5B616E;--line:#E7E9EE;--accent:#FF5A36;--ok:#1E9E62;--bad:#D9344F}
 @media (prefers-color-scheme:dark){:root{--bg:#0E0F12;--card:#17191E;--ink:#F2F3F5;--muted:#A9AFBB;--line:#2A2E37}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,sans-serif;padding:0 16px 64px}
-header,main{max-width:1200px;margin:0 auto}header{padding:24px 0 8px}h1{margin:0;font-size:26px}.muted{color:var(--muted);font-size:13px}
+header,main{max-width:1200px;margin:0 auto}header{padding:24px 0 8px}h1{margin:0;font-size:26px}h2{margin:32px 0 0;font-size:20px}.muted{color:var(--muted);font-size:13px}
 nav{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}nav a{padding:4px 10px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--ink);text-decoration:none;font-size:13px}
 nav a.on{border-color:var(--accent)}nav a span{color:var(--muted)}a{color:var(--accent)}code{font-size:11px}
 .card{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px;margin-top:14px}

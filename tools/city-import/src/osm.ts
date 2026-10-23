@@ -47,13 +47,29 @@ ${filters.map((f) => `  nwr${around}${f};`).join("\n")}
 out center tags;`;
 }
 
-export async function fetchCityPlaces(
-  http: WikimediaHttp,
-  center: Coordinates,
-  radiusKm: number,
-): Promise<OsmPlace[]> {
+/**
+ * Overpass QL for a city's evening/food venues within [radiusKm]: named
+ * restaurants, cafés, bars, pubs, beer gardens and night clubs, without
+ * branded (chain) ones. A separate request from [cityQuery].
+ */
+export function venueQuery(center: Coordinates, radiusKm: number): string {
+  const around = `(around:${Math.round(radiusKm * 1000)},${center.lat},${center.lng})`;
+  return `[out:json][timeout:180];
+nwr${around}["name"]["amenity"~"^(restaurant|cafe|bar|pub|biergarten|nightclub)$"][!"brand"][!"brand:wikidata"][!"operator:wikidata"];
+out center tags;`;
+}
+
+export function fetchCityPlaces(http: WikimediaHttp, center: Coordinates, radiusKm: number): Promise<OsmPlace[]> {
+  return overpass(http, cityQuery(center, radiusKm));
+}
+
+export function fetchCityVenues(http: WikimediaHttp, center: Coordinates, radiusKm: number): Promise<OsmPlace[]> {
+  return overpass(http, venueQuery(center, radiusKm));
+}
+
+async function overpass(http: WikimediaHttp, query: string): Promise<OsmPlace[]> {
   const url = new URL("https://overpass-api.de/api/interpreter");
-  url.searchParams.set("data", cityQuery(center, radiusKm));
+  url.searchParams.set("data", query);
   const data = await http.json<OverpassResponse>(url, 260_000, 120 * 1024 * 1024);
   const places: OsmPlace[] = [];
   for (const element of data.elements ?? []) {
@@ -87,4 +103,19 @@ export function osmCommonsFile(tags: Record<string, string>): string | null {
     if (match) return `File:${decodeURIComponent(match[2]).replace(/_/g, " ")}`;
   }
   return null;
+}
+
+/** http(s) website from a tag value, normalised, or null. */
+export function safeWebsite(value: string | undefined): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === "https:" || url.protocol === "http:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+export function isQid(value: string | undefined): value is string {
+  return Boolean(value && /^Q[1-9]\d*$/.test(value));
 }
