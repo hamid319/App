@@ -2155,6 +2155,360 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove dates'**
   String get clearTripDates;
+
+  /// No description provided for @textSourceWikipedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Text: Wikipedia, CC BY-SA'**
+  String get textSourceWikipedia;
+
+  /// No description provided for @openingHoursLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening hours'**
+  String get openingHoursLabel;
+
+  /// No description provided for @websiteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Website'**
+  String get websiteLabel;
+
+  /// No description provided for @osmAttribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Map data: © OpenStreetMap contributors'**
+  String get osmAttribution;
+
+  /// No description provided for @openingHoursWeekdays.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon,Tue,Wed,Thu,Fri,Sat,Sun'**
+  String get openingHoursWeekdays;
+
+  /// No description provided for @openingHoursMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec'**
+  String get openingHoursMonths;
+
+  /// No description provided for @openingHoursDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get openingHoursDaily;
+
+  /// No description provided for @openingHoursAlwaysOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open 24 hours'**
+  String get openingHoursAlwaysOpen;
+
+  /// No description provided for @openingHoursClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'closed'**
+  String get openingHoursClosed;
+
+  /// No description provided for @openingHoursPublicHolidays.
+  ///
+  /// In en, this message translates to:
+  /// **'public holidays'**
+  String get openingHoursPublicHolidays;
+
+  /// No description provided for @openingHoursSchoolHolidays.
+  ///
+  /// In en, this message translates to:
+  /// **'school holidays'**
+  String get openingHoursSchoolHolidays;
+
+  /// No description provided for @openingHoursSunrise.
+  ///
+  /// In en, this message translates to:
+  /// **'sunrise'**
+  String get openingHoursSunrise;
+
+  /// No description provided for @openingHoursSunset.
+  ///
+  /// In en, this message translates to:
+  /// **'sunset'**
+  String get openingHoursSunset;
+
+  /// No description provided for @openingHoursEaster.
+  ///
+  /// In en, this message translates to:
+  /// **'Easter'**
+  String get openingHoursEaster;
+
+  /// No description provided for @reviewsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews'**
+  String get reviewsTitle;
+
+  /// No description provided for @reviewsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews yet.'**
+  String get reviewsNone;
+
+  /// No description provided for @reviewsFew.
+  ///
+  /// In en, this message translates to:
+  /// **'Only a few reviews so far. The average appears from 3 reviews.'**
+  String get reviewsFew;
+
+  /// No description provided for @reviewsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 review} other{{count} reviews}}'**
+  String reviewsCount(int count);
+
+  /// No description provided for @reviewWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a review'**
+  String get reviewWrite;
+
+  /// No description provided for @reviewEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit your review'**
+  String get reviewEdit;
+
+  /// No description provided for @reviewSignInToWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to write a review'**
+  String get reviewSignInToWrite;
+
+  /// No description provided for @reviewSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your review'**
+  String get reviewSheetTitle;
+
+  /// No description provided for @reviewTextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What did you like? (optional)'**
+  String get reviewTextHint;
+
+  /// No description provided for @reviewRatingRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose 1 to 5 stars.'**
+  String get reviewRatingRequired;
+
+  /// No description provided for @reviewSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for your review!'**
+  String get reviewSaved;
+
+  /// No description provided for @reviewDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Review deleted.'**
+  String get reviewDeleted;
+
+  /// No description provided for @reviewDeleteButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete review'**
+  String get reviewDeleteButton;
+
+  /// No description provided for @reviewReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get reviewReport;
+
+  /// No description provided for @reviewReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report this review?'**
+  String get reviewReportTitle;
+
+  /// No description provided for @reviewReportBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The text will be hidden until we have checked it.'**
+  String get reviewReportBody;
+
+  /// No description provided for @reviewReported.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks. The review is hidden for now.'**
+  String get reviewReported;
+
+  /// No description provided for @reviewAnonymousAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous'**
+  String get reviewAnonymousAuthor;
+
+  /// No description provided for @reviewYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get reviewYou;
+
+  /// No description provided for @reviewStarsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{stars} of 5 stars'**
+  String reviewStarsLabel(int stars);
+
+  /// No description provided for @errorSaveReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Your review could not be saved.'**
+  String get errorSaveReview;
+
+  /// No description provided for @errorLoadReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews could not be loaded.'**
+  String get errorLoadReviews;
+
+  /// No description provided for @favoritesMapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get favoritesMapTitle;
+
+  /// No description provided for @favoritesShowMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Show on map'**
+  String get favoritesShowMap;
+
+  /// No description provided for @favoritesMapEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Your favorites will appear here as pins.'**
+  String get favoritesMapEmpty;
+
+  /// No description provided for @mapsNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'The map is not set up in this build yet (Google Maps key missing).'**
+  String get mapsNotConfigured;
+
+  /// No description provided for @dayPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Day plan'**
+  String get dayPlanTitle;
+
+  /// No description provided for @dayPlanSelectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick the places for your day plan.'**
+  String get dayPlanSelectHint;
+
+  /// No description provided for @dayPlanSelectPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Select for the day plan'**
+  String get dayPlanSelectPlace;
+
+  /// No description provided for @dayPlanCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Create day plan (1 place)} other{Create day plan ({count} places)}}'**
+  String dayPlanCreate(int count);
+
+  /// No description provided for @dayPlanView.
+  ///
+  /// In en, this message translates to:
+  /// **'View day plan'**
+  String get dayPlanView;
+
+  /// No description provided for @dayPlanEndNearMe.
+  ///
+  /// In en, this message translates to:
+  /// **'End near me'**
+  String get dayPlanEndNearMe;
+
+  /// No description provided for @dayPlanStartNearMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Start near me'**
+  String get dayPlanStartNearMe;
+
+  /// No description provided for @dayPlanEndNearMeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts at the farthest place, so you finish near where you\'re staying.'**
+  String get dayPlanEndNearMeHint;
+
+  /// No description provided for @dayPlanStartNearMeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts at the closest place and works outwards.'**
+  String get dayPlanStartNearMeHint;
+
+  /// No description provided for @dayPlanNoLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re not near these places, so the route starts at the first stop. Drag to change it.'**
+  String get dayPlanNoLocation;
+
+  /// No description provided for @dayPlanLeg.
+  ///
+  /// In en, this message translates to:
+  /// **'{distance} as the crow flies'**
+  String dayPlanLeg(String distance);
+
+  /// No description provided for @dayPlanTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total: {distance} as the crow flies'**
+  String dayPlanTotal(String distance);
+
+  /// No description provided for @dayPlanOpenRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Open route in Google Maps'**
+  String get dayPlanOpenRoute;
+
+  /// No description provided for @dayPlanRouteCapped.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Maps shows up to 10 stops; the first 10 are opened.'**
+  String get dayPlanRouteCapped;
+
+  /// No description provided for @dayPlanAdminOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the group creator can change the day plan.'**
+  String get dayPlanAdminOnly;
+
+  /// No description provided for @dayPlanNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No day plan yet.'**
+  String get dayPlanNone;
+
+  /// No description provided for @errorSaveDayPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'The day plan could not be saved.'**
+  String get errorSaveDayPlan;
+
+  /// No description provided for @distanceKmValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km'**
+  String distanceKmValue(String km);
+
+  /// No description provided for @distanceMetersValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{meters} m'**
+  String distanceMetersValue(int meters);
 }
 
 class _AppLocalizationsDelegate

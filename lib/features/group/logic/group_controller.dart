@@ -1,8 +1,11 @@
 import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../common/models/day_plan.dart';
 import '../../../common/models/group_model.dart';
+import '../../../common/models/place_model.dart';
 import '../../../common/models/group_session_model.dart';
+import '../../../common/utils/day_route.dart';
 import '../../../features/auth/logic/auth_controller.dart';
 import '../../../features/profile/data/profile_repository.dart';
 import '../../../features/swipe/data/places_repository.dart';
@@ -414,6 +417,52 @@ class GroupController extends AsyncNotifier<GroupModel?> {
       throw StateError('Only the admin can reorder the session list');
     }
     await _repo.updateSessionOrder(group.groupId, sessionId, orderedPlaceIds);
+  }
+
+  /// The admin's position for planning, or null when it is unavailable.
+  /// [orderDayRoute] ignores it when it is far from the places.
+  Future<({double lat, double lng})?> planningOrigin() async {
+    try {
+      final position =
+          await ref.read(locationServiceProvider).getCurrentLocation();
+      return (lat: position.latitude, lng: position.longitude);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Builds the day plan from the [selected] matches (group favourite
+  /// first) as a short route and stores it on the session. Admin only.
+  Future<DayPlan> createDayPlan(
+    String sessionId,
+    List<PlaceModel> selected, {
+    required bool endNearOrigin,
+    ({double lat, double lng})? origin,
+  }) async {
+    final group = state.value;
+    if (group == null || !isAdmin) {
+      throw StateError('Only the admin can plan the day');
+    }
+    final route = orderDayRoute(
+      [for (final p in selected) RouteStop(id: p.id, lat: p.lat, lng: p.lng)],
+      origin: origin,
+      endNearOrigin: endNearOrigin,
+    );
+    final plan = DayPlan(
+      placeIds: [for (final stop in route) stop.id],
+      endNearOrigin: endNearOrigin,
+    );
+    await _repo.saveDayPlan(group.groupId, sessionId, plan);
+    return plan;
+  }
+
+  /// Saves a day plan the admin reordered by hand.
+  Future<void> saveDayPlan(String sessionId, DayPlan plan) async {
+    final group = state.value;
+    if (group == null || !isAdmin) {
+      throw StateError('Only the admin can plan the day');
+    }
+    await _repo.saveDayPlan(group.groupId, sessionId, plan);
   }
 }
 

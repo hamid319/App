@@ -177,6 +177,7 @@ must be reverted before a public release.
 | 9.2 | **Dev places fallback.** `AppConfig.useDevPlacesFallback = true` builds group sessions from places already in Firestore near the group's city when the `getCityPlaces` Cloud Function is missing. Hides a broken backend in production. | `lib/core/config/app_config.dart`, used in `places_repository.dart` (`fetchPlacesForCity`) | Set to `false` once the Cloud Functions are deployed. |
 
 ---
+| 9.3 | **Legacy place sources.** The deck and group pools use the curated import (`tools/city-import`) when a city has places, and otherwise fall back to the old paths: `loadNearbyPlaces` (reads the whole `places` collection, audit 3.1) and the `getCityPlaces` Cloud Function. | `swipe_controller.dart` (`_loadSoloPlaces`), `places_repository.dart` (`fetchPlacesForCity`) | Once all offered cities are imported, remove the fallbacks, the 51 test places and the Google Places client path. |
 
 ## 10. Open product decisions
 
@@ -185,4 +186,4 @@ them are on hold until then.
 
 | # | Decision | Options | Blocks |
 |---|---|---|---|
-| 10.1 | **When does a place count as a group match?** Today the results screen lists every place with **at least 1 like** (`getQualifiedPlaces` in `group_repository.dart`), so a single person's like already counts. | (a) Majority of participants, minimum 2 · (b) all participants · (c) at least 2 likes regardless of group size · (d) keep 1 like. Whatever is chosen should apply to the live counter **and** the results list. | The live "3 matches so far" counter in a running group session (matches stay hidden until the end, only the number grows) from the design proposal. |
+| 10.1 | ~~**When does a place count as a group match?**~~ **Decided 2026-10-23: (a) majority of participants, minimum 2 likes** (`GroupSessionModel.matchThreshold`, used by the results list). Apply the same rule to the live counter when it is built. | — | — |

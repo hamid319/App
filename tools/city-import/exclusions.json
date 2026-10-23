@@ -1,0 +1,4 @@
+{
+  "_comment": "Places the team removed after reviewing the report: cityId -> list of place ids from the report (wd_Q123 or osm_way_456). Excluded places are never published and are hidden if they were published before.",
+  "places": {}
+}

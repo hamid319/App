@@ -10,6 +10,8 @@ import '../../group/logic/group_controller.dart';
 import '../../../main_providers.dart';
 import '../../../core/config/app_config.dart';
 import '../../../common/models/interest.dart';
+import '../../../common/utils/geo_utils.dart';
+import '../../../core/constants/popular_cities.dart';
 import 'discover_preferences_controller.dart';
 
 /// Why the deck has no card to show, so the UI can offer the right way out.
@@ -108,7 +110,12 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
       // used to clear the favorites that had already loaded fine.
       try {
         final userProfile = await _profileRepo.getUserProfile(userId);
-        _favorites.addAll(userProfile.favorites);
+        // Replace rather than append: build() can run again while an
+        // earlier run is still awaiting (city, group and auth all trigger
+        // it), and appending then counted every favorite several times.
+        _favorites
+          ..clear()
+          ..addAll(userProfile.favorites.toSet());
       } catch (e) {
         debugPrint('Loading favorites failed: $e');
       }
@@ -148,11 +155,7 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
       }
     }
 
-    final allPlaces = await _placesRepo.loadNearbyPlaces(
-      _userLat,
-      _userLng,
-      radiusKm: prefs.radiusKm.toDouble(),
-    );
+    final allPlaces = await _loadSoloPlaces(prefs);
     final matching = allPlaces
         .where((p) => placeMatchesInterests(p, prefs.interests))
         .toList();
@@ -166,6 +169,34 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
                 ? DeckEmptyReason.allSeen
                 : DeckEmptyReason.none;
     return unseen;
+  }
+
+  /// Curated places of the chosen city, or of the nearest curated city when
+  /// browsing near the user, within the chosen radius. Falls back to the
+  /// legacy nearby query while a city has no curated places yet.
+  Future<List<PlaceModel>> _loadSoloPlaces(DiscoverPreferences prefs) async {
+    final radiusKm = prefs.radiusKm.toDouble();
+    final cityId = prefs.city?.id ??
+        PopularCity.nearest(_userLat, _userLng, maxKm: radiusKm)?.id;
+    if (cityId != null) {
+      try {
+        final curated = await _placesRepo.loadCityPlaces(cityId);
+        if (curated.isNotEmpty) {
+          return curated
+              .where((p) => GeoUtils.isWithinRadius(
+                    _userLat,
+                    _userLng,
+                    p.lat,
+                    p.lng,
+                    radiusKm,
+                  ))
+              .toList();
+        }
+      } catch (e) {
+        debugPrint('Loading curated places for $cityId failed: $e');
+      }
+    }
+    return _placesRepo.loadNearbyPlaces(_userLat, _userLng, radiusKm: radiusKm);
   }
 
   PlaceModel? get nextPlaceInDeck {

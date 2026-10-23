@@ -1144,4 +1144,218 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get clearTripDates => 'Zeitraum entfernen';
+
+  @override
+  String get textSourceWikipedia => 'Text: Wikipedia, CC BY-SA';
+
+  @override
+  String get openingHoursLabel => 'Öffnungszeiten';
+
+  @override
+  String get websiteLabel => 'Website';
+
+  @override
+  String get osmAttribution => 'Kartendaten: © OpenStreetMap-Mitwirkende';
+
+  @override
+  String get openingHoursWeekdays => 'Mo,Di,Mi,Do,Fr,Sa,So';
+
+  @override
+  String get openingHoursMonths =>
+      'Jan,Feb,Mär,Apr,Mai,Jun,Jul,Aug,Sep,Okt,Nov,Dez';
+
+  @override
+  String get openingHoursDaily => 'Täglich';
+
+  @override
+  String get openingHoursAlwaysOpen => 'Rund um die Uhr geöffnet';
+
+  @override
+  String get openingHoursClosed => 'geschlossen';
+
+  @override
+  String get openingHoursPublicHolidays => 'Feiertage';
+
+  @override
+  String get openingHoursSchoolHolidays => 'Schulferien';
+
+  @override
+  String get openingHoursSunrise => 'Sonnenaufgang';
+
+  @override
+  String get openingHoursSunset => 'Sonnenuntergang';
+
+  @override
+  String get openingHoursEaster => 'Ostern';
+
+  @override
+  String get reviewsTitle => 'Bewertungen';
+
+  @override
+  String get reviewsNone => 'Noch keine Bewertungen.';
+
+  @override
+  String get reviewsFew =>
+      'Bisher nur wenige Bewertungen. Der Durchschnitt erscheint ab 3 Bewertungen.';
+
+  @override
+  String reviewsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Bewertungen',
+      one: '1 Bewertung',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewWrite => 'Bewerten';
+
+  @override
+  String get reviewEdit => 'Deine Bewertung bearbeiten';
+
+  @override
+  String get reviewSignInToWrite => 'Melde dich an, um zu bewerten';
+
+  @override
+  String get reviewSheetTitle => 'Deine Bewertung';
+
+  @override
+  String get reviewTextHint => 'Was hat dir gefallen? (optional)';
+
+  @override
+  String get reviewRatingRequired => 'Wähle 1 bis 5 Sterne.';
+
+  @override
+  String get reviewSaved => 'Danke für deine Bewertung!';
+
+  @override
+  String get reviewDeleted => 'Bewertung gelöscht.';
+
+  @override
+  String get reviewDeleteButton => 'Bewertung löschen';
+
+  @override
+  String get reviewReport => 'Melden';
+
+  @override
+  String get reviewReportTitle => 'Diese Bewertung melden?';
+
+  @override
+  String get reviewReportBody =>
+      'Der Text wird ausgeblendet, bis wir ihn geprüft haben.';
+
+  @override
+  String get reviewReported => 'Danke. Die Bewertung ist vorerst ausgeblendet.';
+
+  @override
+  String get reviewAnonymousAuthor => 'Anonym';
+
+  @override
+  String get reviewYou => 'Du';
+
+  @override
+  String reviewStarsLabel(int stars) {
+    return '$stars von 5 Sternen';
+  }
+
+  @override
+  String get errorSaveReview =>
+      'Deine Bewertung konnte nicht gespeichert werden.';
+
+  @override
+  String get errorLoadReviews => 'Bewertungen konnten nicht geladen werden.';
+
+  @override
+  String get favoritesMapTitle => 'Karte';
+
+  @override
+  String get favoritesShowMap => 'Auf der Karte zeigen';
+
+  @override
+  String get favoritesMapEmpty => 'Deine Favoriten erscheinen hier als Pins.';
+
+  @override
+  String get mapsNotConfigured =>
+      'Die Karte ist in dieser Version noch nicht eingerichtet (Google-Maps-Schlüssel fehlt).';
+
+  @override
+  String get dayPlanTitle => 'Tagesplan';
+
+  @override
+  String get dayPlanSelectHint => 'Hake die Orte für euren Tagesplan an.';
+
+  @override
+  String get dayPlanSelectPlace => 'Für den Tagesplan auswählen';
+
+  @override
+  String dayPlanCreate(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tagesplan erstellen ($count Orte)',
+      one: 'Tagesplan erstellen (1 Ort)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dayPlanView => 'Tagesplan ansehen';
+
+  @override
+  String get dayPlanEndNearMe => 'In meiner Nähe enden';
+
+  @override
+  String get dayPlanStartNearMe => 'In meiner Nähe starten';
+
+  @override
+  String get dayPlanEndNearMeHint =>
+      'Beginnt beim weitesten Ort, damit ihr am Ende in der Nähe eurer Unterkunft seid.';
+
+  @override
+  String get dayPlanStartNearMeHint =>
+      'Beginnt beim nächsten Ort und führt von dort weg.';
+
+  @override
+  String get dayPlanNoLocation =>
+      'Du bist nicht in der Nähe dieser Orte, daher beginnt die Route beim ersten Stopp. Zum Ändern ziehen.';
+
+  @override
+  String dayPlanLeg(String distance) {
+    return '$distance Luftlinie';
+  }
+
+  @override
+  String dayPlanTotal(String distance) {
+    return 'Gesamt: $distance Luftlinie';
+  }
+
+  @override
+  String get dayPlanOpenRoute => 'Route in Google Maps öffnen';
+
+  @override
+  String get dayPlanRouteCapped =>
+      'Google Maps zeigt höchstens 10 Stopps; die ersten 10 werden geöffnet.';
+
+  @override
+  String get dayPlanAdminOnly =>
+      'Nur der Gruppen-Ersteller kann den Tagesplan ändern.';
+
+  @override
+  String get dayPlanNone => 'Noch kein Tagesplan.';
+
+  @override
+  String get errorSaveDayPlan =>
+      'Der Tagesplan konnte nicht gespeichert werden.';
+
+  @override
+  String distanceKmValue(String km) {
+    return '$km km';
+  }
+
+  @override
+  String distanceMetersValue(int meters) {
+    return '$meters m';
+  }
 }

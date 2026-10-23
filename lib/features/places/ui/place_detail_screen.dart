@@ -4,18 +4,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/theme.dart';
 import '../../../common/models/place_model.dart';
+import '../../../common/utils/opening_hours_format.dart';
 import '../../../common/utils/place_type_labels.dart';
 import '../../../common/widgets/place_photo.dart';
 import '../../../common/widgets/skeleton.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/errors/user_message.dart';
+import '../../../core/services/link_launcher.dart';
 import '../../../core/services/maps_launcher.dart';
 import '../../../l10n/l10n.dart';
 import '../../swipe/data/places_repository.dart';
 import '../../swipe/logic/swipe_controller.dart';
 import '../widgets/maps_app_sheet.dart';
 import '../widgets/photo_credits.dart';
+import '../widgets/place_reviews_section.dart';
 import '../widgets/prompt_tile.dart';
 
 final placeDetailProvider =
@@ -132,7 +135,10 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
     final text = Theme.of(context).textTheme;
     final l10n = context.l10n;
     final tags = placeTypeLabels(l10n, place.types);
-    final description = place.description?.trim() ?? '';
+    final lang = Localizations.localeOf(context).languageCode;
+    final name = place.nameFor(lang);
+    final description = place.descriptionFor(lang)?.trim() ?? '';
+    final wikipediaUrl = place.wikipediaUrlFor(lang);
     final heroHeight = MediaQuery.sizeOf(context).height * 0.46;
     final darkTheme = Theme.of(context).brightness == Brightness.dark;
 
@@ -141,12 +147,12 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
       if (isFav) {
         await swipeCtrl.removeFavorite(place.id);
         messenger.showSnackBar(
-          SnackBar(content: Text(l10n.placeRemovedFromFavorites(place.name))),
+          SnackBar(content: Text(l10n.placeRemovedFromFavorites(name))),
         );
       } else {
         await swipeCtrl.addFavorite(place.id);
         messenger.showSnackBar(
-          SnackBar(content: Text(l10n.placeAddedToFavorites(place.name))),
+          SnackBar(content: Text(l10n.placeAddedToFavorites(name))),
         );
       }
     }
@@ -234,7 +240,7 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
               ),
               sliver: SliverList.list(
                 children: [
-                  Text(place.name, style: text.headlineMedium),
+                  Text(name, style: text.headlineMedium),
                   const SizedBox(height: AppSizes.space8),
                   _MetaRow(place: place),
                   if (tags.isNotEmpty) ...[
@@ -258,6 +264,26 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
                         height: 1.6,
                       ),
                     ),
+                    if (wikipediaUrl != null) ...[
+                      const SizedBox(height: AppSizes.space8),
+                      _TextSource(
+                        url: wikipediaUrl,
+                        label: l10n.textSourceWikipedia,
+                      ),
+                    ],
+                  ],
+                  if (place.openingHours != null || place.website != null) ...[
+                    const SizedBox(height: AppSizes.groupGap),
+                    _PlaceFacts(place: place),
+                  ],
+                  const SizedBox(height: AppSizes.groupGap),
+                  PlaceReviewsSection(placeId: place.id),
+                  if (place.osmUrl != null) ...[
+                    const SizedBox(height: AppSizes.space16),
+                    _TextSource(
+                      url: place.osmUrl!,
+                      label: l10n.osmAttribution,
+                    ),
                   ],
                 ],
               ),
@@ -275,7 +301,7 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
               : MapsApp.google;
           if (app == null) return;
           try {
-            await MapsLauncher.open(app, place.lat, place.lng, place.name);
+            await MapsLauncher.open(app, place.lat, place.lng, name);
           } catch (e) {
             if (!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
@@ -370,6 +396,133 @@ class _SoftTag extends StatelessWidget {
               color: scheme.onSurface,
             ),
       ),
+    );
+  }
+}
+
+/// Source line under a description taken from Wikipedia (CC BY-SA requires
+/// naming and linking it).
+class _TextSource extends StatelessWidget {
+  const _TextSource({required this.url, required this.label});
+
+  final String url;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppSizes.radiusXs),
+        onTap: () async {
+          try {
+            await LinkLauncher.open(url);
+          } catch (e) {
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  userMessage(e, fallback: l10n.errorOpenLink, l10n: l10n),
+                ),
+              ),
+            );
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSizes.space4),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  decoration: TextDecoration.underline,
+                  decorationColor: scheme.onSurfaceVariant,
+                ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Opening hours and website from OpenStreetMap.
+class _PlaceFacts extends StatelessWidget {
+  const _PlaceFacts({required this.place});
+
+  final PlaceModel place;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final hours = place.openingHours;
+    final website = place.website;
+    Widget row(IconData icon, String label, String value, {VoidCallback? onTap}) {
+      final content = Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSizes.space8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 20, color: scheme.onSurfaceVariant),
+            const SizedBox(width: AppSizes.space12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label,
+                      style: text.labelMedium
+                          ?.copyWith(color: scheme.onSurfaceVariant)),
+                  const SizedBox(height: 2),
+                  Text(
+                    value,
+                    style: text.bodyMedium?.copyWith(
+                      color: onTap == null ? scheme.onSurface : scheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+      return onTap == null
+          ? content
+          : InkWell(
+              borderRadius: BorderRadius.circular(AppSizes.radiusXs),
+              onTap: onTap,
+              child: content,
+            );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (hours != null)
+          row(Icons.schedule, l10n.openingHoursLabel,
+              formatOpeningHours(hours, l10n)),
+        if (website != null)
+          row(
+            Icons.language,
+            l10n.websiteLabel,
+            Uri.tryParse(website)?.host.replaceFirst('www.', '') ?? website,
+            onTap: () async {
+              try {
+                await LinkLauncher.open(website);
+              } catch (e) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      userMessage(e, fallback: l10n.errorOpenLink, l10n: l10n),
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
+      ],
     );
   }
 }

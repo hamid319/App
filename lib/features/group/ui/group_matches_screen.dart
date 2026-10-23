@@ -70,6 +70,7 @@ final sessionResultsProvider =
     final qualified = await repo.getQualifiedPlaces(
       groupId: query.groupId,
       sessionId: query.sessionId,
+      participantCount: session.participants.length,
     );
 
     final placesRepo = PlacesRepository();
@@ -339,9 +340,13 @@ class _GroupMatchesScreenState extends ConsumerState<GroupMatchesScreen> {
                         }
 
                         return _ResultsList(
-                          initialResults: results,
+                          results: results,
                           isAdmin: group.ownerUid == user?.uid,
-                          sessionId: sessionId,
+                          groupId: widget.groupId,
+                          session: sessions.firstWhere(
+                            (s) => s.sessionId == sessionId,
+                            orElse: () => sessions.first,
+                          ),
                         );
                       },
                     ),
@@ -404,15 +409,19 @@ String _formatSessionLabel(BuildContext context, GroupSessionModel session) {
   return '${session.destination} · $dateLabel';
 }
 
+/// The session's matches. The group admin ticks the ones for the day plan
+/// and creates it; everyone can open an existing plan.
 class _ResultsList extends ConsumerStatefulWidget {
-  final List<ResultItem> initialResults;
+  final List<ResultItem> results;
   final bool isAdmin;
-  final String sessionId;
+  final String groupId;
+  final GroupSessionModel session;
 
   const _ResultsList({
-    required this.initialResults,
+    required this.results,
     required this.isAdmin,
-    required this.sessionId,
+    required this.groupId,
+    required this.session,
   });
 
   @override
@@ -420,153 +429,209 @@ class _ResultsList extends ConsumerStatefulWidget {
 }
 
 class _ResultsListState extends ConsumerState<_ResultsList> {
-  late List<ResultItem> _results;
+  late Set<String> _selected = _initialSelection();
+  bool _busy = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _results = List.from(widget.initialResults);
+  Set<String> _initialSelection() {
+    final ids = {for (final r in widget.results) r.place.id};
+    return {...?widget.session.dayPlan?.placeIds}.intersection(ids);
   }
 
   @override
   void didUpdateWidget(covariant _ResultsList oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // If the new initial results are completely different (e.g. session switched), update them
-    // Otherwise, we keep our local sorted state to prevent jitter during drag/drop
-    if (oldWidget.sessionId != widget.sessionId ||
-        oldWidget.initialResults.length != widget.initialResults.length) {
-      _results = List.from(widget.initialResults);
+    if (oldWidget.session.sessionId != widget.session.sessionId) {
+      _selected = _initialSelection();
     }
   }
 
-  void _saveOrder() {
-    ref.read(groupControllerProvider.notifier).updateSessionOrder(
-          widget.sessionId,
-          _results.map((r) => r.place.id).toList(),
-        );
-  }
+  void _openPlan() => context
+      .push('/day-plan/${widget.groupId}/${widget.session.sessionId}');
 
-  void _removeItem(int index) {
-    setState(() {
-      _results.removeAt(index);
-    });
-    _saveOrder();
+  Future<void> _createPlan() async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final controller = ref.read(groupControllerProvider.notifier);
+    // In ranking order, so without a usable location the route starts at
+    // the group's favourite.
+    final places = [
+      for (final r in widget.results)
+        if (_selected.contains(r.place.id)) r.place,
+    ];
+    setState(() => _busy = true);
+    try {
+      final origin = await controller.planningOrigin();
+      await controller.createDayPlan(
+        widget.session.sessionId,
+        places,
+        endNearOrigin: widget.session.dayPlan?.endNearOrigin ?? true,
+        origin: origin,
+      );
+      ref.invalidate(completedSessionsProvider(widget.groupId));
+      if (mounted) _openPlan();
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(
+        content:
+            Text(userMessage(e, fallback: l10n.errorSaveDayPlan, l10n: l10n)),
+      ));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     final like = context.swipeColors.like;
-    return ReorderableListView.builder(
-      buildDefaultDragHandles: false,
-      padding: const EdgeInsets.all(16.0),
-      itemCount: _results.length,
-      // onReorderItem already accounts for the removed item's index shift.
-      onReorderItem: (oldIndex, newIndex) {
-        if (!widget.isAdmin) return;
-        setState(() {
-          final item = _results.removeAt(oldIndex);
-          _results.insert(newIndex, item);
-        });
-        _saveOrder();
-      },
-      itemBuilder: (context, index) {
-        final result = _results[index];
-        final podium = index < 3;
-        return Padding(
-          key: ValueKey(result.place.id),
-          padding: const EdgeInsets.only(bottom: 10),
-          child: Card(
-            child: InkWell(
-              borderRadius: BorderRadius.circular(24),
-              onTap: () => context.push('/place/${result.place.id}'),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 10, 6, 10),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 28,
-                      child: Text(
-                        '${index + 1}',
-                        textAlign: TextAlign.center,
-                        style: text.headlineSmall?.copyWith(
-                          color: podium ? scheme.primary : scheme.outline,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    _ResultThumbnail(place: result.place),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+    final hasPlan = widget.session.dayPlan?.placeIds.isNotEmpty ?? false;
+    return Column(
+      children: [
+        if (widget.isAdmin)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: Text(
+              l10n.dayPlanSelectHint,
+              style: text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+            ),
+          ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16.0),
+            itemCount: widget.results.length,
+            itemBuilder: (context, index) {
+              final result = widget.results[index];
+              final podium = index < 3;
+              final selected = _selected.contains(result.place.id);
+              return Padding(
+                key: ValueKey(result.place.id),
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Card(
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(24),
+                    onTap: () => context.push('/place/${result.place.id}'),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 10, 6, 10),
+                      child: Row(
                         children: [
-                          Text(
-                            result.place.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: text.titleMedium,
+                          SizedBox(
+                            width: 28,
+                            child: Text(
+                              '${index + 1}',
+                              textAlign: TextAlign.center,
+                              style: text.headlineSmall?.copyWith(
+                                color: podium ? scheme.primary : scheme.outline,
+                              ),
+                            ),
                           ),
-                          if (result.place.address != null) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              result.place.address!,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: text.bodySmall
-                                  ?.copyWith(color: scheme.onSurfaceVariant),
-                            ),
-                          ],
-                          const SizedBox(height: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: like.withValues(alpha: 0.14),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
+                          const SizedBox(width: 10),
+                          _ResultThumbnail(place: result.place),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(Icons.favorite, size: 13, color: like),
-                                const SizedBox(width: 4),
                                 Text(
-                                  '${result.likes}',
-                                  style: text.labelMedium?.copyWith(
-                                    color: like,
-                                    fontWeight: FontWeight.w800,
+                                  result.place.nameFor(
+                                    Localizations.localeOf(context).languageCode,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: text.titleMedium,
+                                ),
+                                if (result.place.address != null) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    result.place.address!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: text.bodySmall
+                                        ?.copyWith(color: scheme.onSurfaceVariant),
+                                  ),
+                                ],
+                                const SizedBox(height: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: like.withValues(alpha: 0.14),
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.favorite, size: 13, color: like),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '${result.likes}',
+                                        style: text.labelMedium?.copyWith(
+                                          color: like,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
                           ),
+                          if (widget.isAdmin)
+                            Checkbox(
+                              value: selected,
+                              semanticLabel: l10n.dayPlanSelectPlace,
+                              onChanged: _busy
+                                  ? null
+                                  : (value) => setState(() {
+                                        if (value == true) {
+                                          _selected.add(result.place.id);
+                                        } else {
+                                          _selected.remove(result.place.id);
+                                        }
+                                      }),
+                            ),
                         ],
                       ),
                     ),
-                    if (widget.isAdmin) ...[
-                      IconButton(
-                        tooltip: MaterialLocalizations.of(context)
-                            .deleteButtonTooltip,
-                        icon: Icon(Icons.close, color: scheme.onSurfaceVariant),
-                        onPressed: () => _removeItem(index),
-                      ),
-                      ReorderableDragStartListener(
-                        index: index,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Icon(Icons.drag_indicator,
-                              color: scheme.onSurfaceVariant),
-                        ),
-                      ),
-                    ],
-                  ],
+                  ),
                 ),
+              );
+            },
+          ),
+        ),
+        if (widget.isAdmin || hasPlan)
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (widget.isAdmin)
+                    FilledButton.icon(
+                      icon: _busy
+                          ? const SizedBox.square(
+                              dimension: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.route),
+                      label: Text(l10n.dayPlanCreate(_selected.length)),
+                      onPressed:
+                          _selected.isEmpty || _busy ? null : _createPlan,
+                    ),
+                  if (hasPlan) ...[
+                    if (widget.isAdmin) const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.map_outlined),
+                      label: Text(l10n.dayPlanView),
+                      onPressed: _openPlan,
+                    ),
+                  ],
+                ],
               ),
             ),
           ),
-        );
-      },
+      ],
     );
   }
 }

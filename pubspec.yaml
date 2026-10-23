@@ -30,6 +30,7 @@ dependencies:
   cached_network_image: ^3.3.1
   cloud_functions: ^6.0.4
   device_calendar: ^4.3.3
+  google_maps_flutter: ^2.18.1
 
 dev_dependencies:
   flutter_test:
@@ -44,7 +45,8 @@ flutter:
   generate: true
   uses-material-design: true
   assets:
-    - .env
+    # .env is deliberately not bundled: anything in an app bundle can be
+    # extracted, and Places calls go through the getCityPlaces function.
     # Font licences (SIL OFL 1.1), registered with LicenseRegistry in main.dart.
     - assets/fonts/Figtree-OFL.txt
     - assets/fonts/BricolageGrotesque-OFL.txt

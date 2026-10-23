@@ -278,7 +278,8 @@ class _CardFace extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.swipeColors;
     final tags = placeTypeLabels(context.l10n, place.types).take(3).toList();
-    final description = place.description?.trim() ?? '';
+    final lang = Localizations.localeOf(context).languageCode;
+    final description = place.descriptionFor(lang)?.trim() ?? '';
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -319,7 +320,7 @@ class _CardFace extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    place.name,
+                    place.nameFor(lang),
                     style: AppTypography.cardTitle(),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,

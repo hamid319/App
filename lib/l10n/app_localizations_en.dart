@@ -1119,4 +1119,216 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clearTripDates => 'Remove dates';
+
+  @override
+  String get textSourceWikipedia => 'Text: Wikipedia, CC BY-SA';
+
+  @override
+  String get openingHoursLabel => 'Opening hours';
+
+  @override
+  String get websiteLabel => 'Website';
+
+  @override
+  String get osmAttribution => 'Map data: © OpenStreetMap contributors';
+
+  @override
+  String get openingHoursWeekdays => 'Mon,Tue,Wed,Thu,Fri,Sat,Sun';
+
+  @override
+  String get openingHoursMonths =>
+      'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec';
+
+  @override
+  String get openingHoursDaily => 'Daily';
+
+  @override
+  String get openingHoursAlwaysOpen => 'Open 24 hours';
+
+  @override
+  String get openingHoursClosed => 'closed';
+
+  @override
+  String get openingHoursPublicHolidays => 'public holidays';
+
+  @override
+  String get openingHoursSchoolHolidays => 'school holidays';
+
+  @override
+  String get openingHoursSunrise => 'sunrise';
+
+  @override
+  String get openingHoursSunset => 'sunset';
+
+  @override
+  String get openingHoursEaster => 'Easter';
+
+  @override
+  String get reviewsTitle => 'Reviews';
+
+  @override
+  String get reviewsNone => 'No reviews yet.';
+
+  @override
+  String get reviewsFew =>
+      'Only a few reviews so far. The average appears from 3 reviews.';
+
+  @override
+  String reviewsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reviews',
+      one: '1 review',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewWrite => 'Write a review';
+
+  @override
+  String get reviewEdit => 'Edit your review';
+
+  @override
+  String get reviewSignInToWrite => 'Sign in to write a review';
+
+  @override
+  String get reviewSheetTitle => 'Your review';
+
+  @override
+  String get reviewTextHint => 'What did you like? (optional)';
+
+  @override
+  String get reviewRatingRequired => 'Choose 1 to 5 stars.';
+
+  @override
+  String get reviewSaved => 'Thanks for your review!';
+
+  @override
+  String get reviewDeleted => 'Review deleted.';
+
+  @override
+  String get reviewDeleteButton => 'Delete review';
+
+  @override
+  String get reviewReport => 'Report';
+
+  @override
+  String get reviewReportTitle => 'Report this review?';
+
+  @override
+  String get reviewReportBody =>
+      'The text will be hidden until we have checked it.';
+
+  @override
+  String get reviewReported => 'Thanks. The review is hidden for now.';
+
+  @override
+  String get reviewAnonymousAuthor => 'Anonymous';
+
+  @override
+  String get reviewYou => 'You';
+
+  @override
+  String reviewStarsLabel(int stars) {
+    return '$stars of 5 stars';
+  }
+
+  @override
+  String get errorSaveReview => 'Your review could not be saved.';
+
+  @override
+  String get errorLoadReviews => 'Reviews could not be loaded.';
+
+  @override
+  String get favoritesMapTitle => 'Map';
+
+  @override
+  String get favoritesShowMap => 'Show on map';
+
+  @override
+  String get favoritesMapEmpty => 'Your favorites will appear here as pins.';
+
+  @override
+  String get mapsNotConfigured =>
+      'The map is not set up in this build yet (Google Maps key missing).';
+
+  @override
+  String get dayPlanTitle => 'Day plan';
+
+  @override
+  String get dayPlanSelectHint => 'Tick the places for your day plan.';
+
+  @override
+  String get dayPlanSelectPlace => 'Select for the day plan';
+
+  @override
+  String dayPlanCreate(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Create day plan ($count places)',
+      one: 'Create day plan (1 place)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dayPlanView => 'View day plan';
+
+  @override
+  String get dayPlanEndNearMe => 'End near me';
+
+  @override
+  String get dayPlanStartNearMe => 'Start near me';
+
+  @override
+  String get dayPlanEndNearMeHint =>
+      'Starts at the farthest place, so you finish near where you\'re staying.';
+
+  @override
+  String get dayPlanStartNearMeHint =>
+      'Starts at the closest place and works outwards.';
+
+  @override
+  String get dayPlanNoLocation =>
+      'You\'re not near these places, so the route starts at the first stop. Drag to change it.';
+
+  @override
+  String dayPlanLeg(String distance) {
+    return '$distance as the crow flies';
+  }
+
+  @override
+  String dayPlanTotal(String distance) {
+    return 'Total: $distance as the crow flies';
+  }
+
+  @override
+  String get dayPlanOpenRoute => 'Open route in Google Maps';
+
+  @override
+  String get dayPlanRouteCapped =>
+      'Google Maps shows up to 10 stops; the first 10 are opened.';
+
+  @override
+  String get dayPlanAdminOnly =>
+      'Only the group creator can change the day plan.';
+
+  @override
+  String get dayPlanNone => 'No day plan yet.';
+
+  @override
+  String get errorSaveDayPlan => 'The day plan could not be saved.';
+
+  @override
+  String distanceKmValue(String km) {
+    return '$km km';
+  }
+
+  @override
+  String distanceMetersValue(int meters) {
+    return '$meters m';
+  }
 }

@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:meta/meta.dart';
 
+import 'day_plan.dart';
+
 @immutable
 class GroupSessionModel {
   const GroupSessionModel({
@@ -18,6 +20,7 @@ class GroupSessionModel {
     this.progressByUser,
     this.orderedPlaceIds,
     this.endTime,
+    this.dayPlan,
   });
 
   final String sessionId;
@@ -37,7 +40,16 @@ class GroupSessionModel {
   final List<String>? orderedPlaceIds;
   final DateTime? endTime;
 
+  /// Set once the admin has built a day plan from the matches.
+  final DayPlan? dayPlan;
+
   bool get isCompleted => status == 'completed';
+
+  /// Likes a place needs to count as a group match: a majority of the
+  /// participants and at least 2 (product decision, POSSIBLE_ERRORS 10.1).
+  /// 2 people: both, 3: 2, 4: 3, 5: 3.
+  static int matchThreshold(int participantCount) =>
+      participantCount ~/ 2 + 1 < 2 ? 2 : participantCount ~/ 2 + 1;
 
   /// Auto-end check: every participant has swiped every card
   bool get allMembersDone {
@@ -65,6 +77,7 @@ class GroupSessionModel {
     Map<String, int>? progressByUser,
     List<String>? orderedPlaceIds,
     DateTime? endTime,
+    DayPlan? dayPlan,
   }) {
     return GroupSessionModel(
       sessionId: sessionId ?? this.sessionId,
@@ -81,6 +94,7 @@ class GroupSessionModel {
       progressByUser: progressByUser ?? this.progressByUser,
       orderedPlaceIds: orderedPlaceIds ?? this.orderedPlaceIds,
       endTime: endTime ?? this.endTime,
+      dayPlan: dayPlan ?? this.dayPlan,
     );
   }
 
@@ -107,6 +121,9 @@ class GroupSessionModel {
           ? _stringList(json['orderedPlaceIds'])
           : null,
       endTime: _parseDateTime(json['endTime']),
+      dayPlan: json['dayPlan'] is Map
+          ? DayPlan.fromJson(Map<String, dynamic>.from(json['dayPlan'] as Map))
+          : null,
     );
   }
 

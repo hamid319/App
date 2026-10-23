@@ -104,7 +104,9 @@ class _MatchCelebration extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSizes.space12),
                     Text(
-                      l10n.matchBody(place.name),
+                      l10n.matchBody(
+                        place.nameFor(Localizations.localeOf(context).languageCode),
+                      ),
                       textAlign: TextAlign.center,
                       style: body?.copyWith(color: Colors.white),
                     ),

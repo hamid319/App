@@ -5,11 +5,13 @@ import '../features/onboarding/ui/onboarding_screen.dart';
 import '../features/auth/ui/login_screen.dart';
 import '../features/auth/ui/register_screen.dart';
 import '../features/home/ui/simplified_home_screen.dart';
+import '../features/home/ui/favorites_map_screen.dart';
 import '../features/home/ui/favorites_screen.dart';
 import '../features/swipe/ui/swipe_screen.dart';
 import '../features/places/ui/place_detail_screen.dart';
 import '../features/group/ui/simplified_group_screen.dart';
 import '../features/group/ui/group_matches_screen.dart';
+import '../features/group/ui/day_plan_screen.dart';
 import '../features/profile/ui/simplified_profile_screen.dart';
 import '../features/profile/ui/settings_screen.dart';
 import '../core/services/preferences_service.dart';
@@ -85,6 +87,14 @@ GoRouter createRouter(Ref ref) {
       // Full-screen, outside the shell: the photo uses the whole screen and
       // the bottom bar is the page's own action bar.
       GoRoute(
+        path: '/favorites-map',
+        builder: (ctx, state) => const AccountGate(
+          reason: GateReason.favorites,
+          icon: Icons.map_outlined,
+          child: FavoritesMapScreen(),
+        ),
+      ),
+      GoRoute(
         path: '/place/:id',
         builder: (ctx, state) => const PlaceDetailScreen(),
       ),
@@ -127,6 +137,17 @@ GoRouter createRouter(Ref ref) {
                 child: GroupJoinScreen(groupId: groupId, code: code),
               );
             },
+          ),
+          GoRoute(
+            path: '/day-plan/:groupId/:sessionId',
+            builder: (ctx, state) => AccountGate(
+              reason: GateReason.groupMatches,
+              icon: Icons.route,
+              child: DayPlanScreen(
+                groupId: state.pathParameters['groupId']!,
+                sessionId: state.pathParameters['sessionId']!,
+              ),
+            ),
           ),
           GoRoute(
             path: '/group-matches/:groupId',
@@ -210,6 +231,7 @@ bool isActiveSessionRouteAllowed(String currentPath) {
       // Details of a card being voted on.
       currentPath.startsWith('/place/') ||
       currentPath.startsWith('/group-matches') ||
+      currentPath.startsWith('/day-plan') ||
       currentPath == '/group' ||
       currentPath.startsWith('/group/') ||
       currentPath == '/profile' ||

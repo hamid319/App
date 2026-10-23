@@ -47,17 +47,18 @@ routerProvider           // Provider<GoRouter>
 ```
 /onboarding   /login   /register
 /home         /swipe/:groupId   /place/:id
-/group        /group/join?groupId=&code=   /group-matches/:groupId
-/profile      /settings   /favorites
+/group        /group/join?groupId=&code=   /group-matches/:groupId   /day-plan/:groupId/:sessionId
+/profile      /settings   /favorites   /favorites-map
 ```
 - Always use `context.go()` or `context.push()`. Never `Navigator.push()`.
 - New routes go in `app/routes.dart` only. Path format: lowercase kebab-case.
 
 ## Env / secrets
 ```dart
-Env.googlePlacesApiKey  // loaded from .env via flutter_dotenv
+Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so empty in builds
 ```
-- Never hardcode API keys or base URLs in `.dart` files.
+- Never hardcode API keys or base URLs in `.dart` files. Never add `.env` to pubspec assets (bundled files can be extracted).
+- Google Maps SDK key: iOS `ios/Flutter/Secrets.xcconfig`, Android `android/local.properties` (`MAPS_API_KEY`), both git-ignored.
 - App-wide constants → `AppConfig` / `core/constants/`.
 
 ## Firestore structure (short form)
@@ -68,6 +69,13 @@ Env.googlePlacesApiKey  // loaded from .env via flutter_dotenv
     /votes/{placeId}   likedBy: string[], dislikedBy: string[]
     /userSwipes/{uid}  swipedPlaceIds: string[]
 /places/{placeId}      imageUrls: string[], types: string[]
+                       curated (tools/city-import): id wd_<QID> or osm_<type>_<id>, source 'wikidata', cityId, status,
+                       names/descriptions/wikipediaUrls per language, interests, popularity,
+                       address/openingHours/website/osmUrl (OpenStreetMap, ODbL: credit it in the UI)
+  /reviews/{uid}       rating 1-5, text ≤500, authorName, language, hidden, createdAt, updatedAt
+                       (signed-in non-guests only; a report sets hidden=true, moderate in the console)
+    /reports/{uid}     createdAt (write-only for clients)
+/cities/{cityId}       curated cities (read-only for clients); cityId = PopularCity id
                        prompts: [{kind, text: {en, de}}]   (prompt tiles; kinds in PlacePromptKind)
                        photos: [{publicUrl, creator, licenseName, licenseUrl, commonsFilePageUrl}]  (Wikidata pipeline)
                        photoAttributions: [{displayName, uri}]  (Google; must be shown with the photo)

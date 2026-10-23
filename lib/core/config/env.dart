@@ -2,7 +2,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Env {
   static Future<void> init() async {
-    await dotenv.load(fileName: '.env');
+    // .env is not bundled as an asset (see pubspec.yaml), so a release
+    // build ships no keys and the getters below return empty values.
+    await dotenv.load(fileName: '.env', isOptional: true);
   }
 
   static String get googlePlacesApiKey =>
