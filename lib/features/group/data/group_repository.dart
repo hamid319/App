@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../common/models/group_model.dart';
+import '../../../common/models/day_plan.dart';
 import '../../../common/models/group_session_model.dart';
 import '../../../core/services/firestore_service.dart';
 
@@ -477,9 +478,12 @@ class GroupRepository {
   }
 
   /// Returns only places that reached at least 1 like.
+  /// Vote documents of the places that count as group matches (see
+  /// [GroupSessionModel.matchThreshold]), most liked first.
   Future<List<Map<String, dynamic>>> getQualifiedPlaces({
     required String groupId,
     required String sessionId,
+    required int participantCount,
   }) async {
     final snap = await _db
         .collection('groups')
@@ -490,7 +494,9 @@ class GroupRepository {
         .get();
 
     final votes = snap.docs.map((doc) => doc.data()).toList();
-    final qualified = votes.where((v) => (v['likes'] as num? ?? 0) >= 1).toList();
+    final threshold = GroupSessionModel.matchThreshold(participantCount);
+    final qualified =
+        votes.where((v) => (v['likes'] as num? ?? 0) >= threshold).toList();
     qualified.sort((a, b) => (b['likes'] as num? ?? 0).compareTo(a['likes'] as num? ?? 0));
     return qualified;
   }
@@ -527,6 +533,17 @@ class GroupRepository {
         .update({
       'orderedPlaceIds': orderedPlaceIds,
     });
+  }
+
+  /// Stores the admin's day plan on the session (rules: owner only).
+  Future<void> saveDayPlan(
+      String groupId, String sessionId, DayPlan plan) async {
+    await _db
+        .collection('groups')
+        .doc(groupId)
+        .collection('sessions')
+        .doc(sessionId)
+        .update({'dayPlan': plan.toJson()});
   }
 
   /// Real-time stream of the active session -- drives UI reactivity.

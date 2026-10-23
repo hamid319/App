@@ -531,5 +531,59 @@
   "favoritesMapTitle": "Map",
   "favoritesShowMap": "Show on map",
   "favoritesMapEmpty": "Your favorites will appear here as pins.",
-  "mapsNotConfigured": "The map is not set up in this build yet (Google Maps key missing)."
+  "mapsNotConfigured": "The map is not set up in this build yet (Google Maps key missing).",
+  "dayPlanTitle": "Day plan",
+  "dayPlanSelectHint": "Tick the places for your day plan.",
+  "dayPlanSelectPlace": "Select for the day plan",
+  "dayPlanCreate": "{count, plural, =1{Create day plan (1 place)} other{Create day plan ({count} places)}}",
+  "@dayPlanCreate": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dayPlanView": "View day plan",
+  "dayPlanEndNearMe": "End near me",
+  "dayPlanStartNearMe": "Start near me",
+  "dayPlanEndNearMeHint": "Starts at the farthest place, so you finish near where you're staying.",
+  "dayPlanStartNearMeHint": "Starts at the closest place and works outwards.",
+  "dayPlanNoLocation": "You're not near these places, so the route starts at the first stop. Drag to change it.",
+  "dayPlanLeg": "{distance} as the crow flies",
+  "@dayPlanLeg": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "dayPlanTotal": "Total: {distance} as the crow flies",
+  "@dayPlanTotal": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "dayPlanOpenRoute": "Open route in Google Maps",
+  "dayPlanRouteCapped": "Google Maps shows up to 10 stops; the first 10 are opened.",
+  "dayPlanAdminOnly": "Only the group creator can change the day plan.",
+  "dayPlanNone": "No day plan yet.",
+  "errorSaveDayPlan": "The day plan could not be saved.",
+  "distanceKmValue": "{km} km",
+  "@distanceKmValue": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "distanceMetersValue": "{meters} m",
+  "@distanceMetersValue": {
+    "placeholders": {
+      "meters": {
+        "type": "int"
+      }
+    }
+  }
 }

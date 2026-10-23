@@ -1279,4 +1279,83 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get mapsNotConfigured =>
       'Die Karte ist in dieser Version noch nicht eingerichtet (Google-Maps-Schlüssel fehlt).';
+
+  @override
+  String get dayPlanTitle => 'Tagesplan';
+
+  @override
+  String get dayPlanSelectHint => 'Hake die Orte für euren Tagesplan an.';
+
+  @override
+  String get dayPlanSelectPlace => 'Für den Tagesplan auswählen';
+
+  @override
+  String dayPlanCreate(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tagesplan erstellen ($count Orte)',
+      one: 'Tagesplan erstellen (1 Ort)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dayPlanView => 'Tagesplan ansehen';
+
+  @override
+  String get dayPlanEndNearMe => 'In meiner Nähe enden';
+
+  @override
+  String get dayPlanStartNearMe => 'In meiner Nähe starten';
+
+  @override
+  String get dayPlanEndNearMeHint =>
+      'Beginnt beim weitesten Ort, damit ihr am Ende in der Nähe eurer Unterkunft seid.';
+
+  @override
+  String get dayPlanStartNearMeHint =>
+      'Beginnt beim nächsten Ort und führt von dort weg.';
+
+  @override
+  String get dayPlanNoLocation =>
+      'Du bist nicht in der Nähe dieser Orte, daher beginnt die Route beim ersten Stopp. Zum Ändern ziehen.';
+
+  @override
+  String dayPlanLeg(String distance) {
+    return '$distance Luftlinie';
+  }
+
+  @override
+  String dayPlanTotal(String distance) {
+    return 'Gesamt: $distance Luftlinie';
+  }
+
+  @override
+  String get dayPlanOpenRoute => 'Route in Google Maps öffnen';
+
+  @override
+  String get dayPlanRouteCapped =>
+      'Google Maps zeigt höchstens 10 Stopps; die ersten 10 werden geöffnet.';
+
+  @override
+  String get dayPlanAdminOnly =>
+      'Nur der Gruppen-Ersteller kann den Tagesplan ändern.';
+
+  @override
+  String get dayPlanNone => 'Noch kein Tagesplan.';
+
+  @override
+  String get errorSaveDayPlan =>
+      'Der Tagesplan konnte nicht gespeichert werden.';
+
+  @override
+  String distanceKmValue(String km) {
+    return '$km km';
+  }
+
+  @override
+  String distanceMetersValue(int meters) {
+    return '$meters m';
+  }
 }

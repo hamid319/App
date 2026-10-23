@@ -27,6 +27,32 @@ class MapsLauncher {
         {'api': '1', 'destination': '$lat,$lng'},
       );
 
+  /// Most stops a Google Maps route URL takes (origin, 8 waypoints,
+  /// destination).
+  static const maxRouteStops = 10;
+
+  /// Walking route through [stops] in Google Maps; the app opens it when
+  /// installed. Stops beyond [maxRouteStops] are left out.
+  static Uri googleMapsRouteUri(List<({double lat, double lng})> stops) {
+    final shown = stops.take(maxRouteStops).toList();
+    String point(({double lat, double lng}) p) => '${p.lat},${p.lng}';
+    return Uri.https('www.google.com', '/maps/dir/', {
+      'api': '1',
+      'origin': point(shown.first),
+      'destination': point(shown.last),
+      if (shown.length > 2)
+        'waypoints': shown.sublist(1, shown.length - 1).map(point).join('|'),
+      'travelmode': 'walking',
+    });
+  }
+
+  static Future<void> openRoute(List<({double lat, double lng})> stops) async {
+    if (stops.isEmpty) return;
+    if (!await _launch(googleMapsRouteUri(stops))) {
+      throw Exception('Could not launch maps');
+    }
+  }
+
   static Future<void> open(
     MapsApp app,
     double lat,

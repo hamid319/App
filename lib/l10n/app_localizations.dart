@@ -2395,6 +2395,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The map is not set up in this build yet (Google Maps key missing).'**
   String get mapsNotConfigured;
+
+  /// No description provided for @dayPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Day plan'**
+  String get dayPlanTitle;
+
+  /// No description provided for @dayPlanSelectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick the places for your day plan.'**
+  String get dayPlanSelectHint;
+
+  /// No description provided for @dayPlanSelectPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Select for the day plan'**
+  String get dayPlanSelectPlace;
+
+  /// No description provided for @dayPlanCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Create day plan (1 place)} other{Create day plan ({count} places)}}'**
+  String dayPlanCreate(int count);
+
+  /// No description provided for @dayPlanView.
+  ///
+  /// In en, this message translates to:
+  /// **'View day plan'**
+  String get dayPlanView;
+
+  /// No description provided for @dayPlanEndNearMe.
+  ///
+  /// In en, this message translates to:
+  /// **'End near me'**
+  String get dayPlanEndNearMe;
+
+  /// No description provided for @dayPlanStartNearMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Start near me'**
+  String get dayPlanStartNearMe;
+
+  /// No description provided for @dayPlanEndNearMeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts at the farthest place, so you finish near where you\'re staying.'**
+  String get dayPlanEndNearMeHint;
+
+  /// No description provided for @dayPlanStartNearMeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts at the closest place and works outwards.'**
+  String get dayPlanStartNearMeHint;
+
+  /// No description provided for @dayPlanNoLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re not near these places, so the route starts at the first stop. Drag to change it.'**
+  String get dayPlanNoLocation;
+
+  /// No description provided for @dayPlanLeg.
+  ///
+  /// In en, this message translates to:
+  /// **'{distance} as the crow flies'**
+  String dayPlanLeg(String distance);
+
+  /// No description provided for @dayPlanTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total: {distance} as the crow flies'**
+  String dayPlanTotal(String distance);
+
+  /// No description provided for @dayPlanOpenRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Open route in Google Maps'**
+  String get dayPlanOpenRoute;
+
+  /// No description provided for @dayPlanRouteCapped.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Maps shows up to 10 stops; the first 10 are opened.'**
+  String get dayPlanRouteCapped;
+
+  /// No description provided for @dayPlanAdminOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the group creator can change the day plan.'**
+  String get dayPlanAdminOnly;
+
+  /// No description provided for @dayPlanNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No day plan yet.'**
+  String get dayPlanNone;
+
+  /// No description provided for @errorSaveDayPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'The day plan could not be saved.'**
+  String get errorSaveDayPlan;
+
+  /// No description provided for @distanceKmValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km'**
+  String distanceKmValue(String km);
+
+  /// No description provided for @distanceMetersValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{meters} m'**
+  String distanceMetersValue(int meters);
 }
 
 class _AppLocalizationsDelegate

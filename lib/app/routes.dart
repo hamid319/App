@@ -11,6 +11,7 @@ import '../features/swipe/ui/swipe_screen.dart';
 import '../features/places/ui/place_detail_screen.dart';
 import '../features/group/ui/simplified_group_screen.dart';
 import '../features/group/ui/group_matches_screen.dart';
+import '../features/group/ui/day_plan_screen.dart';
 import '../features/profile/ui/simplified_profile_screen.dart';
 import '../features/profile/ui/settings_screen.dart';
 import '../core/services/preferences_service.dart';
@@ -138,6 +139,17 @@ GoRouter createRouter(Ref ref) {
             },
           ),
           GoRoute(
+            path: '/day-plan/:groupId/:sessionId',
+            builder: (ctx, state) => AccountGate(
+              reason: GateReason.groupMatches,
+              icon: Icons.route,
+              child: DayPlanScreen(
+                groupId: state.pathParameters['groupId']!,
+                sessionId: state.pathParameters['sessionId']!,
+              ),
+            ),
+          ),
+          GoRoute(
             path: '/group-matches/:groupId',
             builder: (ctx, state) => AccountGate(
               reason: GateReason.groupMatches,
@@ -219,6 +231,7 @@ bool isActiveSessionRouteAllowed(String currentPath) {
       // Details of a card being voted on.
       currentPath.startsWith('/place/') ||
       currentPath.startsWith('/group-matches') ||
+      currentPath.startsWith('/day-plan') ||
       currentPath == '/group' ||
       currentPath.startsWith('/group/') ||
       currentPath == '/profile' ||

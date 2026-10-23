@@ -1253,4 +1253,82 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get mapsNotConfigured =>
       'The map is not set up in this build yet (Google Maps key missing).';
+
+  @override
+  String get dayPlanTitle => 'Day plan';
+
+  @override
+  String get dayPlanSelectHint => 'Tick the places for your day plan.';
+
+  @override
+  String get dayPlanSelectPlace => 'Select for the day plan';
+
+  @override
+  String dayPlanCreate(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Create day plan ($count places)',
+      one: 'Create day plan (1 place)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dayPlanView => 'View day plan';
+
+  @override
+  String get dayPlanEndNearMe => 'End near me';
+
+  @override
+  String get dayPlanStartNearMe => 'Start near me';
+
+  @override
+  String get dayPlanEndNearMeHint =>
+      'Starts at the farthest place, so you finish near where you\'re staying.';
+
+  @override
+  String get dayPlanStartNearMeHint =>
+      'Starts at the closest place and works outwards.';
+
+  @override
+  String get dayPlanNoLocation =>
+      'You\'re not near these places, so the route starts at the first stop. Drag to change it.';
+
+  @override
+  String dayPlanLeg(String distance) {
+    return '$distance as the crow flies';
+  }
+
+  @override
+  String dayPlanTotal(String distance) {
+    return 'Total: $distance as the crow flies';
+  }
+
+  @override
+  String get dayPlanOpenRoute => 'Open route in Google Maps';
+
+  @override
+  String get dayPlanRouteCapped =>
+      'Google Maps shows up to 10 stops; the first 10 are opened.';
+
+  @override
+  String get dayPlanAdminOnly =>
+      'Only the group creator can change the day plan.';
+
+  @override
+  String get dayPlanNone => 'No day plan yet.';
+
+  @override
+  String get errorSaveDayPlan => 'The day plan could not be saved.';
+
+  @override
+  String distanceKmValue(String km) {
+    return '$km km';
+  }
+
+  @override
+  String distanceMetersValue(int meters) {
+    return '$meters m';
+  }
 }

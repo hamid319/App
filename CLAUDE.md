@@ -47,7 +47,7 @@ routerProvider           // Provider<GoRouter>
 ```
 /onboarding   /login   /register
 /home         /swipe/:groupId   /place/:id
-/group        /group/join?groupId=&code=   /group-matches/:groupId
+/group        /group/join?groupId=&code=   /group-matches/:groupId   /day-plan/:groupId/:sessionId
 /profile      /settings   /favorites   /favorites-map
 ```
 - Always use `context.go()` or `context.push()`. Never `Navigator.push()`.

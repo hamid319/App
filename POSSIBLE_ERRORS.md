@@ -186,4 +186,4 @@ them are on hold until then.
 
 | # | Decision | Options | Blocks |
 |---|---|---|---|
-| 10.1 | **When does a place count as a group match?** Today the results screen lists every place with **at least 1 like** (`getQualifiedPlaces` in `group_repository.dart`), so a single person's like already counts. | (a) Majority of participants, minimum 2 · (b) all participants · (c) at least 2 likes regardless of group size · (d) keep 1 like. Whatever is chosen should apply to the live counter **and** the results list. | The live "3 matches so far" counter in a running group session (matches stay hidden until the end, only the number grows) from the design proposal. |
+| 10.1 | ~~**When does a place count as a group match?**~~ **Decided 2026-10-23: (a) majority of participants, minimum 2 likes** (`GroupSessionModel.matchThreshold`, used by the results list). Apply the same rule to the live counter when it is built. | — | — |
