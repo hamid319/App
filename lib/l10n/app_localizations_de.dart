@@ -917,34 +917,34 @@ class AppLocalizationsDe extends AppLocalizations {
   String get matchOpenPlace => 'Ort ansehen';
 
   @override
-  String get onboarding1Lead => 'Swipe dich zu deinem';
+  String get onboarding1Lead => 'Plant zusammen,';
 
   @override
-  String get onboarding1Accent => 'nächsten Lieblingsort.';
+  String get onboarding1Accent => 'ohne endlose Chats.';
 
   @override
   String get onboarding1Body =>
-      'Rechts für „will ich sehen“, links für „lieber nicht“.';
+      'Sammelt Ideen, stimmt ab und seht sofort, was allen gefällt.';
 
   @override
-  String get onboarding2Lead => 'Sammle, was dir gefällt –';
+  String get onboarding2Lead => 'Aus Ideen wird';
 
   @override
-  String get onboarding2Accent => 'plane später.';
+  String get onboarding2Accent => 'ein Tagesplan.';
 
   @override
   String get onboarding2Body =>
-      'Jedes Like landet in deinen Favoriten, bereit für die nächste Reise.';
+      'TripFam ordnet eure Lieblingsorte zu kurzen Wegen auf der Karte, Tag für Tag.';
 
   @override
-  String get onboarding3Lead => 'Plant zusammen,';
+  String get onboarding3Lead => 'Kosten teilen,';
 
   @override
-  String get onboarding3Accent => 'ohne endlose Chats.';
+  String get onboarding3Accent => 'ohne Rechnen.';
 
   @override
   String get onboarding3Body =>
-      'Alle swipen denselben Stapel. TripFam zeigt euch, was allen gefällt.';
+      'Tragt ein, wer was bezahlt hat. TripFam zeigt, wer wem wie viel schuldet.';
 
   @override
   String get onboardingGuest => 'Erst mal als Gast umsehen';
