@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  // A getter, so tests can subclass AuthService without a Firebase app.
+  FirebaseAuth get _auth => FirebaseAuth.instance;
 
   User? get currentUser => _auth.currentUser;
 
@@ -41,6 +42,16 @@ class AuthService {
       EmailAuthProvider.credential(email: email, password: password),
     );
     return cred.user;
+  }
+
+  /// Sends Firebase's password reset email. [languageCode] sets the language
+  /// of the email (e.g. "de"); the link opens Firebase's reset page.
+  Future<void> sendPasswordResetEmail(
+    String email, {
+    String? languageCode,
+  }) async {
+    if (languageCode != null) await _auth.setLanguageCode(languageCode);
+    await _auth.sendPasswordResetEmail(email: email);
   }
 
   Future<void> updateDisplayName(String displayName) async {

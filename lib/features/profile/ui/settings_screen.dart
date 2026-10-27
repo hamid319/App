@@ -96,6 +96,22 @@ class SettingsScreen extends ConsumerWidget {
                       trailing: const Icon(Icons.chevron_right_rounded),
                       onTap: () => _editPaypalHandle(context, ref),
                     ),
+                    if (user.email.isNotEmpty)
+                      ListTile(
+                        leading: const Icon(Icons.lock_reset_rounded),
+                        title: Text(l10n.resetPasswordSetting),
+                        subtitle: Text(l10n.resetPasswordSettingSubtitle),
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: () => context.push(
+                          Uri(
+                            path: '/forgot-password',
+                            queryParameters: {
+                              'email': user.email,
+                              'from': 'settings',
+                            },
+                          ).toString(),
+                        ),
+                      ),
                     ListTile(
                       leading: Icon(Icons.logout_rounded,
                           color: Theme.of(context).colorScheme.error),
