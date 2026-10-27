@@ -1817,7 +1817,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding3Body.
   ///
   /// In en, this message translates to:
-  /// **'Everyone swipes the same deck. SwipeTrip shows you what you all like.'**
+  /// **'Everyone swipes the same deck. TripFam shows you what you all like.'**
   String get onboarding3Body;
 
   /// No description provided for @onboardingGuest.
@@ -2165,7 +2165,7 @@ abstract class AppLocalizations {
   /// No description provided for @calendarPermissionDenied.
   ///
   /// In en, this message translates to:
-  /// **'SwipeTrip has no access to your calendar. You can allow it in the iPhone or Android settings.'**
+  /// **'TripFam has no access to your calendar. You can allow it in the iPhone or Android settings.'**
   String get calendarPermissionDenied;
 
   /// No description provided for @errorLoadCalendar.
@@ -2897,7 +2897,7 @@ abstract class AppLocalizations {
   /// No description provided for @tripInviteMessage.
   ///
   /// In en, this message translates to:
-  /// **'Join our trip \"{trip}\" on SwipeTrip! Open Trips, tap + and join with the code {code}.'**
+  /// **'Join our trip \"{trip}\" on TripFam! Open Trips, tap + and join with the code {code}.'**
   String tripInviteMessage(String trip, String code);
 
   /// No description provided for @tripInviteCopied.

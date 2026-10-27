@@ -60,7 +60,8 @@ class AppPalette {
   /// Pastel chip fills, picked by category; text on them is always [ink].
   final Color mint, peach, sky;
 
-  // Apple HIG grouped look: grey page, white inset groups, one tint.
+  // Apple HIG grouped look: grey page, white inset groups, one tint
+  // (TripFam navy; sky in dark mode, where navy would vanish).
   // Secondary text is a little darker than iOS's own grey so it passes
   // WCAG AA on both the page and the cards.
   static const light = AppPalette(
@@ -73,11 +74,11 @@ class AppPalette {
     ink3: Color(0xFFAEAEB2),
     line: Color(0xFFD1D1D6),
     edge: Color(0xFFD1D1D6),
-    primary: Color(0xFFC2410C),
-    primarySoft: Color(0xFFFFEDD5),
-    like: Color(0xFFC2410C),
+    primary: BrandColors.navy,
+    primarySoft: Color(0xFFE3E8FA),
+    like: BrandColors.coral,
     nope: Color(0xFF1C1C1E),
-    gold: Color(0xFFFFCC00),
+    gold: BrandColors.amber,
     danger: Color(0xFFD70015),
     mint: Color(0xFFD1FAE5),
     peach: Color(0xFFFFEDD5),
@@ -94,16 +95,33 @@ class AppPalette {
     ink3: Color(0xFF636366),
     line: Color(0xFF38383A),
     edge: Color(0xFF38383A),
-    primary: Color(0xFFFF7A45),
-    primarySoft: Color(0xFF3D1F12),
-    like: Color(0xFFFF7A45),
+    primary: BrandColors.sky,
+    primarySoft: Color(0xFF1E2A4F),
+    like: Color(0xFFFF8A78),
     nope: Color(0xFFFFFFFF),
     gold: Color(0xFFFFD60A),
     danger: Color(0xFFFF6961),
     mint: Color(0xFF0F2E22),
-    peach: Color(0xFF3D1F12),
+    peach: Color(0xFF3D2420),
     sky: Color(0xFF0F2440),
   );
+}
+
+/// TripFam brand colours: the logo, wordmark, app icon and splash use these
+/// directly; screens use the palette above (via the theme), which builds on
+/// them.
+class BrandColors {
+  /// Midnight navy: suitcase, "trip", the tint in light mode.
+  static const navy = Color(0xFF1F2A6B);
+
+  /// Coral: "fam", the heart sticker, likes and highlights.
+  static const coral = Color(0xFFFF6F59);
+
+  /// Sky: icon and splash ground, the tint in dark mode.
+  static const sky = Color(0xFFA9C7FF);
+
+  /// Amber: the pin sticker, ratings.
+  static const amber = Color(0xFFFFC857);
 }
 
 /// Colours that sit on top of photos and look the same in light and dark.

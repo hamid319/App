@@ -944,7 +944,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get onboarding3Body =>
-      'Alle swipen denselben Stapel. SwipeTrip zeigt euch, was allen gefällt.';
+      'Alle swipen denselben Stapel. TripFam zeigt euch, was allen gefällt.';
 
   @override
   String get onboardingGuest => 'Erst mal als Gast umsehen';
@@ -1148,7 +1148,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get calendarPermissionDenied =>
-      'SwipeTrip hat keinen Zugriff auf deinen Kalender. Du kannst ihn in den Einstellungen deines iPhones oder Android-Geräts erlauben.';
+      'TripFam hat keinen Zugriff auf deinen Kalender. Du kannst ihn in den Einstellungen deines iPhones oder Android-Geräts erlauben.';
 
   @override
   String get errorLoadCalendar => 'Dein Kalender konnte nicht geladen werden.';
@@ -1603,7 +1603,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String tripInviteMessage(String trip, String code) {
-    return 'Komm mit auf unsere Reise „$trip“ in SwipeTrip! Öffne Reisen, tippe auf + und tritt mit dem Code $code bei.';
+    return 'Komm mit auf unsere Reise „$trip“ in TripFam! Öffne Reisen, tippe auf + und tritt mit dem Code $code bei.';
   }
 
   @override

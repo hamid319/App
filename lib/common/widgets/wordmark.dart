@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../core/constants/colors.dart';
 import '../../core/constants/typography.dart';
-import 'swipe_pin_mark.dart';
+import 'tripfam_mark.dart';
 
-/// SwipeTrip logo: the swipe-pin mark followed by the "swipetrip" logotype
-/// (ink + brand orange, in the display font).
+/// TripFam logo: the suitcase mark followed by the "tripfam" logotype
+/// ("trip" in the tint, navy or sky in dark mode; "fam" in coral).
 class Wordmark extends StatelessWidget {
   const Wordmark({super.key, this.size = 24, this.showMark = true});
 
@@ -17,23 +18,26 @@ class Wordmark extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final style = AppTypography.display(size: size, color: scheme.onSurface);
     return Semantics(
-      label: 'SwipeTrip',
+      label: 'TripFam',
       header: true,
       child: ExcludeSemantics(
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (showMark) ...[
-              SwipePinMark(size: size * 1.35),
+              TripFamMark(size: size * 1.35),
               SizedBox(width: size * 0.35),
             ],
             Text.rich(
               TextSpan(
                 children: [
-                  const TextSpan(text: 'swipe'),
                   TextSpan(
                     text: 'trip',
                     style: TextStyle(color: scheme.primary),
+                  ),
+                  const TextSpan(
+                    text: 'fam',
+                    style: TextStyle(color: BrandColors.coral),
                   ),
                 ],
               ),

@@ -376,7 +376,7 @@
   "onboarding2Body": "Every like lands in your favorites, ready for your next trip.",
   "onboarding3Lead": "Plan together,",
   "onboarding3Accent": "without endless chats.",
-  "onboarding3Body": "Everyone swipes the same deck. SwipeTrip shows you what you all like.",
+  "onboarding3Body": "Everyone swipes the same deck. TripFam shows you what you all like.",
   "onboardingGuest": "Just look around as a guest",
   "filterAll": "All · {count}",
   "@filterAll": {
@@ -479,7 +479,7 @@
   "fromCalendar": "From calendar",
   "calendarPickTitle": "Pick a trip from your calendar",
   "calendarPickHint": "We use the event's title, place and dates for the group. Nothing else leaves your phone.",
-  "calendarPermissionDenied": "SwipeTrip has no access to your calendar. You can allow it in the iPhone or Android settings.",
+  "calendarPermissionDenied": "TripFam has no access to your calendar. You can allow it in the iPhone or Android settings.",
   "errorLoadCalendar": "Couldn't load your calendar.",
   "calendarNoEvents": "No upcoming events in your calendar.",
   "calendarCityNotFound": "We couldn't recognise the city. Please pick it.",
@@ -699,7 +699,7 @@
   "tripJournalSoon": "The travel journal is coming soon.",
   "tripInvite": "Invite",
   "tripInviteFriends": "Invite friends",
-  "tripInviteMessage": "Join our trip \"{trip}\" on SwipeTrip! Open Trips, tap + and join with the code {code}.",
+  "tripInviteMessage": "Join our trip \"{trip}\" on TripFam! Open Trips, tap + and join with the code {code}.",
   "@tripInviteMessage": {
     "placeholders": {
       "trip": {
