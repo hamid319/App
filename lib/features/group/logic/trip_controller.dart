@@ -220,3 +220,22 @@ class TripActions extends Notifier<void> {
     return places.length;
   }
 }
+
+/// Gives the owner's groups an entry in `inviteCodes` (groups made before
+/// that lookup existed have none, so their code could not be resolved).
+/// Best effort and once per group per app run; watched by the trips list.
+final inviteIndexBackfillProvider = Provider<void>((ref) {
+  final uid = ref.watch(authControllerProvider).value?.uid;
+  final groups = ref.watch(userGroupsProvider).value ?? const <GroupModel>[];
+  if (uid == null) return;
+  final repo = ref.read(groupRepositoryProvider);
+  for (final group in groups) {
+    if (group.ownerUid != uid || !_indexedInvites.add(group.groupId)) continue;
+    repo.ensureInviteIndex(group).catchError((Object _) {
+      // Retried on the next app start.
+      _indexedInvites.remove(group.groupId);
+    });
+  }
+});
+
+final Set<String> _indexedInvites = {};

@@ -24,6 +24,7 @@ class TripsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final trips = ref.watch(userGroupsProvider);
+    ref.watch(inviteIndexBackfillProvider);
     final text = Theme.of(context).textTheme;
 
     return Scaffold(

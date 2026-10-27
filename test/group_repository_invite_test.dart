@@ -31,7 +31,10 @@ void main() {
       'activeSessionId': activeSessionId,
       if (joinEnabled != null) 'joinEnabled': joinEnabled,
       'invite': {'code': 'ABC123', 'createdAt': null},
-    });
+    }).then((_) => firestore
+        .collection('inviteCodes')
+        .doc('ABC123')
+        .set({'groupId': 'group-1'}));
   }
 
   Future<Map<String, dynamic>> groupData() async =>
@@ -139,5 +142,33 @@ void main() {
           .isJoinable,
       isFalse,
     );
+  });
+
+  test('joining sends the code along and unknown codes fail', () async {
+    await seedGroup();
+    await repository.joinGroupByCodeOnly('abc123', 'new-user');
+    final data = await groupData();
+    expect(data['members'], contains('new-user'));
+    expect(data['joinCode'], 'ABC123');
+
+    await expectLater(
+      repository.joinGroupByCodeOnly('WRONG1', 'other-user'),
+      throwsA(isA<Exception>()),
+    );
+    await expectLater(
+      repository.joinGroupByInvite('group-1', 'WRONG1', 'other-user'),
+      throwsA(isA<Exception>()),
+    );
+  });
+
+  test('a new group gets its invite code entry', () async {
+    await repository.createGroup(const GroupModel(
+      groupId: 'g2',
+      members: ['owner'],
+      ownerUid: 'owner',
+      invite: GroupInvite(code: 'XYZ789'),
+    ));
+    final entry = await firestore.collection('inviteCodes').doc('XYZ789').get();
+    expect(entry.data()?['groupId'], 'g2');
   });
 }

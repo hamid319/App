@@ -59,34 +59,34 @@ class GroupRepository {
         normalizedGroup.toJson(),
       );
     }
+    await ensureInviteIndex(normalizedGroup);
+  }
+
+  /// Invite codes live in `inviteCodes/{code}` (`groupId`), so someone who
+  /// is not a member yet can resolve a code without being able to read or
+  /// list groups. Groups themselves are readable by members only.
+  DocumentReference<Map<String, dynamic>> _inviteDoc(String code) =>
+      _db.collection('inviteCodes').doc(code.toUpperCase());
+
+  /// Writes the code's lookup entry. Called when a group is created and, for
+  /// groups made before the lookup existed, by their owner (idempotent).
+  Future<void> ensureInviteIndex(GroupModel group) async {
+    final code = group.invite?.code ?? '';
+    if (code.isEmpty) return;
+    await _inviteDoc(code).set({
+      'groupId': group.groupId,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
   }
 
   Future<void> joinGroupByInvite(
       String groupId, String code, String userId) async {
-    final groupRef = _db.collection('groups').doc(groupId);
-    await _db.runTransaction((transaction) async {
-      final snap = await transaction.get(groupRef);
-      if (!snap.exists || snap.data() == null) {
-        throw Exception('Group not found');
-      }
-
-      final group = GroupModel.fromJson(snap.data()!);
-      if (group.invite?.code != code) {
-        throw Exception('Invalid invite code');
-      }
-      if (!group.isJoinable) {
-        throw Exception('Joining is currently disabled for this group');
-      }
-      if (group.members.contains(userId)) {
-        return;
-      }
-
-      transaction.update(groupRef, {
-        'members': FieldValue.arrayUnion([userId]),
-      });
-    });
+    await _joinWithCode(groupId, code.toUpperCase(), userId);
   }
 
+  /// Not usable for people outside the group: joining needs the invite code
+  /// (the security rules check it). Kept for members re-joining a group
+  /// they can already read.
   Future<void> joinGroup(String groupId, String userId) async {
     final groupRef = _db.collection('groups').doc(groupId);
     await _db.runTransaction((transaction) async {
@@ -108,42 +108,52 @@ class GroupRepository {
 
   Future<String> joinGroupByCodeOnly(String code, String userId) async {
     final normalizedCode = code.toUpperCase();
-    final query = await _db
-        .collection('groups')
-        .where('invite.code', isEqualTo: normalizedCode)
-        .limit(1)
-        .get();
-
-    if (query.docs.isEmpty) {
+    final invite = await _inviteDoc(normalizedCode).get();
+    final groupId = invite.data()?['groupId'];
+    if (!invite.exists || groupId is! String || groupId.isEmpty) {
       throw Exception('Invalid invite code');
     }
+    await _joinWithCode(groupId, normalizedCode, userId);
+    return groupId;
+  }
 
-    final groupId = query.docs.first.id;
+  /// Adds [userId] to the group and sends the [code] along as `joinCode`,
+  /// which the rules compare with the group's invite code. A non-member
+  /// cannot read the group first, so the checks run client-side only when
+  /// the read is allowed (already a member, or tests without rules).
+  Future<void> _joinWithCode(String groupId, String code, String userId) async {
     final groupRef = _db.collection('groups').doc(groupId);
-
-    await _db.runTransaction((transaction) async {
-      final snap = await transaction.get(groupRef);
-      if (!snap.exists || snap.data() == null) {
+    try {
+      final snap = await groupRef.get();
+      if (snap.exists && snap.data() != null) {
+        final group = GroupModel.fromJson(snap.data()!);
+        if (group.members.contains(userId)) return;
+        if (group.invite?.code != code) {
+          throw Exception('Invalid invite code');
+        }
+        if (!group.isJoinable) {
+          throw Exception('Joining is currently disabled for this group');
+        }
+      } else if (!snap.exists) {
         throw Exception('Group not found');
       }
+    } on FirebaseException catch (e) {
+      // Not a member yet: reading is not allowed, the rules decide below.
+      if (e.code != 'permission-denied') rethrow;
+    }
 
-      final group = GroupModel.fromJson(snap.data()!);
-      if (group.invite?.code != normalizedCode) {
-        throw Exception('Invalid invite code');
-      }
-      if (!group.isJoinable) {
-        throw Exception('Joining is currently disabled for this group');
-      }
-      if (group.members.contains(userId)) {
-        return;
-      }
-
-      transaction.update(groupRef, {
+    try {
+      await groupRef.update({
         'members': FieldValue.arrayUnion([userId]),
+        'joinCode': code,
       });
-    });
-
-    return groupId;
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        // Wrong code, or a swipe session is running.
+        throw Exception('Invalid invite code or joining is closed right now');
+      }
+      rethrow;
+    }
   }
 
   Stream<List<GroupModel>> streamUserGroups(String userId) {
