@@ -58,6 +58,27 @@ class AuthService {
     await _auth.currentUser?.updateDisplayName(displayName);
   }
 
+  /// Confirms the signed-in email account's password again. Firebase asks
+  /// for this before deleting an account whose last sign-in is not recent.
+  Future<void> reauthenticateWithPassword(String password) async {
+    final user = _auth.currentUser;
+    final email = user?.email;
+    if (user == null || email == null || email.isEmpty) {
+      throw StateError('Not authenticated');
+    }
+    await user.reauthenticateWithCredential(
+      EmailAuthProvider.credential(email: email, password: password),
+    );
+  }
+
+  /// Deletes the signed-in Firebase Auth user (and with it the session).
+  /// Throws `requires-recent-login` when the last sign-in is too old.
+  Future<void> deleteCurrentUser() async {
+    final user = _auth.currentUser;
+    if (user == null) throw StateError('Not authenticated');
+    await user.delete();
+  }
+
   Future<void> signOut() async {
     await _auth.signOut();
   }

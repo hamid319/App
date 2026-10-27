@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../auth/logic/account_deletion_controller.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../../app/language_picker.dart';
 import '../../../app/locale_controller.dart';
@@ -9,6 +10,7 @@ import '../../../app/theme_mode_picker.dart';
 import '../../../app/theme.dart';
 import '../../../common/widgets/ticket.dart';
 import '../../../core/constants/sizes.dart';
+import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
 import '../../../common/widgets/member_avatar.dart';
 import '../../group/logic/group_controller.dart';
@@ -123,6 +125,7 @@ class SettingsScreen extends ConsumerWidget {
                       subtitle: Text(l10n.logoutSubtitle),
                       onTap: () => _showLogoutDialog(context, ref),
                     ),
+                    const _DeleteAccountTile(),
                   ]
                 : [
                     ListTile(
@@ -138,6 +141,7 @@ class SettingsScreen extends ConsumerWidget {
                       trailing: const Icon(Icons.chevron_right_rounded),
                       onTap: () => context.push('/login'),
                     ),
+                    const _DeleteAccountTile(),
                   ],
           ),
         ],
@@ -302,6 +306,162 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+}
+
+/// Deletes the account after explaining what goes and what stays; asks for
+/// the password when Firebase wants a recent sign-in.
+class _DeleteAccountTile extends ConsumerWidget {
+  const _DeleteAccountTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final error = Theme.of(context).colorScheme.error;
+    final busy = ref.watch(accountDeletionControllerProvider).isLoading;
+    return ListTile(
+      enabled: !busy,
+      leading: Icon(Icons.delete_forever_outlined, color: error),
+      title: Text(l10n.deleteAccount, style: TextStyle(color: error)),
+      subtitle: Text(l10n.deleteAccountSubtitle),
+      trailing: busy
+          ? SizedBox.square(
+              dimension: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                semanticsLabel: l10n.deleteAccountInProgress,
+              ),
+            )
+          : null,
+      onTap: () => _deleteAccount(context, ref),
+    );
+  }
+
+  Future<void> _deleteAccount(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    if (await _confirm(context) != true || !context.mounted) return;
+
+    // The settings page goes away once the account is signed out, so keep
+    // what is needed afterwards.
+    final router = GoRouter.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final controller = ref.read(accountDeletionControllerProvider.notifier);
+
+    String? password;
+    while (true) {
+      final AccountDeletionOutcome outcome;
+      try {
+        outcome = await controller.deleteAccount(password: password);
+      } catch (e) {
+        messenger.showSnackBar(SnackBar(
+          content: Text(
+              userMessage(e, fallback: l10n.deleteAccountFailed, l10n: l10n)),
+        ));
+        return;
+      }
+      if (outcome == AccountDeletionOutcome.deleted) {
+        messenger.showSnackBar(
+            SnackBar(content: Text(l10n.deleteAccountDone)));
+        router.go('/onboarding');
+        return;
+      }
+      if (!context.mounted) return;
+      password = await _askPassword(context);
+      if (password == null || password.isEmpty) return;
+    }
+  }
+
+  Future<bool?> _confirm(BuildContext context) {
+    final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
+    const bold = TextStyle(fontWeight: FontWeight.bold);
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.deleteAccountDialogTitle),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(l10n.deleteAccountIntro, style: bold),
+              const SizedBox(height: 8),
+              Text(l10n.deleteAccountItemProfile),
+              Text(l10n.deleteAccountItemActivity),
+              Text(l10n.deleteAccountItemTrips),
+              const SizedBox(height: 16),
+              Text(l10n.deleteAccountKeptTitle, style: bold),
+              const SizedBox(height: 8),
+              Text(l10n.deleteAccountKeptBody),
+              const SizedBox(height: 16),
+              Text(l10n.deleteAccountIrreversible, style: bold),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: scheme.error,
+              foregroundColor: scheme.onError,
+              minimumSize: const Size(96, 44),
+            ),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.deleteAccountConfirm),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<String?> _askPassword(BuildContext context) async {
+    final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
+    final controller = TextEditingController();
+    final password = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.deleteAccountPasswordTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.deleteAccountPasswordBody),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              obscureText: true,
+              autocorrect: false,
+              enableSuggestions: false,
+              autofillHints: const [AutofillHints.password],
+              decoration: InputDecoration(labelText: l10n.passwordLabel),
+              onSubmitted: (value) => Navigator.pop(dialogContext, value),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: scheme.error,
+              foregroundColor: scheme.onError,
+              minimumSize: const Size(96, 44),
+            ),
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: Text(l10n.deleteAccountConfirm),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    return password;
   }
 }
 

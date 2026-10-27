@@ -24,4 +24,9 @@ class AuthRepository {
       _authService.updateDisplayName(displayName);
 
   Future<void> logout() => _authService.signOut();
+
+  Future<void> reauthenticate(String password) =>
+      _authService.reauthenticateWithPassword(password);
+
+  Future<void> deleteCurrentUser() => _authService.deleteCurrentUser();
 }

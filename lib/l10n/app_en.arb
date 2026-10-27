@@ -987,5 +987,21 @@
     }
   },
   "resetPasswordSetting": "Reset password",
-  "resetPasswordSettingSubtitle": "We'll email you a link to set a new password"
+  "resetPasswordSettingSubtitle": "We'll email you a link to set a new password",
+  "deleteAccount": "Delete account",
+  "deleteAccountSubtitle": "Permanently delete your account and data",
+  "deleteAccountDialogTitle": "Delete your account?",
+  "deleteAccountIntro": "This permanently deletes:",
+  "deleteAccountItemProfile": "• Your profile: name, email address and profile photo",
+  "deleteAccountItemActivity": "• Your favorites, swipes and place reviews",
+  "deleteAccountItemTrips": "• Your membership in all trips. Trips where you are the only member are deleted completely. In shared trips, the longest-standing member becomes the organizer.",
+  "deleteAccountKeptTitle": "What stays",
+  "deleteAccountKeptBody": "Expenses, ideas and polls in shared trips stay so the other members' plans and balances remain correct. They are shown without your name.",
+  "deleteAccountIrreversible": "This cannot be undone.",
+  "deleteAccountConfirm": "Delete permanently",
+  "deleteAccountPasswordTitle": "Confirm with your password",
+  "deleteAccountPasswordBody": "For your security, please enter your password again to delete your account.",
+  "deleteAccountInProgress": "Deleting your account…",
+  "deleteAccountDone": "Your account has been deleted.",
+  "deleteAccountFailed": "Your account could not be deleted. Please try again."
 }

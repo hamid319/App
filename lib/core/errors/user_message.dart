@@ -77,6 +77,8 @@ String? _knownAppMessage(String message, AppLocalizations l10n) {
       return l10n.errorGroupLocationRequired;
     case 'Session not found':
       return l10n.errorSessionNotFound;
+    case 'Wrong password':
+      return l10n.authWrongPassword;
     case 'Not authenticated':
     case 'User not authenticated':
       return l10n.errorNotLoggedIn;

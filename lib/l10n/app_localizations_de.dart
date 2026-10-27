@@ -1953,4 +1953,60 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get resetPasswordSettingSubtitle =>
       'Wir schicken dir einen Link für ein neues Passwort';
+
+  @override
+  String get deleteAccount => 'Konto löschen';
+
+  @override
+  String get deleteAccountSubtitle =>
+      'Dein Konto und deine Daten endgültig löschen';
+
+  @override
+  String get deleteAccountDialogTitle => 'Konto löschen?';
+
+  @override
+  String get deleteAccountIntro => 'Dabei wird endgültig gelöscht:';
+
+  @override
+  String get deleteAccountItemProfile =>
+      '• Dein Profil: Name, E-Mail-Adresse und Profilfoto';
+
+  @override
+  String get deleteAccountItemActivity =>
+      '• Deine Favoriten, Swipes und Bewertungen von Orten';
+
+  @override
+  String get deleteAccountItemTrips =>
+      '• Deine Mitgliedschaft in allen Reisen. Reisen, in denen du allein bist, werden komplett gelöscht. In gemeinsamen Reisen wird das Mitglied, das am längsten dabei ist, zum Organisator.';
+
+  @override
+  String get deleteAccountKeptTitle => 'Was bleibt';
+
+  @override
+  String get deleteAccountKeptBody =>
+      'Ausgaben, Ideen und Umfragen in gemeinsamen Reisen bleiben erhalten, damit Pläne und Salden der anderen stimmen. Sie werden ohne deinen Namen angezeigt.';
+
+  @override
+  String get deleteAccountIrreversible =>
+      'Das kann nicht rückgängig gemacht werden.';
+
+  @override
+  String get deleteAccountConfirm => 'Endgültig löschen';
+
+  @override
+  String get deleteAccountPasswordTitle => 'Mit Passwort bestätigen';
+
+  @override
+  String get deleteAccountPasswordBody =>
+      'Gib zur Sicherheit noch einmal dein Passwort ein, um dein Konto zu löschen.';
+
+  @override
+  String get deleteAccountInProgress => 'Dein Konto wird gelöscht …';
+
+  @override
+  String get deleteAccountDone => 'Dein Konto wurde gelöscht.';
+
+  @override
+  String get deleteAccountFailed =>
+      'Dein Konto konnte nicht gelöscht werden. Bitte versuch es noch einmal.';
 }

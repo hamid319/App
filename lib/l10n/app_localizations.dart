@@ -3415,6 +3415,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We\'ll email you a link to set a new password'**
   String get resetPasswordSettingSubtitle;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete your account and data'**
+  String get deleteAccountSubtitle;
+
+  /// No description provided for @deleteAccountDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete your account?'**
+  String get deleteAccountDialogTitle;
+
+  /// No description provided for @deleteAccountIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'This permanently deletes:'**
+  String get deleteAccountIntro;
+
+  /// No description provided for @deleteAccountItemProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'• Your profile: name, email address and profile photo'**
+  String get deleteAccountItemProfile;
+
+  /// No description provided for @deleteAccountItemActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'• Your favorites, swipes and place reviews'**
+  String get deleteAccountItemActivity;
+
+  /// No description provided for @deleteAccountItemTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'• Your membership in all trips. Trips where you are the only member are deleted completely. In shared trips, the longest-standing member becomes the organizer.'**
+  String get deleteAccountItemTrips;
+
+  /// No description provided for @deleteAccountKeptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What stays'**
+  String get deleteAccountKeptTitle;
+
+  /// No description provided for @deleteAccountKeptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses, ideas and polls in shared trips stay so the other members\' plans and balances remain correct. They are shown without your name.'**
+  String get deleteAccountKeptBody;
+
+  /// No description provided for @deleteAccountIrreversible.
+  ///
+  /// In en, this message translates to:
+  /// **'This cannot be undone.'**
+  String get deleteAccountIrreversible;
+
+  /// No description provided for @deleteAccountConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete permanently'**
+  String get deleteAccountConfirm;
+
+  /// No description provided for @deleteAccountPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm with your password'**
+  String get deleteAccountPasswordTitle;
+
+  /// No description provided for @deleteAccountPasswordBody.
+  ///
+  /// In en, this message translates to:
+  /// **'For your security, please enter your password again to delete your account.'**
+  String get deleteAccountPasswordBody;
+
+  /// No description provided for @deleteAccountInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting your account…'**
+  String get deleteAccountInProgress;
+
+  /// No description provided for @deleteAccountDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has been deleted.'**
+  String get deleteAccountDone;
+
+  /// No description provided for @deleteAccountFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account could not be deleted. Please try again.'**
+  String get deleteAccountFailed;
 }
 
 class _AppLocalizationsDelegate

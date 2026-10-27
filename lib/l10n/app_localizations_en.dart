@@ -1923,4 +1923,59 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get resetPasswordSettingSubtitle =>
       'We\'ll email you a link to set a new password';
+
+  @override
+  String get deleteAccount => 'Delete account';
+
+  @override
+  String get deleteAccountSubtitle =>
+      'Permanently delete your account and data';
+
+  @override
+  String get deleteAccountDialogTitle => 'Delete your account?';
+
+  @override
+  String get deleteAccountIntro => 'This permanently deletes:';
+
+  @override
+  String get deleteAccountItemProfile =>
+      '• Your profile: name, email address and profile photo';
+
+  @override
+  String get deleteAccountItemActivity =>
+      '• Your favorites, swipes and place reviews';
+
+  @override
+  String get deleteAccountItemTrips =>
+      '• Your membership in all trips. Trips where you are the only member are deleted completely. In shared trips, the longest-standing member becomes the organizer.';
+
+  @override
+  String get deleteAccountKeptTitle => 'What stays';
+
+  @override
+  String get deleteAccountKeptBody =>
+      'Expenses, ideas and polls in shared trips stay so the other members\' plans and balances remain correct. They are shown without your name.';
+
+  @override
+  String get deleteAccountIrreversible => 'This cannot be undone.';
+
+  @override
+  String get deleteAccountConfirm => 'Delete permanently';
+
+  @override
+  String get deleteAccountPasswordTitle => 'Confirm with your password';
+
+  @override
+  String get deleteAccountPasswordBody =>
+      'For your security, please enter your password again to delete your account.';
+
+  @override
+  String get deleteAccountInProgress => 'Deleting your account…';
+
+  @override
+  String get deleteAccountDone => 'Your account has been deleted.';
+
+  @override
+  String get deleteAccountFailed =>
+      'Your account could not be deleted. Please try again.';
 }

@@ -552,5 +552,21 @@
   "useOtherEmail": "Andere E-Mail-Adresse verwenden",
   "resetLinkFailed": "Der Link konnte nicht gesendet werden. Bitte versuch es noch einmal.",
   "resetPasswordSetting": "Passwort zurücksetzen",
-  "resetPasswordSettingSubtitle": "Wir schicken dir einen Link für ein neues Passwort"
+  "resetPasswordSettingSubtitle": "Wir schicken dir einen Link für ein neues Passwort",
+  "deleteAccount": "Konto löschen",
+  "deleteAccountSubtitle": "Dein Konto und deine Daten endgültig löschen",
+  "deleteAccountDialogTitle": "Konto löschen?",
+  "deleteAccountIntro": "Dabei wird endgültig gelöscht:",
+  "deleteAccountItemProfile": "• Dein Profil: Name, E-Mail-Adresse und Profilfoto",
+  "deleteAccountItemActivity": "• Deine Favoriten, Swipes und Bewertungen von Orten",
+  "deleteAccountItemTrips": "• Deine Mitgliedschaft in allen Reisen. Reisen, in denen du allein bist, werden komplett gelöscht. In gemeinsamen Reisen wird das Mitglied, das am längsten dabei ist, zum Organisator.",
+  "deleteAccountKeptTitle": "Was bleibt",
+  "deleteAccountKeptBody": "Ausgaben, Ideen und Umfragen in gemeinsamen Reisen bleiben erhalten, damit Pläne und Salden der anderen stimmen. Sie werden ohne deinen Namen angezeigt.",
+  "deleteAccountIrreversible": "Das kann nicht rückgängig gemacht werden.",
+  "deleteAccountConfirm": "Endgültig löschen",
+  "deleteAccountPasswordTitle": "Mit Passwort bestätigen",
+  "deleteAccountPasswordBody": "Gib zur Sicherheit noch einmal dein Passwort ein, um dein Konto zu löschen.",
+  "deleteAccountInProgress": "Dein Konto wird gelöscht …",
+  "deleteAccountDone": "Dein Konto wurde gelöscht.",
+  "deleteAccountFailed": "Dein Konto konnte nicht gelöscht werden. Bitte versuch es noch einmal."
 }

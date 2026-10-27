@@ -86,6 +86,13 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/groups/$(groupId)).data;
     }
 
+    // The owner is the trip's last member: deleting their account clears
+    // the trip, including what members who left had created.
+    function isSoleOwner(groupId) {
+      let group = groupData(groupId);
+      return isOwner(group) && group.members.size() == 1;
+    }
+
     match /users/{userId} {
       // Read stays open to authenticated users because the group flow resolves
       // member profiles. Tighten to self-only once member names come from a
@@ -146,6 +153,13 @@ service cloud.firestore {
                         && request.resource.data.keys().hasOnly(['createdAt']);
         }
       }
+    }
+
+    // Collection-group read of the caller's own reviews, so deleting an
+    // account can find them (needs the reviews.uid field override in
+    // firestore.indexes.json). Deleting uses the rule above.
+    match /{path=**}/reviews/{uid} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
     }
 
     // Curated cities, written only by the import tool. importRuns has no
@@ -295,7 +309,8 @@ service cloud.firestore {
           )
         );
         allow delete: if isMember(groupData(groupId))
-                      && resource.data.createdBy == request.auth.uid;
+                      && (resource.data.createdBy == request.auth.uid
+                          || isSoleOwner(groupId));
       }
 
       // Shared expense in integer cents. Editable and deletable by its creator.
@@ -310,7 +325,8 @@ service cloud.firestore {
                       && request.resource.data.createdBy == resource.data.createdBy
                       && request.resource.data.createdAt == resource.data.createdAt;
         allow delete: if isMember(groupData(groupId))
-                      && resource.data.createdBy == request.auth.uid;
+                      && (resource.data.createdBy == request.auth.uid
+                          || isSoleOwner(groupId));
       }
 
       match /sessions/{sessionId} {
@@ -346,6 +362,7 @@ service cloud.firestore {
                                      'likedBy',
                                      'dislikedBy'
                                    ]);
+          allow delete: if isSoleOwner(groupId);
         }
 
         // Per-user swipe progress, private to its owner.
@@ -353,6 +370,7 @@ service cloud.firestore {
           allow read: if isMember(groupData(groupId));
           allow write: if isMember(groupData(groupId))
                        && request.auth.uid == userId;
+          allow delete: if isSoleOwner(groupId);
         }
       }
     }
