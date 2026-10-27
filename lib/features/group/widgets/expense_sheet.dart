@@ -2,16 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../common/models/group_model.dart';
+import '../../../common/models/trip_expense.dart';
 import '../../../common/utils/money.dart';
-import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
 import '../logic/trip_controller.dart';
 import 'trip_ui.dart';
 
 /// Sheet to add a shared expense: title, amount in euros, who paid
 /// (default: me) and who shares it (default: everyone), split equally.
+/// With [expense] it edits that one instead, and its creator can delete it.
 Future<void> showExpenseSheet(
-    BuildContext context, GroupModel group, String uid) {
+  BuildContext context,
+  GroupModel group,
+  String uid, {
+  TripExpense? expense,
+}) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -20,29 +25,72 @@ Future<void> showExpenseSheet(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (_) => _ExpenseSheet(group: group, uid: uid),
+    builder: (_) => _ExpenseSheet(group: group, uid: uid, expense: expense),
   );
 }
 
+/// Asks before deleting [expense]; true when confirmed.
+Future<bool> confirmDeleteExpense(
+    BuildContext context, TripExpense expense) async {
+  final l10n = context.l10n;
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: Text(l10n.tripExpenseDeleteTitle),
+      content: Text(expense.title),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: Text(l10n.cancel),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, true),
+          style: TextButton.styleFrom(
+              foregroundColor: Theme.of(dialogContext).colorScheme.error),
+          child: Text(l10n.delete),
+        ),
+      ],
+    ),
+  );
+  return ok == true;
+}
+
 class _ExpenseSheet extends ConsumerStatefulWidget {
-  const _ExpenseSheet({required this.group, required this.uid});
+  const _ExpenseSheet({required this.group, required this.uid, this.expense});
 
   final GroupModel group;
   final String uid;
+  final TripExpense? expense;
 
   @override
   ConsumerState<_ExpenseSheet> createState() => _ExpenseSheetState();
 }
 
 class _ExpenseSheetState extends ConsumerState<_ExpenseSheet> {
-  final _title = TextEditingController();
-  final _amount = TextEditingController();
-  late String _paidBy = widget.group.members.contains(widget.uid)
-      ? widget.uid
-      : widget.group.members.first;
-  late final Set<String> _participants = {...widget.group.members};
-  bool _busy = false;
+  late final _title = TextEditingController(text: widget.expense?.title);
+  late final _amount = TextEditingController(
+      text: widget.expense == null
+          ? null
+          : centsToAmountInput(widget.expense!.amountCents,
+              Localizations.localeOf(context).toLanguageTag()));
+  late String _paidBy = _initialPayer();
+  // Only current members: someone who left can no longer be split with.
+  late final Set<String> _participants = widget.expense == null
+      ? {...widget.group.members}
+      : {
+          for (final m in widget.expense!.participants)
+            if (widget.group.members.contains(m)) m,
+        };
   String? _error;
+
+  bool get _editing => widget.expense != null;
+
+  String _initialPayer() {
+    final members = widget.group.members;
+    final paidBy = widget.expense?.paidBy;
+    if (paidBy != null && members.contains(paidBy)) return paidBy;
+    return members.contains(widget.uid) ? widget.uid : members.first;
+  }
 
   @override
   void dispose() {
@@ -51,7 +99,7 @@ class _ExpenseSheetState extends ConsumerState<_ExpenseSheet> {
     super.dispose();
   }
 
-  Future<void> _save() async {
+  void _save() {
     final l10n = context.l10n;
     final cents = parseAmountToCents(_amount.text);
     final String? error = _title.text.trim().isEmpty
@@ -65,30 +113,46 @@ class _ExpenseSheetState extends ConsumerState<_ExpenseSheet> {
       setState(() => _error = error);
       return;
     }
-    setState(() {
-      _busy = true;
-      _error = null;
-    });
-    try {
-      await ref.read(tripActionsProvider.notifier).addExpense(
-            widget.group.groupId,
-            title: _title.text,
-            amountCents: cents!,
-            paidBy: _paidBy,
-            // Member order, so the list reads like the group.
-            participants: [
-              for (final m in widget.group.members)
-                if (_participants.contains(m)) m,
-            ],
-          );
-      if (mounted) Navigator.pop(context);
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _busy = false;
-        _error = userMessage(e, fallback: l10n.errorGeneric, l10n: l10n);
-      });
-    }
+    // Member order, so the list reads like the group.
+    final participants = [
+      for (final m in widget.group.members)
+        if (_participants.contains(m)) m,
+    ];
+    final actions = ref.read(tripActionsProvider.notifier);
+    final groupId = widget.group.groupId;
+    final existing = widget.expense;
+    // Not awaited: the list and balances update from the local write at
+    // once, and offline the write waits in Firestore's queue.
+    runTripWrite(
+      context,
+      () => existing == null
+          ? actions.addExpense(
+              groupId,
+              title: _title.text,
+              amountCents: cents!,
+              paidBy: _paidBy,
+              participants: participants,
+            )
+          : actions.updateExpense(
+              groupId,
+              existing.copyWith(
+                title: _title.text.trim(),
+                amountCents: cents,
+                paidBy: _paidBy,
+                participants: participants,
+              ),
+            ),
+    );
+    Navigator.pop(context);
+  }
+
+  Future<void> _delete() async {
+    final expense = widget.expense!;
+    if (!await confirmDeleteExpense(context, expense) || !mounted) return;
+    final actions = ref.read(tripActionsProvider.notifier);
+    final groupId = widget.group.groupId;
+    runTripWrite(context, () => actions.deleteExpense(groupId, expense));
+    Navigator.pop(context);
   }
 
   @override
@@ -124,7 +188,22 @@ class _ExpenseSheetState extends ConsumerState<_ExpenseSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(l10n.tripAddExpense, style: text.headlineSmall),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                      _editing ? l10n.tripEditExpense : l10n.tripAddExpense,
+                      style: text.headlineSmall),
+                ),
+                if (_editing)
+                  IconButton(
+                    onPressed: _delete,
+                    tooltip: l10n.delete,
+                    color: scheme.error,
+                    icon: const Icon(Icons.delete_outline_rounded),
+                  ),
+              ],
+            ),
             const SizedBox(height: 12),
             InsetGroup(
               children: [
@@ -132,7 +211,7 @@ class _ExpenseSheetState extends ConsumerState<_ExpenseSheet> {
                   padding: const EdgeInsets.symmetric(horizontal: 14),
                   child: TextField(
                     controller: _title,
-                    autofocus: true,
+                    autofocus: !_editing,
                     maxLength: 80,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: plain(l10n.tripExpenseTitleHint),
@@ -194,9 +273,8 @@ class _ExpenseSheetState extends ConsumerState<_ExpenseSheet> {
             ],
             const SizedBox(height: 20),
             FloatingPrimaryButton(
-              label: l10n.tripAddExpense,
-              icon: Icons.add_rounded,
-              loading: _busy,
+              label: _editing ? l10n.save : l10n.tripAddExpense,
+              icon: _editing ? Icons.check_rounded : Icons.add_rounded,
               onPressed: _save,
             ),
           ],

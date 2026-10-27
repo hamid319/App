@@ -126,6 +126,7 @@ class Ticket extends StatelessWidget {
     super.key,
     required this.child,
     this.onTap,
+    this.onLongPress,
     this.color,
     this.padding = EdgeInsets.zero,
     this.notchFromTop,
@@ -136,6 +137,7 @@ class Ticket extends StatelessWidget {
 
   final Widget child;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final Color? color;
   final EdgeInsetsGeometry padding;
   final double? notchFromTop;
@@ -154,6 +156,7 @@ class Ticket extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         child: Padding(padding: padding, child: child),
       ),
     );

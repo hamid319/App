@@ -12,13 +12,18 @@ import '../../../l10n/l10n.dart';
 import '../logic/group_controller.dart';
 import '../logic/trip_controller.dart';
 import '../widgets/join_trip_dialog.dart';
+import '../widgets/sync_badge.dart';
 import '../widgets/trip_create_sheet.dart';
 import '../widgets/trip_ui.dart';
 
 /// "Trips" tab: the next trip as a large card, other planned trips and
 /// past trips as grouped lists. "+" plans a new trip or joins one by code.
 class TripsScreen extends ConsumerWidget {
-  const TripsScreen({super.key});
+  const TripsScreen({super.key, this.openCreate = false});
+
+  /// Opens the "new trip" sheet right away (`/trips?create=1`, e.g. from
+  /// "Add to trip" on a place when there is no trip yet).
+  final bool openCreate;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,6 +55,11 @@ class TripsScreen extends ConsumerWidget {
                     children: [
                       Expanded(
                         child: Text(l10n.tripsTitle, style: text.displaySmall),
+                      ),
+                      if (openCreate) _OnFirstFrame(() => _create(context)),
+                      const Padding(
+                        padding: EdgeInsets.only(right: 8, bottom: 12),
+                        child: TripsSyncBadge(),
                       ),
                       _AddButton(onTap: () => _showAddMenu(context, ref)),
                     ],
@@ -144,6 +154,29 @@ class TripsScreen extends ConsumerWidget {
     final id = await showJoinTripDialog(context, ref);
     if (id != null && context.mounted) context.push('/trip/$id');
   }
+}
+
+/// Runs [action] once after its first frame.
+class _OnFirstFrame extends StatefulWidget {
+  const _OnFirstFrame(this.action);
+
+  final VoidCallback action;
+
+  @override
+  State<_OnFirstFrame> createState() => _OnFirstFrameState();
+}
+
+class _OnFirstFrameState extends State<_OnFirstFrame> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.action();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.shrink();
 }
 
 class _AddButton extends StatelessWidget {

@@ -8,6 +8,7 @@ import '../../../common/models/group_model.dart';
 import '../../../common/utils/trip_dates.dart';
 import '../../../common/widgets/member_avatar.dart';
 import '../../../common/widgets/place_photo.dart';
+import '../../../core/errors/user_message.dart';
 import '../logic/group_controller.dart';
 import '../../../l10n/l10n.dart';
 import '../logic/trip_controller.dart';
@@ -479,6 +480,27 @@ void showTripSnack(BuildContext context, String message, {bool error = false}) {
     content: Text(message),
     backgroundColor: error ? scheme.error : null,
   ));
+}
+
+/// Starts a trip write without waiting for the server. Firestore applies
+/// it locally at once (the lists update) and queues it while offline, so
+/// sheets close right away instead of spinning until the device is back
+/// online. A failure, e.g. rejected by the rules, shows as a snackbar.
+void runTripWrite(
+  BuildContext context,
+  Future<Object?> Function() write, {
+  VoidCallback? onError,
+}) {
+  final messenger = ScaffoldMessenger.maybeOf(context);
+  final l10n = context.l10n;
+  final errorColor = Theme.of(context).colorScheme.error;
+  Future.sync(write).then<void>((_) {}, onError: (Object e) {
+    onError?.call();
+    messenger?.showSnackBar(SnackBar(
+      content: Text(userMessage(e, fallback: l10n.errorGeneric, l10n: l10n)),
+      backgroundColor: errorColor,
+    ));
+  });
 }
 
 /// Dates of a trip in the app's locale, null without dates.

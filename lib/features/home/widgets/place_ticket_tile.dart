@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../common/models/place_model.dart';
 import '../../../common/utils/place_type_labels.dart';
+import '../../../common/widgets/add_to_trip_sheet.dart';
 import '../../../common/widgets/place_photo.dart';
 import '../../../common/widgets/ticket.dart';
 import '../../../core/constants/sizes.dart';
@@ -21,7 +22,8 @@ String? placeCategoryLabel(BuildContext context, PlaceModel place) {
 }
 
 /// Paper ticket with the place photo on top, a perforation and a stub with
-/// name and category chip. Tapping opens the place detail. Used by the
+/// name and category chip. Tapping opens the place detail, a long press
+/// adds the place to a trip. Used by the
 /// favorites grid, the home sliders and the collection grids.
 class PlaceTicketTile extends StatelessWidget {
   const PlaceTicketTile({
@@ -51,6 +53,7 @@ class PlaceTicketTile extends StatelessWidget {
     final photo = PlacePhoto(place: place);
     return Ticket(
       onTap: () => context.push('/place/${place.id}'),
+      onLongPress: () => showAddToTripSheet(context, place),
       notchFromBottom: placeTicketStubHeight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

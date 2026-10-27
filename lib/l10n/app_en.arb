@@ -1003,5 +1003,40 @@
   "deleteAccountPasswordBody": "For your security, please enter your password again to delete your account.",
   "deleteAccountInProgress": "Deleting your account…",
   "deleteAccountDone": "Your account has been deleted.",
-  "deleteAccountFailed": "Your account could not be deleted. Please try again."
+  "deleteAccountFailed": "Your account could not be deleted. Please try again.",
+  "addToTrip": "Add to trip",
+  "addToTripSaved": "Saved to {trip}",
+  "@addToTripSaved": {
+    "placeholders": {
+      "trip": {
+        "type": "String"
+      }
+    }
+  },
+  "addToTripAlready": "Already in {trip}",
+  "@addToTripAlready": {
+    "placeholders": {
+      "trip": {
+        "type": "String"
+      }
+    }
+  },
+  "addToTripOpen": "Open",
+  "addToTripAdded": "Added",
+  "addToTripNoTrips": "You don't have a trip yet. Create one to collect places with your friends.",
+  "addToTripCreate": "Create trip",
+  "tripEditExpense": "Edit expense",
+  "tripExpenseAddedBy": "Added by {name}",
+  "@tripExpenseAddedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tripExpenseAddedByYou": "Added by you",
+  "errorExpenseNotCreator": "Only the person who added this expense can change it.",
+  "tripOffline": "Offline",
+  "tripSyncing": "Syncing…",
+  "tripOfflineHint": "Changes are saved on this device and synced when you're back online."
 }

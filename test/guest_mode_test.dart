@@ -44,6 +44,9 @@ class _FakeAuthService implements AuthService {
   Stream<User?> authStateChanges() => _changes.stream;
 
   @override
+  Stream<User?> userChanges() => _changes.stream;
+
+  @override
   Future<User?> signInAnonymously() async {
     if (anonymousError != null) throw anonymousError!;
     _user = _FakeUser(uid: 'guest-uid', isAnonymous: true);

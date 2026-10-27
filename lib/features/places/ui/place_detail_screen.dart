@@ -6,6 +6,7 @@ import '../../../app/theme.dart';
 import '../../../common/models/place_model.dart';
 import '../../../common/utils/opening_hours_format.dart';
 import '../../../common/utils/place_type_labels.dart';
+import '../../../common/widgets/add_to_trip_sheet.dart';
 import '../../../common/widgets/place_photo.dart';
 import '../../../common/widgets/skeleton.dart';
 import '../../../common/widgets/ticket.dart';
@@ -309,6 +310,7 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
       bottomNavigationBar: _ActionBar(
         isFav: isFav,
         onToggleFavorite: toggleFavorite,
+        onAddToTrip: () => showAddToTripSheet(context, place),
         onOpenMaps: () async {
           // iOS users choose between Apple Maps and Google Maps.
           final app = Theme.of(context).platform == TargetPlatform.iOS
@@ -610,11 +612,13 @@ class _ActionBar extends StatelessWidget {
   const _ActionBar({
     required this.isFav,
     required this.onToggleFavorite,
+    required this.onAddToTrip,
     required this.onOpenMaps,
   });
 
   final bool isFav;
   final VoidCallback onToggleFavorite;
+  final VoidCallback onAddToTrip;
   final VoidCallback onOpenMaps;
 
   @override
@@ -645,6 +649,13 @@ class _ActionBar extends StatelessWidget {
                 iconColor: isFav ? context.swipeColors.like : null,
                 tooltip: isFav ? l10n.removeFromFavorites : l10n.addToFavorites,
                 onPressed: onToggleFavorite,
+              ),
+              const SizedBox(width: AppSizes.space12),
+              InkActionButton(
+                icon: Icons.luggage_outlined,
+                size: 52,
+                tooltip: l10n.addToTrip,
+                onPressed: onAddToTrip,
               ),
               const SizedBox(width: AppSizes.space12),
               Expanded(

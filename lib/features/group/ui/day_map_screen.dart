@@ -18,6 +18,7 @@ import '../../../core/services/maps_availability.dart';
 import '../../../core/services/maps_launcher.dart';
 import '../../../l10n/l10n.dart';
 import '../logic/trip_controller.dart';
+import '../widgets/sync_badge.dart';
 import '../widgets/trip_ui.dart';
 
 final _mapsConfiguredProvider =
@@ -71,6 +72,12 @@ class _DayMapScreenState extends ConsumerState<DayMapScreen> {
             ? context.pop()
             : context.go('/trip/${widget.groupId}'),
       ),
+    );
+
+    final syncBadge = Positioned(
+      top: MediaQuery.paddingOf(context).top + 14,
+      right: 16,
+      child: TripSyncBadge(groupId: widget.groupId),
     );
 
     return Scaffold(
@@ -150,6 +157,7 @@ class _DayMapScreenState extends ConsumerState<DayMapScreen> {
                       ),
               ),
               back,
+              syncBadge,
               _DaySheet(
                 group: group,
                 dayCount: plan.days.length,

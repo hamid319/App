@@ -568,5 +568,19 @@
   "deleteAccountPasswordBody": "Gib zur Sicherheit noch einmal dein Passwort ein, um dein Konto zu löschen.",
   "deleteAccountInProgress": "Dein Konto wird gelöscht …",
   "deleteAccountDone": "Dein Konto wurde gelöscht.",
-  "deleteAccountFailed": "Dein Konto konnte nicht gelöscht werden. Bitte versuch es noch einmal."
+  "deleteAccountFailed": "Dein Konto konnte nicht gelöscht werden. Bitte versuch es noch einmal.",
+  "addToTrip": "Zu Reise hinzufügen",
+  "addToTripSaved": "In {trip} gemerkt",
+  "addToTripAlready": "Schon in {trip}",
+  "addToTripOpen": "Öffnen",
+  "addToTripAdded": "Hinzugefügt",
+  "addToTripNoTrips": "Du hast noch keine Reise. Leg eine an, um mit deinen Freunden Orte zu sammeln.",
+  "addToTripCreate": "Reise anlegen",
+  "tripEditExpense": "Ausgabe bearbeiten",
+  "tripExpenseAddedBy": "Hinzugefügt von {name}",
+  "tripExpenseAddedByYou": "Von dir hinzugefügt",
+  "errorExpenseNotCreator": "Nur wer die Ausgabe hinzugefügt hat, kann sie ändern.",
+  "tripOffline": "Offline",
+  "tripSyncing": "Wird synchronisiert …",
+  "tripOfflineHint": "Änderungen werden auf diesem Gerät gespeichert und synchronisiert, sobald du wieder online bist."
 }

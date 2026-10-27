@@ -17,6 +17,7 @@ import '../logic/trip_controller.dart';
 import '../widgets/idea_sheet.dart';
 import '../widgets/poll_sheet.dart';
 import '../widgets/swipe_session_sheet.dart';
+import '../widgets/sync_badge.dart';
 import '../widgets/trip_members_sheet.dart';
 import '../widgets/trip_ui.dart';
 
@@ -230,8 +231,15 @@ class _PlanBody extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(group.groupName ?? l10n.unnamedGroup,
-                    style: text.headlineMedium),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(group.groupName ?? l10n.unnamedGroup,
+                          style: text.headlineMedium),
+                    ),
+                    TripSyncBadge(groupId: group.groupId),
+                  ],
+                ),
                 const SizedBox(height: 2),
                 InkWell(
                   onTap: () => showTripMembersSheet(context, group, uid),
@@ -296,18 +304,9 @@ class _PollCard extends ConsumerWidget {
       if (v > top) top = v;
     }
 
-    Future<void> vote(String optionId) async {
-      try {
-        await ref
-            .read(tripActionsProvider.notifier)
-            .vote(group.groupId, poll, optionId);
-      } catch (e) {
-        if (context.mounted) {
-          showTripSnack(
-              context, userMessage(e, fallback: l10n.errorGeneric, l10n: l10n),
-              error: true);
-        }
-      }
+    void vote(String optionId) {
+      final actions = ref.read(tripActionsProvider.notifier);
+      runTripWrite(context, () => actions.vote(group.groupId, poll, optionId));
     }
 
     return TripCard(
@@ -338,9 +337,13 @@ class _PollCard extends ConsumerWidget {
                     tooltip: l10n.moreOptions,
                     icon: Icon(Icons.more_horiz_rounded,
                         size: 20, color: scheme.onSurfaceVariant),
-                    onSelected: (close) => ref
-                        .read(tripActionsProvider.notifier)
-                        .setPollClosed(group.groupId, poll.id, close),
+                    onSelected: (close) {
+                      final actions = ref.read(tripActionsProvider.notifier);
+                      runTripWrite(
+                          context,
+                          () => actions.setPollClosed(
+                              group.groupId, poll.id, close));
+                    },
                     itemBuilder: (_) => [
                       PopupMenuItem(
                         value: !poll.closed,
@@ -564,10 +567,10 @@ class _IdeaRow extends ConsumerWidget {
           ],
         ),
       );
-      if (ok == true) {
-        await ref
-            .read(tripActionsProvider.notifier)
-            .deleteIdea(group.groupId, idea.id);
+      if (ok == true && context.mounted) {
+        final actions = ref.read(tripActionsProvider.notifier);
+        runTripWrite(
+            context, () => actions.deleteIdea(group.groupId, idea.id));
       }
     }
 
@@ -629,9 +632,11 @@ class _IdeaRow extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(14),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(14),
-                  onTap: () => ref
-                      .read(tripActionsProvider.notifier)
-                      .toggleLike(group.groupId, idea),
+                  onTap: () {
+                    final actions = ref.read(tripActionsProvider.notifier);
+                    runTripWrite(
+                        context, () => actions.toggleLike(group.groupId, idea));
+                  },
                   child: Padding(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

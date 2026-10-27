@@ -177,10 +177,12 @@ GoRouter createRouter(Ref ref) {
           ),
           GoRoute(
             path: '/trips',
-            builder: (ctx, state) => const AccountGate(
+            builder: (ctx, state) => AccountGate(
               reason: GateReason.groups,
               icon: Icons.luggage_rounded,
-              child: TripsScreen(),
+              child: TripsScreen(
+                openCreate: state.uri.queryParameters['create'] == '1',
+              ),
             ),
           ),
           // Old groups tab; groups are trips now.

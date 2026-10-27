@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../common/models/group_model.dart';
 import '../../../common/models/place_model.dart';
+import '../../../common/models/sync_status.dart';
 import '../../../common/models/trip_expense.dart';
 import '../../../common/models/trip_idea.dart';
 import '../../../common/models/trip_plan.dart';
@@ -15,9 +16,6 @@ import '../../auth/logic/auth_controller.dart';
 import '../../swipe/data/places_repository.dart';
 import '../data/trip_repository.dart';
 import 'group_controller.dart';
-
-final tripRepositoryProvider =
-    Provider<TripRepository>((ref) => TripRepository());
 
 /// One trip (group) of the signed-in user, live from [userGroupsProvider].
 /// Data is null when the user is not (or no longer) a member.
@@ -42,6 +40,18 @@ final tripPollsProvider = StreamProvider.autoDispose
 final tripExpensesProvider = StreamProvider.autoDispose
     .family<List<TripExpense>, String>((ref, groupId) =>
         ref.watch(tripRepositoryProvider).streamExpenses(groupId));
+
+/// Offline / unsent-changes state of one trip, for the trip screens.
+final tripSyncStatusProvider = StreamProvider.autoDispose
+    .family<SyncStatus, String>((ref, groupId) =>
+        ref.watch(tripRepositoryProvider).streamTripSyncStatus(groupId));
+
+/// Offline / unsent-changes state of the trips list.
+final tripsSyncStatusProvider = StreamProvider.autoDispose<SyncStatus>((ref) {
+  final uid = ref.watch(authControllerProvider).value?.uid;
+  if (uid == null) return Stream.value(SyncStatus.synced);
+  return ref.watch(tripRepositoryProvider).streamTripsSyncStatus(uid);
+});
 
 /// Places by id in the given order; the key is the ids joined with '|'.
 final tripPlacesProvider =
@@ -159,8 +169,13 @@ class TripActions extends Notifier<void> {
     );
   }
 
-  Future<void> deleteExpense(String groupId, String expenseId) =>
-      _repo.deleteExpense(groupId, expenseId);
+  /// Saves an edited expense; only its creator may.
+  Future<void> updateExpense(String groupId, TripExpense expense) =>
+      _repo.updateExpense(groupId, expense, uid: _uid);
+
+  /// Deletes an expense; only its creator may.
+  Future<void> deleteExpense(String groupId, TripExpense expense) =>
+      _repo.deleteExpense(groupId, expense, uid: _uid);
 
   /// Builds the trip's day plan from the wishlist ideas that have a place,
   /// most liked first, spread over the trip days as short walking routes.

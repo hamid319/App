@@ -1978,4 +1978,55 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deleteAccountFailed =>
       'Your account could not be deleted. Please try again.';
+
+  @override
+  String get addToTrip => 'Add to trip';
+
+  @override
+  String addToTripSaved(String trip) {
+    return 'Saved to $trip';
+  }
+
+  @override
+  String addToTripAlready(String trip) {
+    return 'Already in $trip';
+  }
+
+  @override
+  String get addToTripOpen => 'Open';
+
+  @override
+  String get addToTripAdded => 'Added';
+
+  @override
+  String get addToTripNoTrips =>
+      'You don\'t have a trip yet. Create one to collect places with your friends.';
+
+  @override
+  String get addToTripCreate => 'Create trip';
+
+  @override
+  String get tripEditExpense => 'Edit expense';
+
+  @override
+  String tripExpenseAddedBy(String name) {
+    return 'Added by $name';
+  }
+
+  @override
+  String get tripExpenseAddedByYou => 'Added by you';
+
+  @override
+  String get errorExpenseNotCreator =>
+      'Only the person who added this expense can change it.';
+
+  @override
+  String get tripOffline => 'Offline';
+
+  @override
+  String get tripSyncing => 'Syncing…';
+
+  @override
+  String get tripOfflineHint =>
+      'Changes are saved on this device and synced when you\'re back online.';
 }
