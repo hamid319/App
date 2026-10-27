@@ -1,5 +1,4 @@
 import Flutter
-import GoogleMaps
 import UIKit
 
 @main
@@ -8,20 +7,21 @@ import UIKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    // Maps SDK key from ios/Flutter/Secrets.xcconfig (git-ignored) via
-    // Info.plist. Without a key the map screens show a notice instead
-    // of crashing; Dart asks over the channel below.
-    let mapsKey = (Bundle.main.object(forInfoDictionaryKey: "GMSApiKey") as? String)?
+    // Mapbox public token from ios/Flutter/Secrets.xcconfig (git-ignored)
+    // via Info.plist. Without one the map screens show a notice instead of
+    // an empty map; Dart asks for it over the channel below.
+    let mapboxToken = (Bundle.main.object(forInfoDictionaryKey: "MBXAccessToken") as? String)?
       .trimmingCharacters(in: .whitespaces) ?? ""
-    let mapsConfigured = !mapsKey.isEmpty && !mapsKey.hasPrefix("$(")
-    if mapsConfigured {
-      GMSServices.provideAPIKey(mapsKey)
-    }
+    let mapsConfigured = !mapboxToken.isEmpty && !mapboxToken.hasPrefix("$(")
     GeneratedPluginRegistrant.register(with: self)
     if let controller = window?.rootViewController as? FlutterViewController {
       FlutterMethodChannel(name: "swipetrip/maps", binaryMessenger: controller.binaryMessenger)
         .setMethodCallHandler { call, result in
-          result(call.method == "isConfigured" ? mapsConfigured : FlutterMethodNotImplemented)
+          switch call.method {
+          case "isConfigured": result(mapsConfigured)
+          case "accessToken": result(mapsConfigured ? mapboxToken : nil)
+          default: result(FlutterMethodNotImplemented)
+          }
         }
     }
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

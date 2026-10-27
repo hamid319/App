@@ -30,7 +30,7 @@ dependencies:
   cached_network_image: ^3.3.1
   cloud_functions: ^6.0.4
   device_calendar: ^4.3.3
-  google_maps_flutter: ^2.18.1
+  mapbox_maps_flutter: ^3.33.0
 
 dev_dependencies:
   flutter_test:

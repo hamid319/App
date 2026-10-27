@@ -2435,7 +2435,7 @@ abstract class AppLocalizations {
   /// No description provided for @mapsNotConfigured.
   ///
   /// In en, this message translates to:
-  /// **'The map is not set up in this build yet (Google Maps key missing).'**
+  /// **'The map is not set up in this build yet (Mapbox token missing).'**
   String get mapsNotConfigured;
 
   /// No description provided for @dayPlanTitle.

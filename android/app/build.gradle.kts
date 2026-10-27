@@ -39,7 +39,13 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        manifestPlaceholders["MAPS_API_KEY"] = localProperties.getProperty("MAPS_API_KEY", "")
+        // Mapbox public token from android/local.properties (git-ignored); the
+        // Maps SDK reads the string resource mapbox_access_token on its own.
+        resValue(
+            "string",
+            "mapbox_access_token",
+            localProperties.getProperty("MAPBOX_ACCESS_TOKEN", ""),
+        )
     }
 
     buildTypes {

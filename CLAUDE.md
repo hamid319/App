@@ -59,7 +59,7 @@ routerProvider           // Provider<GoRouter>
 Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so empty in builds
 ```
 - Never hardcode API keys or base URLs in `.dart` files. Never add `.env` to pubspec assets (bundled files can be extracted).
-- Google Maps SDK key: iOS `ios/Flutter/Secrets.xcconfig`, Android `android/local.properties` (`MAPS_API_KEY`), both git-ignored.
+- Mapbox public token (`pk.`): iOS `ios/Flutter/Secrets.xcconfig`, Android `android/local.properties` (`MAPBOX_ACCESS_TOKEN`), both git-ignored. Maps use Mapbox via `common/widgets/places_map.dart`; Google is only the "open in Google Maps" link.
 - App-wide constants → `AppConfig` / `core/constants/`.
 
 ## Firestore structure (short form)

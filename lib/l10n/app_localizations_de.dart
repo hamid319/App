@@ -1299,7 +1299,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get mapsNotConfigured =>
-      'Die Karte ist in dieser Version noch nicht eingerichtet (Google-Maps-Schlüssel fehlt).';
+      'Die Karte ist in dieser Version noch nicht eingerichtet (Mapbox-Token fehlt).';
 
   @override
   String get dayPlanTitle => 'Tagesplan';

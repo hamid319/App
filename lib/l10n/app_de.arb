@@ -389,7 +389,7 @@
   "favoritesMapTitle": "Karte",
   "favoritesShowMap": "Auf der Karte zeigen",
   "favoritesMapEmpty": "Deine Favoriten erscheinen hier als Pins.",
-  "mapsNotConfigured": "Die Karte ist in dieser Version noch nicht eingerichtet (Google-Maps-Schlüssel fehlt).",
+  "mapsNotConfigured": "Die Karte ist in dieser Version noch nicht eingerichtet (Mapbox-Token fehlt).",
   "dayPlanTitle": "Tagesplan",
   "dayPlanSelectHint": "Hake die Orte für euren Tagesplan an.",
   "dayPlanSelectPlace": "Für den Tagesplan auswählen",

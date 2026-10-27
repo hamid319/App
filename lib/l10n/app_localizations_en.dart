@@ -1273,7 +1273,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mapsNotConfigured =>
-      'The map is not set up in this build yet (Google Maps key missing).';
+      'The map is not set up in this build yet (Mapbox token missing).';
 
   @override
   String get dayPlanTitle => 'Day plan';

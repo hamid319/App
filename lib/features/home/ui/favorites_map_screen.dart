@@ -1,11 +1,9 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../common/models/place_model.dart';
+import '../../../common/widgets/places_map.dart';
 import '../../../common/widgets/ticket.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/errors/user_message.dart';
@@ -23,8 +21,8 @@ final _favoritePlacesProvider =
   return ref.watch(placesRepositoryProvider).loadPlacesByIds(ids);
 });
 
-/// All favorites as markers on a Google map; tapping a marker's label
-/// opens the place. Only the map tiles come from Google: no Places API.
+/// All favorites as named pins on a Mapbox map; tapping a pin opens the
+/// place. Only the map tiles come from Mapbox: no place data or search.
 class FavoritesMapScreen extends ConsumerWidget {
   const FavoritesMapScreen({super.key});
 
@@ -78,51 +76,9 @@ class _FavoritesMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lang = Localizations.localeOf(context).languageCode;
-    final markers = {
-      for (final place in places)
-        Marker(
-          markerId: MarkerId(place.id),
-          position: LatLng(place.lat, place.lng),
-          infoWindow: InfoWindow(
-            title: place.nameFor(lang),
-            onTap: () => context.push('/place/${place.id}'),
-          ),
-        ),
-    };
-    final bounds = _boundsOf(places);
-    return GoogleMap(
-      initialCameraPosition: CameraPosition(target: bounds.center, zoom: 12),
-      markers: markers,
-      myLocationButtonEnabled: false,
-      mapToolbarEnabled: false,
-      onMapCreated: (controller) {
-        if (places.length < 2) return;
-        // After the first frame, so the map knows its size.
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          controller.animateCamera(
-            CameraUpdate.newLatLngBounds(bounds.latLngBounds, 64),
-          );
-        });
-      },
+    return PlacesMap(
+      places: places,
+      onTapPlace: (place) => context.push('/place/${place.id}'),
     );
   }
-}
-
-({LatLng center, LatLngBounds latLngBounds}) _boundsOf(List<PlaceModel> places) {
-  var south = places.first.lat, north = south;
-  var west = places.first.lng, east = west;
-  for (final p in places) {
-    south = math.min(south, p.lat);
-    north = math.max(north, p.lat);
-    west = math.min(west, p.lng);
-    east = math.max(east, p.lng);
-  }
-  return (
-    center: LatLng((south + north) / 2, (west + east) / 2),
-    latLngBounds: LatLngBounds(
-      southwest: LatLng(south, west),
-      northeast: LatLng(north, east),
-    ),
-  );
 }

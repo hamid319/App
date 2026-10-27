@@ -4,7 +4,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 
 import '../../../common/models/group_model.dart';
@@ -13,6 +12,7 @@ import '../../../common/utils/day_route.dart';
 import '../../../common/utils/place_type_labels.dart';
 import '../../../common/utils/trip_days.dart';
 import '../../../common/widgets/error_view.dart';
+import '../../../common/widgets/places_map.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../core/services/maps_availability.dart';
 import '../../../core/services/maps_launcher.dart';
@@ -166,143 +166,29 @@ class _DayMapScreenState extends ConsumerState<DayMapScreen> {
   }
 }
 
-/// Google map with numbered markers and the walking order as a line.
-class _DayMap extends StatefulWidget {
+/// Share of the screen the day sheet covers when it opens; the map keeps
+/// its pins, logo and attribution above it.
+const double _sheetStart = 0.58;
+
+/// Mapbox map with numbered pins and the walking order as a line; tapping
+/// a pin opens the place.
+class _DayMap extends StatelessWidget {
   const _DayMap({super.key, required this.stops});
 
   final List<PlaceModel> stops;
 
   @override
-  State<_DayMap> createState() => _DayMapState();
-}
-
-class _DayMapState extends State<_DayMap> {
-  Set<Marker> _markers = const {};
-  bool _loaded = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_loaded) return;
-    _loaded = true;
-    _loadMarkers();
-  }
-
-  Future<void> _loadMarkers() async {
-    final color = Theme.of(context).colorScheme.primary;
-    final ratio = MediaQuery.devicePixelRatioOf(context);
-    final lang = Localizations.localeOf(context).languageCode;
-    final markers = <Marker>{};
-    for (final (i, p) in widget.stops.indexed) {
-      final icon = await _numberMarker(i + 1, color, ratio);
-      if (!mounted) return;
-      markers.add(Marker(
-        markerId: MarkerId(p.id),
-        position: LatLng(p.lat, p.lng),
-        anchor: const Offset(0.5, 0.5),
-        icon: icon,
-        infoWindow: InfoWindow(
-          title: p.nameFor(lang),
-          onTap: () => context.push('/place/${p.id}'),
-        ),
-      ));
-    }
-    if (mounted) setState(() => _markers = markers);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final bounds = _boundsOf(widget.stops);
-    final scheme = Theme.of(context).colorScheme;
-    final size = MediaQuery.sizeOf(context);
-    return GoogleMap(
-      initialCameraPosition: CameraPosition(target: bounds.center, zoom: 14),
-      markers: _markers,
-      polylines: {
-        if (widget.stops.length > 1)
-          Polyline(
-            polylineId: const PolylineId('route'),
-            points: [for (final p in widget.stops) LatLng(p.lat, p.lng)],
-            color: scheme.primary,
-            // Solid: dotted patterns render unreliably on iOS Google Maps.
-            width: 4,
-          ),
-      },
-      // The sheet covers the lower half; keep the stops above it.
-      padding: EdgeInsets.only(bottom: size.height * 0.5),
-      myLocationButtonEnabled: false,
-      mapToolbarEnabled: false,
-      zoomControlsEnabled: false,
-      onMapCreated: (controller) {
-        if (widget.stops.length < 2) return;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          controller.animateCamera(
-            CameraUpdate.newLatLngBounds(bounds.latLngBounds, 56),
-          );
-        });
-      },
+    // The sheet covers the lower half; keep the stops above it.
+    return PlacesMap(
+      places: stops,
+      numbered: true,
+      bottomInset: MediaQuery.sizeOf(context).height * _sheetStart,
+      onTapPlace: (place) => context.push('/place/${place.id}'),
     );
   }
 }
 
-/// Tinted disc with a white ring and the stop number, as a marker icon.
-Future<BitmapDescriptor> _numberMarker(
-    int number, Color color, double ratio) async {
-  const size = 36.0;
-  final recorder = ui.PictureRecorder();
-  final canvas =
-      Canvas(recorder, Rect.fromLTWH(0, 0, size * ratio, size * ratio))
-        ..scale(ratio);
-  const center = Offset(size / 2, size / 2);
-  canvas.drawCircle(
-    center.translate(0, 1),
-    size / 2 - 1,
-    Paint()
-      ..color = const Color(0x40000000)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
-  );
-  canvas.drawCircle(center, size / 2 - 2, Paint()..color = Colors.white);
-  canvas.drawCircle(center, size / 2 - 5, Paint()..color = color);
-  final painter = TextPainter(
-    text: TextSpan(
-      text: '$number',
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 14,
-        fontWeight: FontWeight.w700,
-      ),
-    ),
-    textDirection: ui.TextDirection.ltr,
-  )..layout();
-  painter.paint(canvas, center - Offset(painter.width / 2, painter.height / 2));
-  final image = await recorder
-      .endRecording()
-      .toImage((size * ratio).round(), (size * ratio).round());
-  final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-  return BitmapDescriptor.bytes(bytes!.buffer.asUint8List(),
-      imagePixelRatio: ratio);
-}
-
-({LatLng center, LatLngBounds latLngBounds}) _boundsOf(
-    List<PlaceModel> places) {
-  var south = places.first.lat, north = south;
-  var west = places.first.lng, east = west;
-  for (final p in places) {
-    south = math.min(south, p.lat);
-    north = math.max(north, p.lat);
-    west = math.min(west, p.lng);
-    east = math.max(east, p.lng);
-  }
-  return (
-    center: LatLng((south + north) / 2, (west + east) / 2),
-    latLngBounds: LatLngBounds(
-      southwest: LatLng(south, west),
-      northeast: LatLng(north, east),
-    ),
-  );
-}
-
-/// The floating sheet: day title, summary, day chips and the stops.
 class _DaySheet extends StatelessWidget {
   const _DaySheet({
     required this.group,
@@ -341,7 +227,7 @@ class _DaySheet extends StatelessWidget {
     final starts = stopStartMinutes(walks);
 
     return DraggableScrollableSheet(
-      initialChildSize: 0.58,
+      initialChildSize: _sheetStart,
       minChildSize: 0.22,
       maxChildSize: 0.92,
       builder: (context, controller) => Padding(

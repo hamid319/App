@@ -538,7 +538,7 @@
   "favoritesMapTitle": "Map",
   "favoritesShowMap": "Show on map",
   "favoritesMapEmpty": "Your favorites will appear here as pins.",
-  "mapsNotConfigured": "The map is not set up in this build yet (Google Maps key missing).",
+  "mapsNotConfigured": "The map is not set up in this build yet (Mapbox token missing).",
   "dayPlanTitle": "Day plan",
   "dayPlanSelectHint": "Tick the places for your day plan.",
   "dayPlanSelectPlace": "Select for the day plan",
