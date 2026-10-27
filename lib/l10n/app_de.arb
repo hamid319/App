@@ -466,7 +466,7 @@
   "tripJournalSoon": "Das Reisetagebuch kommt bald.",
   "tripInvite": "Einladen",
   "tripInviteFriends": "Freunde einladen",
-  "tripInviteMessage": "Komm mit auf unsere Reise „{trip}“ in TripFam! Öffne Reisen, tippe auf + und tritt mit dem Code {code} bei.",
+  "tripInviteMessage": "Komm mit auf unsere Reise „{trip}“ in TripFam: {link}\n\nMit der App: Reisen öffnen, auf + tippen und den Code {code} eingeben.",
   "tripInviteCopied": "Einladung kopiert. Füge sie in einen Chat ein.",
   "tripLeave": "Reise verlassen",
   "tripDelete": "Reise löschen",

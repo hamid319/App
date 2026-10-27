@@ -68,14 +68,27 @@ class GroupRepository {
   DocumentReference<Map<String, dynamic>> _inviteDoc(String code) =>
       _db.collection('inviteCodes').doc(code.toUpperCase());
 
-  /// Writes the code's lookup entry. Called when a group is created and, for
-  /// groups made before the lookup existed, by their owner (idempotent).
-  Future<void> ensureInviteIndex(GroupModel group) async {
+  /// Writes the code's lookup entry with what the web invite shows before
+  /// joining (trip name, city, owner's first name). Called when a group is
+  /// created and by the owner's app for every own group (idempotent).
+  Future<void> ensureInviteIndex(GroupModel group, {String? ownerName}) async {
     final code = group.invite?.code ?? '';
     if (code.isEmpty) return;
+    String? short(String? v, int max) {
+      final t = v?.trim();
+      if (t == null || t.isEmpty) return null;
+      return t.length <= max ? t : t.substring(0, max);
+    }
+
+    final title = short(group.groupName, 80);
+    final city = short(group.location?.cityName, 80);
+    final owner = short(ownerName?.split(' ').first, 60);
     await _inviteDoc(code).set({
       'groupId': group.groupId,
       'createdAt': FieldValue.serverTimestamp(),
+      if (title != null) 'title': title,
+      if (city != null) 'cityName': city,
+      if (owner != null) 'ownerName': owner,
     });
   }
 

@@ -2897,8 +2897,8 @@ abstract class AppLocalizations {
   /// No description provided for @tripInviteMessage.
   ///
   /// In en, this message translates to:
-  /// **'Join our trip \"{trip}\" on TripFam! Open Trips, tap + and join with the code {code}.'**
-  String tripInviteMessage(String trip, String code);
+  /// **'Join our trip \"{trip}\" on TripFam: {link}\n\nWith the app: open Trips, tap + and enter the code {code}.'**
+  String tripInviteMessage(String trip, String code, String link);
 
   /// No description provided for @tripInviteCopied.
   ///

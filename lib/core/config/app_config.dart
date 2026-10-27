@@ -1,5 +1,10 @@
 class AppConfig {
-  static const String appName = 'SwipeTrip';
+  static const String appName = 'TripFam';
+
+  /// Web invite page (Firebase Hosting, web_invite/). Friends open
+  /// `$inviteBaseUrl/<CODE>` and join without the app. Switch to the own
+  /// domain once it is connected to Hosting.
+  static const String inviteBaseUrl = 'https://travelapp-31255.web.app/join';
 
   // Cost controls for Google Places API (New)
   // Set to true to allow real HTTP requests to Google APIs.

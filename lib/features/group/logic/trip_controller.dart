@@ -9,6 +9,7 @@ import '../../../common/models/trip_poll.dart';
 import '../../../common/models/user_model.dart';
 import '../../../common/utils/day_route.dart';
 import '../../../common/utils/trip_days.dart';
+import '../../../common/widgets/member_avatar.dart' show friendlyMemberName;
 import '../../../main_providers.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../swipe/data/places_repository.dart';
@@ -43,14 +44,15 @@ final tripExpensesProvider = StreamProvider.autoDispose
         ref.watch(tripRepositoryProvider).streamExpenses(groupId));
 
 /// Places by id in the given order; the key is the ids joined with '|'.
-final tripPlacesProvider = FutureProvider.autoDispose
-    .family<List<PlaceModel>, String>((ref, key) {
+final tripPlacesProvider =
+    FutureProvider.autoDispose.family<List<PlaceModel>, String>((ref, key) {
   final ids = key.isEmpty ? <String>[] : key.split('|');
   return ref.watch(placesRepositoryProvider).loadPlacesByIds(ids);
 });
 
 /// Key for [tripPlacesProvider]: stable for the same set of ids.
-String placesKey(Iterable<String> ids) => (ids.toSet().toList()..sort()).join('|');
+String placesKey(Iterable<String> ids) =>
+    (ids.toSet().toList()..sort()).join('|');
 
 /// Curated places of the trip's city, best-known first: the cover photo
 /// and suggestions for new ideas. Empty for cities without the import.
@@ -225,13 +227,17 @@ class TripActions extends Notifier<void> {
 /// that lookup existed have none, so their code could not be resolved).
 /// Best effort and once per group per app run; watched by the trips list.
 final inviteIndexBackfillProvider = Provider<void>((ref) {
-  final uid = ref.watch(authControllerProvider).value?.uid;
+  final me = ref.watch(authControllerProvider).value;
+  final uid = me?.uid;
   final groups = ref.watch(userGroupsProvider).value ?? const <GroupModel>[];
   if (uid == null) return;
   final repo = ref.read(groupRepositoryProvider);
   for (final group in groups) {
     if (group.ownerUid != uid || !_indexedInvites.add(group.groupId)) continue;
-    repo.ensureInviteIndex(group).catchError((Object _) {
+    repo
+        .ensureInviteIndex(group,
+            ownerName: friendlyMemberName(me?.displayName))
+        .catchError((Object _) {
       // Retried on the next app start.
       _indexedInvites.remove(group.groupId);
     });

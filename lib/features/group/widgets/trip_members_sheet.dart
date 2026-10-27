@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../common/models/group_model.dart';
 import '../../../common/widgets/member_avatar.dart';
+import '../../../core/config/app_config.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
 import '../logic/group_controller.dart';
 import 'trip_ui.dart';
 
-/// Copies an invitation (trip name and invite code) to the clipboard.
+/// Opens the share sheet with an invitation: the web link (friends join in
+/// the browser, no app needed) and the code for people with the app.
 Future<void> copyTripInvite(BuildContext context, GroupModel group) async {
   final l10n = context.l10n;
   final code = group.invite?.code;
@@ -18,10 +20,16 @@ Future<void> copyTripInvite(BuildContext context, GroupModel group) async {
     showTripSnack(context, l10n.joiningDisabled);
     return;
   }
-  await Clipboard.setData(ClipboardData(
-    text: l10n.tripInviteMessage(group.groupName ?? l10n.unnamedGroup, code),
+  final link = '${AppConfig.inviteBaseUrl}/$code';
+  // iPad needs an anchor for the share popover.
+  final box = context.findRenderObject() as RenderBox?;
+  await SharePlus.instance.share(ShareParams(
+    text: l10n.tripInviteMessage(
+        group.groupName ?? l10n.unnamedGroup, code, link),
+    subject: group.groupName ?? l10n.unnamedGroup,
+    sharePositionOrigin:
+        box == null ? null : box.localToGlobal(Offset.zero) & box.size,
   ));
-  if (context.mounted) showTripSnack(context, l10n.tripInviteCopied);
 }
 
 /// Members of a trip with the invite code; leave or (owner) delete it.

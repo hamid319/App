@@ -168,15 +168,20 @@ service cloud.firestore {
                             && request.auth.uid == request.resource.data.userId;
     }
 
-    // Invite code -> group. Anyone signed in may look up a code they know
-    // (get), nobody may list codes. Only the group's owner writes the entry,
+    // Invite code -> group, plus the trip name, city and owner's first name
+    // for the web invite preview. Anyone signed in may look up a code they
+    // know (get), nobody may list codes. Only the group's owner writes the entry,
     // and only for the group's current code.
     match /inviteCodes/{code} {
       allow get: if isAuthenticated();
       allow list: if false;
       allow create, update: if isAuthenticated()
-        && request.resource.data.keys().hasOnly(['groupId', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['groupId', 'createdAt', 'title', 'cityName', 'ownerName'])
         && request.resource.data.groupId is string
+        // Shown on the web invite before joining; short plain strings only.
+        && (!('title' in request.resource.data) || (request.resource.data.title is string && request.resource.data.title.size() <= 80))
+        && (!('cityName' in request.resource.data) || (request.resource.data.cityName is string && request.resource.data.cityName.size() <= 80))
+        && (!('ownerName' in request.resource.data) || (request.resource.data.ownerName is string && request.resource.data.ownerName.size() <= 60))
         && get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.ownerUid == request.auth.uid
         && get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.invite.code == code;
       allow delete: if isAuthenticated()

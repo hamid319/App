@@ -1574,8 +1574,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tripInviteFriends => 'Invite friends';
 
   @override
-  String tripInviteMessage(String trip, String code) {
-    return 'Join our trip \"$trip\" on TripFam! Open Trips, tap + and join with the code $code.';
+  String tripInviteMessage(String trip, String code, String link) {
+    return 'Join our trip \"$trip\" on TripFam: $link\n\nWith the app: open Trips, tap + and enter the code $code.';
   }
 
   @override

@@ -31,6 +31,7 @@ dependencies:
   cloud_functions: ^6.0.4
   device_calendar: ^4.3.3
   mapbox_maps_flutter: ^3.33.0
+  share_plus: ^13.3.1
 
 dev_dependencies:
   flutter_test:
