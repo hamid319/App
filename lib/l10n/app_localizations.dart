@@ -1769,55 +1769,55 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding1Lead.
   ///
   /// In en, this message translates to:
-  /// **'Swipe your way to your'**
+  /// **'Plan together,'**
   String get onboarding1Lead;
 
   /// No description provided for @onboarding1Accent.
   ///
   /// In en, this message translates to:
-  /// **'next favourite place.'**
+  /// **'without endless chats.'**
   String get onboarding1Accent;
 
   /// No description provided for @onboarding1Body.
   ///
   /// In en, this message translates to:
-  /// **'Swipe right for “want to see”, left for “rather not”.'**
+  /// **'Collect ideas, vote and see right away what everyone likes.'**
   String get onboarding1Body;
 
   /// No description provided for @onboarding2Lead.
   ///
   /// In en, this message translates to:
-  /// **'Save what you love,'**
+  /// **'Ideas become'**
   String get onboarding2Lead;
 
   /// No description provided for @onboarding2Accent.
   ///
   /// In en, this message translates to:
-  /// **'plan it later.'**
+  /// **'a day plan.'**
   String get onboarding2Accent;
 
   /// No description provided for @onboarding2Body.
   ///
   /// In en, this message translates to:
-  /// **'Every like lands in your favorites, ready for your next trip.'**
+  /// **'TripFam turns your favourite places into short walks on the map, day by day.'**
   String get onboarding2Body;
 
   /// No description provided for @onboarding3Lead.
   ///
   /// In en, this message translates to:
-  /// **'Plan together,'**
+  /// **'Split costs,'**
   String get onboarding3Lead;
 
   /// No description provided for @onboarding3Accent.
   ///
   /// In en, this message translates to:
-  /// **'without endless chats.'**
+  /// **'no maths.'**
   String get onboarding3Accent;
 
   /// No description provided for @onboarding3Body.
   ///
   /// In en, this message translates to:
-  /// **'Everyone swipes the same deck. TripFam shows you what you all like.'**
+  /// **'Add who paid for what. TripFam shows who owes whom and how much.'**
   String get onboarding3Body;
 
   /// No description provided for @onboardingGuest.

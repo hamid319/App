@@ -894,34 +894,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get matchOpenPlace => 'View place';
 
   @override
-  String get onboarding1Lead => 'Swipe your way to your';
+  String get onboarding1Lead => 'Plan together,';
 
   @override
-  String get onboarding1Accent => 'next favourite place.';
+  String get onboarding1Accent => 'without endless chats.';
 
   @override
   String get onboarding1Body =>
-      'Swipe right for “want to see”, left for “rather not”.';
+      'Collect ideas, vote and see right away what everyone likes.';
 
   @override
-  String get onboarding2Lead => 'Save what you love,';
+  String get onboarding2Lead => 'Ideas become';
 
   @override
-  String get onboarding2Accent => 'plan it later.';
+  String get onboarding2Accent => 'a day plan.';
 
   @override
   String get onboarding2Body =>
-      'Every like lands in your favorites, ready for your next trip.';
+      'TripFam turns your favourite places into short walks on the map, day by day.';
 
   @override
-  String get onboarding3Lead => 'Plan together,';
+  String get onboarding3Lead => 'Split costs,';
 
   @override
-  String get onboarding3Accent => 'without endless chats.';
+  String get onboarding3Accent => 'no maths.';
 
   @override
   String get onboarding3Body =>
-      'Everyone swipes the same deck. TripFam shows you what you all like.';
+      'Add who paid for what. TripFam shows who owes whom and how much.';
 
   @override
   String get onboardingGuest => 'Just look around as a guest';
