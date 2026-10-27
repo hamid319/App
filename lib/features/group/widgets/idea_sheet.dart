@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../common/models/group_model.dart';
 import '../../../common/models/place_model.dart';
 import '../../../common/widgets/place_photo.dart';
-import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
 import '../logic/trip_controller.dart';
 import 'trip_ui.dart';
@@ -35,7 +34,6 @@ class _IdeaSheet extends ConsumerStatefulWidget {
 
 class _IdeaSheetState extends ConsumerState<_IdeaSheet> {
   final _title = TextEditingController();
-  bool _busy = false;
 
   @override
   void dispose() {
@@ -43,24 +41,16 @@ class _IdeaSheetState extends ConsumerState<_IdeaSheet> {
     super.dispose();
   }
 
-  Future<void> _add({PlaceModel? place}) async {
-    final l10n = context.l10n;
+  void _add({PlaceModel? place}) {
     final lang = Localizations.localeOf(context).languageCode;
     final title = place?.nameFor(lang) ?? _title.text.trim();
     if (title.isEmpty) return;
-    setState(() => _busy = true);
-    try {
-      await ref
-          .read(tripActionsProvider.notifier)
-          .addIdea(widget.group.groupId, title, placeId: place?.id);
-      if (mounted) Navigator.pop(context);
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _busy = false);
-      showTripSnack(context,
-          userMessage(e, fallback: l10n.errorGeneric, l10n: l10n),
-          error: true);
-    }
+    final actions = ref.read(tripActionsProvider.notifier);
+    final groupId = widget.group.groupId;
+    // Not awaited: the wishlist shows the idea at once, offline too.
+    runTripWrite(
+        context, () => actions.addIdea(groupId, title, placeId: place?.id));
+    Navigator.pop(context);
   }
 
   @override
@@ -107,7 +97,6 @@ class _IdeaSheetState extends ConsumerState<_IdeaSheet> {
             FloatingPrimaryButton(
               label: l10n.tripAddIdeaButton,
               icon: Icons.add_rounded,
-              loading: _busy,
               onPressed: query.isEmpty ? null : () => _add(),
             ),
             if (suggestions.isNotEmpty) ...[
@@ -126,7 +115,7 @@ class _IdeaSheetState extends ConsumerState<_IdeaSheet> {
                 children: [
                   for (final place in suggestions)
                     InkWell(
-                      onTap: _busy ? null : () => _add(place: place),
+                      onTap: () => _add(place: place),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 14, vertical: 8),

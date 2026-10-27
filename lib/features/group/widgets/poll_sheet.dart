@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../common/models/trip_poll.dart';
-import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
 import '../logic/trip_controller.dart';
 import 'trip_ui.dart';
@@ -33,7 +32,6 @@ class _PollSheet extends ConsumerStatefulWidget {
 class _PollSheetState extends ConsumerState<_PollSheet> {
   final _question = TextEditingController();
   final _options = [TextEditingController(), TextEditingController()];
-  bool _busy = false;
 
   @override
   void dispose() {
@@ -48,23 +46,14 @@ class _PollSheetState extends ConsumerState<_PollSheet> {
       _question.text.trim().isNotEmpty &&
       _options.where((c) => c.text.trim().isNotEmpty).length >= 2;
 
-  Future<void> _create() async {
-    final l10n = context.l10n;
-    setState(() => _busy = true);
-    try {
-      await ref.read(tripActionsProvider.notifier).createPoll(
-            widget.groupId,
-            _question.text,
-            [for (final c in _options) c.text],
-          );
-      if (mounted) Navigator.pop(context);
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _busy = false);
-      showTripSnack(context,
-          userMessage(e, fallback: l10n.errorGeneric, l10n: l10n),
-          error: true);
-    }
+  void _create() {
+    final actions = ref.read(tripActionsProvider.notifier);
+    final groupId = widget.groupId;
+    final question = _question.text;
+    final options = [for (final c in _options) c.text];
+    // Not awaited, so creating a poll also works offline.
+    runTripWrite(context, () => actions.createPoll(groupId, question, options));
+    Navigator.pop(context);
   }
 
   @override
@@ -134,7 +123,6 @@ class _PollSheetState extends ConsumerState<_PollSheet> {
             const SizedBox(height: 12),
             FloatingPrimaryButton(
               label: l10n.tripPollCreate,
-              loading: _busy,
               onPressed: _valid ? _create : null,
             ),
           ],

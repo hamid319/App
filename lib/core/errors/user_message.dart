@@ -77,6 +77,8 @@ String? _knownAppMessage(String message, AppLocalizations l10n) {
       return l10n.errorGroupLocationRequired;
     case 'Session not found':
       return l10n.errorSessionNotFound;
+    case 'Only the creator can change this expense':
+      return l10n.errorExpenseNotCreator;
     case 'Not authenticated':
     case 'User not authenticated':
       return l10n.errorNotLoggedIn;

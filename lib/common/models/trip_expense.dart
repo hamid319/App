@@ -16,6 +16,9 @@ class TripExpense {
 
   static const defaultCurrency = 'EUR';
 
+  /// Thrown (as a [StateError]) when someone else's expense is changed.
+  static const notCreatorMessage = 'Only the creator can change this expense';
+
   const TripExpense({
     required this.id,
     required this.title,
@@ -41,6 +44,26 @@ class TripExpense {
         createdAt: json['createdAt'] is Timestamp
             ? (json['createdAt'] as Timestamp).toDate()
             : null,
+      );
+
+  /// Only whoever added an expense may edit or delete it.
+  bool isEditableBy(String uid) => uid.isNotEmpty && createdBy == uid;
+
+  TripExpense copyWith({
+    String? title,
+    int? amountCents,
+    String? paidBy,
+    List<String>? participants,
+  }) =>
+      TripExpense(
+        id: id,
+        title: title ?? this.title,
+        amountCents: amountCents ?? this.amountCents,
+        currency: currency,
+        paidBy: paidBy ?? this.paidBy,
+        participants: participants ?? this.participants,
+        createdBy: createdBy,
+        createdAt: createdAt,
       );
 
   /// Without [createdAt] the server time is written.

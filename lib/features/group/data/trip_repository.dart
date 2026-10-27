@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../common/models/group_model.dart';
+import '../../../common/models/sync_status.dart';
 import '../../../common/models/trip_expense.dart';
 import '../../../common/models/trip_idea.dart';
 import '../../../common/models/trip_plan.dart';
@@ -24,6 +28,63 @@ class TripRepository {
 
   CollectionReference<Map<String, dynamic>> _expenses(String groupId) =>
       _group(groupId).collection('expenses');
+
+  // --- Trips ---
+
+  /// The trips [uid] is a member of. Same query as the trips tab, so the
+  /// SDK serves both from one listener and its cache.
+  Stream<List<GroupModel>> streamUserTrips(String uid) => _db
+      .collection('groups')
+      .where('members', arrayContains: uid)
+      .snapshots()
+      .map((snap) =>
+          snap.docs.map((doc) => GroupModel.fromJson(doc.data())).toList());
+
+  // --- Sync state ---
+
+  /// Whether one trip (its document, wishlist, polls and expenses) is
+  /// served from the cache or has unsent changes. Listens to the same
+  /// queries as the screens with metadata changes, so the SDK shares the
+  /// listeners and this costs no extra reads (one for the group document).
+  Stream<SyncStatus> streamTripSyncStatus(String groupId) => _syncStatus([
+        _group(groupId)
+            .snapshots(includeMetadataChanges: true)
+            .map((s) => s.metadata),
+        for (final c in [_ideas(groupId), _polls(groupId), _expenses(groupId)])
+          c.snapshots(includeMetadataChanges: true).map((s) => s.metadata),
+      ]);
+
+  /// [streamTripSyncStatus] for the trips list of [uid].
+  Stream<SyncStatus> streamTripsSyncStatus(String uid) => _syncStatus([
+        _db
+            .collection('groups')
+            .where('members', arrayContains: uid)
+            .snapshots(includeMetadataChanges: true)
+            .map((s) => s.metadata),
+      ]);
+
+  Stream<SyncStatus> _syncStatus(List<Stream<SnapshotMetadata>> sources) {
+    final subs = <StreamSubscription<SnapshotMetadata>>[];
+    final latest = <int, ({bool fromCache, bool pendingWrites})>{};
+    late final StreamController<SyncStatus> controller;
+    controller = StreamController<SyncStatus>(
+      onListen: () {
+        for (final (i, source) in sources.indexed) {
+          subs.add(source.listen(
+            (m) {
+              latest[i] =
+                  (fromCache: m.isFromCache, pendingWrites: m.hasPendingWrites);
+              controller.add(SyncStatus.combine(latest.values));
+            },
+            // Load errors are shown by the screens' own listeners.
+            onError: (Object _) {},
+          ));
+        }
+      },
+      onCancel: () => Future.wait([for (final s in subs) s.cancel()]),
+    );
+    return controller.stream.distinct();
+  }
 
   // --- Ideas ---
 
@@ -52,6 +113,35 @@ class TripRepository {
       source: source,
     ).toJson());
     return ref.id;
+  }
+
+  /// Whether the trip's wishlist already has an idea for [placeId]. Live,
+  /// so a pending local add shows up at once (also offline).
+  Stream<bool> streamHasPlaceIdea(String groupId, String placeId) =>
+      _ideas(groupId)
+          .where('placeId', isEqualTo: placeId)
+          .limit(1)
+          .snapshots()
+          .map((snap) => snap.docs.isNotEmpty);
+
+  /// Adds [placeId] to the trip's wishlist unless an idea for it is
+  /// already there. Returns the idea's id and whether it was new.
+  Future<({String id, bool added})> addPlaceIdea(
+    String groupId, {
+    required String placeId,
+    required String title,
+    required String uid,
+  }) async {
+    final existing = await _ideas(groupId)
+        .where('placeId', isEqualTo: placeId)
+        .limit(1)
+        .get();
+    if (existing.docs.isNotEmpty) {
+      return (id: existing.docs.first.id, added: false);
+    }
+    final id =
+        await addIdea(groupId, title: title, uid: uid, placeId: placeId);
+    return (id: id, added: true);
   }
 
   /// Adds or removes only [uid] in the idea's likes.
@@ -143,14 +233,37 @@ class TripRepository {
     return ref.id;
   }
 
-  Future<void> updateExpense(String groupId, TripExpense expense) async {
+  /// Saves the edited [expense]. Only its creator may: the rules enforce
+  /// that on the server, this guard keeps the client from even trying.
+  /// Creator and creation time never change.
+  Future<void> updateExpense(
+    String groupId,
+    TripExpense expense, {
+    required String uid,
+  }) async {
+    _checkCreator(expense, uid);
     _validate(expense);
-    final data = expense.toJson()..remove('createdAt');
+    final data = expense.toJson()
+      ..remove('createdAt')
+      ..remove('createdBy');
     await _expenses(groupId).doc(expense.id).update(data);
   }
 
-  Future<void> deleteExpense(String groupId, String expenseId) =>
-      _expenses(groupId).doc(expenseId).delete();
+  /// Deletes [expense]; only its creator may.
+  Future<void> deleteExpense(
+    String groupId,
+    TripExpense expense, {
+    required String uid,
+  }) async {
+    _checkCreator(expense, uid);
+    await _expenses(groupId).doc(expense.id).delete();
+  }
+
+  void _checkCreator(TripExpense expense, String uid) {
+    if (expense.id.isEmpty || !expense.isEditableBy(uid)) {
+      throw StateError(TripExpense.notCreatorMessage);
+    }
+  }
 
   void _validate(TripExpense expense) {
     if (expense.title.trim().isEmpty) {

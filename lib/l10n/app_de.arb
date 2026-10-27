@@ -552,5 +552,19 @@
   "useOtherEmail": "Andere E-Mail-Adresse verwenden",
   "resetLinkFailed": "Der Link konnte nicht gesendet werden. Bitte versuch es noch einmal.",
   "resetPasswordSetting": "Passwort zurücksetzen",
-  "resetPasswordSettingSubtitle": "Wir schicken dir einen Link für ein neues Passwort"
+  "resetPasswordSettingSubtitle": "Wir schicken dir einen Link für ein neues Passwort",
+  "addToTrip": "Zu Reise hinzufügen",
+  "addToTripSaved": "In {trip} gemerkt",
+  "addToTripAlready": "Schon in {trip}",
+  "addToTripOpen": "Öffnen",
+  "addToTripAdded": "Hinzugefügt",
+  "addToTripNoTrips": "Du hast noch keine Reise. Leg eine an, um mit deinen Freunden Orte zu sammeln.",
+  "addToTripCreate": "Reise anlegen",
+  "tripEditExpense": "Ausgabe bearbeiten",
+  "tripExpenseAddedBy": "Hinzugefügt von {name}",
+  "tripExpenseAddedByYou": "Von dir hinzugefügt",
+  "errorExpenseNotCreator": "Nur wer die Ausgabe hinzugefügt hat, kann sie ändern.",
+  "tripOffline": "Offline",
+  "tripSyncing": "Wird synchronisiert …",
+  "tripOfflineHint": "Änderungen werden auf diesem Gerät gespeichert und synchronisiert, sobald du wieder online bist."
 }

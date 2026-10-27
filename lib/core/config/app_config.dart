@@ -19,6 +19,12 @@ class AppConfig {
   // Region the Cloud Functions are deployed to; must match functions/config.js.
   static const String functionsRegion = 'europe-west1';
 
+  // Firestore's on-device cache (persistence is on by default on mobile).
+  // Trips, wishlists, day plans and costs are read from it offline and
+  // writes wait in it until the connection is back. 100 MB keeps a few
+  // weeks of browsing; the SDK evicts least recently used documents.
+  static const int firestoreCacheBytes = 100 * 1024 * 1024;
+
   // Absolute max limit of places per city to query or cache.
   // Google caps Nearby Search (New) at 20 results per request.
   static const int maxPlacesLimit = 20;

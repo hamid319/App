@@ -8,6 +8,9 @@ class AuthService {
 
   Stream<User?> authStateChanges() => _auth.authStateChanges();
 
+  /// Like [authStateChanges], but also fires when a guest links an account.
+  Stream<User?> userChanges() => _auth.userChanges();
+
   Future<User?> signInWithEmail(String email, String password) async {
     final cred = await _auth.signInWithEmailAndPassword(
       email: email,

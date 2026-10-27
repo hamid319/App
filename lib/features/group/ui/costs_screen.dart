@@ -15,6 +15,7 @@ import '../../../l10n/l10n.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../logic/trip_controller.dart';
 import '../widgets/expense_sheet.dart';
+import '../widgets/sync_badge.dart';
 import '../widgets/trip_ui.dart';
 import 'trip_detail_screen.dart';
 
@@ -85,7 +86,7 @@ class CostsScreen extends ConsumerWidget {
   }
 }
 
-class _CostsBody extends ConsumerWidget {
+class _CostsBody extends ConsumerStatefulWidget {
   const _CostsBody({
     required this.group,
     required this.uid,
@@ -97,7 +98,34 @@ class _CostsBody extends ConsumerWidget {
   final List<TripExpense> expenses;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_CostsBody> createState() => _CostsBodyState();
+}
+
+class _CostsBodyState extends ConsumerState<_CostsBody> {
+  /// Swiped away, until the stream drops them: a dismissed row has to
+  /// leave the tree in the same frame.
+  final Set<String> _removed = {};
+
+  void _delete(TripExpense expense) {
+    setState(() => _removed.add(expense.id));
+    final actions = ref.read(tripActionsProvider.notifier);
+    runTripWrite(
+      context,
+      () => actions.deleteExpense(widget.group.groupId, expense),
+      onError: () {
+        if (mounted) setState(() => _removed.remove(expense.id));
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final group = widget.group;
+    final uid = widget.uid;
+    final expenses = [
+      for (final e in widget.expenses)
+        if (!_removed.contains(e.id)) e,
+    ];
     final l10n = context.l10n;
     final text = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
@@ -142,6 +170,7 @@ class _CostsBody extends ConsumerWidget {
                     text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
               ),
             ),
+            TripSyncBadge(groupId: group.groupId),
           ],
         ),
         const SizedBox(height: 16),
@@ -243,6 +272,7 @@ class _CostsBody extends ConsumerWidget {
                   uid: uid,
                   tone: i % 3,
                   name: name,
+                  onDelete: () => _delete(e),
                 ),
             ],
           ),
@@ -324,6 +354,7 @@ class _ExpenseRow extends ConsumerWidget {
     required this.uid,
     required this.tone,
     required this.name,
+    required this.onDelete,
   });
 
   final GroupModel group;
@@ -331,6 +362,7 @@ class _ExpenseRow extends ConsumerWidget {
   final String uid;
   final int tone;
   final String Function(String uid) name;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -351,35 +383,16 @@ class _ExpenseRow extends ConsumerWidget {
             : l10n.tripSplitPeople(expense.participants.length);
     final fill = [colors.sky, colors.peach, colors.mint][tone];
 
-    Future<void> delete() async {
-      final ok = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: Text(l10n.tripExpenseDeleteTitle),
-          content: Text(expense.title),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(l10n.cancel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              style: TextButton.styleFrom(
-                  foregroundColor: Theme.of(dialogContext).colorScheme.error),
-              child: Text(l10n.delete),
-            ),
-          ],
-        ),
-      );
-      if (ok == true) {
-        await ref
-            .read(tripActionsProvider.notifier)
-            .deleteExpense(group.groupId, expense.id);
-      }
-    }
+    final mine = expense.isEditableBy(uid);
+    final addedBy = mine
+        ? l10n.tripExpenseAddedByYou
+        : l10n.tripExpenseAddedBy(name(expense.createdBy));
 
-    return InkWell(
-      onLongPress: expense.createdBy == uid ? delete : null,
+    final row = InkWell(
+      // Only the creator may change an expense (the rules say the same).
+      onTap: mine
+          ? () => showExpenseSheet(context, group, uid, expense: expense)
+          : null,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
@@ -411,15 +424,43 @@ class _ExpenseRow extends ConsumerWidget {
                     style: text.labelSmall
                         ?.copyWith(color: scheme.onSurfaceVariant),
                   ),
+                  Text(
+                    addedBy,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: text.labelSmall
+                        ?.copyWith(color: scheme.onSurfaceVariant),
+                  ),
                 ],
               ),
             ),
             const SizedBox(width: 8),
             Text(formatCents(expense.amountCents, locale),
                 style: text.titleMedium?.copyWith(fontSize: 16)),
+            if (mine) ...[
+              const SizedBox(width: 4),
+              Icon(Icons.chevron_right_rounded,
+                  size: 20, color: scheme.onSurfaceVariant),
+            ],
           ],
         ),
       ),
+    );
+    if (!mine) return row;
+
+    // Swipe left to delete, as in iOS lists; asks first.
+    return Dismissible(
+      key: ValueKey('expense-${expense.id}'),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        color: scheme.error,
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Icon(Icons.delete_outline_rounded, color: scheme.onError),
+      ),
+      confirmDismiss: (_) => confirmDeleteExpense(context, expense),
+      onDismissed: (_) => onDelete(),
+      child: row,
     );
   }
 }

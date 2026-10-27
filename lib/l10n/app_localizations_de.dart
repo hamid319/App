@@ -1953,4 +1953,55 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get resetPasswordSettingSubtitle =>
       'Wir schicken dir einen Link für ein neues Passwort';
+
+  @override
+  String get addToTrip => 'Zu Reise hinzufügen';
+
+  @override
+  String addToTripSaved(String trip) {
+    return 'In $trip gemerkt';
+  }
+
+  @override
+  String addToTripAlready(String trip) {
+    return 'Schon in $trip';
+  }
+
+  @override
+  String get addToTripOpen => 'Öffnen';
+
+  @override
+  String get addToTripAdded => 'Hinzugefügt';
+
+  @override
+  String get addToTripNoTrips =>
+      'Du hast noch keine Reise. Leg eine an, um mit deinen Freunden Orte zu sammeln.';
+
+  @override
+  String get addToTripCreate => 'Reise anlegen';
+
+  @override
+  String get tripEditExpense => 'Ausgabe bearbeiten';
+
+  @override
+  String tripExpenseAddedBy(String name) {
+    return 'Hinzugefügt von $name';
+  }
+
+  @override
+  String get tripExpenseAddedByYou => 'Von dir hinzugefügt';
+
+  @override
+  String get errorExpenseNotCreator =>
+      'Nur wer die Ausgabe hinzugefügt hat, kann sie ändern.';
+
+  @override
+  String get tripOffline => 'Offline';
+
+  @override
+  String get tripSyncing => 'Wird synchronisiert …';
+
+  @override
+  String get tripOfflineHint =>
+      'Änderungen werden auf diesem Gerät gespeichert und synchronisiert, sobald du wieder online bist.';
 }

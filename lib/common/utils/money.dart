@@ -44,6 +44,16 @@ int? parseAmountToCents(String input) {
   return cents > 0 ? cents : null;
 }
 
+/// [cents] as an editable amount in [locale]: "12,50" in German, "12.50"
+/// in English, never with thousands separators. [parseAmountToCents]
+/// reads it back.
+String centsToAmountInput(int cents, String locale) {
+  final sep = NumberFormat.decimalPattern(locale).symbols.DECIMAL_SEP;
+  final whole = cents ~/ 100;
+  final fraction = (cents % 100).toString().padLeft(2, '0');
+  return '$whole$sep$fraction';
+}
+
 /// paypal.me link that asks for [cents] euros, or null for an empty handle.
 /// The handle may be given with or without the "paypal.me/" prefix.
 Uri? paypalMeUri(String? handle, int cents) {

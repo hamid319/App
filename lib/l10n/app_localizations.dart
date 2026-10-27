@@ -3415,6 +3415,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We\'ll email you a link to set a new password'**
   String get resetPasswordSettingSubtitle;
+
+  /// No description provided for @addToTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to trip'**
+  String get addToTrip;
+
+  /// No description provided for @addToTripSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to {trip}'**
+  String addToTripSaved(String trip);
+
+  /// No description provided for @addToTripAlready.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in {trip}'**
+  String addToTripAlready(String trip);
+
+  /// No description provided for @addToTripOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get addToTripOpen;
+
+  /// No description provided for @addToTripAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get addToTripAdded;
+
+  /// No description provided for @addToTripNoTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have a trip yet. Create one to collect places with your friends.'**
+  String get addToTripNoTrips;
+
+  /// No description provided for @addToTripCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create trip'**
+  String get addToTripCreate;
+
+  /// No description provided for @tripEditExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit expense'**
+  String get tripEditExpense;
+
+  /// No description provided for @tripExpenseAddedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Added by {name}'**
+  String tripExpenseAddedBy(String name);
+
+  /// No description provided for @tripExpenseAddedByYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Added by you'**
+  String get tripExpenseAddedByYou;
+
+  /// No description provided for @errorExpenseNotCreator.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the person who added this expense can change it.'**
+  String get errorExpenseNotCreator;
+
+  /// No description provided for @tripOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get tripOffline;
+
+  /// No description provided for @tripSyncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get tripSyncing;
+
+  /// No description provided for @tripOfflineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes are saved on this device and synced when you\'re back online.'**
+  String get tripOfflineHint;
 }
 
 class _AppLocalizationsDelegate
