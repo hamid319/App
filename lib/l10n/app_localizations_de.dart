@@ -1907,4 +1907,50 @@ class AppLocalizationsDe extends AppLocalizations {
   String tripSplitOnlyFor(String name) {
     return 'nur für $name';
   }
+
+  @override
+  String get forgotPasswordLink => 'Passwort vergessen?';
+
+  @override
+  String get forgotPasswordTitle => 'Passwort vergessen?';
+
+  @override
+  String get forgotPasswordBody =>
+      'Gib deine E-Mail-Adresse ein. Wir schicken dir einen Link, mit dem du ein neues Passwort festlegst.';
+
+  @override
+  String get sendResetLink => 'Link senden';
+
+  @override
+  String get backToLogin => 'Zurück zum Login';
+
+  @override
+  String get resetLinkSentTitle => 'Schau in dein Postfach';
+
+  @override
+  String resetLinkSentBody(String email) {
+    return 'Wenn es ein Konto für $email gibt, ist ein Link zum Zurücksetzen unterwegs. Er ist eine Stunde gültig. Sieh auch im Spam-Ordner nach.';
+  }
+
+  @override
+  String get resendResetLink => 'Erneut senden';
+
+  @override
+  String resendIn(int seconds) {
+    return 'Erneut senden in $seconds s';
+  }
+
+  @override
+  String get useOtherEmail => 'Andere E-Mail-Adresse verwenden';
+
+  @override
+  String get resetLinkFailed =>
+      'Der Link konnte nicht gesendet werden. Bitte versuch es noch einmal.';
+
+  @override
+  String get resetPasswordSetting => 'Passwort zurücksetzen';
+
+  @override
+  String get resetPasswordSettingSubtitle =>
+      'Wir schicken dir einen Link für ein neues Passwort';
 }

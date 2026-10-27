@@ -3337,6 +3337,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'only for {name}'**
   String tripSplitOnlyFor(String name);
+
+  /// No description provided for @forgotPasswordLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPasswordLink;
+
+  /// No description provided for @forgotPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot your password?'**
+  String get forgotPasswordTitle;
+
+  /// No description provided for @forgotPasswordBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email and we\'ll send you a link to set a new password.'**
+  String get forgotPasswordBody;
+
+  /// No description provided for @sendResetLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Send link'**
+  String get sendResetLink;
+
+  /// No description provided for @backToLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to login'**
+  String get backToLogin;
+
+  /// No description provided for @resetLinkSentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your inbox'**
+  String get resetLinkSentTitle;
+
+  /// No description provided for @resetLinkSentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If there is an account for {email}, a link to reset your password is on its way. It is valid for one hour. Also check your spam folder.'**
+  String resetLinkSentBody(String email);
+
+  /// No description provided for @resendResetLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Send again'**
+  String get resendResetLink;
+
+  /// No description provided for @resendIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Send again in {seconds} s'**
+  String resendIn(int seconds);
+
+  /// No description provided for @useOtherEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a different email'**
+  String get useOtherEmail;
+
+  /// No description provided for @resetLinkFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The link could not be sent. Please try again.'**
+  String get resetLinkFailed;
+
+  /// No description provided for @resetPasswordSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get resetPasswordSetting;
+
+  /// No description provided for @resetPasswordSettingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll email you a link to set a new password'**
+  String get resetPasswordSettingSubtitle;
 }
 
 class _AppLocalizationsDelegate
