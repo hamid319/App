@@ -181,14 +181,17 @@ service cloud.firestore {
       allow update: if isAuthenticated() && (
         // Owner can update anything (threshold, location, active session, ...)
         isOwner(resource.data) ||
-        // A member may clear the active session when it finishes.
+        // A member may clear the active session when it finishes (which
+        // reopens joining).
         (
           isMember(resource.data) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly([
             'activeSessionId',
-            'hasCompletedSession'
+            'hasCompletedSession',
+            'joinEnabled'
           ]) &&
-          request.resource.data.activeSessionId == null
+          request.resource.data.activeSessionId == null &&
+          request.resource.data.get('joinEnabled', true) == true
         ) ||
         // A member may refresh the shared-favourites projection.
         (
@@ -197,9 +200,12 @@ service cloud.firestore {
             'sharedFavorites'
           ])
         ) ||
-        // Joining: only the caller may be appended, and only themselves.
+        // Joining: only the caller may be appended, and only themselves,
+        // and only while no swipe session is running. (The legacy
+        // joinEnabled flag is not checked: it stayed false after a group's
+        // first session and locked the invite code for good.)
         (
-          resource.data.joinEnabled == true &&
+          resource.data.get('activeSessionId', null) == null &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members']) &&
           request.resource.data.members.hasAll(resource.data.members) &&
           request.resource.data.members.size() == resource.data.members.size() + 1 &&

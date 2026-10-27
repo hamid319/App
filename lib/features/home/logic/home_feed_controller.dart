@@ -172,7 +172,9 @@ Future<void> _awaitSession(Ref ref) async {
 }
 
 /// Sights of a curated city, best-known first. Cached per city for the
-/// app session (one query per city), refreshed by invalidating it.
+/// app session, refreshed by invalidating it. The query itself is shared
+/// with the solo deck (PlacesRepository caches it), so both load one city
+/// with one read.
 final citySightsProvider =
     FutureProvider.family<List<PlaceModel>, String>((ref, cityId) async {
   await _awaitSession(ref);
@@ -236,6 +238,8 @@ final homeFeedProvider = FutureProvider<HomeFeed>((ref) async {
 
 /// Reloads the feed of the current place from Firestore (pull to refresh).
 void refreshHomeFeed(WidgetRef ref) {
+  // The repository reuses loaded cities for a while; a refresh re-reads.
+  ref.read(placesRepositoryProvider).clearCityCache();
   final city = ref.read(discoverPreferencesProvider).value?.city;
   if (city == null) {
     ref.invalidate(nearbySightsProvider);

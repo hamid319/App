@@ -14,7 +14,7 @@ import 'trip_ui.dart';
 Future<void> copyTripInvite(BuildContext context, GroupModel group) async {
   final l10n = context.l10n;
   final code = group.invite?.code;
-  if (code == null || code.isEmpty || group.joinEnabled != true) {
+  if (code == null || code.isEmpty || !group.isJoinable) {
     showTripSnack(context, l10n.joiningDisabled);
     return;
   }
@@ -51,7 +51,7 @@ class _MembersSheet extends ConsumerWidget {
     final text = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
     final isOwner = group.ownerUid == userId;
-    final showInvite = group.invite != null && group.joinEnabled == true;
+    final showInvite = group.invite != null && group.isJoinable;
 
     return DraggableScrollableSheet(
       expand: false,

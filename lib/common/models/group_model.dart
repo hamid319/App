@@ -86,6 +86,7 @@ class GroupModel {
   // New fields from plan
   final String? ownerUid;
   final GroupLocation? location;
+  /// Legacy flag, false while a session runs. Use [isJoinable] instead.
   final bool? joinEnabled;
   final GroupInvite? invite;
 
@@ -112,6 +113,11 @@ class GroupModel {
     this.tripEnd,
     this.tripPlan,
   });
+
+  /// New members may join (by invite code) whenever no swipe session is
+  /// running. Matches the join rule in firestore.rules. Groups whose legacy
+  /// [joinEnabled] flag was left false after a session are joinable too.
+  bool get isJoinable => activeSessionId == null;
 
   GroupModel copyWith({
     String? groupId,

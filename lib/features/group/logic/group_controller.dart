@@ -125,7 +125,7 @@ class GroupController extends AsyncNotifier<GroupModel?> {
   }
 
   bool get canJoin {
-    return state.value?.joinEnabled ?? false;
+    return state.value?.isJoinable ?? false;
   }
 
   String _generateInviteCode() {

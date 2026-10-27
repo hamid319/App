@@ -29,13 +29,51 @@ class PlacesRepository {
       _functions ??
       FirebaseFunctions.instanceFor(region: AppConfig.functionsRegion);
 
+  /// How long a city's loaded places are reused. The home feed and the
+  /// solo deck both need the same city on start; this makes it one query.
+  static const cityCacheTtl = Duration(minutes: 10);
+
+  /// A curated city counts as "near" when its centre lies within the
+  /// search radius plus this much: a city's places spread around its
+  /// centre, so a user in the suburbs still gets their city.
+  static const cityReachKm = 30.0;
+
+  /// Upper bound for the legacy (Google cache) places read per city.
+  static const legacyCityLimit = 150;
+
+  final Map<String, ({DateTime at, Future<List<PlaceModel>> places})>
+      _cityCache = {};
+
   /// Curated places of a city from the batch import (tools/city-import):
-  /// active ones only, best-known first. One query per city instead of
-  /// reading the whole collection.
+  /// active ones only, best-known first. One bounded query per city (never
+  /// the whole collection), reused for [cityCacheTtl]; [refresh] skips the
+  /// cache. The returned list is unmodifiable.
   Future<List<PlaceModel>> loadCityPlaces(
     String cityId, {
     int limit = 150,
-  }) async {
+    bool refresh = false,
+  }) {
+    final key = '$cityId|$limit';
+    final cached = _cityCache[key];
+    if (!refresh &&
+        cached != null &&
+        DateTime.now().difference(cached.at) < cityCacheTtl) {
+      return cached.places;
+    }
+    final future = _queryCityPlaces(cityId, limit);
+    _cityCache[key] = (at: DateTime.now(), places: future);
+    // A failed load is not kept, so the next call tries again.
+    future.catchError((Object _) {
+      if (identical(_cityCache[key]?.places, future)) _cityCache.remove(key);
+      return const <PlaceModel>[];
+    });
+    return future;
+  }
+
+  /// Forgets the cached city places (pull to refresh).
+  void clearCityCache() => _cityCache.clear();
+
+  Future<List<PlaceModel>> _queryCityPlaces(String cityId, int limit) async {
     final snapshot = await _db
         .collection('places')
         .where('cityId', isEqualTo: cityId)
@@ -43,8 +81,15 @@ class PlacesRepository {
         .orderBy('popularity', descending: true)
         .limit(limit)
         .get();
-    return snapshot.docs.map((d) => PlaceModel.fromJson(d.data())).toList();
+    return List.unmodifiable(
+        snapshot.docs.map((d) => PlaceModel.fromJson(d.data())));
   }
+
+  /// Id of the curated city nearest to a position, if one is within
+  /// [radiusKm] plus [cityReachKm].
+  static String? nearestCityId(double lat, double lng,
+          {required double radiusKm}) =>
+      PopularCity.nearest(lat, lng, maxKm: radiusKm + cityReachKm)?.id;
 
   /// Venues of a city (restaurants, cafés, bars from the OpenStreetMap
   /// import), best-known first. Returns an empty list while the composite
@@ -72,30 +117,49 @@ class PlacesRepository {
   }
 
   /// Places for solo discovery around a position: the curated places of
-  /// [cityId] (or of the nearest curated city) within [radiusKm], falling
-  /// back to the legacy nearby query while a city has no curated places.
+  /// [cityId] (or of the nearest curated city, see [nearestCityId]) within
+  /// [radiusKm]. While a city has no curated places, its legacy Google
+  /// cache is used. Empty when no curated city is near: the collection is
+  /// never read as a whole.
   Future<List<PlaceModel>> loadPlacesAround({
     String? cityId,
     required double lat,
     required double lng,
     required double radiusKm,
   }) async {
-    final id =
-        cityId ?? PopularCity.nearest(lat, lng, maxKm: radiusKm)?.id;
-    if (id != null) {
-      try {
-        final curated = await loadCityPlaces(id);
-        if (curated.isNotEmpty) {
-          return curated
-              .where((p) =>
-                  GeoUtils.isWithinRadius(lat, lng, p.lat, p.lng, radiusKm))
-              .toList();
-        }
-      } catch (e) {
-        debugPrint('Loading curated places for $id failed: $e');
-      }
+    final id = cityId ?? nearestCityId(lat, lng, radiusKm: radiusKm);
+    if (id == null) return const [];
+    final places = await _loadCityOrLegacy(id);
+    return places
+        .where((p) => GeoUtils.isWithinRadius(lat, lng, p.lat, p.lng, radiusKm))
+        .toList();
+  }
+
+  Future<List<PlaceModel>> _loadCityOrLegacy(String cityId) async {
+    try {
+      final curated = await loadCityPlaces(cityId);
+      if (curated.isNotEmpty) return curated;
+    } catch (e) {
+      debugPrint('Loading curated places for $cityId failed: $e');
     }
-    return loadNearbyPlaces(lat, lng, radiusKm: radiusKm);
+    final legacyId = _legacyCityId(cityId);
+    if (legacyId == null) return const [];
+    final snapshot = await _db
+        .collection('places')
+        .where('cityId', isEqualTo: legacyId)
+        .limit(legacyCityLimit)
+        .get();
+    return snapshot.docs.map((d) => PlaceModel.fromJson(d.data())).toList();
+  }
+
+  /// City id the legacy Google path ([fetchAndCachePlacesForCity]) stores
+  /// ("PT_lisbon") for an app city id ("pt_lisbon").
+  static String? _legacyCityId(String cityId) {
+    final city = PopularCity.byId(cityId);
+    if (city == null) return null;
+    final prefix = '${city.countryCode.toLowerCase()}_';
+    if (!cityId.startsWith(prefix)) return null;
+    return '${city.countryCode}_${cityId.substring(prefix.length)}';
   }
 
   /// App city id ("pt_lisbon") of a group location ("PT", "lisbon").
@@ -394,27 +458,18 @@ class PlacesRepository {
     }
   }
 
+  /// Places within [radiusKm] of a position (optionally with all [tags]),
+  /// taken from the nearest curated city; see [loadPlacesAround].
   Future<List<PlaceModel>> loadNearbyPlaces(
     double lat,
     double lng, {
     double radiusKm = 50.0,
     List<String>? tags,
   }) async {
-    final query = await _db.collection('places').get();
-    return query.docs
-        .map((doc) => PlaceModel.fromJson(doc.data()))
-        .where((place) {
-      final isWithinRadius = GeoUtils.isWithinRadius(
-        lat,
-        lng,
-        place.lat,
-        place.lng,
-        radiusKm,
-      );
-      final matchesTags =
-          tags == null || tags.every((t) => place.types.contains(t));
-      return isWithinRadius && matchesTags;
-    }).toList();
+    final places =
+        await loadPlacesAround(lat: lat, lng: lng, radiusKm: radiusKm);
+    if (tags == null) return places;
+    return places.where((p) => tags.every((t) => p.types.contains(t))).toList();
   }
 
   Future<PlaceModel?> getPlaceById(String id) async {

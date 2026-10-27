@@ -74,7 +74,7 @@ class GroupRepository {
       if (group.invite?.code != code) {
         throw Exception('Invalid invite code');
       }
-      if (group.joinEnabled != true) {
+      if (!group.isJoinable) {
         throw Exception('Joining is currently disabled for this group');
       }
       if (group.members.contains(userId)) {
@@ -131,7 +131,7 @@ class GroupRepository {
       if (group.invite?.code != normalizedCode) {
         throw Exception('Invalid invite code');
       }
-      if (group.joinEnabled != true) {
+      if (!group.isJoinable) {
         throw Exception('Joining is currently disabled for this group');
       }
       if (group.members.contains(userId)) {
@@ -257,7 +257,11 @@ class GroupRepository {
       transaction.set(sessionRef, session.toJson());
       transaction.update(groupRef, {
         'activeSessionId': sessionRef.id,
-        'joinEnabled': false, // Prevent joining once session starts
+        // Joining pauses while the session runs; every path that ends the
+        // session sets it back. Joinability itself is `activeSessionId ==
+        // null` (see GroupModel.isJoinable); the flag is kept for older
+        // app versions that still check it.
+        'joinEnabled': false,
       });
       return sessionRef.id;
     });
@@ -380,6 +384,7 @@ class GroupRepository {
         transaction.update(groupRef, {
           'activeSessionId': null,
           'hasCompletedSession': true,
+          'joinEnabled': true,
         });
       } else if (!alreadyVoted) {
         transaction.update(sessionRef, updatedSession.toJson());
@@ -447,6 +452,7 @@ class GroupRepository {
       if (group.activeSessionId == sessionId) {
         transaction.update(groupRef, {
           'activeSessionId': null,
+          'joinEnabled': true,
         });
       }
     });
@@ -472,6 +478,7 @@ class GroupRepository {
     batch.update(groupRef, {
       'activeSessionId': null,
       'hasCompletedSession': true,
+      'joinEnabled': true,
     });
 
     await batch.commit();

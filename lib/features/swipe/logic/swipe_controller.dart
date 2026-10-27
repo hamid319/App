@@ -67,7 +67,8 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
 
   @override
   Future<List<PlaceModel>> build() async {
-    _placesRepo = PlacesRepository();
+    // Shared instance: its city cache spares the home feed's query.
+    _placesRepo = ref.read(placesRepositoryProvider);
     _profileRepo = ProfileRepository(ref.read(firestoreServiceProvider));
     _locationService = ref.read(locationServiceProvider);
     _favorites.clear();
