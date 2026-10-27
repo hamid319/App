@@ -54,9 +54,7 @@ class DiscoverLocationChip extends ConsumerWidget {
       label: '${context.l10n.locationTitle} ${placeLabel(context, prefs)}',
       child: Material(
         color: scheme.surface,
-        shape: StadiumBorder(
-          side: BorderSide(color: scheme.outline, width: AppSizes.edge),
-        ),
+        shape: const StadiumBorder(),
         child: InkWell(
           customBorder: const StadiumBorder(),
           onTap: () => showLocationPicker(context, ref),
@@ -71,7 +69,7 @@ class DiscoverLocationChip extends ConsumerWidget {
                         ? Icons.near_me_outlined
                         : Icons.place_outlined,
                     size: 16,
-                    color: scheme.onSurface,
+                    color: scheme.primary,
                   ),
                   const SizedBox(width: 4),
                   ConstrainedBox(
@@ -83,7 +81,7 @@ class DiscoverLocationChip extends ConsumerWidget {
                       style: Theme.of(context)
                           .textTheme
                           .labelLarge
-                          ?.copyWith(fontWeight: FontWeight.w800),
+                          ?.copyWith(fontWeight: FontWeight.w600),
                     ),
                   ),
                   Icon(Icons.expand_more,
@@ -111,8 +109,8 @@ class DiscoverFilterButton extends ConsumerWidget {
     return IconButton(
       tooltip: context.l10n.filtersTitle,
       style: IconButton.styleFrom(
-        backgroundColor: active > 0 ? scheme.onSurface : scheme.surface,
-        side: BorderSide(color: scheme.outline, width: AppSizes.edge),
+        backgroundColor: active > 0 ? scheme.primary : scheme.surface,
+        side: BorderSide.none,
       ),
       onPressed: () => showFilterSheet(context, ref),
       icon: Badge(
@@ -121,7 +119,7 @@ class DiscoverFilterButton extends ConsumerWidget {
         child: Icon(
           Icons.tune,
           size: 20,
-          color: active > 0 ? scheme.surface : scheme.onSurface,
+          color: active > 0 ? scheme.onPrimary : scheme.primary,
         ),
       ),
     );

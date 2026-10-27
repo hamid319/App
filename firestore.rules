@@ -38,6 +38,50 @@ service cloud.firestore {
              && data.updatedAt == request.time;
     }
 
+    // The likes differ by exactly the caller's uid (added or removed).
+    function onlyOwnUidToggled(before, after) {
+      let added = after.toSet().difference(before.toSet());
+      let removed = before.toSet().difference(after.toSet());
+      return added.union(removed).size() == 1
+             && added.union(removed).hasOnly([request.auth.uid])
+             && after.size() == after.toSet().size();
+    }
+
+    function isValidIdea(data) {
+      return data.keys().hasOnly(['placeId', 'title', 'addedBy', 'likedBy', 'source', 'createdAt'])
+             && data.keys().hasAll(['title', 'addedBy', 'likedBy', 'source', 'createdAt'])
+             && data.title is string && data.title.size() > 0 && data.title.size() <= 120
+             && (data.get('placeId', null) == null || data.placeId is string)
+             && data.addedBy is string
+             && data.likedBy is list
+             && data.source in ['manual', 'swipe', 'link']
+             && data.createdAt == request.time;
+    }
+
+    function isValidPoll(data) {
+      return data.keys().hasOnly(['question', 'options', 'votes', 'createdBy', 'createdAt', 'closed'])
+             && data.keys().hasAll(['question', 'options', 'votes', 'createdBy', 'createdAt', 'closed'])
+             && data.question is string && data.question.size() > 0 && data.question.size() <= 140
+             && data.options is list && data.options.size() >= 2 && data.options.size() <= 6
+             && data.votes is map
+             && data.createdBy is string
+             && data.closed is bool
+             && data.createdAt == request.time;
+    }
+
+    function isValidExpense(data, group) {
+      return data.keys().hasOnly(['title', 'amountCents', 'currency', 'paidBy', 'participants', 'createdBy', 'createdAt'])
+             && data.keys().hasAll(['title', 'amountCents', 'currency', 'paidBy', 'participants', 'createdBy', 'createdAt'])
+             && data.title is string && data.title.size() > 0 && data.title.size() <= 80
+             && data.amountCents is int && data.amountCents > 0 && data.amountCents <= 100000000
+             && data.currency == 'EUR'
+             && data.paidBy is string && data.paidBy in group.members
+             && data.participants is list && data.participants.size() > 0
+             && group.members.hasAll(data.participants)
+             && data.createdBy is string
+             && data.createdAt is timestamp;
+    }
+
     function groupData(groupId) {
       return get(/databases/$(database)/documents/groups/$(groupId)).data;
     }
@@ -161,6 +205,13 @@ service cloud.firestore {
           request.resource.data.members.size() == resource.data.members.size() + 1 &&
           request.auth.uid in request.resource.data.members
         ) ||
+        // Any member may (re)build the trip's day plan from the wishlist.
+        (
+          isMember(resource.data) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['tripPlan']) &&
+          request.resource.data.tripPlan.days is list &&
+          request.resource.data.tripPlan.days.size() <= 14
+        ) ||
         // Leaving: the caller may only remove themselves.
         (
           isMember(resource.data) &&
@@ -171,6 +222,67 @@ service cloud.firestore {
       );
 
       allow delete: if isOwner(resource.data);
+
+      // --- Trip planning (ideas, polls, expenses) ---
+
+      // Wishlist idea. likedBy may only change by the caller's own uid.
+      match /ideas/{ideaId} {
+        allow read: if isMember(groupData(groupId));
+        allow create: if isMember(groupData(groupId))
+                      && isValidIdea(request.resource.data)
+                      && request.resource.data.addedBy == request.auth.uid
+                      && request.resource.data.likedBy.hasOnly([request.auth.uid]);
+        allow update: if isMember(groupData(groupId))
+                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likedBy'])
+                      && request.resource.data.likedBy is list
+                      && onlyOwnUidToggled(resource.data.likedBy, request.resource.data.likedBy);
+        allow delete: if isMember(groupData(groupId))
+                      && (resource.data.addedBy == request.auth.uid
+                          || isOwner(groupData(groupId)));
+      }
+
+      // Poll. votes is a map uid -> option id: one vote per member, and a
+      // member may only set or remove their own entry.
+      match /polls/{pollId} {
+        allow read: if isMember(groupData(groupId));
+        allow create: if isMember(groupData(groupId))
+                      && isValidPoll(request.resource.data)
+                      && request.resource.data.createdBy == request.auth.uid
+                      && request.resource.data.votes.size() == 0
+                      && request.resource.data.closed == false;
+        allow update: if isMember(groupData(groupId)) && (
+          (
+            resource.data.closed == false
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes'])
+            && request.resource.data.votes is map
+            && request.resource.data.votes.diff(resource.data.votes).affectedKeys().hasOnly([request.auth.uid])
+            && (!(request.auth.uid in request.resource.data.votes)
+                || request.resource.data.votes[request.auth.uid] is string)
+          ) ||
+          (
+            resource.data.createdBy == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['closed'])
+            && request.resource.data.closed is bool
+          )
+        );
+        allow delete: if isMember(groupData(groupId))
+                      && resource.data.createdBy == request.auth.uid;
+      }
+
+      // Shared expense in integer cents. Editable and deletable by its creator.
+      match /expenses/{expenseId} {
+        allow read: if isMember(groupData(groupId));
+        allow create: if isMember(groupData(groupId))
+                      && isValidExpense(request.resource.data, groupData(groupId))
+                      && request.resource.data.createdBy == request.auth.uid;
+        allow update: if isMember(groupData(groupId))
+                      && resource.data.createdBy == request.auth.uid
+                      && isValidExpense(request.resource.data, groupData(groupId))
+                      && request.resource.data.createdBy == resource.data.createdBy
+                      && request.resource.data.createdAt == resource.data.createdAt;
+        allow delete: if isMember(groupData(groupId))
+                      && resource.data.createdBy == request.auth.uid;
+      }
 
       match /sessions/{sessionId} {
         allow read: if isMember(groupData(groupId));

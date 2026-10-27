@@ -46,8 +46,9 @@ routerProvider           // Provider<GoRouter>
 ## Routes (`app/routes.dart`)
 ```
 /onboarding   /login   /register
-/home         /swipe/:groupId   /place/:id
-/group        /group/join?groupId=&code=   /group-matches/:groupId   /day-plan/:groupId/:sessionId
+/trips (start, tab Reisen)   /trip/:groupId   /trip/:groupId/day/:index   /trip/:groupId/costs
+/home (tab Entdecken, feed)  /discover (solo deck)   /collection/:theme   /place/:id
+/group → /trips   /group/join?groupId=&code=   /swipe/:groupId   /group-matches/:groupId   /day-plan/:groupId/:sessionId
 /profile      /settings   /favorites   /favorites-map
 ```
 - Always use `context.go()` or `context.push()`. Never `Navigator.push()`.

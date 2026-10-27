@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:meta/meta.dart';
 
+import 'trip_plan.dart';
+
 @immutable
 class GroupLocation {
   final String countryCode;
@@ -91,6 +93,9 @@ class GroupModel {
   final DateTime? tripStart;
   final DateTime? tripEnd;
 
+  /// Day plan built from the trip's wishlist, null until someone builds it.
+  final TripPlan? tripPlan;
+
   const GroupModel({
     required this.groupId,
     this.groupName,
@@ -105,6 +110,7 @@ class GroupModel {
     this.invite,
     this.tripStart,
     this.tripEnd,
+    this.tripPlan,
   });
 
   GroupModel copyWith({
@@ -121,6 +127,7 @@ class GroupModel {
     GroupInvite? invite,
     DateTime? tripStart,
     DateTime? tripEnd,
+    TripPlan? tripPlan,
   }) {
     return GroupModel(
       groupId: groupId ?? this.groupId,
@@ -136,6 +143,7 @@ class GroupModel {
       invite: invite ?? this.invite,
       tripStart: tripStart ?? this.tripStart,
       tripEnd: tripEnd ?? this.tripEnd,
+      tripPlan: tripPlan ?? this.tripPlan,
     );
   }
 
@@ -167,6 +175,9 @@ class GroupModel {
           : null,
       tripStart: _date(json['tripStart']),
       tripEnd: _date(json['tripEnd']),
+      tripPlan: json['tripPlan'] is Map
+          ? TripPlan.fromJson(Map<String, dynamic>.from(json['tripPlan']))
+          : null,
     );
   }
 

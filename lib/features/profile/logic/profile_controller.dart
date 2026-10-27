@@ -44,7 +44,9 @@ class ProfileController extends AsyncNotifier<UserModel?> {
             ? List<String>.from(data['groups'])
             : currentUser.groups,
       );
-      state = AsyncData(updated);
+      state = AsyncData(data.containsKey('paypalHandle')
+          ? updated.withPaypalHandle(data['paypalHandle'] as String?)
+          : updated);
     } catch (e, st) {
       state = AsyncError(e, st);
     }

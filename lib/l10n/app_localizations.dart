@@ -1514,6 +1514,48 @@ abstract class AppLocalizations {
   /// **'Park'**
   String get tagPark;
 
+  /// No description provided for @tagGarden.
+  ///
+  /// In en, this message translates to:
+  /// **'Garden'**
+  String get tagGarden;
+
+  /// No description provided for @tagMonument.
+  ///
+  /// In en, this message translates to:
+  /// **'Monument'**
+  String get tagMonument;
+
+  /// No description provided for @tagNationalPark.
+  ///
+  /// In en, this message translates to:
+  /// **'National park'**
+  String get tagNationalPark;
+
+  /// No description provided for @tagObservationDeck.
+  ///
+  /// In en, this message translates to:
+  /// **'Observation deck'**
+  String get tagObservationDeck;
+
+  /// No description provided for @tagTheater.
+  ///
+  /// In en, this message translates to:
+  /// **'Theatre'**
+  String get tagTheater;
+
+  /// No description provided for @tagPlayground.
+  ///
+  /// In en, this message translates to:
+  /// **'Playground'**
+  String get tagPlayground;
+
+  /// No description provided for @tagShoppingMall.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping mall'**
+  String get tagShoppingMall;
+
   /// No description provided for @tagNature.
   ///
   /// In en, this message translates to:
@@ -2683,6 +2725,618 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nothing here yet. Try another city.'**
   String get collectionEmpty;
+
+  /// No description provided for @navTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'Trips'**
+  String get navTrips;
+
+  /// No description provided for @profileFavoritesMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites on the map'**
+  String get profileFavoritesMap;
+
+  /// No description provided for @inviteCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'ABC123'**
+  String get inviteCodeHint;
+
+  /// No description provided for @paypalHandleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'PayPal.me name'**
+  String get paypalHandleTitle;
+
+  /// No description provided for @paypalHandleNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get paypalHandleNone;
+
+  /// No description provided for @paypalHandleBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip members can pay you back through your paypal.me link. Optional.'**
+  String get paypalHandleBody;
+
+  /// No description provided for @paypalHandlePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'paypal.me/'**
+  String get paypalHandlePrefix;
+
+  /// No description provided for @paypalHandleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'yourname'**
+  String get paypalHandleHint;
+
+  /// No description provided for @tripsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trips'**
+  String get tripsTitle;
+
+  /// No description provided for @tripsPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned trips'**
+  String get tripsPlanned;
+
+  /// No description provided for @tripsPast.
+  ///
+  /// In en, this message translates to:
+  /// **'Past trips'**
+  String get tripsPast;
+
+  /// No description provided for @tripsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No trips yet'**
+  String get tripsEmptyTitle;
+
+  /// No description provided for @tripsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan a trip with friends: collect ideas, vote, plan the days and split the costs.'**
+  String get tripsEmptyBody;
+
+  /// No description provided for @tripNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan a new trip'**
+  String get tripNewTitle;
+
+  /// No description provided for @tripJoinByCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Join with a code'**
+  String get tripJoinByCode;
+
+  /// No description provided for @tripCreateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create trip'**
+  String get tripCreateButton;
+
+  /// No description provided for @tripCountdown.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =0{today} =1{tomorrow} other{in {days} days}}'**
+  String tripCountdown(int days);
+
+  /// No description provided for @tripOngoing.
+  ///
+  /// In en, this message translates to:
+  /// **'On the road'**
+  String get tripOngoing;
+
+  /// No description provided for @tripPeopleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 person} other{{count} people}}'**
+  String tripPeopleCount(int count);
+
+  /// No description provided for @tripOpenPolls.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 open poll} other{{count} open polls}}'**
+  String tripOpenPolls(int count);
+
+  /// No description provided for @tripTabPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get tripTabPlan;
+
+  /// No description provided for @tripTabMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get tripTabMap;
+
+  /// No description provided for @tripTabJournal.
+  ///
+  /// In en, this message translates to:
+  /// **'Journal'**
+  String get tripTabJournal;
+
+  /// No description provided for @tripTabCosts.
+  ///
+  /// In en, this message translates to:
+  /// **'Costs'**
+  String get tripTabCosts;
+
+  /// No description provided for @tripSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'soon'**
+  String get tripSoon;
+
+  /// No description provided for @tripJournalSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'The travel journal is coming soon.'**
+  String get tripJournalSoon;
+
+  /// No description provided for @tripInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite'**
+  String get tripInvite;
+
+  /// No description provided for @tripInviteFriends.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite friends'**
+  String get tripInviteFriends;
+
+  /// No description provided for @tripInviteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Join our trip \"{trip}\" on SwipeTrip! Open Trips, tap + and join with the code {code}.'**
+  String tripInviteMessage(String trip, String code);
+
+  /// No description provided for @tripInviteCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation copied. Paste it into a chat.'**
+  String get tripInviteCopied;
+
+  /// No description provided for @tripLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave trip'**
+  String get tripLeave;
+
+  /// No description provided for @tripDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete trip'**
+  String get tripDelete;
+
+  /// No description provided for @tripNewPoll.
+  ///
+  /// In en, this message translates to:
+  /// **'New poll'**
+  String get tripNewPoll;
+
+  /// No description provided for @tripPollQuestionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Question, e.g. Where do we stay?'**
+  String get tripPollQuestionHint;
+
+  /// No description provided for @tripPollOptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Option {number}'**
+  String tripPollOptionHint(int number);
+
+  /// No description provided for @tripPollAddOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Add option'**
+  String get tripPollAddOption;
+
+  /// No description provided for @tripPollCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start poll'**
+  String get tripPollCreate;
+
+  /// No description provided for @tripPollVoted.
+  ///
+  /// In en, this message translates to:
+  /// **'{voters} of {members} voted'**
+  String tripPollVoted(int voters, int members);
+
+  /// No description provided for @tripPollClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get tripPollClosed;
+
+  /// No description provided for @tripPollClose.
+  ///
+  /// In en, this message translates to:
+  /// **'End poll'**
+  String get tripPollClose;
+
+  /// No description provided for @tripPollReopen.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen poll'**
+  String get tripPollReopen;
+
+  /// No description provided for @tripWishlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Wishlist'**
+  String get tripWishlist;
+
+  /// No description provided for @tripAddIdea.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Idea'**
+  String get tripAddIdea;
+
+  /// No description provided for @tripWishlistEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect what you want to see and do. Ideas with a place go into the day plan.'**
+  String get tripWishlistEmpty;
+
+  /// No description provided for @tripAddIdeaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New idea'**
+  String get tripAddIdeaTitle;
+
+  /// No description provided for @tripIdeaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Place, activity or link'**
+  String get tripIdeaHint;
+
+  /// No description provided for @tripAddIdeaButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add idea'**
+  String get tripAddIdeaButton;
+
+  /// No description provided for @tripIdeaSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Places in {city}'**
+  String tripIdeaSuggestions(String city);
+
+  /// No description provided for @tripIdeaBy.
+  ///
+  /// In en, this message translates to:
+  /// **'by {name}'**
+  String tripIdeaBy(String name);
+
+  /// No description provided for @tripIdeaByYou.
+  ///
+  /// In en, this message translates to:
+  /// **'by you'**
+  String get tripIdeaByYou;
+
+  /// No description provided for @tripIdeaFromSwipe.
+  ///
+  /// In en, this message translates to:
+  /// **'from swiping'**
+  String get tripIdeaFromSwipe;
+
+  /// No description provided for @tripIdeaFromLink.
+  ///
+  /// In en, this message translates to:
+  /// **'link'**
+  String get tripIdeaFromLink;
+
+  /// No description provided for @tripIdeaDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete idea?'**
+  String get tripIdeaDeleteTitle;
+
+  /// No description provided for @tripLikeIdea.
+  ///
+  /// In en, this message translates to:
+  /// **'Like'**
+  String get tripLikeIdea;
+
+  /// No description provided for @tripBuildPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Build day plan from 1 idea} other{Build day plan from {count} ideas}}'**
+  String tripBuildPlan(int count);
+
+  /// No description provided for @tripPlanNeedsIdeas.
+  ///
+  /// In en, this message translates to:
+  /// **'Add ideas with a place first'**
+  String get tripPlanNeedsIdeas;
+
+  /// No description provided for @tripShowDayPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Day plan'**
+  String get tripShowDayPlan;
+
+  /// No description provided for @tripPlanStops.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 stop} other{{count} stops}}'**
+  String tripPlanStops(int count);
+
+  /// No description provided for @tripSwipeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect ideas by swiping'**
+  String get tripSwipeTitle;
+
+  /// No description provided for @tripSwipeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone swipes through places in {city}'**
+  String tripSwipeSubtitle(String city);
+
+  /// No description provided for @tripSwipeSheetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone swipes through the same places. Afterwards you see what the group likes and can add it to the wishlist.'**
+  String get tripSwipeSheetBody;
+
+  /// No description provided for @tripSwipeLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe round is running'**
+  String get tripSwipeLive;
+
+  /// No description provided for @tripImportMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Add matches to the wishlist'**
+  String get tripImportMatches;
+
+  /// No description provided for @tripMatchesImported.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No new matches to add} =1{1 idea added} other{{count} ideas added}}'**
+  String tripMatchesImported(int count);
+
+  /// No description provided for @tripNoPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No day plan yet'**
+  String get tripNoPlanTitle;
+
+  /// No description provided for @tripNoPlanBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect ideas with a place on the wishlist, then build the plan.'**
+  String get tripNoPlanBody;
+
+  /// No description provided for @tripDayN.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {number}'**
+  String tripDayN(int number);
+
+  /// No description provided for @tripDaySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{stops, plural, =1{1 stop} other{{stops} stops}} · {distance} on foot · {minutes} min'**
+  String tripDaySummary(int stops, String distance, int minutes);
+
+  /// No description provided for @tripDayEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing planned for this day.'**
+  String get tripDayEmpty;
+
+  /// No description provided for @tripWalkMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min walk'**
+  String tripWalkMinutes(int minutes);
+
+  /// No description provided for @tripYouGet.
+  ///
+  /// In en, this message translates to:
+  /// **'You get'**
+  String get tripYouGet;
+
+  /// No description provided for @tripYouOwe.
+  ///
+  /// In en, this message translates to:
+  /// **'You owe'**
+  String get tripYouOwe;
+
+  /// No description provided for @tripAllSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'All settled'**
+  String get tripAllSettled;
+
+  /// No description provided for @tripOwesYou.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} owes you'**
+  String tripOwesYou(String name);
+
+  /// No description provided for @tripYouOweTo.
+  ///
+  /// In en, this message translates to:
+  /// **'You owe {name}'**
+  String tripYouOweTo(String name);
+
+  /// No description provided for @tripOwes.
+  ///
+  /// In en, this message translates to:
+  /// **'{from} owes {to}'**
+  String tripOwes(String from, String to);
+
+  /// No description provided for @tripRequestPaypal.
+  ///
+  /// In en, this message translates to:
+  /// **'Request via PayPal link'**
+  String get tripRequestPaypal;
+
+  /// No description provided for @tripPayWithPaypal.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {name} with PayPal'**
+  String tripPayWithPaypal(String name);
+
+  /// No description provided for @tripRequestIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Costs for \"{trip}\":'**
+  String tripRequestIntro(String trip);
+
+  /// No description provided for @tripRequestLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {amount}'**
+  String tripRequestLine(String name, String amount);
+
+  /// No description provided for @tripPaypalRequestLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {amount}, {link}'**
+  String tripPaypalRequestLine(String name, String amount, String link);
+
+  /// No description provided for @tripRequestCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Request copied. Paste it into your group chat.'**
+  String get tripRequestCopied;
+
+  /// No description provided for @tripRequestCopiedNoPaypal.
+  ///
+  /// In en, this message translates to:
+  /// **'Request copied. Add your PayPal.me name in Settings to include a payment link.'**
+  String get tripRequestCopiedNoPaypal;
+
+  /// No description provided for @tripExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get tripExpenses;
+
+  /// No description provided for @tripExpensesTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'total {amount}'**
+  String tripExpensesTotal(String amount);
+
+  /// No description provided for @tripExpensesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No expenses yet. Add what someone paid for the group.'**
+  String get tripExpensesEmpty;
+
+  /// No description provided for @tripAddExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add expense'**
+  String get tripAddExpense;
+
+  /// No description provided for @tripExpenseTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What for? e.g. Dinner'**
+  String get tripExpenseTitleHint;
+
+  /// No description provided for @tripExpenseAmountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get tripExpenseAmountHint;
+
+  /// No description provided for @tripExpensePaidBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid by'**
+  String get tripExpensePaidBy;
+
+  /// No description provided for @tripExpenseSplitWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Split between'**
+  String get tripExpenseSplitWith;
+
+  /// No description provided for @tripExpenseSplitEqually.
+  ///
+  /// In en, this message translates to:
+  /// **'Split equally'**
+  String get tripExpenseSplitEqually;
+
+  /// No description provided for @tripExpensePerPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Split equally: {amount} per person'**
+  String tripExpensePerPerson(String amount);
+
+  /// No description provided for @tripExpenseTitleMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter what the expense was for.'**
+  String get tripExpenseTitleMissing;
+
+  /// No description provided for @tripExpenseAmountInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount above zero, e.g. 12,50.'**
+  String get tripExpenseAmountInvalid;
+
+  /// No description provided for @tripExpenseNoParticipants.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose at least one person.'**
+  String get tripExpenseNoParticipants;
+
+  /// No description provided for @tripExpenseDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete expense?'**
+  String get tripExpenseDeleteTitle;
+
+  /// No description provided for @tripYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get tripYou;
+
+  /// No description provided for @tripYouPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'You paid'**
+  String get tripYouPaid;
+
+  /// No description provided for @tripSplitEqually.
+  ///
+  /// In en, this message translates to:
+  /// **'split equally'**
+  String get tripSplitEqually;
+
+  /// No description provided for @tripSplitPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{only 1 person} other{only {count} people}}'**
+  String tripSplitPeople(int count);
+
+  /// No description provided for @tripSplitOnlyFor.
+  ///
+  /// In en, this message translates to:
+  /// **'only for {name}'**
+  String tripSplitOnlyFor(String name);
 }
 
 class _AppLocalizationsDelegate

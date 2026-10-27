@@ -785,6 +785,27 @@ class AppLocalizationsDe extends AppLocalizations {
   String get tagPark => 'Park';
 
   @override
+  String get tagGarden => 'Garten';
+
+  @override
+  String get tagMonument => 'Denkmal';
+
+  @override
+  String get tagNationalPark => 'Nationalpark';
+
+  @override
+  String get tagObservationDeck => 'Aussichtsplattform';
+
+  @override
+  String get tagTheater => 'Theater';
+
+  @override
+  String get tagPlayground => 'Spielplatz';
+
+  @override
+  String get tagShoppingMall => 'Einkaufszentrum';
+
+  @override
   String get tagNature => 'Natur';
 
   @override
@@ -1468,4 +1489,422 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get collectionEmpty =>
       'Hier ist noch nichts. Probier eine andere Stadt.';
+
+  @override
+  String get navTrips => 'Reisen';
+
+  @override
+  String get profileFavoritesMap => 'Favoriten auf der Karte';
+
+  @override
+  String get inviteCodeHint => 'ABC123';
+
+  @override
+  String get paypalHandleTitle => 'PayPal.me-Name';
+
+  @override
+  String get paypalHandleNone => 'Nicht festgelegt';
+
+  @override
+  String get paypalHandleBody =>
+      'Mitreisende können dir über deinen paypal.me-Link Geld zurückzahlen. Optional.';
+
+  @override
+  String get paypalHandlePrefix => 'paypal.me/';
+
+  @override
+  String get paypalHandleHint => 'deinname';
+
+  @override
+  String get tripsTitle => 'Reisen';
+
+  @override
+  String get tripsPlanned => 'Geplante Reisen';
+
+  @override
+  String get tripsPast => 'Vergangene Reisen';
+
+  @override
+  String get tripsEmptyTitle => 'Noch keine Reise';
+
+  @override
+  String get tripsEmptyBody =>
+      'Plant eine Reise mit Freunden: Ideen sammeln, abstimmen, Tage planen und Kosten teilen.';
+
+  @override
+  String get tripNewTitle => 'Neue Reise planen';
+
+  @override
+  String get tripJoinByCode => 'Mit Code beitreten';
+
+  @override
+  String get tripCreateButton => 'Reise erstellen';
+
+  @override
+  String tripCountdown(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'in $days Tagen',
+      one: 'morgen',
+      zero: 'heute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tripOngoing => 'Unterwegs';
+
+  @override
+  String tripPeopleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Personen',
+      one: '1 Person',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tripOpenPolls(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Abstimmungen offen',
+      one: '1 Abstimmung offen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tripTabPlan => 'Plan';
+
+  @override
+  String get tripTabMap => 'Karte';
+
+  @override
+  String get tripTabJournal => 'Tagebuch';
+
+  @override
+  String get tripTabCosts => 'Kosten';
+
+  @override
+  String get tripSoon => 'bald';
+
+  @override
+  String get tripJournalSoon => 'Das Reisetagebuch kommt bald.';
+
+  @override
+  String get tripInvite => 'Einladen';
+
+  @override
+  String get tripInviteFriends => 'Freunde einladen';
+
+  @override
+  String tripInviteMessage(String trip, String code) {
+    return 'Komm mit auf unsere Reise „$trip“ in SwipeTrip! Öffne Reisen, tippe auf + und tritt mit dem Code $code bei.';
+  }
+
+  @override
+  String get tripInviteCopied =>
+      'Einladung kopiert. Füge sie in einen Chat ein.';
+
+  @override
+  String get tripLeave => 'Reise verlassen';
+
+  @override
+  String get tripDelete => 'Reise löschen';
+
+  @override
+  String get tripNewPoll => 'Neue Abstimmung';
+
+  @override
+  String get tripPollQuestionHint => 'Frage, z. B. Wo übernachten wir?';
+
+  @override
+  String tripPollOptionHint(int number) {
+    return 'Option $number';
+  }
+
+  @override
+  String get tripPollAddOption => 'Option hinzufügen';
+
+  @override
+  String get tripPollCreate => 'Abstimmung starten';
+
+  @override
+  String tripPollVoted(int voters, int members) {
+    return '$voters von $members haben abgestimmt';
+  }
+
+  @override
+  String get tripPollClosed => 'Beendet';
+
+  @override
+  String get tripPollClose => 'Abstimmung beenden';
+
+  @override
+  String get tripPollReopen => 'Abstimmung wieder öffnen';
+
+  @override
+  String get tripWishlist => 'Wunschliste';
+
+  @override
+  String get tripAddIdea => '+ Idee';
+
+  @override
+  String get tripWishlistEmpty =>
+      'Sammelt, was ihr sehen und machen wollt. Ideen mit Ort kommen in den Tagesplan.';
+
+  @override
+  String get tripAddIdeaTitle => 'Neue Idee';
+
+  @override
+  String get tripIdeaHint => 'Ort, Aktivität oder Link';
+
+  @override
+  String get tripAddIdeaButton => 'Idee hinzufügen';
+
+  @override
+  String tripIdeaSuggestions(String city) {
+    return 'Orte in $city';
+  }
+
+  @override
+  String tripIdeaBy(String name) {
+    return 'von $name';
+  }
+
+  @override
+  String get tripIdeaByYou => 'von dir';
+
+  @override
+  String get tripIdeaFromSwipe => 'aus dem Swipen';
+
+  @override
+  String get tripIdeaFromLink => 'Link';
+
+  @override
+  String get tripIdeaDeleteTitle => 'Idee löschen?';
+
+  @override
+  String get tripLikeIdea => 'Gefällt mir';
+
+  @override
+  String tripBuildPlan(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tagesplan aus $count Ideen erstellen',
+      one: 'Tagesplan aus 1 Idee erstellen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tripPlanNeedsIdeas => 'Erst Ideen mit Ort sammeln';
+
+  @override
+  String get tripShowDayPlan => 'Tagesplan';
+
+  @override
+  String tripPlanStops(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Stopps',
+      one: '1 Stopp',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tripSwipeTitle => 'Ideen per Swipe sammeln';
+
+  @override
+  String tripSwipeSubtitle(String city) {
+    return 'Alle swipen durch Orte in $city';
+  }
+
+  @override
+  String get tripSwipeSheetBody =>
+      'Alle swipen durch dieselben Orte. Danach seht ihr, was der Gruppe gefällt, und könnt es zur Wunschliste hinzufügen.';
+
+  @override
+  String get tripSwipeLive => 'Swipe-Runde läuft';
+
+  @override
+  String get tripImportMatches => 'Treffer zur Wunschliste hinzufügen';
+
+  @override
+  String tripMatchesImported(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Ideen hinzugefügt',
+      one: '1 Idee hinzugefügt',
+      zero: 'Keine neuen Treffer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tripNoPlanTitle => 'Noch kein Tagesplan';
+
+  @override
+  String get tripNoPlanBody =>
+      'Sammelt Ideen mit Ort in der Wunschliste und erstellt dann den Plan.';
+
+  @override
+  String tripDayN(int number) {
+    return 'Tag $number';
+  }
+
+  @override
+  String tripDaySummary(int stops, String distance, int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      stops,
+      locale: localeName,
+      other: '$stops Stopps',
+      one: '1 Stopp',
+    );
+    return '$_temp0 · $distance zu Fuß · $minutes Min.';
+  }
+
+  @override
+  String get tripDayEmpty => 'Für diesen Tag ist nichts geplant.';
+
+  @override
+  String tripWalkMinutes(int minutes) {
+    return '$minutes Min. zu Fuß';
+  }
+
+  @override
+  String get tripYouGet => 'Du bekommst';
+
+  @override
+  String get tripYouOwe => 'Du schuldest';
+
+  @override
+  String get tripAllSettled => 'Alles ausgeglichen';
+
+  @override
+  String tripOwesYou(String name) {
+    return '$name schuldet dir';
+  }
+
+  @override
+  String tripYouOweTo(String name) {
+    return 'Du schuldest $name';
+  }
+
+  @override
+  String tripOwes(String from, String to) {
+    return '$from schuldet $to';
+  }
+
+  @override
+  String get tripRequestPaypal => 'Per PayPal-Link anfordern';
+
+  @override
+  String tripPayWithPaypal(String name) {
+    return '$name per PayPal bezahlen';
+  }
+
+  @override
+  String tripRequestIntro(String trip) {
+    return 'Kosten für „$trip“:';
+  }
+
+  @override
+  String tripRequestLine(String name, String amount) {
+    return '$name: $amount';
+  }
+
+  @override
+  String tripPaypalRequestLine(String name, String amount, String link) {
+    return '$name: $amount, $link';
+  }
+
+  @override
+  String get tripRequestCopied =>
+      'Zahlungsaufforderung kopiert. Füge sie in euren Gruppenchat ein.';
+
+  @override
+  String get tripRequestCopiedNoPaypal =>
+      'Zahlungsaufforderung kopiert. Mit deinem PayPal.me-Namen in den Einstellungen kommt ein Bezahllink dazu.';
+
+  @override
+  String get tripExpenses => 'Ausgaben';
+
+  @override
+  String tripExpensesTotal(String amount) {
+    return 'gesamt $amount';
+  }
+
+  @override
+  String get tripExpensesEmpty =>
+      'Noch keine Ausgaben. Trag ein, was jemand für die Gruppe bezahlt hat.';
+
+  @override
+  String get tripAddExpense => 'Ausgabe hinzufügen';
+
+  @override
+  String get tripExpenseTitleHint => 'Wofür? z. B. Abendessen';
+
+  @override
+  String get tripExpenseAmountHint => 'Betrag';
+
+  @override
+  String get tripExpensePaidBy => 'Bezahlt von';
+
+  @override
+  String get tripExpenseSplitWith => 'Geteilt zwischen';
+
+  @override
+  String get tripExpenseSplitEqually => 'Gleich geteilt';
+
+  @override
+  String tripExpensePerPerson(String amount) {
+    return 'Gleich geteilt: $amount pro Person';
+  }
+
+  @override
+  String get tripExpenseTitleMissing => 'Gib an, wofür die Ausgabe war.';
+
+  @override
+  String get tripExpenseAmountInvalid =>
+      'Gib einen Betrag über null ein, z. B. 12,50.';
+
+  @override
+  String get tripExpenseNoParticipants => 'Wähle mindestens eine Person.';
+
+  @override
+  String get tripExpenseDeleteTitle => 'Ausgabe löschen?';
+
+  @override
+  String get tripYou => 'Du';
+
+  @override
+  String get tripYouPaid => 'Du hast bezahlt';
+
+  @override
+  String get tripSplitEqually => 'gleich geteilt';
+
+  @override
+  String tripSplitPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'nur $count Personen',
+      one: 'nur 1 Person',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tripSplitOnlyFor(String name) {
+    return 'nur für $name';
+  }
 }

@@ -44,7 +44,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       next.whenData((user) {
         // A guest session is not a finished sign-in; wait for a real account.
         if (user != null && !user.isAnonymous && mounted) {
-          context.go('/home');
+          context.go('/trips');
         }
       });
     });

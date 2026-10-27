@@ -12,6 +12,9 @@ class UserModel {
   final DateTime? createdAt;
   final String? fcmToken;
 
+  /// Optional paypal.me name, so trip members can pay back via a link.
+  final String? paypalHandle;
+
   /// True for the invisible guest account (Firebase Anonymous Auth). Comes
   /// from the auth session, so it is never stored in Firestore.
   final bool isAnonymous;
@@ -25,6 +28,7 @@ class UserModel {
     this.groups = const [],
     this.createdAt,
     this.fcmToken,
+    this.paypalHandle,
     this.isAnonymous = false,
   });
 
@@ -37,6 +41,7 @@ class UserModel {
     List<String>? groups,
     DateTime? createdAt,
     String? fcmToken,
+    String? paypalHandle,
     bool? isAnonymous,
   }) {
     return UserModel(
@@ -48,6 +53,7 @@ class UserModel {
       groups: groups ?? this.groups,
       createdAt: createdAt ?? this.createdAt,
       fcmToken: fcmToken ?? this.fcmToken,
+      paypalHandle: paypalHandle ?? this.paypalHandle,
       isAnonymous: isAnonymous ?? this.isAnonymous,
     );
   }
@@ -71,6 +77,24 @@ class UserModel {
       groups: List<String>.from(json['groups'] ?? []),
       createdAt: parsedCreatedAt,
       fcmToken: json['fcmToken'] as String?,
+      paypalHandle: json['paypalHandle'] as String?,
+    );
+  }
+
+  /// Copy with [handle] as PayPal name; null or blank removes it.
+  UserModel withPaypalHandle(String? handle) {
+    final value = handle?.trim();
+    return UserModel(
+      uid: uid,
+      email: email,
+      displayName: displayName,
+      photoUrl: photoUrl,
+      favorites: favorites,
+      groups: groups,
+      createdAt: createdAt,
+      fcmToken: fcmToken,
+      paypalHandle: value == null || value.isEmpty ? null : value,
+      isAnonymous: isAnonymous,
     );
   }
 
@@ -83,5 +107,6 @@ class UserModel {
         'groups': groups,
         'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : null,
         'fcmToken': fcmToken,
+        if (paypalHandle != null) 'paypalHandle': paypalHandle,
       };
 }

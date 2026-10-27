@@ -302,6 +302,13 @@
   "tagHistory": "History",
   "tagChurch": "Church",
   "tagPark": "Park",
+  "tagGarden": "Garden",
+  "tagMonument": "Monument",
+  "tagNationalPark": "National park",
+  "tagObservationDeck": "Observation deck",
+  "tagTheater": "Theatre",
+  "tagPlayground": "Playground",
+  "tagShoppingMall": "Shopping mall",
   "tagNature": "Nature",
   "tagNaturalFeature": "Nature spot",
   "tagOutdoors": "Outdoors",
@@ -642,5 +649,313 @@
   "homeSeeAll": "All",
   "homeVenuesComingTitle": "Bars & restaurants coming soon",
   "homeVenuesComingBody": "We're collecting the best spots for your evening.",
-  "collectionEmpty": "Nothing here yet. Try another city."
+  "collectionEmpty": "Nothing here yet. Try another city.",
+  "navTrips": "Trips",
+  "profileFavoritesMap": "Favorites on the map",
+  "inviteCodeHint": "ABC123",
+  "paypalHandleTitle": "PayPal.me name",
+  "paypalHandleNone": "Not set",
+  "paypalHandleBody": "Trip members can pay you back through your paypal.me link. Optional.",
+  "paypalHandlePrefix": "paypal.me/",
+  "paypalHandleHint": "yourname",
+  "tripsTitle": "Trips",
+  "tripsPlanned": "Planned trips",
+  "tripsPast": "Past trips",
+  "tripsEmptyTitle": "No trips yet",
+  "tripsEmptyBody": "Plan a trip with friends: collect ideas, vote, plan the days and split the costs.",
+  "tripNewTitle": "Plan a new trip",
+  "tripJoinByCode": "Join with a code",
+  "tripCreateButton": "Create trip",
+  "tripCountdown": "{days, plural, =0{today} =1{tomorrow} other{in {days} days}}",
+  "@tripCountdown": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "tripOngoing": "On the road",
+  "tripPeopleCount": "{count, plural, =1{1 person} other{{count} people}}",
+  "@tripPeopleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tripOpenPolls": "{count, plural, =1{1 open poll} other{{count} open polls}}",
+  "@tripOpenPolls": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tripTabPlan": "Plan",
+  "tripTabMap": "Map",
+  "tripTabJournal": "Journal",
+  "tripTabCosts": "Costs",
+  "tripSoon": "soon",
+  "tripJournalSoon": "The travel journal is coming soon.",
+  "tripInvite": "Invite",
+  "tripInviteFriends": "Invite friends",
+  "tripInviteMessage": "Join our trip \"{trip}\" on SwipeTrip! Open Trips, tap + and join with the code {code}.",
+  "@tripInviteMessage": {
+    "placeholders": {
+      "trip": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "tripInviteCopied": "Invitation copied. Paste it into a chat.",
+  "tripLeave": "Leave trip",
+  "tripDelete": "Delete trip",
+  "tripNewPoll": "New poll",
+  "tripPollQuestionHint": "Question, e.g. Where do we stay?",
+  "tripPollOptionHint": "Option {number}",
+  "@tripPollOptionHint": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "tripPollAddOption": "Add option",
+  "tripPollCreate": "Start poll",
+  "tripPollVoted": "{voters} of {members} voted",
+  "@tripPollVoted": {
+    "placeholders": {
+      "voters": {
+        "type": "int"
+      },
+      "members": {
+        "type": "int"
+      }
+    }
+  },
+  "tripPollClosed": "Closed",
+  "tripPollClose": "End poll",
+  "tripPollReopen": "Reopen poll",
+  "tripWishlist": "Wishlist",
+  "tripAddIdea": "+ Idea",
+  "tripWishlistEmpty": "Collect what you want to see and do. Ideas with a place go into the day plan.",
+  "tripAddIdeaTitle": "New idea",
+  "tripIdeaHint": "Place, activity or link",
+  "tripAddIdeaButton": "Add idea",
+  "tripIdeaSuggestions": "Places in {city}",
+  "@tripIdeaSuggestions": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "tripIdeaBy": "by {name}",
+  "@tripIdeaBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tripIdeaByYou": "by you",
+  "tripIdeaFromSwipe": "from swiping",
+  "tripIdeaFromLink": "link",
+  "tripIdeaDeleteTitle": "Delete idea?",
+  "tripLikeIdea": "Like",
+  "tripBuildPlan": "{count, plural, =1{Build day plan from 1 idea} other{Build day plan from {count} ideas}}",
+  "@tripBuildPlan": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tripPlanNeedsIdeas": "Add ideas with a place first",
+  "tripShowDayPlan": "Day plan",
+  "tripPlanStops": "{count, plural, =1{1 stop} other{{count} stops}}",
+  "@tripPlanStops": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tripSwipeTitle": "Collect ideas by swiping",
+  "tripSwipeSubtitle": "Everyone swipes through places in {city}",
+  "@tripSwipeSubtitle": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "tripSwipeSheetBody": "Everyone swipes through the same places. Afterwards you see what the group likes and can add it to the wishlist.",
+  "tripSwipeLive": "Swipe round is running",
+  "tripImportMatches": "Add matches to the wishlist",
+  "tripMatchesImported": "{count, plural, =0{No new matches to add} =1{1 idea added} other{{count} ideas added}}",
+  "@tripMatchesImported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tripNoPlanTitle": "No day plan yet",
+  "tripNoPlanBody": "Collect ideas with a place on the wishlist, then build the plan.",
+  "tripDayN": "Day {number}",
+  "@tripDayN": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "tripDaySummary": "{stops, plural, =1{1 stop} other{{stops} stops}} · {distance} on foot · {minutes} min",
+  "@tripDaySummary": {
+    "placeholders": {
+      "stops": {
+        "type": "int"
+      },
+      "distance": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "tripDayEmpty": "Nothing planned for this day.",
+  "tripWalkMinutes": "{minutes} min walk",
+  "@tripWalkMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "tripYouGet": "You get",
+  "tripYouOwe": "You owe",
+  "tripAllSettled": "All settled",
+  "tripOwesYou": "{name} owes you",
+  "@tripOwesYou": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tripYouOweTo": "You owe {name}",
+  "@tripYouOweTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tripOwes": "{from} owes {to}",
+  "@tripOwes": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "tripRequestPaypal": "Request via PayPal link",
+  "tripPayWithPaypal": "Pay {name} with PayPal",
+  "@tripPayWithPaypal": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tripRequestIntro": "Costs for \"{trip}\":",
+  "@tripRequestIntro": {
+    "placeholders": {
+      "trip": {
+        "type": "String"
+      }
+    }
+  },
+  "tripRequestLine": "{name}: {amount}",
+  "@tripRequestLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tripPaypalRequestLine": "{name}: {amount}, {link}",
+  "@tripPaypalRequestLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "link": {
+        "type": "String"
+      }
+    }
+  },
+  "tripRequestCopied": "Request copied. Paste it into your group chat.",
+  "tripRequestCopiedNoPaypal": "Request copied. Add your PayPal.me name in Settings to include a payment link.",
+  "tripExpenses": "Expenses",
+  "tripExpensesTotal": "total {amount}",
+  "@tripExpensesTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tripExpensesEmpty": "No expenses yet. Add what someone paid for the group.",
+  "tripAddExpense": "Add expense",
+  "tripExpenseTitleHint": "What for? e.g. Dinner",
+  "tripExpenseAmountHint": "Amount",
+  "tripExpensePaidBy": "Paid by",
+  "tripExpenseSplitWith": "Split between",
+  "tripExpenseSplitEqually": "Split equally",
+  "tripExpensePerPerson": "Split equally: {amount} per person",
+  "@tripExpensePerPerson": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tripExpenseTitleMissing": "Enter what the expense was for.",
+  "tripExpenseAmountInvalid": "Enter an amount above zero, e.g. 12,50.",
+  "tripExpenseNoParticipants": "Choose at least one person.",
+  "tripExpenseDeleteTitle": "Delete expense?",
+  "tripYou": "You",
+  "tripYouPaid": "You paid",
+  "tripSplitEqually": "split equally",
+  "tripSplitPeople": "{count, plural, =1{only 1 person} other{only {count} people}}",
+  "@tripSplitPeople": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tripSplitOnlyFor": "only for {name}",
+  "@tripSplitOnlyFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

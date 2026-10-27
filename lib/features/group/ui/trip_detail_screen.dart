@@ -1,0 +1,823 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../common/models/group_model.dart';
+import '../../../common/models/place_model.dart';
+import '../../../common/models/trip_idea.dart';
+import '../../../common/models/trip_poll.dart';
+import '../../../common/widgets/error_view.dart';
+import '../../../common/widgets/place_photo.dart';
+import '../../../core/errors/user_message.dart';
+import '../../../core/services/link_launcher.dart';
+import '../../../l10n/l10n.dart';
+import '../../auth/logic/auth_controller.dart';
+import '../logic/group_controller.dart';
+import '../logic/trip_controller.dart';
+import '../widgets/idea_sheet.dart';
+import '../widgets/poll_sheet.dart';
+import '../widgets/swipe_session_sheet.dart';
+import '../widgets/trip_members_sheet.dart';
+import '../widgets/trip_ui.dart';
+
+/// The segments of a trip.
+enum TripSection { plan, map, journal, costs }
+
+/// Segmented control shared by the trip screens. Map and costs are their
+/// own routes on top of the plan; the journal is not built yet.
+class TripSectionControl extends StatelessWidget {
+  const TripSectionControl({
+    super.key,
+    required this.groupId,
+    required this.selected,
+  });
+
+  final String groupId;
+  final TripSection selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return TripSegmentedControl(
+      segments: [
+        TripSegment(l10n.tripTabPlan),
+        TripSegment(l10n.tripTabMap),
+        TripSegment(l10n.tripTabJournal, badge: l10n.tripSoon, enabled: false),
+        TripSegment(l10n.tripTabCosts),
+      ],
+      selected: selected.index,
+      onSelected: (i) {
+        final target = TripSection.values[i];
+        if (target == selected) return;
+        // Map and costs open on top of the plan and replace each other.
+        void open(String path) => selected == TripSection.plan
+            ? context.push(path)
+            : context.pushReplacement(path);
+        switch (target) {
+          case TripSection.plan:
+            context.canPop() ? context.pop() : context.go('/trip/$groupId');
+          case TripSection.map:
+            open('/trip/$groupId/day/0');
+          case TripSection.journal:
+            showTripSnack(context, l10n.tripJournalSoon);
+          case TripSection.costs:
+            open('/trip/$groupId/costs');
+        }
+      },
+    );
+  }
+}
+
+/// A trip's plan: polls, the wishlist and the way into the day plan.
+class TripDetailScreen extends ConsumerStatefulWidget {
+  const TripDetailScreen({super.key, required this.groupId});
+
+  final String groupId;
+
+  @override
+  ConsumerState<TripDetailScreen> createState() => _TripDetailScreenState();
+}
+
+class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
+  bool _building = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // The swipe session flows work on the selected group.
+    Future.microtask(() {
+      if (!mounted) return;
+      ref.read(selectedGroupIdProvider.notifier).updateState(widget.groupId);
+    });
+  }
+
+  Future<void> _buildPlan(GroupModel group, List<TripIdea> ideas) async {
+    final l10n = context.l10n;
+    setState(() => _building = true);
+    try {
+      await ref.read(tripActionsProvider.notifier).buildPlan(group, ideas);
+      if (mounted) context.push('/trip/${group.groupId}/day/0');
+    } catch (e) {
+      if (mounted) {
+        showTripSnack(context,
+            userMessage(e, fallback: l10n.errorSaveDayPlan, l10n: l10n),
+            error: true);
+      }
+    } finally {
+      if (mounted) setState(() => _building = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final trip = ref.watch(tripProvider(widget.groupId));
+    final uid = ref.watch(authControllerProvider).value?.uid ?? '';
+
+    return Scaffold(
+      body: trip.when(
+        loading: () => WithBackButton(
+          fallbackRoute: '/trips',
+          child: const Center(child: CircularProgressIndicator()),
+        ),
+        error: (e, _) => WithBackButton(
+          fallbackRoute: '/trips',
+          child: ErrorView(
+            message: userMessage(e, fallback: l10n.errorLoadGroups, l10n: l10n),
+            onRetry: () => ref.invalidate(userGroupsProvider),
+          ),
+        ),
+        data: (group) {
+          if (group == null) {
+            return ErrorView(
+              message: l10n.groupNotFound,
+              onRetry: () => context.go('/trips'),
+            );
+          }
+          final ideas =
+              ref.watch(tripIdeasProvider(widget.groupId)).value ?? const [];
+          final plannable = ideas.where((i) => i.placeId != null).length;
+          return Stack(
+            children: [
+              _PlanBody(group: group, uid: uid, ideas: ideas),
+              BottomFloat(
+                button: FloatingPrimaryButton(
+                  label: plannable == 0
+                      ? l10n.tripPlanNeedsIdeas
+                      : l10n.tripBuildPlan(plannable),
+                  icon: Icons.auto_awesome_rounded,
+                  loading: _building,
+                  onPressed:
+                      plannable == 0 ? null : () => _buildPlan(group, ideas),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _PlanBody extends ConsumerWidget {
+  const _PlanBody(
+      {required this.group, required this.uid, required this.ideas});
+
+  final GroupModel group;
+  final String uid;
+  final List<TripIdea> ideas;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final text = Theme.of(context).textTheme;
+    final scheme = Theme.of(context).colorScheme;
+    final polls =
+        ref.watch(tripPollsProvider(group.groupId)).value ?? const <TripPoll>[];
+    final names = [
+      for (final (i, id) in group.members.indexed)
+        id == uid
+            ? memberName(ref, id, l10n.tripYou)
+            : memberName(ref, id, l10n.memberFallback(i + 1)),
+    ];
+    final subtitle = [
+      tripDatesLabel(context, group),
+      names.join(', '),
+    ].whereType<String>().join(' · ');
+    final topPadding = MediaQuery.paddingOf(context).top;
+
+    return ListView(
+      padding: EdgeInsets.zero,
+      children: [
+        SizedBox(
+          height: 230,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              TripCover(group: group),
+              Positioned(
+                top: topPadding + 8,
+                left: 16,
+                child: GlassButton(
+                  icon: Icons.arrow_back_ios_new_rounded,
+                  tooltip: l10n.back,
+                  onTap: () =>
+                      context.canPop() ? context.pop() : context.go('/trips'),
+                ),
+              ),
+              Positioned(
+                top: topPadding + 8,
+                right: 16,
+                child: GlassButton(
+                  icon: Icons.person_add_alt_1_rounded,
+                  tooltip: l10n.tripInviteFriends,
+                  label: l10n.tripInvite,
+                  onTap: () => copyTripInvite(context, group),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Transform.translate(
+          offset: const Offset(0, -24),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 120),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(group.groupName ?? l10n.unnamedGroup,
+                    style: text.headlineMedium),
+                const SizedBox(height: 2),
+                InkWell(
+                  onTap: () => showTripMembersSheet(context, group, uid),
+                  child: Text(
+                    subtitle,
+                    style: text.bodyMedium
+                        ?.copyWith(color: scheme.onSurfaceVariant),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TripSectionControl(
+                    groupId: group.groupId, selected: TripSection.plan),
+                const SizedBox(height: 16),
+                for (final poll in polls) ...[
+                  _PollCard(group: group, poll: poll, uid: uid),
+                  const SizedBox(height: 12),
+                ],
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () => showPollSheet(context, group.groupId),
+                    icon: const Icon(Icons.how_to_vote_outlined, size: 20),
+                    label: Text(l10n.tripNewPoll),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TripSectionHeader(
+                  l10n.tripWishlist,
+                  action: l10n.tripAddIdea,
+                  onAction: () => showIdeaSheet(context, group),
+                ),
+                const SizedBox(height: 8),
+                _Wishlist(group: group, uid: uid, ideas: ideas),
+                const SizedBox(height: 24),
+                _MoreSection(group: group, uid: uid, ideas: ideas),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PollCard extends ConsumerWidget {
+  const _PollCard({required this.group, required this.poll, required this.uid});
+
+  final GroupModel group;
+  final TripPoll poll;
+  final String uid;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final text = Theme.of(context).textTheme;
+    final scheme = Theme.of(context).colorScheme;
+    final voters = poll.voterCount;
+    final mine = poll.voteOf(uid);
+    var top = 0;
+    for (final o in poll.options) {
+      final v = poll.votesFor(o.id);
+      if (v > top) top = v;
+    }
+
+    Future<void> vote(String optionId) async {
+      try {
+        await ref
+            .read(tripActionsProvider.notifier)
+            .vote(group.groupId, poll, optionId);
+      } catch (e) {
+        if (context.mounted) {
+          showTripSnack(
+              context, userMessage(e, fallback: l10n.errorGeneric, l10n: l10n),
+              error: true);
+        }
+      }
+    }
+
+    return TripCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: Text(poll.question, style: text.titleMedium)),
+              const SizedBox(width: 8),
+              Padding(
+                padding: const EdgeInsets.only(top: 3),
+                child: Text(
+                  poll.closed
+                      ? l10n.tripPollClosed
+                      : l10n.tripPollVoted(voters, group.members.length),
+                  style:
+                      text.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
+                ),
+              ),
+              if (poll.createdBy == uid)
+                SizedBox(
+                  height: 24,
+                  width: 32,
+                  child: PopupMenuButton<bool>(
+                    padding: EdgeInsets.zero,
+                    tooltip: l10n.moreOptions,
+                    icon: Icon(Icons.more_horiz_rounded,
+                        size: 20, color: scheme.onSurfaceVariant),
+                    onSelected: (close) => ref
+                        .read(tripActionsProvider.notifier)
+                        .setPollClosed(group.groupId, poll.id, close),
+                    itemBuilder: (_) => [
+                      PopupMenuItem(
+                        value: !poll.closed,
+                        child: Text(poll.closed
+                            ? l10n.tripPollReopen
+                            : l10n.tripPollClose),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          for (final (i, option) in poll.options.indexed) ...[
+            if (i > 0) const SizedBox(height: 8),
+            _PollOptionBar(
+              label: option.label,
+              votes: poll.votesFor(option.id),
+              fraction: voters == 0 ? 0 : poll.votesFor(option.id) / voters,
+              leading: top > 0 && poll.votesFor(option.id) == top,
+              mine: mine == option.id,
+              onTap: poll.closed ? null : () => vote(option.id),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _PollOptionBar extends StatelessWidget {
+  const _PollOptionBar({
+    required this.label,
+    required this.votes,
+    required this.fraction,
+    required this.leading,
+    required this.mine,
+    required this.onTap,
+  });
+
+  final String label;
+  final int votes;
+  final double fraction;
+  final bool leading;
+  final bool mine;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final fill = leading
+        ? scheme.primary.withValues(alpha: 0.16)
+        : scheme.surfaceContainerHigh;
+    return Semantics(
+      button: onTap != null,
+      selected: mine,
+      child: Material(
+        color: scheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(10),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: SizedBox(
+            height: 40,
+            child: Stack(
+              children: [
+                FractionallySizedBox(
+                  widthFactor: fraction.clamp(0.0, 1.0),
+                  heightFactor: 1,
+                  child: ColoredBox(color: fill),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Row(
+                    children: [
+                      if (mine) ...[
+                        Icon(Icons.check_circle_rounded,
+                            size: 16, color: scheme.primary),
+                        const SizedBox(width: 6),
+                      ],
+                      Expanded(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: text.bodyMedium?.copyWith(
+                              fontWeight:
+                                  leading ? FontWeight.w600 : FontWeight.w400),
+                        ),
+                      ),
+                      Text(
+                        '$votes',
+                        style: text.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: leading
+                              ? scheme.primary
+                              : scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Wishlist extends ConsumerWidget {
+  const _Wishlist(
+      {required this.group, required this.uid, required this.ideas});
+
+  final GroupModel group;
+  final String uid;
+  final List<TripIdea> ideas;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    if (ideas.isEmpty) {
+      return TripCard(
+        child: Row(
+          children: [
+            Icon(Icons.lightbulb_outline_rounded, color: scheme.primary),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(l10n.tripWishlistEmpty,
+                  style: text.bodyMedium
+                      ?.copyWith(color: scheme.onSurfaceVariant)),
+            ),
+          ],
+        ),
+      );
+    }
+    final ids = [
+      for (final i in ideas)
+        if (i.placeId != null) i.placeId!,
+    ];
+    final places = ref.watch(tripPlacesProvider(placesKey(ids))).value ??
+        const <PlaceModel>[];
+    final byId = {for (final p in places) p.id: p};
+    return InsetGroup(
+      separatorIndent: 14 + 48 + 12,
+      children: [
+        for (final idea in ideas)
+          _IdeaRow(
+            group: group,
+            idea: idea,
+            place: byId[idea.placeId],
+            uid: uid,
+          ),
+      ],
+    );
+  }
+}
+
+class _IdeaRow extends ConsumerWidget {
+  const _IdeaRow({
+    required this.group,
+    required this.idea,
+    required this.place,
+    required this.uid,
+  });
+
+  final GroupModel group;
+  final TripIdea idea;
+  final PlaceModel? place;
+  final String uid;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final text = Theme.of(context).textTheme;
+    final scheme = Theme.of(context).colorScheme;
+    final lang = Localizations.localeOf(context).languageCode;
+    final author = idea.addedBy == uid
+        ? l10n.tripIdeaByYou
+        : l10n.tripIdeaBy(memberName(ref, idea.addedBy, l10n.userFallbackName));
+    final subtitle = [
+      author,
+      switch (idea.source) {
+        IdeaSource.swipe => l10n.tripIdeaFromSwipe,
+        IdeaSource.link => l10n.tripIdeaFromLink,
+        IdeaSource.manual => null,
+      },
+    ].whereType<String>().join(' · ');
+    final liked = idea.isLikedBy(uid);
+    final placeModel = place;
+
+    void open() {
+      if (idea.placeId != null) {
+        context.push('/place/${idea.placeId}');
+      } else if (idea.source == IdeaSource.link) {
+        LinkLauncher.open(idea.title).catchError((_) {});
+      }
+    }
+
+    Future<void> delete() async {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(l10n.tripIdeaDeleteTitle),
+          content: Text(idea.title),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(dialogContext).colorScheme.error),
+              child: Text(l10n.delete),
+            ),
+          ],
+        ),
+      );
+      if (ok == true) {
+        await ref
+            .read(tripActionsProvider.notifier)
+            .deleteIdea(group.groupId, idea.id);
+      }
+    }
+
+    return InkWell(
+      onTap: open,
+      onLongPress: idea.addedBy == uid ? delete : null,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: SizedBox.square(
+                dimension: 48,
+                child: placeModel != null
+                    ? PlacePhoto(place: placeModel)
+                    : ColoredBox(
+                        color: scheme.surfaceContainerHigh,
+                        child: Icon(
+                          idea.source == IdeaSource.link
+                              ? Icons.link_rounded
+                              : Icons.lightbulb_outline_rounded,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    placeModel?.nameFor(lang) ?? idea.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: text.titleMedium?.copyWith(fontSize: 16),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: text.labelSmall
+                        ?.copyWith(color: scheme.onSurfaceVariant),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Semantics(
+              button: true,
+              selected: liked,
+              label: l10n.tripLikeIdea,
+              child: Material(
+                color: liked
+                    ? scheme.primary.withValues(alpha: 0.16)
+                    : scheme.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(14),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(14),
+                  onTap: () => ref
+                      .read(tripActionsProvider.notifier)
+                      .toggleLike(group.groupId, idea),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          liked
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded,
+                          size: 16,
+                          color:
+                              liked ? scheme.primary : scheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${idea.likes}',
+                          style: text.labelLarge?.copyWith(
+                            fontSize: 14,
+                            color: liked
+                                ? scheme.primary
+                                : scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Day plan, the group swipe round and the members.
+class _MoreSection extends ConsumerWidget {
+  const _MoreSection(
+      {required this.group, required this.uid, required this.ideas});
+
+  final GroupModel group;
+  final String uid;
+  final List<TripIdea> ideas;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final isAdmin = group.ownerUid == uid;
+    final live = group.activeSessionId != null;
+    final id = group.groupId;
+    final city = group.location?.cityName ?? '';
+    final plan = group.tripPlan;
+
+    Future<void> startSwipe() async {
+      // The start sheet works on the selected group; wait until it is ours.
+      ref.read(selectedGroupIdProvider.notifier).updateState(id);
+      final selected = await ref.read(groupControllerProvider.future);
+      if (!context.mounted || selected?.groupId != id) return;
+      if (await showStartSessionSheet(context) && context.mounted) {
+        context.push('/swipe/$id');
+      }
+    }
+
+    Future<void> importMatches() async {
+      final lang = Localizations.localeOf(context).languageCode;
+      try {
+        final added = await ref
+            .read(tripActionsProvider.notifier)
+            .importSwipeMatches(group, ideas, lang);
+        if (context.mounted) {
+          showTripSnack(context, l10n.tripMatchesImported(added));
+        }
+      } catch (e) {
+        if (context.mounted) {
+          showTripSnack(context,
+              userMessage(e, fallback: l10n.errorLoadResults, l10n: l10n),
+              error: true);
+        }
+      }
+    }
+
+    return InsetGroup(
+      separatorIndent: 14 + 28 + 12,
+      children: [
+        if (plan != null && !plan.isEmpty)
+          _ActionRow(
+            icon: Icons.map_outlined,
+            title: l10n.tripShowDayPlan,
+            subtitle: l10n.tripPlanStops(plan.stopCount),
+            onTap: () => context.push('/trip/$id/day/0'),
+          ),
+        if (live)
+          _ActionRow(
+            icon: Icons.swipe_rounded,
+            title: l10n.tripSwipeLive,
+            subtitle: l10n.continueSwiping,
+            onTap: () => context.push('/swipe/$id'),
+          )
+        else
+          _ActionRow(
+            icon: Icons.swipe_rounded,
+            title: l10n.tripSwipeTitle,
+            subtitle:
+                isAdmin ? l10n.tripSwipeSubtitle(city) : l10n.waitingForAdmin,
+            onTap: isAdmin ? startSwipe : null,
+          ),
+        if (group.hasCompletedSession) ...[
+          _ActionRow(
+            icon: Icons.emoji_events_outlined,
+            title: l10n.viewMatches,
+            onTap: () => context.push('/group-matches/$id'),
+          ),
+          _ActionRow(
+            icon: Icons.playlist_add_rounded,
+            title: l10n.tripImportMatches,
+            onTap: importMatches,
+          ),
+        ],
+        _ActionRow(
+          icon: Icons.group_outlined,
+          title: l10n.membersHeader(group.members.length),
+          trailing: AvatarRow(memberIds: group.members, size: 26, max: 4),
+          onTap: () => showTripMembersSheet(context, group, uid),
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionRow extends StatelessWidget {
+  const _ActionRow({
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.trailing,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final enabled = onTap != null;
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 28,
+              child: Icon(icon,
+                  color: enabled ? scheme.primary : scheme.onSurfaceVariant),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: text.bodyLarge?.copyWith(
+                          color: enabled
+                              ? scheme.onSurface
+                              : scheme.onSurfaceVariant)),
+                  if (subtitle != null)
+                    Text(subtitle!,
+                        style: text.labelSmall
+                            ?.copyWith(color: scheme.onSurfaceVariant)),
+                ],
+              ),
+            ),
+            if (trailing != null) ...[trailing!, const SizedBox(width: 6)],
+            if (enabled)
+              Icon(Icons.chevron_right_rounded,
+                  color: scheme.onSurfaceVariant.withValues(alpha: 0.6)),
+          ],
+        ),
+      ),
+    );
+  }
+}

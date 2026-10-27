@@ -173,10 +173,10 @@ class SimplifiedProfileScreen extends ConsumerWidget {
                       ),
                       Expanded(
                         child: _Stat(
-                          icon: Icons.groups_rounded,
+                          icon: Icons.luggage_rounded,
                           value: groups,
-                          label: l10n.navGroups,
-                          onTap: () => context.go('/group'),
+                          label: l10n.navTrips,
+                          onTap: () => context.go('/trips'),
                         ),
                       ),
                     ],
@@ -190,6 +190,43 @@ class SimplifiedProfileScreen extends ConsumerWidget {
             onPressed: () => _showEditProfileDialog(context, ref, user),
             icon: const Icon(Icons.edit_outlined),
             label: Text(l10n.editProfile),
+          ),
+          const SizedBox(height: AppSizes.groupGap),
+          // Favorites moved here from their own tab.
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+            child: Material(
+              color: scheme.surface,
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: Icon(Icons.favorite_rounded, color: scheme.primary),
+                    title: Text(l10n.navFavorites),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('$favorites',
+                            style: text.bodyLarge
+                                ?.copyWith(color: scheme.onSurfaceVariant)),
+                        const Icon(Icons.chevron_right_rounded),
+                      ],
+                    ),
+                    onTap: () => context.push('/favorites'),
+                  ),
+                  Divider(
+                      height: 0.5,
+                      thickness: 0.5,
+                      indent: 56,
+                      color: scheme.outlineVariant),
+                  ListTile(
+                    leading: Icon(Icons.map_outlined, color: scheme.primary),
+                    title: Text(l10n.profileFavoritesMap),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => context.push('/favorites-map'),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

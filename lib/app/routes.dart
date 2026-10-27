@@ -11,7 +11,11 @@ import '../features/home/ui/favorites_map_screen.dart';
 import '../features/home/ui/favorites_screen.dart';
 import '../features/swipe/ui/swipe_screen.dart';
 import '../features/places/ui/place_detail_screen.dart';
-import '../features/group/ui/simplified_group_screen.dart';
+import '../features/group/ui/costs_screen.dart';
+import '../features/group/ui/day_map_screen.dart';
+import '../features/group/ui/group_join_screen.dart';
+import '../features/group/ui/trip_detail_screen.dart';
+import '../features/group/ui/trips_screen.dart';
 import '../features/group/ui/group_matches_screen.dart';
 import '../features/group/ui/day_plan_screen.dart';
 import '../features/profile/ui/simplified_profile_screen.dart';
@@ -106,6 +110,37 @@ GoRouter createRouter(Ref ref) {
         path: '/place/:id',
         builder: (ctx, state) => const PlaceDetailScreen(),
       ),
+      // A trip (group): full screen, the photo header and the floating
+      // primary button replace the bottom navigation.
+      GoRoute(
+        path: '/trip/:groupId',
+        builder: (ctx, state) => AccountGate(
+          reason: GateReason.groups,
+          icon: Icons.luggage_rounded,
+          child: TripDetailScreen(groupId: state.pathParameters['groupId']!),
+        ),
+        routes: [
+          GoRoute(
+            path: 'day/:index',
+            builder: (ctx, state) => AccountGate(
+              reason: GateReason.groups,
+              icon: Icons.map_outlined,
+              child: DayMapScreen(
+                groupId: state.pathParameters['groupId']!,
+                day: int.tryParse(state.pathParameters['index'] ?? '') ?? 0,
+              ),
+            ),
+          ),
+          GoRoute(
+            path: 'costs',
+            builder: (ctx, state) => AccountGate(
+              reason: GateReason.groups,
+              icon: Icons.receipt_long_rounded,
+              child: CostsScreen(groupId: state.pathParameters['groupId']!),
+            ),
+          ),
+        ],
+      ),
       // All main routes wrapped in ShellRoute for persistent bottom nav
       ShellRoute(
         builder: (context, state, child) => ShellNavigation(child: child),
@@ -133,12 +168,17 @@ GoRouter createRouter(Ref ref) {
             ),
           ),
           GoRoute(
-            path: '/group',
+            path: '/trips',
             builder: (ctx, state) => const AccountGate(
               reason: GateReason.groups,
-              icon: Icons.group,
-              child: SimplifiedGroupScreen(),
+              icon: Icons.luggage_rounded,
+              child: TripsScreen(),
             ),
+          ),
+          // Old groups tab; groups are trips now.
+          GoRoute(
+            path: '/group',
+            redirect: (ctx, state) => '/trips',
           ),
           GoRoute(
             path: '/group/join',
@@ -228,8 +268,10 @@ String? resolveAuthRedirect({
   if (!hasSession) return isGoingToAuth ? null : '/login';
 
   // Guests may open login/register to upgrade; real accounts never need to.
-  if (hasAccount && isGoingToAuth) return '/home';
-  if (path == '/') return '/home';
+  // Accounts start on their trips, guests (who cannot have trips) on the
+  // discover feed.
+  if (hasAccount && isGoingToAuth) return '/trips';
+  if (path == '/') return hasAccount ? '/trips' : '/home';
   return null;
 }
 
@@ -248,6 +290,8 @@ bool isActiveSessionRouteAllowed(String currentPath) {
       currentPath.startsWith('/day-plan') ||
       currentPath == '/group' ||
       currentPath.startsWith('/group/') ||
+      currentPath == '/trips' ||
+      currentPath.startsWith('/trip/') ||
       currentPath == '/profile' ||
       currentPath == '/settings' ||
       currentPath == '/favorites';

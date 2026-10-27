@@ -1,12 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-/// Bricolage Grotesque for titles, Figtree for everything else. Both are
-/// bundled under assets/fonts (SIL OFL 1.1) and declared in pubspec.yaml
-/// with one file per weight, so `fontWeight` picks the real cut instead of
-/// a synthesized bold, and no font is fetched from the network.
+/// The platform's system font everywhere (San Francisco on iOS, Roboto on
+/// Android), as Apple's HIG asks: `null` families let Flutter pick it.
+/// Titles get iOS's large-title weights and tight tracking.
 class AppTypography {
-  static const bodyFamily = 'Figtree';
-  static const displayFamily = 'BricolageGrotesque';
+  static const String? bodyFamily = null;
+  static const String? displayFamily = null;
 
   static TextStyle _display(double size, double height, FontWeight weight) =>
       TextStyle(
@@ -14,47 +14,51 @@ class AppTypography {
         fontSize: size,
         height: height,
         fontWeight: weight,
-        letterSpacing: -0.5,
+        letterSpacing: -0.02 * size,
       );
 
   static TextTheme textTheme(Color ink, Color ink2) {
-    final base = Typography.material2021()
+    final base = Typography.material2021(platform: defaultTargetPlatform)
         .englishLike
-        .merge(Typography.material2021().black)
-        .apply(fontFamily: bodyFamily);
+        .merge(Typography.material2021(platform: defaultTargetPlatform).black);
 
     return base
         .copyWith(
-          displaySmall: _display(34, 38 / 34, FontWeight.w800),
-          headlineMedium: _display(28, 32 / 28, FontWeight.w800),
-          headlineSmall: _display(24, 28 / 24, FontWeight.w800),
-          titleLarge: _display(22, 26 / 22, FontWeight.w800),
+          displaySmall: _display(34, 41 / 34, FontWeight.w700),
+          headlineMedium: _display(28, 34 / 28, FontWeight.w700),
+          headlineSmall: _display(22, 28 / 22, FontWeight.w700),
+          titleLarge: _display(20, 25 / 20, FontWeight.w700),
           titleMedium: base.titleMedium?.copyWith(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.4,
           ),
-          bodyLarge: base.bodyLarge?.copyWith(fontSize: 16, height: 24 / 16),
-          bodyMedium: base.bodyMedium?.copyWith(fontSize: 14, height: 20 / 14),
+          bodyLarge: base.bodyLarge?.copyWith(
+            fontSize: 17,
+            height: 22 / 17,
+            letterSpacing: -0.4,
+          ),
+          bodyMedium: base.bodyMedium?.copyWith(fontSize: 15, height: 20 / 15),
           labelLarge: base.labelLarge?.copyWith(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
           ),
           labelSmall: base.labelSmall?.copyWith(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.66,
+            fontSize: 13,
+            fontWeight: FontWeight.w400,
+            letterSpacing: 0,
           ),
         )
         .apply(bodyColor: ink, displayColor: ink);
   }
 
-  /// Big place name on a swipe card, always white on a photo.
+  /// Big place name on a swipe card.
   static TextStyle cardTitle() => const TextStyle(
         fontFamily: displayFamily,
-        fontSize: 28,
-        height: 1.05,
-        fontWeight: FontWeight.w800,
-        letterSpacing: -0.6,
+        fontSize: 26,
+        height: 1.1,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.5,
         color: Colors.white,
       );
 
@@ -63,17 +67,17 @@ class AppTypography {
         fontFamily: displayFamily,
         fontSize: 17,
         height: 1.3,
-        fontWeight: FontWeight.w700,
-        letterSpacing: -0.2,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.4,
         color: color,
       );
 
   /// LIKE / NOPE stamp.
   static TextStyle stamp(Color color) => TextStyle(
         fontFamily: displayFamily,
-        fontSize: 32,
-        fontWeight: FontWeight.w800,
-        letterSpacing: 1.2,
+        fontSize: 15,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.4,
         color: color,
       );
 
@@ -87,8 +91,8 @@ class AppTypography {
         fontFamily: displayFamily,
         fontSize: size,
         height: height,
-        fontWeight: FontWeight.w800,
-        letterSpacing: -0.04 * size,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.02 * size,
         color: color,
       );
 }

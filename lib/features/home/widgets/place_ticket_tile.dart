@@ -89,7 +89,7 @@ class PlaceTicketTile extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style:
-                        text.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
+                        text.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                   ),
                   if (subtitle != null)
                     Flexible(child: TagChip(label: subtitle!, tone: tone)),

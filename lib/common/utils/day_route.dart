@@ -101,3 +101,14 @@ List<RouteStop> _improve(List<RouteStop> route, {required bool fixFirst}) {
   }
   return best;
 }
+
+/// Average walking speed used for estimates.
+const double walkingSpeedKmh = 4.8;
+
+/// Walking time in whole minutes for [km] at [walkingSpeedKmh], at least 1
+/// for any real distance.
+int walkingMinutes(double km) {
+  if (km <= 0) return 0;
+  final minutes = (km / walkingSpeedKmh * 60).round();
+  return minutes < 1 ? 1 : minutes;
+}

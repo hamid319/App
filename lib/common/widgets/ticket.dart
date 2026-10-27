@@ -103,15 +103,24 @@ class TicketBorder extends ShapeBorder {
       color, width, radius, notchFromTop, notchFromBottom, notchRadius);
 }
 
-/// The hard, unblurred "print" shadow under raised tickets and buttons.
+/// Soft iOS card shadow under raised cards and floating buttons. [edge]
+/// is kept for older call sites; the shadow is always a light black blur.
 List<BoxShadow> printShadow(Color edge, {double offset = AppSizes.printShadow}) =>
-    [BoxShadow(color: edge, offset: Offset(0, offset))];
+    [
+      BoxShadow(
+        color: const Color(0x14000000),
+        blurRadius: 12,
+        offset: Offset(0, offset - 1),
+      ),
+    ];
 
-/// A ticket-shaped surface with an ink rim. The base container for list
-/// rows, swipe cards and info blocks in the "Ticket und Stempel" design.
+/// A rounded inset group (iOS grouped style): the base container for list
+/// rows, swipe cards and info blocks. [notchFromTop] / [notchFromBottom]
+/// are from the earlier ticket design and are ignored, so older screens
+/// keep compiling.
 ///
-/// [raised] adds the print shadow; use it for the one thing on a screen
-/// that should feel tappable above the rest (the swipe card, a hero ticket).
+/// [raised] adds a soft shadow; use it for the one thing on a screen that
+/// should float above the rest (the swipe card, a hero card).
 class Ticket extends StatelessWidget {
   const Ticket({
     super.key,
@@ -136,12 +145,8 @@ class Ticket extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final edge = context.swipeColors.edge;
-    final shape = TicketBorder(
-      color: edge,
-      radius: radius,
-      notchFromTop: notchFromTop,
-      notchFromBottom: notchFromBottom,
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(radius),
     );
     Widget body = Material(
       color: color ?? Theme.of(context).colorScheme.surface,
@@ -154,7 +159,10 @@ class Ticket extends StatelessWidget {
     );
     if (raised) {
       body = DecoratedBox(
-        decoration: ShapeDecoration(shape: shape, shadows: printShadow(edge)),
+        decoration: ShapeDecoration(
+          shape: shape,
+          shadows: printShadow(context.swipeColors.edge),
+        ),
         child: body,
       );
     }
@@ -162,8 +170,8 @@ class Ticket extends StatelessWidget {
   }
 }
 
-/// A rubber stamp: rotated, outlined capitals. Used for LIKE / NOPE on the
-/// swipe card, MUST SEE, MATCH and other moments worth a stamp.
+/// A small capsule label for moments worth marking: LIKE / NOPE on the
+/// swipe card, MATCH, MUST SEE. [angle] tilts it slightly.
 class Stamp extends StatelessWidget {
   const Stamp({
     super.key,
@@ -184,31 +192,33 @@ class Stamp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = Theme.of(context).scaffoldBackgroundColor;
+    final fontSize = size * 0.55;
+    final onFill = ThemeData.estimateBrightnessForColor(color) == Brightness.dark
+        ? Colors.white
+        : Colors.black;
     return Transform.rotate(
-      angle: angle,
+      angle: angle * 0.5,
       child: Container(
         padding: EdgeInsets.symmetric(
-          horizontal: size * 0.4,
-          vertical: size * 0.08,
+          horizontal: fontSize * 0.8,
+          vertical: fontSize * 0.3,
         ),
         decoration: BoxDecoration(
-          color: filled ? color : null,
-          border: Border.all(color: color, width: size * 0.11),
-          borderRadius: BorderRadius.circular(size * 0.25),
+          color: filled ? color : color.withValues(alpha: 0.14),
+          borderRadius: BorderRadius.circular(999),
         ),
         child: Text(
           text.toUpperCase(),
-          style: AppTypography.stamp(filled ? bg : color)
-              .copyWith(fontSize: size),
+          style: AppTypography.stamp(filled ? onFill : color)
+              .copyWith(fontSize: fontSize),
         ),
       ),
     );
   }
 }
 
-/// Round action with an ink rim and print shadow, for the swipe row and
-/// other big single-purpose buttons.
+/// Round floating action with a soft shadow, for the swipe row and other
+/// big single-purpose buttons.
 class InkActionButton extends StatelessWidget {
   const InkActionButton({
     super.key,
@@ -232,6 +242,7 @@ class InkActionButton extends StatelessWidget {
     final edge = context.swipeColors.edge;
     final scheme = Theme.of(context).colorScheme;
     final enabled = onPressed != null;
+    // Outline only where a white button would vanish on a white page.
     return Tooltip(
       message: tooltip,
       child: AnimatedOpacity(
@@ -243,8 +254,10 @@ class InkActionButton extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: fill ?? scheme.surface,
-            border: Border.all(color: edge, width: AppSizes.edge),
-            boxShadow: enabled ? printShadow(edge) : null,
+            border: fill == null
+                ? Border.all(color: edge, width: 0.5)
+                : null,
+            boxShadow: enabled ? printShadow(edge, offset: 4) : null,
           ),
           child: Material(
             type: MaterialType.transparency,
@@ -334,8 +347,8 @@ class SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme.labelSmall?.copyWith(
           color: Theme.of(context).colorScheme.onSurfaceVariant,
-          letterSpacing: 1.1,
-          fontWeight: FontWeight.w800,
+          letterSpacing: 0.2,
+          fontWeight: FontWeight.w500,
         );
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSizes.space8),
@@ -349,8 +362,7 @@ class SectionLabel extends StatelessWidget {
   }
 }
 
-/// Big round icon on a pastel disc with an ink rim, for empty, error and
-/// success states.
+/// Big round icon on a pastel disc, for empty, error and success states.
 class IconBadge extends StatelessWidget {
   const IconBadge({
     super.key,
@@ -379,8 +391,7 @@ class IconBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: fill,
         shape: BoxShape.circle,
-        border: Border.all(color: c.edge, width: AppSizes.edge),
-        boxShadow: printShadow(c.edge),
+
       ),
       child: Icon(
         icon,

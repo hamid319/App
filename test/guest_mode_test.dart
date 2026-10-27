@@ -126,8 +126,9 @@ void main() {
     });
 
     test('real accounts are sent away from the auth screens', () {
-      expect(redirect('/login', account: true), '/home');
-      expect(redirect('/register', account: true), '/home');
+      expect(redirect('/login', account: true), '/trips');
+      expect(redirect('/register', account: true), '/trips');
+      expect(redirect('/', account: true), '/trips');
       expect(redirect('/profile', account: true), isNull);
     });
 

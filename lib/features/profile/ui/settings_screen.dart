@@ -12,6 +12,7 @@ import '../../../core/constants/sizes.dart';
 import '../../../l10n/l10n.dart';
 import '../../../common/widgets/member_avatar.dart';
 import '../../group/logic/group_controller.dart';
+import '../logic/profile_controller.dart';
 import '../../swipe/logic/swipe_controller.dart';
 
 /// Open to everyone. The "App" section (language, privacy, security) works
@@ -86,6 +87,16 @@ class SettingsScreen extends ConsumerWidget {
             tiles: hasAccount
                 ? [
                     ListTile(
+                      leading: const Icon(Icons.payments_outlined),
+                      title: Text(l10n.paypalHandleTitle),
+                      subtitle: Text(
+                        ref.watch(profileControllerProvider).value?.paypalHandle ??
+                            l10n.paypalHandleNone,
+                      ),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () => _editPaypalHandle(context, ref),
+                    ),
+                    ListTile(
                       leading: Icon(Icons.logout_rounded,
                           color: Theme.of(context).colorScheme.error),
                       title: Text(
@@ -115,6 +126,57 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  /// Optional paypal.me name, used for payment links in trip costs.
+  Future<void> _editPaypalHandle(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    final uid = ref.read(authControllerProvider).value?.uid;
+    if (uid == null) return;
+    final controller = TextEditingController(
+        text: ref.read(profileControllerProvider).value?.paypalHandle ?? '');
+    final value = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.paypalHandleTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.paypalHandleBody),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              autocorrect: false,
+              decoration: InputDecoration(
+                prefixText: l10n.paypalHandlePrefix,
+                hintText: l10n.paypalHandleHint,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(minimumSize: const Size(96, 44)),
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (value == null) return;
+    final handle = value.trim().replaceFirst(
+        RegExp(r'^(https?://)?(www\.)?paypal\.me/'), '');
+    await ref.read(profileControllerProvider.notifier).updateProfile(
+      uid,
+      {'paypalHandle': handle.isEmpty ? null : handle},
     );
   }
 

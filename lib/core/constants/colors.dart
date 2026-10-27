@@ -42,11 +42,10 @@ class AppPalette {
   /// Hairlines and dividers.
   final Color line;
 
-  /// The ticket outline: the strong border around tickets, buttons and
-  /// stamps that gives the "Ticket und Stempel" look its print feel.
+  /// Hairline around controls that need one (text fields, outlined chips).
   final Color edge;
 
-  /// "Sunset" brand orange: the one accent per screen.
+  /// Tint: the one accent per screen (buttons, links, selection).
   final Color primary, primarySoft;
 
   /// Swipe outcomes. Used for like/nope only, never as general accents.
@@ -61,46 +60,49 @@ class AppPalette {
   /// Pastel chip fills, picked by category; text on them is always [ink].
   final Color mint, peach, sky;
 
+  // Apple HIG grouped look: grey page, white inset groups, one tint.
+  // Secondary text is a little darker than iOS's own grey so it passes
+  // WCAG AA on both the page and the cards.
   static const light = AppPalette(
     brightness: Brightness.light,
-    bg: Color(0xFFFFF7EC),
+    bg: Color(0xFFF2F2F7),
     surface: Color(0xFFFFFFFF),
-    surface2: Color(0xFFF7EBDA),
-    ink: Color(0xFF221A14),
-    ink2: Color(0xFF6B5D50),
-    ink3: Color(0xFFA3958A),
-    line: Color(0xFFEADCC8),
-    edge: Color(0xFF221A14),
-    primary: Color(0xFFFF5A36),
-    primarySoft: Color(0xFFFFE3D9),
-    like: Color(0xFFFF5A36),
-    nope: Color(0xFF221A14),
-    gold: Color(0xFFFFC93C),
-    danger: Color(0xFFD7263D),
-    mint: Color(0xFFDDF2D1),
-    peach: Color(0xFFFFE3D9),
-    sky: Color(0xFFDCEBFA),
+    surface2: Color(0xFFE5E5EA),
+    ink: Color(0xFF000000),
+    ink2: Color(0xFF6E6E73),
+    ink3: Color(0xFFAEAEB2),
+    line: Color(0xFFD1D1D6),
+    edge: Color(0xFFD1D1D6),
+    primary: Color(0xFFC2410C),
+    primarySoft: Color(0xFFFFEDD5),
+    like: Color(0xFFC2410C),
+    nope: Color(0xFF1C1C1E),
+    gold: Color(0xFFFFCC00),
+    danger: Color(0xFFD70015),
+    mint: Color(0xFFD1FAE5),
+    peach: Color(0xFFFFEDD5),
+    sky: Color(0xFFDBEAFE),
   );
 
   static const dark = AppPalette(
     brightness: Brightness.dark,
-    bg: Color(0xFF17120E),
-    surface: Color(0xFF221B15),
-    surface2: Color(0xFF2E251E),
-    ink: Color(0xFFFFF3E4),
-    ink2: Color(0xFFC9B8A6),
-    ink3: Color(0xFF8C7B6B),
-    line: Color(0xFF3A3027),
-    edge: Color(0xFFE9D9C6),
-    primary: Color(0xFFFF6A47),
-    primarySoft: Color(0xFF45241A),
-    like: Color(0xFFFF6A47),
-    nope: Color(0xFFFFF3E4),
-    gold: Color(0xFFFFCF52),
-    danger: Color(0xFFFF5D6E),
-    mint: Color(0xFF243A22),
-    peach: Color(0xFF45241A),
-    sky: Color(0xFF1E3044),
+    bg: Color(0xFF000000),
+    surface: Color(0xFF1C1C1E),
+    surface2: Color(0xFF2C2C2E),
+    ink: Color(0xFFFFFFFF),
+    ink2: Color(0xFF98989F),
+    ink3: Color(0xFF636366),
+    line: Color(0xFF38383A),
+    edge: Color(0xFF38383A),
+    primary: Color(0xFFFF7A45),
+    primarySoft: Color(0xFF3D1F12),
+    like: Color(0xFFFF7A45),
+    nope: Color(0xFFFFFFFF),
+    gold: Color(0xFFFFD60A),
+    danger: Color(0xFFFF6961),
+    mint: Color(0xFF0F2E22),
+    peach: Color(0xFF3D1F12),
+    sky: Color(0xFF0F2440),
   );
 }
 
