@@ -1,6 +1,6 @@
 #!/bin/bash
 # Stop hook — runs flutter analyze on changed lib/ files; reverts on new errors.
-APP=/Users/hamidebrahimi/Desktop/SwipeTrip/App
+APP="$(cd "$(dirname "$0")/../.." && pwd)"
 TRACKING="$APP/.claude/.turn_changes"
 
 [ ! -f "$TRACKING" ] && exit 0

@@ -93,7 +93,8 @@ Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so
 - Hardcoded secrets or URLs in `.dart`
 - Cross-feature imports (`features/A` importing `features/B`)
 - `Navigator.push()` anywhere — use GoRouter only
-- `git commit`, `git push`, `rm -rf`, `firebase deploy` — blocked by `.claude/settings.json`
+- `rm -rf`, `git reset --hard`, `git clean`, `git rebase`, `firebase deploy` — blocked by `.claude/settings.json`
+- `git commit` / `git push` are allowed, but only when the owner asks for them; never force-push, never push to `main` unless told to
 
 ## MVP pending (as of June 2026)
 - Google Places API key (currently mock data, 51 hardcoded places)

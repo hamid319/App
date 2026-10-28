@@ -205,6 +205,8 @@ class _TripRow extends ConsumerWidget {
           content: Text(isAdded
               ? l10n.addToTripAlready(name)
               : l10n.addToTripSaved(name)),
+          // With an action, Flutter keeps a SnackBar until dismissed.
+          persist: false,
           action: SnackBarAction(
             label: l10n.addToTripOpen,
             onPressed: () => router.push('/trip/${trip.groupId}'),
