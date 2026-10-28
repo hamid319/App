@@ -2110,6 +2110,60 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journalAddShort => 'Entry';
 
   @override
+  String get passportTitle => 'Passport';
+
+  @override
+  String get passportCoverTitle => 'PASSPORT';
+
+  @override
+  String get passportCoverSubtitle => 'OF YOUR TRIPS';
+
+  @override
+  String get passportDataName => 'Name';
+
+  @override
+  String get passportDataSince => 'Member since';
+
+  @override
+  String get passportDataNumber => 'Passport no.';
+
+  @override
+  String get passportDataCountries => 'Countries';
+
+  @override
+  String get passportDataCities => 'Cities';
+
+  @override
+  String get passportVisas => 'VISAS';
+
+  @override
+  String get passportTapToOpen => 'Tap to open';
+
+  @override
+  String get passportNextStamp => 'Next stamp';
+
+  @override
+  String get passportEmpty =>
+      'Every city you travel to gets a stamp here once the trip begins.';
+
+  @override
+  String passportPage(int page, int total) {
+    return 'Page $page of $total';
+  }
+
+  @override
+  String passportStampCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stamps',
+      one: '1 stamp',
+      zero: 'No stamps yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String journalPhotoOf(int index, int total) {
     return 'Photo $index of $total';
   }

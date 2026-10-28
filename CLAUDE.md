@@ -49,7 +49,7 @@ routerProvider           // Provider<GoRouter>
 /trips (start, tab Reisen)   /trip/:groupId   /trip/:groupId/day/:index   /trip/:groupId/costs   /trip/:groupId/journal   /trip/:groupId/recap
 /home (tab Entdecken, feed)  /discover (solo deck)   /collection/:theme   /place/:id
 /group → /trips   /group/join?groupId=&code=   /swipe/:groupId   /group-matches/:groupId   /day-plan/:groupId/:sessionId
-/profile      /settings   /favorites   /favorites-map
+/profile   /passport   /settings   /favorites   /favorites-map
 ```
 - Always use `context.go()` or `context.push()`. Never `Navigator.push()`.
 - New routes go in `app/routes.dart` only. Path format: lowercase kebab-case.

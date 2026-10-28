@@ -2141,6 +2141,60 @@ class AppLocalizationsDe extends AppLocalizations {
   String get journalAddShort => 'Eintrag';
 
   @override
+  String get passportTitle => 'Reisepass';
+
+  @override
+  String get passportCoverTitle => 'REISEPASS';
+
+  @override
+  String get passportCoverSubtitle => 'DEINER REISEN';
+
+  @override
+  String get passportDataName => 'Name';
+
+  @override
+  String get passportDataSince => 'Mitglied seit';
+
+  @override
+  String get passportDataNumber => 'Pass-Nr.';
+
+  @override
+  String get passportDataCountries => 'Länder';
+
+  @override
+  String get passportDataCities => 'Städte';
+
+  @override
+  String get passportVisas => 'VISA';
+
+  @override
+  String get passportTapToOpen => 'Zum Öffnen tippen';
+
+  @override
+  String get passportNextStamp => 'Nächster Stempel';
+
+  @override
+  String get passportEmpty =>
+      'Jede Stadt, in die du reist, bekommt hier einen Stempel, sobald die Reise beginnt.';
+
+  @override
+  String passportPage(int page, int total) {
+    return 'Seite $page von $total';
+  }
+
+  @override
+  String passportStampCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Stempel',
+      one: '1 Stempel',
+      zero: 'Noch keine Stempel',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String journalPhotoOf(int index, int total) {
     return 'Foto $index von $total';
   }

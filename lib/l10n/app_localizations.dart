@@ -3722,6 +3722,90 @@ abstract class AppLocalizations {
   /// **'Entry'**
   String get journalAddShort;
 
+  /// No description provided for @passportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Passport'**
+  String get passportTitle;
+
+  /// No description provided for @passportCoverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'PASSPORT'**
+  String get passportCoverTitle;
+
+  /// No description provided for @passportCoverSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'OF YOUR TRIPS'**
+  String get passportCoverSubtitle;
+
+  /// No description provided for @passportDataName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get passportDataName;
+
+  /// No description provided for @passportDataSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Member since'**
+  String get passportDataSince;
+
+  /// No description provided for @passportDataNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Passport no.'**
+  String get passportDataNumber;
+
+  /// No description provided for @passportDataCountries.
+  ///
+  /// In en, this message translates to:
+  /// **'Countries'**
+  String get passportDataCountries;
+
+  /// No description provided for @passportDataCities.
+  ///
+  /// In en, this message translates to:
+  /// **'Cities'**
+  String get passportDataCities;
+
+  /// No description provided for @passportVisas.
+  ///
+  /// In en, this message translates to:
+  /// **'VISAS'**
+  String get passportVisas;
+
+  /// No description provided for @passportTapToOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to open'**
+  String get passportTapToOpen;
+
+  /// No description provided for @passportNextStamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Next stamp'**
+  String get passportNextStamp;
+
+  /// No description provided for @passportEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Every city you travel to gets a stamp here once the trip begins.'**
+  String get passportEmpty;
+
+  /// No description provided for @passportPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page} of {total}'**
+  String passportPage(int page, int total);
+
+  /// No description provided for @passportStampCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No stamps yet} =1{1 stamp} other{{count} stamps}}'**
+  String passportStampCount(int count);
+
   /// No description provided for @journalPhotoOf.
   ///
   /// In en, this message translates to:

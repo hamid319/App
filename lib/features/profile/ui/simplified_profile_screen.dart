@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../logic/profile_controller.dart';
+import '../logic/passport_controller.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../../core/errors/user_message.dart';
@@ -12,6 +13,7 @@ import '../../../common/widgets/skeleton.dart';
 import '../../../common/widgets/member_avatar.dart';
 import '../../../common/widgets/ticket.dart';
 import '../../../core/constants/sizes.dart';
+import '../../../core/constants/colors.dart';
 import '../../group/logic/group_controller.dart';
 import '../../swipe/logic/swipe_controller.dart';
 
@@ -192,6 +194,8 @@ class SimplifiedProfileScreen extends ConsumerWidget {
             label: Text(l10n.editProfile),
           ),
           const SizedBox(height: AppSizes.groupGap),
+          const _PassportRow(),
+          const SizedBox(height: AppSizes.space16),
           // Favorites moved here from their own tab.
           ClipRRect(
             borderRadius: BorderRadius.circular(AppSizes.radiusMd),
@@ -326,6 +330,44 @@ class _Stat extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Entry to the passport: a small navy booklet and the stamp count.
+class _PassportRow extends ConsumerWidget {
+  const _PassportRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final count = ref.watch(passportStampsProvider).value?.length ?? 0;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+      child: Material(
+        color: scheme.surface,
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.space16, vertical: AppSizes.space4),
+          leading: Container(
+            width: 36,
+            height: 48,
+            decoration: const BoxDecoration(
+              color: BrandColors.navy,
+              borderRadius: BorderRadius.horizontal(
+                left: Radius.circular(3),
+                right: Radius.circular(7),
+              ),
+            ),
+            child: const Icon(Icons.public_rounded,
+                color: Color(0xFFE8C46A), size: 20),
+          ),
+          title: Text(context.l10n.passportTitle),
+          subtitle: Text(context.l10n.passportStampCount(count)),
+          trailing: const Icon(Icons.chevron_right_rounded),
+          onTap: () => context.push('/passport'),
+        ),
       ),
     );
   }

@@ -67,4 +67,15 @@ class PreferencesService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyDiscoverPreferences, json);
   }
+
+  /// Passport stamps (city ids) whose stamping animation [uid] has seen.
+  static Future<Set<String>> getSeenStamps(String uid) async {
+    final prefs = await SharedPreferences.getInstance();
+    return (prefs.getStringList('passport_seen_$uid') ?? const []).toSet();
+  }
+
+  static Future<void> setSeenStamps(String uid, Set<String> cityIds) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('passport_seen_$uid', cityIds.toList());
+  }
 }

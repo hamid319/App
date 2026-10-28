@@ -1094,6 +1094,31 @@
   "journalOpenRecap": "View recap",
   "journalRecapShort": "Recap",
   "journalAddShort": "Entry",
+  "passportTitle": "Passport",
+  "passportCoverTitle": "PASSPORT",
+  "passportCoverSubtitle": "OF YOUR TRIPS",
+  "passportDataName": "Name",
+  "passportDataSince": "Member since",
+  "passportDataNumber": "Passport no.",
+  "passportDataCountries": "Countries",
+  "passportDataCities": "Cities",
+  "passportVisas": "VISAS",
+  "passportTapToOpen": "Tap to open",
+  "passportNextStamp": "Next stamp",
+  "passportEmpty": "Every city you travel to gets a stamp here once the trip begins.",
+  "passportPage": "Page {page} of {total}",
+  "@passportPage": {
+    "placeholders": {
+      "page": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "passportStampCount": "{count, plural, =0{No stamps yet} =1{1 stamp} other{{count} stamps}}",
+  "@passportStampCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "journalPhotoOf": "Photo {index} of {total}",
   "@journalPhotoOf": {
     "placeholders": {

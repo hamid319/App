@@ -23,6 +23,7 @@ import '../features/group/ui/group_matches_screen.dart';
 import '../features/group/ui/day_plan_screen.dart';
 import '../features/profile/ui/simplified_profile_screen.dart';
 import '../features/profile/ui/settings_screen.dart';
+import '../features/profile/ui/passport_screen.dart';
 import '../core/services/preferences_service.dart';
 import '../features/group/logic/group_controller.dart';
 import '../common/models/group_model.dart';
@@ -166,6 +167,15 @@ GoRouter createRouter(Ref ref) {
             ),
           ),
         ],
+      ),
+      // Full screen: the booklet needs the room of the bottom navigation.
+      GoRoute(
+        path: '/passport',
+        builder: (ctx, state) => const AccountGate(
+          reason: GateReason.profile,
+          icon: Icons.menu_book_rounded,
+          child: PassportScreen(),
+        ),
       ),
       // All main routes wrapped in ShellRoute for persistent bottom nav
       ShellRoute(
