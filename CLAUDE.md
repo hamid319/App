@@ -1,7 +1,12 @@
-# SwipeTrip — Agent Context
+# TripFam — Agent Context
+
+TripFam (formerly SwipeTrip; the Dart package is still `swipetrip`, the
+Firebase project `travelapp-31255`) is a group-trip app: plan together,
+swipe places, day plans on a map, split costs, journal with photos, and a
+passport with a stamp per city. Owner: Hamid (GitHub `hamid319/App`).
 
 ## Stack
-Flutter · Riverpod 3 · Firebase (Auth, Firestore, Storage) · GoRouter 17 · flutter_dotenv
+Flutter · Riverpod 3 · Firebase (Auth, Firestore, Storage, Hosting) · GoRouter 17 · Mapbox Maps · share_plus · audioplayers · flutter_dotenv
 
 ## Architecture: Feature-First Clean Architecture
 
@@ -31,6 +36,10 @@ authServiceProvider       // Provider<AuthService>
 firestoreServiceProvider  // Provider<FirestoreService>
 locationServiceProvider   // Provider<LocationService>
 profileRepositoryProvider // Provider<ProfileRepository>
+tripRepositoryProvider    // Provider<TripRepository> (used from common/ too)
+currentAccountProvider    // the signed-in account ({uid, isGuest})
+myTripsProvider           // StreamProvider<List<GroupModel>>, the user's trips
+placeInTripProvider       // whether a trip's wishlist has a place
 ```
 
 ## Key feature providers
@@ -65,6 +74,7 @@ Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so
 ## Firestore structure (short form)
 ```
 /users/{uid}           favorites: string[], groups: string[]
+/inviteCodes/{code}    groupId, createdAt, title, cityName, ownerName (get only, no list; written by the owner)
 /groups/{groupId}      members: string[], activeSessionId: string?, invite.code: string
   /sessions/{id}       swipeProgress: map<uid,int>, placePool: string[], status: 'in_progress'|'completed'
     /votes/{placeId}   likedBy: string[], dislikedBy: string[]
@@ -91,18 +101,58 @@ Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so
 4. **Hardcoded UI text**: the app supports English and German. Every user-visible string goes through `context.l10n.<key>` (import `l10n/l10n.dart`), defined in `lib/l10n/app_en.arb` (template) and `lib/l10n/app_de.arb`. Never put a text literal in a widget. Add new keys to both files; `flutter gen-l10n` (or `flutter pub get`) regenerates the Dart code. Errors shown to users go through `userMessage(e, fallback: ..., l10n: context.l10n)`.
 
 ## Forbidden patterns (blocked or flagged by hooks)
-- `Image.network(` → use `CachedNetworkImage(` (package not yet added — add it)
+- `Image.network(` → use `CachedNetworkImage(` (`cached_network_image` is installed)
 - Hardcoded secrets or URLs in `.dart`
 - Cross-feature imports (`features/A` importing `features/B`)
 - `Navigator.push()` anywhere — use GoRouter only
 - `rm -rf`, `git reset --hard`, `git clean`, `git rebase`, `firebase deploy` — blocked by `.claude/settings.json`
 - `git commit` / `git push` are allowed, but only when the owner asks for them; never force-push, never push to `main` unless told to
 
-## MVP pending (as of June 2026)
-- Google Places API key (currently mock data, 51 hardcoded places)
-- FCM push notifications (not started)
-- Password reset screen (not started)
-- Dark theme wired in `app.dart` (built in `theme.dart`, not applied yet)
+## Status (October 2026)
+Built and on `main`: trips with invites (web invite page in `web_invite/` on
+Firebase Hosting), group swipe and wishlist, add to trip, day plans on
+Mapbox, costs (edit/delete), offline mode, journal with photos and trip
+recap, passport with stamps (profile), password reset, onboarding, dark
+mode, account deletion, iOS privacy manifest.
+
+Not started or open:
+- FCM push notifications
+- Affiliate links (GetYourGuide/Viator, check their terms first)
+- Super-like and veto in the swipe deck; results per place
+- Passport: GPS check-in on site, share a passport page as an image
+- Untested by the owner: account deletion (throwaway account), offline mode,
+  a real web-invite join with a second account, sound and haptics on a real
+  iPhone, the Android runtime
+- Release: final bundle id, Apple Developer account, domain, trademark check
+
+## House rules (read before changing anything)
+- Talk to the owner in **German, du-form, very short summaries**. Code
+  comments and commit messages in English.
+- **Line endings:** many Dart files use CRLF. Keep them (check with
+  `file <path>`); never commit line-ending-only changes.
+- **`dart format` only the files you changed.** Running it on a folder
+  reformats files you did not touch; revert those.
+- **Never commit:** `ios/Runner.xcodeproj/project.pbxproj` and
+  `Runner.xcscheme` (local signing), `.claude/settings.local.json`,
+  `.mcp.json`, `build`, files ending in ` 2` (iCloud duplicates),
+  `docs/data-and-cost-strategy.md` (only if asked).
+- **Never print secret values:** the Mapbox token (`ios/Flutter/Secrets.xcconfig`,
+  `android/local.properties`), `tools/city-import/.env` (R2 keys), `.env`.
+  Refer to them by name only.
+- **The owner deploys** (`firebase deploy …`). After rule or index changes,
+  tell him the exact command.
+- iOS: run `pod install` with `LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8`.
+- **Place data:** OpenStreetMap, Wikidata, Wikipedia, Wikimedia Commons via
+  `tools/city-import` (Node 22, `npm run check`; collect → report → review →
+  publish). **No Google Places content in the database** (Google's terms
+  forbid storing it). No Instagram images. Keep within the R2 free tier
+  (the tool has a 5 GB budget guard). Publishing city data needs the
+  owner's OK.
+- Budget: about €60 per month for hundreds of users. Prefer solutions that
+  cost no extra Firestore reads or paid API calls.
+- Test with throwaway data, never with the owner's real account for
+  destructive actions. Temporary demo data in code must be removed before
+  committing.
 
 ## Open product decisions
 Listed in `POSSIBLE_ERRORS.md` section 10 (e.g. the group match rule).
