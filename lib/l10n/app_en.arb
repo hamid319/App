@@ -695,8 +695,6 @@
   "tripTabMap": "Map",
   "tripTabJournal": "Journal",
   "tripTabCosts": "Costs",
-  "tripSoon": "soon",
-  "tripJournalSoon": "The travel journal is coming soon.",
   "tripInvite": "Invite",
   "tripInviteFriends": "Invite friends",
   "tripInviteMessage": "Join our trip \"{trip}\" on TripFam: {link}\n\nWith the app: open Trips, tap + and enter the code {code}.",
@@ -1038,5 +1036,116 @@
   "errorExpenseNotCreator": "Only the person who added this expense can change it.",
   "tripOffline": "Offline",
   "tripSyncing": "Syncing…",
-  "tripOfflineHint": "Changes are saved on this device and synced when you're back online."
+  "tripOfflineHint": "Changes are saved on this device and synced when you're back online.",
+  "journalAddEntry": "Add entry",
+  "journalEmptyTitle": "No memories yet",
+  "journalEmptyBody": "Add the first photo or note of your trip. Everyone on the trip sees it.",
+  "journalDayHeader": "Day {day} · {date}",
+  "@journalDayHeader": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "journalDay": "Day",
+  "journalTextHint": "What happened?",
+  "journalAddPhotos": "Add photos",
+  "journalCamera": "Camera",
+  "journalRemovePhoto": "Remove photo",
+  "journalPhotoLimit": "Up to {max} photos per entry.",
+  "@journalPhotoLimit": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "journalNeedsContent": "Write something or add a photo.",
+  "journalUploading": "Uploading photo {done} of {total}…",
+  "@journalUploading": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "journalOfflinePhotos": "Photos can only be uploaded with a connection. Try again online, or save the text without photos.",
+  "journalSaveError": "Couldn't save the entry.",
+  "journalPickError": "Couldn't open your photos.",
+  "journalEditText": "Edit text",
+  "journalEntryOptions": "Entry options",
+  "journalDeleteTitle": "Delete entry?",
+  "journalDeleteBody": "Its photos are deleted too.",
+  "journalPhotoCount": "{count, plural, =1{1 photo} other{{count} photos}}",
+  "@journalPhotoCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "journalOpenRecap": "View recap",
+  "journalPhotoOf": "Photo {index} of {total}",
+  "@journalPhotoOf": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "recapTitle": "Recap",
+  "recapStatDays": "{count, plural, =1{day} other{days}}",
+  "@recapStatDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recapStatMembers": "{count, plural, =1{traveller} other{travellers}}",
+  "@recapStatMembers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recapStatPlaces": "{count, plural, =1{place} other{places}}",
+  "@recapStatPlaces": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recapStatPhotos": "{count, plural, =1{photo} other{photos}}",
+  "@recapStatPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recapTotalCosts": "Total costs",
+  "recapPerPerson": "{amount} per person",
+  "@recapPerPerson": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "recapPlaces": "Your places",
+  "recapShare": "Share",
+  "recapShareError": "Couldn't create the image."
 }

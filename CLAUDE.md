@@ -46,7 +46,7 @@ routerProvider           // Provider<GoRouter>
 ## Routes (`app/routes.dart`)
 ```
 /onboarding   /login   /register
-/trips (start, tab Reisen)   /trip/:groupId   /trip/:groupId/day/:index   /trip/:groupId/costs
+/trips (start, tab Reisen)   /trip/:groupId   /trip/:groupId/day/:index   /trip/:groupId/costs   /trip/:groupId/journal   /trip/:groupId/recap
 /home (tab Entdecken, feed)  /discover (solo deck)   /collection/:theme   /place/:id
 /group → /trips   /group/join?groupId=&code=   /swipe/:groupId   /group-matches/:groupId   /day-plan/:groupId/:sessionId
 /profile      /settings   /favorites   /favorites-map
@@ -69,6 +69,8 @@ Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so
   /sessions/{id}       swipeProgress: map<uid,int>, placePool: string[], status: 'in_progress'|'completed'
     /votes/{placeId}   likedBy: string[], dislikedBy: string[]
     /userSwipes/{uid}  swipedPlaceIds: string[]
+  /journal/{id}        authorUid, day 'yyyy-MM-dd', text ≤500, photos [{path,url,width,height}] ≤6
+                       (photos in Storage trips/{groupId}/journal/{id}/{i}.jpg)
 /places/{placeId}      imageUrls: string[], types: string[]
                        curated (tools/city-import): id wd_<QID> or osm_<type>_<id>, source 'wikidata', cityId, status,
                        names/descriptions/wikipediaUrls per language, interests, popularity,

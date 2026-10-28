@@ -1,6 +1,10 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../common/models/group_model.dart';
+import '../../../common/models/journal_entry.dart';
 import '../../../common/models/place_model.dart';
 import '../../../common/models/sync_status.dart';
 import '../../../common/models/trip_expense.dart';
@@ -11,9 +15,11 @@ import '../../../common/models/user_model.dart';
 import '../../../common/utils/day_route.dart';
 import '../../../common/utils/trip_days.dart';
 import '../../../common/widgets/member_avatar.dart' show friendlyMemberName;
+import '../../../core/services/maps_availability.dart';
 import '../../../main_providers.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../swipe/data/places_repository.dart';
+import '../data/journal_repository.dart';
 import '../data/trip_repository.dart';
 import 'group_controller.dart';
 
@@ -40,6 +46,18 @@ final tripPollsProvider = StreamProvider.autoDispose
 final tripExpensesProvider = StreamProvider.autoDispose
     .family<List<TripExpense>, String>((ref, groupId) =>
         ref.watch(tripRepositoryProvider).streamExpenses(groupId));
+
+/// Whether Mapbox has a token, for the trip maps.
+final mapsConfiguredProvider =
+    FutureProvider<bool>((ref) => MapsAvailability().isConfigured());
+
+final journalRepositoryProvider =
+    Provider<JournalRepository>((ref) => JournalRepository());
+
+/// The trip's journal, by day then time.
+final tripJournalProvider = StreamProvider.autoDispose
+    .family<List<JournalEntry>, String>((ref, groupId) =>
+        ref.watch(journalRepositoryProvider).streamEntries(groupId));
 
 /// Offline / unsent-changes state of one trip, for the trip screens.
 final tripSyncStatusProvider = StreamProvider.autoDispose
@@ -176,6 +194,45 @@ class TripActions extends Notifier<void> {
   /// Deletes an expense; only its creator may.
   Future<void> deleteExpense(String groupId, TripExpense expense) =>
       _repo.deleteExpense(groupId, expense, uid: _uid);
+
+  /// Adds a journal entry; [photos] are uploaded first (needs a
+  /// connection), [onProgress] counts finished uploads.
+  Future<void> addJournalEntry(
+    String groupId, {
+    required DateTime day,
+    required String text,
+    List<XFile> photos = const [],
+    void Function(int done, int total)? onProgress,
+  }) async {
+    final uid = _uid;
+    final uploads = [for (final f in photos) await _readPhoto(f)];
+    await ref.read(journalRepositoryProvider).addEntry(
+          groupId,
+          authorUid: uid,
+          day: journalDayKey(day),
+          text: text,
+          photos: uploads,
+          onProgress: onProgress,
+        );
+  }
+
+  /// Bytes and pixel size, read from the header without decoding.
+  Future<JournalPhotoUpload> _readPhoto(XFile file) async {
+    final bytes = await file.readAsBytes();
+    final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+    final descriptor = await ui.ImageDescriptor.encoded(buffer);
+    final size = (width: descriptor.width, height: descriptor.height);
+    descriptor.dispose();
+    buffer.dispose();
+    return (bytes: bytes, width: size.width, height: size.height);
+  }
+
+  Future<void> editJournalText(
+          String groupId, JournalEntry entry, String text) =>
+      ref.read(journalRepositoryProvider).editText(groupId, entry, text);
+
+  Future<void> deleteJournalEntry(String groupId, JournalEntry entry) =>
+      ref.read(journalRepositoryProvider).deleteEntry(groupId, entry);
 
   /// Builds the trip's day plan from the wishlist ideas that have a place,
   /// most liked first, spread over the trip days as short walking routes.

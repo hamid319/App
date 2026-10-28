@@ -14,15 +14,11 @@ import '../../../common/utils/trip_days.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../../common/widgets/places_map.dart';
 import '../../../core/errors/user_message.dart';
-import '../../../core/services/maps_availability.dart';
 import '../../../core/services/maps_launcher.dart';
 import '../../../l10n/l10n.dart';
 import '../logic/trip_controller.dart';
 import '../widgets/sync_badge.dart';
 import '../widgets/trip_ui.dart';
-
-final _mapsConfiguredProvider =
-    FutureProvider<bool>((ref) => MapsAvailability().isConfigured());
 
 /// One day of the trip plan on a map: numbered stops joined in walking
 /// order, and a sheet with the day's stops, times and walks.
@@ -135,7 +131,7 @@ class _DayMapScreenState extends ConsumerState<DayMapScreen> {
             for (final id in plan.days[day])
               if (byId[id] case final p?) p,
           ];
-          final configured = ref.watch(_mapsConfiguredProvider).value;
+          final configured = ref.watch(mapsConfiguredProvider).value;
           return Stack(
             children: [
               Positioned.fill(

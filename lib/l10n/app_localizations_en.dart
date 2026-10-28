@@ -1562,12 +1562,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tripTabCosts => 'Costs';
 
   @override
-  String get tripSoon => 'soon';
-
-  @override
-  String get tripJournalSoon => 'The travel journal is coming soon.';
-
-  @override
   String get tripInvite => 'Invite';
 
   @override
@@ -2029,4 +2023,152 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tripOfflineHint =>
       'Changes are saved on this device and synced when you\'re back online.';
+
+  @override
+  String get journalAddEntry => 'Add entry';
+
+  @override
+  String get journalEmptyTitle => 'No memories yet';
+
+  @override
+  String get journalEmptyBody =>
+      'Add the first photo or note of your trip. Everyone on the trip sees it.';
+
+  @override
+  String journalDayHeader(int day, String date) {
+    return 'Day $day · $date';
+  }
+
+  @override
+  String get journalDay => 'Day';
+
+  @override
+  String get journalTextHint => 'What happened?';
+
+  @override
+  String get journalAddPhotos => 'Add photos';
+
+  @override
+  String get journalCamera => 'Camera';
+
+  @override
+  String get journalRemovePhoto => 'Remove photo';
+
+  @override
+  String journalPhotoLimit(int max) {
+    return 'Up to $max photos per entry.';
+  }
+
+  @override
+  String get journalNeedsContent => 'Write something or add a photo.';
+
+  @override
+  String journalUploading(int done, int total) {
+    return 'Uploading photo $done of $total…';
+  }
+
+  @override
+  String get journalOfflinePhotos =>
+      'Photos can only be uploaded with a connection. Try again online, or save the text without photos.';
+
+  @override
+  String get journalSaveError => 'Couldn\'t save the entry.';
+
+  @override
+  String get journalPickError => 'Couldn\'t open your photos.';
+
+  @override
+  String get journalEditText => 'Edit text';
+
+  @override
+  String get journalEntryOptions => 'Entry options';
+
+  @override
+  String get journalDeleteTitle => 'Delete entry?';
+
+  @override
+  String get journalDeleteBody => 'Its photos are deleted too.';
+
+  @override
+  String journalPhotoCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos',
+      one: '1 photo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get journalOpenRecap => 'View recap';
+
+  @override
+  String journalPhotoOf(int index, int total) {
+    return 'Photo $index of $total';
+  }
+
+  @override
+  String get recapTitle => 'Recap';
+
+  @override
+  String recapStatDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'days',
+      one: 'day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recapStatMembers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'travellers',
+      one: 'traveller',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recapStatPlaces(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'places',
+      one: 'place',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recapStatPhotos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'photos',
+      one: 'photo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recapTotalCosts => 'Total costs';
+
+  @override
+  String recapPerPerson(String amount) {
+    return '$amount per person';
+  }
+
+  @override
+  String get recapPlaces => 'Your places';
+
+  @override
+  String get recapShare => 'Share';
+
+  @override
+  String get recapShareError => 'Couldn\'t create the image.';
 }

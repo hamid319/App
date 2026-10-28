@@ -20,7 +20,9 @@ String userMessage(
   if (error is FirebaseException) {
     switch (error.code) {
       case 'permission-denied':
+      case 'unauthorized': // Cloud Storage
         return l10n.errorPermissionDenied;
+      case 'retry-limit-exceeded': // Cloud Storage gave up retrying
       case 'unavailable':
       case 'network-request-failed':
       case 'deadline-exceeded':

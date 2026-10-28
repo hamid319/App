@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 /// can simply run again.
 ///
 /// What stays: expenses, ideas and polls in trips that still have other
-/// members (their balances and plans depend on them; the app shows a neutral
+/// members (the user's own journal entries and photos there are deleted) (their balances and plans depend on them; the app shows a neutral
 /// member name once the profile is gone), and report markers under reviews,
 /// which clients cannot delete.
 class AccountDeletionRepository {
@@ -65,6 +65,8 @@ class AccountDeletionRepository {
     Map<String, dynamic> group,
     String uid,
   ) async {
+    // Personal memories go; before leaving, while the rules still see a member.
+    await _deleteJournal(groupRef, authorUid: uid);
     if (group['ownerUid'] == uid) {
       // The web invite shows the organizer's first name; drop it while the
       // user still owns the trip (only the owner may write the entry).
@@ -95,6 +97,7 @@ class AccountDeletionRepository {
     DocumentReference<Map<String, dynamic>> groupRef,
     Map<String, dynamic> group,
   ) async {
+    await _deleteJournal(groupRef);
     for (final name in const ['ideas', 'polls', 'expenses']) {
       await _deleteDocs(await groupRef.collection(name).get());
     }
@@ -106,6 +109,27 @@ class AccountDeletionRepository {
     await _deleteDocs(sessions);
     await _withInviteEntry(groupRef.id, group, (ref) => ref.delete());
     await groupRef.delete();
+  }
+
+  /// Journal entries of a trip (only [authorUid]'s when given) with their
+  /// photos in Storage. The paths come from the entries, so no Storage
+  /// listing (and no list rule) is needed.
+  Future<void> _deleteJournal(
+    DocumentReference<Map<String, dynamic>> groupRef, {
+    String? authorUid,
+  }) async {
+    Query<Map<String, dynamic>> query = groupRef.collection('journal');
+    if (authorUid != null) {
+      query = query.where('authorUid', isEqualTo: authorUid);
+    }
+    final entries = await query.get();
+    for (final doc in entries.docs) {
+      for (final photo in doc.data()['photos'] as List? ?? const []) {
+        final path = photo is Map ? photo['path'] : null;
+        if (path is String && path.isNotEmpty) await _deleteFile(path);
+      }
+    }
+    await _deleteDocs(entries);
   }
 
   /// Runs [action] on the trip's `inviteCodes` entry if it exists and still
@@ -154,9 +178,13 @@ class AccountDeletionRepository {
   }
 
   /// `profile_images/{uid}.jpg` in Storage; nothing to do when there is none.
-  Future<void> deleteProfilePhoto(String uid) async {
+  Future<void> deleteProfilePhoto(String uid) =>
+      _deleteFile('profile_images/$uid.jpg');
+
+  /// Deletes a Storage file; a missing one is fine (runs are repeatable).
+  Future<void> _deleteFile(String path) async {
     try {
-      await _storage.ref('profile_images/$uid.jpg').delete();
+      await _storage.ref(path).delete();
     } on FirebaseException catch (e) {
       if (e.code != 'object-not-found') rethrow;
     }

@@ -11,6 +11,24 @@ service firebase.storage {
       allow write: if false;
     }
 
+    // Trip journal photos. Members read and add; the uploader (custom
+    // metadata authorUid, set by the app) or the trip owner deletes.
+    // Cross-service read of the trip document for the member list.
+    match /trips/{groupId}/journal/{entryId}/{fileName} {
+      function trip() {
+        return firestore.get(/databases/(default)/documents/groups/$(groupId)).data;
+      }
+      allow read: if request.auth != null && request.auth.uid in trip().members;
+      allow create: if request.auth != null
+                    && request.auth.uid in trip().members
+                    && request.resource.size < 8 * 1024 * 1024
+                    && request.resource.contentType.matches('image/.*')
+                    && request.resource.metadata.authorUid == request.auth.uid;
+      allow delete: if request.auth != null
+                    && (resource.metadata.authorUid == request.auth.uid
+                        || trip().ownerUid == request.auth.uid);
+    }
+
     match /profile_images/{fileName} {
       allow read: if request.auth != null;
       allow write: if request.auth != null

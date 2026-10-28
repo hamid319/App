@@ -1,5 +1,6 @@
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -15,11 +16,31 @@ const me = 'me';
 void main() {
   late FakeFirebaseFirestore db;
   late AccountDeletionRepository repo;
+  late _MockStorage storage;
+  late List<String> deletedFiles;
 
   setUp(() {
     db = FakeFirebaseFirestore();
-    repo = AccountDeletionRepository(firestore: db);
+    storage = _MockStorage();
+    deletedFiles = [];
+    when(() => storage.ref(any())).thenAnswer((call) {
+      final path = call.positionalArguments.first as String;
+      final ref = _MockReference();
+      when(ref.delete).thenAnswer((_) async => deletedFiles.add(path));
+      return ref;
+    });
+    repo = AccountDeletionRepository(firestore: db, storage: storage);
   });
+
+  Future<void> journal(String groupId, String id, String author) =>
+      db.collection('groups/$groupId/journal').doc(id).set({
+        'authorUid': author,
+        'day': '2026-10-30',
+        'text': '',
+        'photos': [
+          {'path': 'trips/$groupId/journal/$id/0.jpg', 'url': 'u'},
+        ],
+      });
 
   Future<void> seedGroup(
     String id, {
@@ -103,6 +124,35 @@ void main() {
       expect(await groupDoc('other'), isNotNull);
       expect((await db.collection('inviteCodes').doc('OTHER1').get()).exists,
           isTrue);
+    });
+
+    test('leaving a shared trip deletes only my journal entries and photos',
+        () async {
+      await seedGroup('g3', members: ['owner', me], owner: 'owner');
+      await journal('g3', 'mine', me);
+      await journal('g3', 'theirs', 'owner');
+
+      await repo.leaveAllTrips(me);
+
+      final left = await db.collection('groups/g3/journal').get();
+      expect(left.docs.map((d) => d.id), ['theirs']);
+      expect(deletedFiles, ['trips/g3/journal/mine/0.jpg']);
+      expect((await groupDoc('g3'))!['members'], ['owner']);
+    });
+
+    test('deleting a solo trip deletes all its journal photos', () async {
+      await seedGroup('solo', members: [me], owner: me);
+      await journal('solo', 'mine', me);
+      await journal('solo', 'leftBehind', 'gone');
+
+      await repo.leaveAllTrips(me);
+
+      expect(await count('groups/solo/journal'), 0);
+      expect(deletedFiles, unorderedEquals([
+        'trips/solo/journal/mine/0.jpg',
+        'trips/solo/journal/leftBehind/0.jpg',
+      ]));
+      expect(await groupDoc('solo'), isNull);
     });
 
     test('a plain member just leaves', () async {
@@ -240,6 +290,10 @@ void main() {
 }
 
 class _MockUser extends Mock implements User {}
+
+class _MockStorage extends Mock implements FirebaseStorage {}
+
+class _MockReference extends Mock implements Reference {}
 
 class _MockMetadata extends Mock implements UserMetadata {}
 

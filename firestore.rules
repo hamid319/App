@@ -82,6 +82,18 @@ service cloud.firestore {
              && data.createdAt is timestamp;
     }
 
+    // Journal entry: text and/or up to 6 photos ({path, url, width, height}).
+    function isValidJournalEntry(data) {
+      return data.keys().hasOnly(['authorUid', 'day', 'text', 'photos', 'createdAt', 'updatedAt'])
+             && data.keys().hasAll(['authorUid', 'day', 'text', 'photos', 'createdAt', 'updatedAt'])
+             && data.authorUid is string
+             && data.day is string && data.day.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+             && data.text is string && data.text.size() <= 500
+             && data.photos is list && data.photos.size() <= 6
+             && (data.text.size() > 0 || data.photos.size() > 0)
+             && data.updatedAt == request.time;
+    }
+
     function groupData(groupId) {
       return get(/databases/$(database)/documents/groups/$(groupId)).data;
     }
@@ -327,6 +339,23 @@ service cloud.firestore {
         allow delete: if isMember(groupData(groupId))
                       && (resource.data.createdBy == request.auth.uid
                           || isSoleOwner(groupId));
+      }
+
+      // Journal entry. Edited by its author (text only in the app); deleted
+      // by its author or the trip owner (also when clearing the trip).
+      match /journal/{entryId} {
+        allow read: if isMember(groupData(groupId));
+        allow create: if isMember(groupData(groupId))
+                      && isValidJournalEntry(request.resource.data)
+                      && request.resource.data.authorUid == request.auth.uid
+                      && request.resource.data.createdAt == request.time;
+        allow update: if isMember(groupData(groupId))
+                      && resource.data.authorUid == request.auth.uid
+                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'photos', 'updatedAt'])
+                      && isValidJournalEntry(request.resource.data);
+        allow delete: if isMember(groupData(groupId))
+                      && (resource.data.authorUid == request.auth.uid
+                          || isOwner(groupData(groupId)));
       }
 
       match /sessions/{sessionId} {

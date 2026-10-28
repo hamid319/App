@@ -24,8 +24,8 @@ import '../widgets/trip_ui.dart';
 /// The segments of a trip.
 enum TripSection { plan, map, journal, costs }
 
-/// Segmented control shared by the trip screens. Map and costs are their
-/// own routes on top of the plan; the journal is not built yet.
+/// Segmented control shared by the trip screens. Map, journal and costs
+/// are their own routes on top of the plan.
 class TripSectionControl extends StatelessWidget {
   const TripSectionControl({
     super.key,
@@ -43,14 +43,15 @@ class TripSectionControl extends StatelessWidget {
       segments: [
         TripSegment(l10n.tripTabPlan),
         TripSegment(l10n.tripTabMap),
-        TripSegment(l10n.tripTabJournal, badge: l10n.tripSoon, enabled: false),
+        TripSegment(l10n.tripTabJournal),
         TripSegment(l10n.tripTabCosts),
       ],
       selected: selected.index,
       onSelected: (i) {
         final target = TripSection.values[i];
         if (target == selected) return;
-        // Map and costs open on top of the plan and replace each other.
+        // Map, journal and costs open on top of the plan and replace each
+        // other.
         void open(String path) => selected == TripSection.plan
             ? context.push(path)
             : context.pushReplacement(path);
@@ -60,7 +61,7 @@ class TripSectionControl extends StatelessWidget {
           case TripSection.map:
             open('/trip/$groupId/day/0');
           case TripSection.journal:
-            showTripSnack(context, l10n.tripJournalSoon);
+            open('/trip/$groupId/journal');
           case TripSection.costs:
             open('/trip/$groupId/costs');
         }

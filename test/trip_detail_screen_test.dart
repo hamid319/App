@@ -100,7 +100,8 @@ void main() {
     for (final tab in ['Plan', 'Map', 'Journal', 'Costs']) {
       expect(find.text(tab), findsOneWidget);
     }
-    expect(find.text('soon'), findsOneWidget);
+    // The journal is live now, no "soon" badge.
+    expect(find.text('soon'), findsNothing);
 
     expect(find.text('Where do we stay?'), findsOneWidget);
     expect(find.text('1 of 2 voted'), findsOneWidget);

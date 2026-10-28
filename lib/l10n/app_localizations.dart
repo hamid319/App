@@ -2870,18 +2870,6 @@ abstract class AppLocalizations {
   /// **'Costs'**
   String get tripTabCosts;
 
-  /// No description provided for @tripSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'soon'**
-  String get tripSoon;
-
-  /// No description provided for @tripJournalSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'The travel journal is coming soon.'**
-  String get tripJournalSoon;
-
   /// No description provided for @tripInvite.
   ///
   /// In en, this message translates to:
@@ -3595,6 +3583,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Changes are saved on this device and synced when you\'re back online.'**
   String get tripOfflineHint;
+
+  /// No description provided for @journalAddEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Add entry'**
+  String get journalAddEntry;
+
+  /// No description provided for @journalEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No memories yet'**
+  String get journalEmptyTitle;
+
+  /// No description provided for @journalEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the first photo or note of your trip. Everyone on the trip sees it.'**
+  String get journalEmptyBody;
+
+  /// No description provided for @journalDayHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day} · {date}'**
+  String journalDayHeader(int day, String date);
+
+  /// No description provided for @journalDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get journalDay;
+
+  /// No description provided for @journalTextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened?'**
+  String get journalTextHint;
+
+  /// No description provided for @journalAddPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photos'**
+  String get journalAddPhotos;
+
+  /// No description provided for @journalCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get journalCamera;
+
+  /// No description provided for @journalRemovePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get journalRemovePhoto;
+
+  /// No description provided for @journalPhotoLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {max} photos per entry.'**
+  String journalPhotoLimit(int max);
+
+  /// No description provided for @journalNeedsContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Write something or add a photo.'**
+  String get journalNeedsContent;
+
+  /// No description provided for @journalUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading photo {done} of {total}…'**
+  String journalUploading(int done, int total);
+
+  /// No description provided for @journalOfflinePhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos can only be uploaded with a connection. Try again online, or save the text without photos.'**
+  String get journalOfflinePhotos;
+
+  /// No description provided for @journalSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the entry.'**
+  String get journalSaveError;
+
+  /// No description provided for @journalPickError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open your photos.'**
+  String get journalPickError;
+
+  /// No description provided for @journalEditText.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit text'**
+  String get journalEditText;
+
+  /// No description provided for @journalEntryOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry options'**
+  String get journalEntryOptions;
+
+  /// No description provided for @journalDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete entry?'**
+  String get journalDeleteTitle;
+
+  /// No description provided for @journalDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Its photos are deleted too.'**
+  String get journalDeleteBody;
+
+  /// No description provided for @journalPhotoCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 photo} other{{count} photos}}'**
+  String journalPhotoCount(int count);
+
+  /// No description provided for @journalOpenRecap.
+  ///
+  /// In en, this message translates to:
+  /// **'View recap'**
+  String get journalOpenRecap;
+
+  /// No description provided for @journalPhotoOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo {index} of {total}'**
+  String journalPhotoOf(int index, int total);
+
+  /// No description provided for @recapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recap'**
+  String get recapTitle;
+
+  /// No description provided for @recapStatDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{day} other{days}}'**
+  String recapStatDays(int count);
+
+  /// No description provided for @recapStatMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{traveller} other{travellers}}'**
+  String recapStatMembers(int count);
+
+  /// No description provided for @recapStatPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{place} other{places}}'**
+  String recapStatPlaces(int count);
+
+  /// No description provided for @recapStatPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{photo} other{photos}}'**
+  String recapStatPhotos(int count);
+
+  /// No description provided for @recapTotalCosts.
+  ///
+  /// In en, this message translates to:
+  /// **'Total costs'**
+  String get recapTotalCosts;
+
+  /// No description provided for @recapPerPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} per person'**
+  String recapPerPerson(String amount);
+
+  /// No description provided for @recapPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Your places'**
+  String get recapPlaces;
+
+  /// No description provided for @recapShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get recapShare;
+
+  /// No description provided for @recapShareError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t create the image.'**
+  String get recapShareError;
 }
 
 class _AppLocalizationsDelegate

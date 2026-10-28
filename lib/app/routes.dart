@@ -15,6 +15,8 @@ import '../features/places/ui/place_detail_screen.dart';
 import '../features/group/ui/costs_screen.dart';
 import '../features/group/ui/day_map_screen.dart';
 import '../features/group/ui/group_join_screen.dart';
+import '../features/group/ui/journal_screen.dart';
+import '../features/group/ui/recap_screen.dart';
 import '../features/group/ui/trip_detail_screen.dart';
 import '../features/group/ui/trips_screen.dart';
 import '../features/group/ui/group_matches_screen.dart';
@@ -145,6 +147,22 @@ GoRouter createRouter(Ref ref) {
               reason: GateReason.groups,
               icon: Icons.receipt_long_rounded,
               child: CostsScreen(groupId: state.pathParameters['groupId']!),
+            ),
+          ),
+          GoRoute(
+            path: 'journal',
+            builder: (ctx, state) => AccountGate(
+              reason: GateReason.groups,
+              icon: Icons.photo_library_outlined,
+              child: JournalScreen(groupId: state.pathParameters['groupId']!),
+            ),
+          ),
+          GoRoute(
+            path: 'recap',
+            builder: (ctx, state) => AccountGate(
+              reason: GateReason.groups,
+              icon: Icons.auto_stories_outlined,
+              child: RecapScreen(groupId: state.pathParameters['groupId']!),
             ),
           ),
         ],
