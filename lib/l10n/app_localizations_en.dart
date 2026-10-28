@@ -2134,6 +2134,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passportDataCities => 'Cities';
 
   @override
+  String get passportShare => 'Share page';
+
+  @override
+  String get passportShareTitle => 'My travel passport';
+
+  @override
+  String passportShareStats(int countries, int cities) {
+    String _temp0 = intl.Intl.pluralLogic(
+      countries,
+      locale: localeName,
+      other: '$countries countries',
+      one: '1 country',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      cities,
+      locale: localeName,
+      other: '$cities cities',
+      one: '1 city',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get passportShareTagline => 'Plan trips together with TripFam';
+
+  @override
+  String get passportShareError => 'Couldn\'t create the image.';
+
+  @override
   String get passportVisas => 'VISAS';
 
   @override

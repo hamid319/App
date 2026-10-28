@@ -3770,6 +3770,36 @@ abstract class AppLocalizations {
   /// **'Cities'**
   String get passportDataCities;
 
+  /// No description provided for @passportShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share page'**
+  String get passportShare;
+
+  /// No description provided for @passportShareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My travel passport'**
+  String get passportShareTitle;
+
+  /// No description provided for @passportShareStats.
+  ///
+  /// In en, this message translates to:
+  /// **'{countries, plural, =1{1 country} other{{countries} countries}} · {cities, plural, =1{1 city} other{{cities} cities}}'**
+  String passportShareStats(int countries, int cities);
+
+  /// No description provided for @passportShareTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan trips together with TripFam'**
+  String get passportShareTagline;
+
+  /// No description provided for @passportShareError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t create the image.'**
+  String get passportShareError;
+
   /// No description provided for @passportVisas.
   ///
   /// In en, this message translates to:

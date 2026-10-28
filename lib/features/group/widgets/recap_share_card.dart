@@ -1,9 +1,5 @@
-import 'dart:typed_data';
-import 'dart:ui' as ui;
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import '../../../app/theme.dart';
 import '../../../common/models/journal_entry.dart';
@@ -138,35 +134,5 @@ class RecapShareCard extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-/// Renders [card] off screen at [recapCardSize] and returns it as PNG.
-/// The card's images must already be in the image cache (precacheImage).
-Future<Uint8List> captureRecapCard(BuildContext context, Widget card) async {
-  final key = GlobalKey();
-  final entry = OverlayEntry(
-    builder: (_) => Positioned(
-      // Laid out and painted, but outside the visible screen.
-      left: -recapCardSize.width - 100,
-      top: 0,
-      width: recapCardSize.width,
-      height: recapCardSize.height,
-      child: IgnorePointer(child: RepaintBoundary(key: key, child: card)),
-    ),
-  );
-  Overlay.of(context).insert(entry);
-  try {
-    // Two frames: the first builds and resolves the cached images.
-    await WidgetsBinding.instance.endOfFrame;
-    await WidgetsBinding.instance.endOfFrame;
-    final boundary =
-        key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-    final image = await boundary.toImage(pixelRatio: 1);
-    final data = await image.toByteData(format: ui.ImageByteFormat.png);
-    image.dispose();
-    return data!.buffer.asUint8List();
-  } finally {
-    entry.remove();
   }
 }

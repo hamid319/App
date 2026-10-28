@@ -10,6 +10,7 @@ import '../../../common/utils/money.dart';
 import '../../../common/utils/trip_journal.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../../common/widgets/places_map.dart';
+import '../../../common/widgets/widget_capture.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
 import '../logic/trip_controller.dart';
@@ -89,7 +90,7 @@ class _RecapBodyState extends ConsumerState<_RecapBody> {
           precacheImage(CachedNetworkImageProvider(p.url), context),
       ]);
       if (!mounted) return;
-      final png = await captureRecapCard(
+      final png = await captureWidget(
         context,
         RecapShareCard(
           title: widget.group.groupName ?? l10n.unnamedGroup,
@@ -102,6 +103,7 @@ class _RecapBodyState extends ConsumerState<_RecapBody> {
             (stats.members, l10n.recapStatMembers(stats.members)),
           ],
         ),
+        recapCardSize,
       );
       await SharePlus.instance.share(ShareParams(
         files: [

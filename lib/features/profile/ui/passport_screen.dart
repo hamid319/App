@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../common/models/user_model.dart';
 import '../../../common/utils/passport_mrz.dart';
@@ -12,6 +13,7 @@ import '../../../common/utils/passport_stamps.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../../common/widgets/member_avatar.dart';
 import '../../../common/widgets/tripfam_mark.dart';
+import '../../../common/widgets/widget_capture.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/errors/user_message.dart';
@@ -29,6 +31,12 @@ const _navyDark = Color(0xFF141C4D);
 const _openDuration = Duration(milliseconds: 900);
 const _turnDuration = Duration(milliseconds: 550);
 const _ink = Color(0xFF8C8577);
+
+/// The shared picture: Instagram story format.
+const _shareSize = Size(1080, 1920);
+
+/// A page at the size it has on a phone; the share card scales it up.
+const _pageSize = Size(340, 483);
 
 /// The passport: a booklet that opens, pages to leaf through, and a stamp
 /// per city. Stamps the user has not seen yet are pressed onto the page.
@@ -50,6 +58,7 @@ class _PassportScreenState extends ConsumerState<PassportScreen>
   Set<String>? _fresh;
   final _played = <String>{};
   bool _loadingSeen = false;
+  bool _sharing = false;
 
   @override
   void dispose() {
@@ -111,6 +120,74 @@ class _PassportScreenState extends ConsumerState<PassportScreen>
     _turnTo(target.clamp(0, pages - 1).toDouble());
   }
 
+  /// Shares the open page (or the cover, while closed) as a story-sized
+  /// picture with the TripFam brand and the travel numbers.
+  Future<void> _share(List<PassportStamp> stamps, UserModel? user) async {
+    final l10n = context.l10n;
+    final box = context.findRenderObject() as RenderBox?;
+    final origin =
+        box == null ? null : box.localToGlobal(Offset.zero) & box.size;
+    final pages = stamps.length ~/ _stampsPerPage + 2;
+    final at = _open.isCompleted ? _flip.value.round().clamp(0, pages - 1) : -1;
+    final Widget page = at < 0
+        ? _Cover(name: user?.displayName, stamps: stamps.length)
+        : at == 0
+            ? _DataPage(user: user, stamps: stamps)
+            : _PassportPage(
+                index: at,
+                stamps: stamps
+                    .skip((at - 1) * _stampsPerPage)
+                    .take(_stampsPerPage)
+                    .toList(),
+                showNext: false,
+                empty: stamps.isEmpty,
+                isFresh: (_) => false,
+                onPlayed: (_) {},
+                delayBase: 0,
+              );
+    final countries = stamps
+        .map((s) => s.countryCode)
+        .where((c) => c.isNotEmpty)
+        .toSet()
+        .length;
+    setState(() => _sharing = true);
+    try {
+      final photo = user?.photoUrl;
+      // The capture must not catch an empty photo box.
+      if (at == 0 && photo != null) {
+        await precacheImage(CachedNetworkImageProvider(photo), context);
+      }
+      if (!mounted) return;
+      final png = await captureWidget(
+        context,
+        _PassportShareCard(
+          page: page,
+          title: l10n.passportShareTitle,
+          stats: l10n.passportShareStats(countries, stamps.length),
+          tagline: l10n.passportShareTagline,
+        ),
+        _shareSize,
+      );
+      await SharePlus.instance.share(ShareParams(
+        files: [
+          XFile.fromData(png,
+              mimeType: 'image/png', name: 'tripfam-passport.png'),
+        ],
+        sharePositionOrigin: origin,
+      ));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              userMessage(e, fallback: l10n.passportShareError, l10n: l10n)),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ));
+      }
+    } finally {
+      if (mounted) setState(() => _sharing = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -122,7 +199,24 @@ class _PassportScreenState extends ConsumerState<PassportScreen>
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.passportTitle)),
+      appBar: AppBar(
+        title: Text(l10n.passportTitle),
+        actions: [
+          if (list != null)
+            IconButton(
+              tooltip: l10n.passportShare,
+              onPressed: _sharing
+                  ? null
+                  : () =>
+                      _share(list, ref.read(profileControllerProvider).value),
+              icon: _sharing
+                  ? const SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.ios_share_rounded),
+            ),
+        ],
+      ),
       body: stamps.hasError
           ? ErrorView(
               message: userMessage(stamps.error!,
@@ -912,6 +1006,102 @@ class _DataPage extends StatelessWidget {
           ),
         ),
       ]),
+    );
+  }
+}
+
+/// The picture shared from the passport: the page on navy, tilted like a
+/// passport lying on a table, with the brand and the travel numbers.
+/// Fixed colours, whatever the app theme.
+class _PassportShareCard extends StatelessWidget {
+  const _PassportShareCard({
+    required this.page,
+    required this.title,
+    required this.stats,
+    required this.tagline,
+  });
+
+  final Widget page;
+  final String title;
+  final String stats;
+  final String tagline;
+
+  @override
+  Widget build(BuildContext context) {
+    const pageWidth = 820.0;
+    return Material(
+      color: BrandColors.navy,
+      child: DecoratedBox(
+        // A soft light behind the page.
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(0, -0.05),
+            radius: 0.8,
+            colors: [Color(0xFF2F3C8A), BrandColors.navy],
+          ),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 140),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: const TripFamMark(size: 96),
+                ),
+                const SizedBox(width: 28),
+                const Text('TripFam',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 72,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -1)),
+              ],
+            ),
+            const SizedBox(height: 28),
+            Text(title.toUpperCase(),
+                style: const TextStyle(
+                    color: _gold,
+                    fontSize: 36,
+                    letterSpacing: 10,
+                    fontWeight: FontWeight.w600)),
+            const Spacer(),
+            Transform.rotate(
+              angle: -0.045,
+              child: Container(
+                decoration: const BoxDecoration(
+                  borderRadius: _pageRadius,
+                  boxShadow: [
+                    BoxShadow(
+                        blurRadius: 60,
+                        offset: Offset(0, 30),
+                        color: Color(0x66000000)),
+                  ],
+                ),
+                child: SizedBox(
+                  width: pageWidth,
+                  height: pageWidth / _pageSize.width * _pageSize.height,
+                  child: FittedBox(
+                    child: SizedBox.fromSize(size: _pageSize, child: page),
+                  ),
+                ),
+              ),
+            ),
+            const Spacer(),
+            Text(stats,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 52,
+                    fontWeight: FontWeight.w700)),
+            const SizedBox(height: 16),
+            Text(tagline,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Color(0xB3FFFFFF), fontSize: 34)),
+            const SizedBox(height: 140),
+          ],
+        ),
+      ),
     );
   }
 }

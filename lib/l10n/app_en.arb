@@ -1102,6 +1102,17 @@
   "passportDataNumber": "Passport no.",
   "passportDataCountries": "Countries",
   "passportDataCities": "Cities",
+  "passportShare": "Share page",
+  "passportShareTitle": "My travel passport",
+  "passportShareStats": "{countries, plural, =1{1 country} other{{countries} countries}} · {cities, plural, =1{1 city} other{{cities} cities}}",
+  "@passportShareStats": {
+    "placeholders": {
+      "countries": {"type": "int"},
+      "cities": {"type": "int"}
+    }
+  },
+  "passportShareTagline": "Plan trips together with TripFam",
+  "passportShareError": "Couldn't create the image.",
   "passportVisas": "VISAS",
   "passportTapToOpen": "Tap to open",
   "passportNextStamp": "Next stamp",
