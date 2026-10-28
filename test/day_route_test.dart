@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:swipetrip/common/models/group_session_model.dart';
 import 'package:swipetrip/common/utils/day_route.dart';
 
 void main() {
@@ -48,14 +47,5 @@ void main() {
     // a-b-d-c or a-c-d-b: two short sides and one long side, no diagonal.
     expect(length, lessThan(2 * 2.04 + 2.23 + 0.01));
     expect(route.first.id, 'a');
-  });
-
-  test('a group match needs a majority and at least two likes', () {
-    expect(GroupSessionModel.matchThreshold(1), 2);
-    expect(GroupSessionModel.matchThreshold(2), 2);
-    expect(GroupSessionModel.matchThreshold(3), 2);
-    expect(GroupSessionModel.matchThreshold(4), 3);
-    expect(GroupSessionModel.matchThreshold(5), 3);
-    expect(GroupSessionModel.matchThreshold(6), 4);
   });
 }

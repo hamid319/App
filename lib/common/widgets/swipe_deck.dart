@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../app/theme.dart';
-import '../../../common/models/place_model.dart';
-import '../../../common/utils/place_type_labels.dart';
-import '../../../common/widgets/place_photo.dart';
-import '../../../common/widgets/skeleton.dart';
-import '../../../common/widgets/ticket.dart';
-import '../../../core/constants/sizes.dart';
-import '../../../core/constants/typography.dart';
-import '../../../l10n/l10n.dart';
+import '../../app/theme.dart';
+import '../models/place_model.dart';
+import '../utils/place_type_labels.dart';
+import 'place_photo.dart';
+import 'skeleton.dart';
+import 'ticket.dart';
+import '../../core/constants/sizes.dart';
+import '../../core/constants/typography.dart';
+import '../../l10n/l10n.dart';
 
-/// The swipe stack used by Discover (solo) and group sessions: the current
-/// card on top, the next place's photo waiting behind it, LIKE / NOPE stamps
-/// that follow the drag, and the action row underneath.
+/// The swipe stack used by Discover (solo) and the trip's group deck: the
+/// current card on top, the next place's photo waiting behind it, LIKE /
+/// NOPE (and SUPER, when [onSuperLike] is set) stamps that follow the drag,
+/// and the action row underneath.
 class SwipeDeck extends StatefulWidget {
   const SwipeDeck({
     super.key,
@@ -24,6 +25,7 @@ class SwipeDeck extends StatefulWidget {
     this.nextPlace,
     this.onUndo,
     this.canUndo = false,
+    this.onSuperLike,
   });
 
   final PlaceModel place;
@@ -32,8 +34,11 @@ class SwipeDeck extends StatefulWidget {
   final VoidCallback onSkip;
   final VoidCallback onDetail;
 
-  /// Null hides the undo button entirely (group sessions).
+  /// Null hides the undo button entirely.
   final VoidCallback? onUndo;
+
+  /// A swipe up or the star button; null leaves both out (solo deck).
+  final VoidCallback? onSuperLike;
 
   /// Whether there is a swipe to take back; false greys the button out.
   final bool canUndo;
@@ -53,6 +58,17 @@ class _SwipeDeckState extends State<SwipeDeck>
   bool _animating = false;
   bool _pastThreshold = false;
   double _width = 1;
+  double _height = 1;
+
+  /// Share of the card height a drag up must pass to be a super-like.
+  static const double _upThreshold = 0.22;
+
+  /// 0..1 while dragging up towards a super-like.
+  double get _upProgress {
+    if (widget.onSuperLike == null || _drag.dy >= 0) return 0;
+    if (_drag.dy.abs() < _drag.dx.abs()) return 0;
+    return (-_drag.dy / (_height * _upThreshold)).clamp(0.0, 1.0);
+  }
 
   @override
   void initState() {
@@ -89,7 +105,12 @@ class _SwipeDeckState extends State<SwipeDeck>
     if (_animating) return;
     final vx = d.velocity.pixelsPerSecond.dx;
     final flung = vx.abs() > 800 && vx.sign == _drag.dx.sign;
-    if (_drag.dx.abs() > _width * _threshold || flung) {
+    if (_upProgress >= 1 ||
+        (widget.onSuperLike != null &&
+            d.velocity.pixelsPerSecond.dy < -800 &&
+            _drag.dy.abs() > _drag.dx.abs())) {
+      _flyUp();
+    } else if (_drag.dx.abs() > _width * _threshold || flung) {
       _flyOut(toRight: _drag.dx > 0);
     } else {
       _snapBack();
@@ -136,6 +157,18 @@ class _SwipeDeckState extends State<SwipeDeck>
     });
   }
 
+  void _flyUp() {
+    _animateTo(Offset(_drag.dx, -_height * 1.4), AppSizes.cardOut,
+        Curves.easeIn, onDone: () => widget.onSuperLike?.call());
+  }
+
+  void _buttonSuperLike() {
+    if (_animating) return;
+    HapticFeedback.mediumImpact();
+    _drag = const Offset(0, -8);
+    _flyUp();
+  }
+
   void _buttonSwipe({required bool toRight}) {
     if (_animating) return;
     HapticFeedback.selectionClick();
@@ -159,7 +192,12 @@ class _SwipeDeckState extends State<SwipeDeck>
             ),
             child: LayoutBuilder(builder: (context, box) {
               _width = box.maxWidth;
-              final progress = (_drag.dx / (_width * _threshold)).clamp(-1.0, 1.0);
+              _height = box.maxHeight;
+              final up = _upProgress;
+              // Going up hides LIKE / NOPE in favour of SUPER.
+              final progress =
+                  (_drag.dx / (_width * _threshold)).clamp(-1.0, 1.0) *
+                      (1 - up);
               return Stack(
                 children: [
                   if (widget.nextPlace != null)
@@ -167,7 +205,7 @@ class _SwipeDeckState extends State<SwipeDeck>
                       child: _BackCard(
                         place: widget.nextPlace!,
                         // The waiting card rises as the top card leaves.
-                        lift: progress.abs(),
+                        lift: progress.abs() > up ? progress.abs() : up,
                       ),
                     ),
                   Positioned.fill(
@@ -191,6 +229,7 @@ class _SwipeDeckState extends State<SwipeDeck>
                               place: widget.place,
                               likeOpacity: progress.clamp(0.0, 1.0),
                               nopeOpacity: (-progress).clamp(0.0, 1.0),
+                              superOpacity: up,
                             ),
                           ),
                         ),
@@ -232,6 +271,17 @@ class _SwipeDeckState extends State<SwipeDeck>
                 onPressed: () => _buttonSwipe(toRight: false),
               ),
               const SizedBox(width: AppSizes.space16),
+              if (widget.onSuperLike != null) ...[
+                InkActionButton(
+                  size: 52,
+                  icon: Icons.star_rounded,
+                  fill: colors.gold,
+                  iconColor: _onGold,
+                  tooltip: l10n.superLike,
+                  onPressed: _buttonSuperLike,
+                ),
+                const SizedBox(width: AppSizes.space16),
+              ],
               InkActionButton(
                 size: 64,
                 icon: Icons.favorite_rounded,
@@ -267,11 +317,13 @@ class _CardFace extends StatelessWidget {
     required this.place,
     required this.likeOpacity,
     required this.nopeOpacity,
+    this.superOpacity = 0,
   });
 
   final PlaceModel place;
   final double likeOpacity;
   final double nopeOpacity;
+  final double superOpacity;
 
   @override
   Widget build(BuildContext context) {
@@ -318,6 +370,22 @@ class _CardFace extends StatelessWidget {
                       color: colors.nope,
                       filled: true,
                       angle: 0.22,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 28,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: _FadingStamp(
+                      opacity: superOpacity,
+                      child: Stamp(
+                        text: context.l10n.superStamp,
+                        color: colors.gold,
+                        filled: true,
+                        angle: -0.08,
+                      ),
                     ),
                   ),
                 ),

@@ -27,7 +27,6 @@ final _group = GroupModel(
   ownerUid: 'me',
   tripStart: DateTime(2026, 10, 29),
   tripEnd: DateTime(2026, 10, 31),
-  joinEnabled: true,
   invite: const GroupInvite(code: 'ABC123'),
 );
 

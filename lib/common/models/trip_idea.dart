@@ -26,6 +26,10 @@ class TripIdea {
   final IdeaSource source;
   final DateTime? createdAt;
 
+  /// Super-likes from the trip's swipe deck; each counts as an extra like
+  /// for the ranking. Derived, not stored.
+  final int superLikes;
+
   const TripIdea({
     required this.id,
     this.placeId,
@@ -34,6 +38,7 @@ class TripIdea {
     this.likedBy = const [],
     this.source = IdeaSource.manual,
     this.createdAt,
+    this.superLikes = 0,
   });
 
   int get likes => likedBy.length;
@@ -65,12 +70,14 @@ class TripIdea {
       };
 }
 
-/// Most liked first; equal likes keep the order they were added in.
+/// Most liked first (a super-like counts twice); equal likes keep the
+/// order they were added in.
 List<TripIdea> sortIdeasByLikes(Iterable<TripIdea> ideas) {
   final list = List.of(ideas);
   final epoch = DateTime.fromMillisecondsSinceEpoch(0);
   list.sort((a, b) {
-    final byLikes = b.likes.compareTo(a.likes);
+    final byLikes =
+        (b.likes + b.superLikes).compareTo(a.likes + a.superLikes);
     if (byLikes != 0) return byLikes;
     final byTime = (a.createdAt ?? epoch).compareTo(b.createdAt ?? epoch);
     if (byTime != 0) return byTime;

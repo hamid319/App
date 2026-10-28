@@ -2197,6 +2197,72 @@ class AppLocalizationsDe extends AppLocalizations {
   String get passportPageTitle => 'STEMPEL';
 
   @override
+  String get superLike => 'Super-Like';
+
+  @override
+  String get superStamp => 'SUPER';
+
+  @override
+  String get tripSwipeVeto => 'Veto';
+
+  @override
+  String get tripSwipeVetoTitle => 'Veto einlegen?';
+
+  @override
+  String tripSwipeVetoBody(String place) {
+    return '$place kommt nicht auf die Wunschliste, egal wie viele es mögen. Du hast ein Veto pro Reise.';
+  }
+
+  @override
+  String tripSwipeVetoMove(String current, String place) {
+    return 'Dein Veto liegt auf $current. Auf $place verschieben?';
+  }
+
+  @override
+  String get tripSwipeVetoConfirm => 'Veto einlegen';
+
+  @override
+  String tripSwipeVetoSet(String place) {
+    return 'Veto auf $place';
+  }
+
+  @override
+  String get tripSwipeMatchTitle => 'Match!';
+
+  @override
+  String tripSwipeMatchBody(String names) {
+    return '$names wollen da auch hin. Steht jetzt auf der Wunschliste.';
+  }
+
+  @override
+  String get tripSwipeMatchContinue => 'Weiter swipen';
+
+  @override
+  String get tripSwipeDone => 'Du hast alle Orte gesehen';
+
+  @override
+  String get tripSwipeDoneBody =>
+      'Matches landen auf der Wunschliste, sobald die anderen swipen.';
+
+  @override
+  String get tripSwipeToWishlist => 'Zur Wunschliste';
+
+  @override
+  String get tripSwipeNoPlaces => 'Für diese Stadt gibt es noch keine Orte.';
+
+  @override
+  String tripSwipeLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Noch $count Orte',
+      one: 'Noch 1 Ort',
+      zero: 'Alle Orte gesehen',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get passportTapToOpen => 'Zum Öffnen tippen';
 
   @override

@@ -57,7 +57,8 @@ routerProvider           // Provider<GoRouter>
 /onboarding   /login   /register
 /trips (start, tab Reisen)   /trip/:groupId   /trip/:groupId/day/:index   /trip/:groupId/costs   /trip/:groupId/journal   /trip/:groupId/recap
 /home (tab Entdecken, feed)  /discover (solo deck)   /collection/:theme   /place/:id
-/group → /trips   /group/join?groupId=&code=   /swipe/:groupId   /group-matches/:groupId   /day-plan/:groupId/:sessionId
+/trip/:groupId/swipe (group deck)   /group → /trips   /group/join?groupId=&code=
+(old /swipe/:groupId, /group-matches/:groupId, /day-plan/… redirect to the trip)
 /profile   /passport   /settings   /favorites   /favorites-map
 ```
 - Always use `context.go()` or `context.push()`. Never `Navigator.push()`.
@@ -75,10 +76,12 @@ Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so
 ```
 /users/{uid}           favorites: string[], groups: string[]
 /inviteCodes/{code}    groupId, createdAt, title, cityName, ownerName (get only, no list; written by the owner)
-/groups/{groupId}      members: string[], activeSessionId: string?, invite.code: string
-  /sessions/{id}       swipeProgress: map<uid,int>, placePool: string[], status: 'in_progress'|'completed'
-    /votes/{placeId}   likedBy: string[], dislikedBy: string[]
-    /userSwipes/{uid}  swipedPlaceIds: string[]
+/groups/{groupId}      members: string[], invite.code: string, tripPlan
+  /ideas/{id}          wishlist entries (placeId?, title, addedBy, likedBy, source)
+  /swipes/{uid}        votes: map<placeId, 0 nope|1 like|2 super-like>, veto: placeId?
+                       (the trip's swipe deck, always open; matches are derived in
+                       common/utils/group_swipes.dart and shown on the wishlist, not stored)
+  /sessions/…          old swipe rounds: read/delete only, nothing writes them
   /journal/{id}        authorUid, day 'yyyy-MM-dd', text ≤500, photos [{path,url,width,height}] ≤6
                        (photos in Storage trips/{groupId}/journal/{id}/{i}.jpg)
 /places/{placeId}      imageUrls: string[], types: string[]
@@ -96,7 +99,7 @@ Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so
 
 ## Known bugs — never reintroduce
 1. **Favorites bug**: `place_detail_screen.dart` must NOT call `swipeController.like()` (advances swipe stack). Use `addFavoriteById(placeId)`.
-2. **Firestore rule mismatch**: session `update` rule must allow `swipeProgress`, not `isCompleted`.
+2. **Group swipes**: each member writes only `groups/{g}/swipes/{uid}`; never aggregate votes in shared documents (contention, and members could edit others' votes).
 3. **UID display**: group member list must resolve UIDs to `UserModel.displayName`.
 4. **Hardcoded UI text**: the app supports English and German. Every user-visible string goes through `context.l10n.<key>` (import `l10n/l10n.dart`), defined in `lib/l10n/app_en.arb` (template) and `lib/l10n/app_de.arb`. Never put a text literal in a widget. Add new keys to both files; `flutter gen-l10n` (or `flutter pub get`) regenerates the Dart code. Errors shown to users go through `userMessage(e, fallback: ..., l10n: context.l10n)`.
 
@@ -112,14 +115,15 @@ Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so
 Built and on `main`: trips with invites (web invite page in `web_invite/` on
 Firebase Hosting), group swipe and wishlist, add to trip, day plans on
 Mapbox, costs (edit/delete), offline mode, journal with photos and trip
-recap, passport with stamps (profile), password reset, onboarding, dark
-mode, account deletion, iOS privacy manifest.
+recap, TripFam Pass with stamps and sharing (profile), the trip's group
+swipe deck with super-like, one veto per member and matches on the
+wishlist, password reset, onboarding, dark mode, account deletion, iOS
+privacy manifest.
 
 Not started or open:
 - FCM push notifications
 - Affiliate links (GetYourGuide/Viator, check their terms first)
-- Super-like and veto in the swipe deck; results per place
-- Passport: GPS check-in on site, share a passport page as an image
+- Passport: GPS check-in on site
 - Untested by the owner: account deletion (throwaway account), offline mode,
   a real web-invite join with a second account, sound and haptics on a real
   iPhone, the Android runtime

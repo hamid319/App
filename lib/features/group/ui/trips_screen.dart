@@ -295,13 +295,7 @@ class _HeroTripCard extends ConsumerWidget {
                     children: [
                       AvatarRow(memberIds: group.members),
                       const Spacer(),
-                      if (group.activeSessionId != null)
-                        Text(
-                          l10n.tripSwipeLive,
-                          style: text.labelLarge
-                              ?.copyWith(color: scheme.primary),
-                        )
-                      else if (openPolls > 0)
+                      if (openPolls > 0)
                         Text(
                           l10n.tripOpenPolls(openPolls),
                           style: text.labelLarge

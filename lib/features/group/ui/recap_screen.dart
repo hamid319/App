@@ -132,7 +132,8 @@ class _RecapBodyState extends ConsumerState<_RecapBody> {
     final locale = Localizations.localeOf(context).toLanguageTag();
     final expenses =
         ref.watch(tripExpensesProvider(group.groupId)).value ?? const [];
-    final ideas = ref.watch(tripIdeasProvider(group.groupId)).value ?? const [];
+    final ideas = ref.watch(tripWishlistProvider(group.groupId)).value ??
+        const [];
     final stats = tripRecapStats(group,
         entries: entries, expenses: expenses, ideaCount: ideas.length);
     final photos = recapPhotos(entries);

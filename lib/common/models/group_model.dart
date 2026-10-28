@@ -80,14 +80,10 @@ class GroupModel {
   final List<String> members;
   final List<String> sharedFavorites;
   final DateTime? createdAt;
-  final String? activeSessionId; // To track if a swipe session is ongoing
-  final bool hasCompletedSession;
 
   // New fields from plan
   final String? ownerUid;
   final GroupLocation? location;
-  /// Legacy flag, false while a session runs. Use [isJoinable] instead.
-  final bool? joinEnabled;
   final GroupInvite? invite;
 
   /// Travel dates, e.g. taken from a calendar event (both days inclusive).
@@ -103,21 +99,13 @@ class GroupModel {
     this.members = const [],
     this.sharedFavorites = const [],
     this.createdAt,
-    this.activeSessionId,
-    this.hasCompletedSession = false,
     this.ownerUid,
     this.location,
-    this.joinEnabled,
     this.invite,
     this.tripStart,
     this.tripEnd,
     this.tripPlan,
   });
-
-  /// New members may join (by invite code) whenever no swipe session is
-  /// running. Matches the join rule in firestore.rules. Groups whose legacy
-  /// [joinEnabled] flag was left false after a session are joinable too.
-  bool get isJoinable => activeSessionId == null;
 
   GroupModel copyWith({
     String? groupId,
@@ -125,11 +113,8 @@ class GroupModel {
     List<String>? members,
     List<String>? sharedFavorites,
     DateTime? createdAt,
-    String? activeSessionId,
-    bool? hasCompletedSession,
     String? ownerUid,
     GroupLocation? location,
-    bool? joinEnabled,
     GroupInvite? invite,
     DateTime? tripStart,
     DateTime? tripEnd,
@@ -141,11 +126,8 @@ class GroupModel {
       members: members ?? this.members,
       sharedFavorites: sharedFavorites ?? this.sharedFavorites,
       createdAt: createdAt ?? this.createdAt,
-      activeSessionId: activeSessionId ?? this.activeSessionId,
-      hasCompletedSession: hasCompletedSession ?? this.hasCompletedSession,
       ownerUid: ownerUid ?? this.ownerUid,
       location: location ?? this.location,
-      joinEnabled: joinEnabled ?? this.joinEnabled,
       invite: invite ?? this.invite,
       tripStart: tripStart ?? this.tripStart,
       tripEnd: tripEnd ?? this.tripEnd,
@@ -169,13 +151,10 @@ class GroupModel {
       members: List<String>.from(json['members'] ?? []),
       sharedFavorites: List<String>.from(json['sharedFavorites'] ?? []),
       createdAt: parsedCreatedAt,
-      activeSessionId: json['activeSessionId'] as String?,
-      hasCompletedSession: json['hasCompletedSession'] as bool? ?? false,
       ownerUid: json['ownerUid'] as String?,
       location: json['location'] != null
           ? GroupLocation.fromJson(Map<String, dynamic>.from(json['location']))
           : null,
-      joinEnabled: json['joinEnabled'] as bool?,
       invite: json['invite'] != null
           ? GroupInvite.fromJson(Map<String, dynamic>.from(json['invite']))
           : null,
@@ -199,11 +178,8 @@ class GroupModel {
         'members': members,
         'sharedFavorites': sharedFavorites,
         'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : null,
-        'activeSessionId': activeSessionId,
-        'hasCompletedSession': hasCompletedSession,
         'ownerUid': ownerUid,
         if (location != null) 'location': location!.toJson(),
-        if (joinEnabled != null) 'joinEnabled': joinEnabled,
         if (invite != null) 'invite': invite!.toJson(),
         if (tripStart != null) 'tripStart': Timestamp.fromDate(tripStart!),
         if (tripEnd != null) 'tripEnd': Timestamp.fromDate(tripEnd!),

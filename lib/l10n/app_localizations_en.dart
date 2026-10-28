@@ -2166,6 +2166,72 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passportPageTitle => 'STAMPS';
 
   @override
+  String get superLike => 'Super-like';
+
+  @override
+  String get superStamp => 'SUPER';
+
+  @override
+  String get tripSwipeVeto => 'Veto';
+
+  @override
+  String get tripSwipeVetoTitle => 'Use your veto?';
+
+  @override
+  String tripSwipeVetoBody(String place) {
+    return '$place won\'t go on the wishlist, however many like it. You have one veto per trip.';
+  }
+
+  @override
+  String tripSwipeVetoMove(String current, String place) {
+    return 'Your veto is on $current. Move it to $place?';
+  }
+
+  @override
+  String get tripSwipeVetoConfirm => 'Use veto';
+
+  @override
+  String tripSwipeVetoSet(String place) {
+    return 'Veto on $place';
+  }
+
+  @override
+  String get tripSwipeMatchTitle => 'It\'s a match!';
+
+  @override
+  String tripSwipeMatchBody(String names) {
+    return '$names want to go too. It\'s on the wishlist now.';
+  }
+
+  @override
+  String get tripSwipeMatchContinue => 'Keep swiping';
+
+  @override
+  String get tripSwipeDone => 'You\'ve seen every place';
+
+  @override
+  String get tripSwipeDoneBody =>
+      'Matches land on the trip\'s wishlist as the others swipe.';
+
+  @override
+  String get tripSwipeToWishlist => 'To the wishlist';
+
+  @override
+  String get tripSwipeNoPlaces => 'No places for this city yet.';
+
+  @override
+  String tripSwipeLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count places left',
+      one: '1 place left',
+      zero: 'All places seen',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get passportTapToOpen => 'Tap to open';
 
   @override

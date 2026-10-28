@@ -29,6 +29,9 @@ class AppConfig {
   // Google caps Nearby Search (New) at 20 results per request.
   static const int maxPlacesLimit = 20;
 
+  // Places in a trip's group swipe deck: the city's best-known sights.
+  static const int groupDeckSize = 60;
+
   // Location used when GPS is skipped or fails: Los Angeles, where the
   // current Firestore test places are. Switch to Hamburg (53.5511, 9.9937)
   // once real Places data for Hamburg is loaded.

@@ -1,14 +1,9 @@
 import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../common/models/day_plan.dart';
 import '../../../common/models/group_model.dart';
-import '../../../common/models/place_model.dart';
-import '../../../common/models/group_session_model.dart';
-import '../../../common/utils/day_route.dart';
 import '../../../features/auth/logic/auth_controller.dart';
 import '../../../features/profile/data/profile_repository.dart';
-import '../../../features/swipe/data/places_repository.dart';
 import '../data/group_repository.dart';
 import '../../../main_providers.dart';
 
@@ -47,13 +42,10 @@ final groupControllerProvider =
 class GroupController extends AsyncNotifier<GroupModel?> {
   String? _lastMembersSignature;
   List<String>? _lastSharedFavorites;
-  // Blocks a second start while the place pool for the first is still loading.
-  bool _isStartingSession = false;
 
   GroupRepository get _repo => ref.read(groupRepositoryProvider);
   ProfileRepository get _profileRepo =>
       ProfileRepository(ref.read(firestoreServiceProvider));
-  PlacesRepository get _placesRepo => PlacesRepository();
 
   @override
   Future<GroupModel?> build() async {
@@ -74,28 +66,7 @@ class GroupController extends AsyncNotifier<GroupModel?> {
     try {
       final group = userGroups.firstWhere((g) => g.groupId == selectedId);
 
-      var resolvedGroup = group;
-      final sessionId = group.activeSessionId;
-      if (sessionId != null) {
-        // Only a session document that is really gone may be cleared. A read
-        // or parse failure keeps the session live for everyone.
-        var sessionMissing = false;
-        try {
-          sessionMissing = await _repo.getSession(
-                groupId: group.groupId,
-                sessionId: sessionId,
-              ) ==
-              null;
-        } catch (_) {}
-        if (sessionMissing) {
-          await _repo.clearActiveSessionIfMatch(
-            groupId: group.groupId,
-            sessionId: sessionId,
-          );
-          resolvedGroup = group.copyWith(activeSessionId: null);
-        }
-      }
-
+      final resolvedGroup = group;
       final membersSignature = _buildMembersSignature(
         resolvedGroup.groupId,
         resolvedGroup.members,
@@ -124,10 +95,6 @@ class GroupController extends AsyncNotifier<GroupModel?> {
     return group.ownerUid == currentUser.uid;
   }
 
-  bool get canJoin {
-    return state.value?.isJoinable ?? false;
-  }
-
   String _generateInviteCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final rnd = math.Random();
@@ -153,7 +120,6 @@ class GroupController extends AsyncNotifier<GroupModel?> {
         members: [currentUser.uid],
         ownerUid: currentUser.uid,
         location: location,
-        joinEnabled: true,
         invite:
             GroupInvite(code: _generateInviteCode(), createdAt: DateTime.now()),
         createdAt: DateTime.now(),
@@ -258,229 +224,5 @@ class GroupController extends AsyncNotifier<GroupModel?> {
     } catch (e, st) {
       state = AsyncError(e, st);
     }
-  }
-
-  Future<void> startSessionWithLimit(
-      {required int swipeLimit, int? durationMinutes}) async {
-    final group = state.value;
-    if (group == null) return;
-
-    if (!isAdmin) {
-      throw StateError('Only the admin can start the session');
-    }
-
-    if (_isStartingSession || group.activeSessionId != null) return;
-    _isStartingSession = true;
-
-    final savedState = AsyncValue.data(group);
-    state = const AsyncLoading();
-    try {
-      final location = group.location;
-      if (location == null) {
-        throw StateError('Group location is required to start a session');
-      }
-      final destination = location.cityName.isNotEmpty
-          ? location.cityName
-          : location.countryName;
-      final places = await _placesRepo.fetchPlacesForCity(
-        location,
-        limit: swipeLimit,
-      );
-
-      if (places.isEmpty) {
-        throw StateError('No places found for this destination');
-      }
-
-      final placePool = places.map((p) => p.id).toList();
-
-      // The pool is capped by AppConfig.maxPlacesLimit and can be smaller still
-      // in cities with few attractions. A swipeLimit above the pool size can
-      // never be reached, so allMembersDone would never become true and the
-      // session would hang in progress forever.
-      final effectiveSwipeLimit =
-          swipeLimit < placePool.length ? swipeLimit : placePool.length;
-
-      final endTime = durationMinutes != null
-          ? DateTime.now().add(Duration(minutes: durationMinutes))
-          : null;
-
-      await _repo.startSwipeSession(
-        groupId: group.groupId,
-        destination: destination,
-        participantUids: group.members,
-        swipeLimit: effectiveSwipeLimit,
-        placePool: placePool,
-        endTime: endTime,
-      );
-    } catch (e) {
-      state = savedState;
-      rethrow;
-    } finally {
-      _isStartingSession = false;
-    }
-  }
-
-  Future<void> startSession({
-    required String destination,
-  }) async {
-    final group = state.value;
-    if (group == null) return;
-
-    if (!isAdmin) {
-      throw StateError('Only the admin can start the session');
-    }
-
-    if (_isStartingSession || group.activeSessionId != null) return;
-    _isStartingSession = true;
-
-    final savedState = AsyncValue.data(group);
-    state = const AsyncLoading();
-    try {
-      final location = group.location;
-      if (location == null) {
-        throw StateError('Group location is required to start a session');
-      }
-      final resolvedDestination = location.cityName.isNotEmpty
-          ? location.cityName
-          : location.countryName;
-      final places = await _placesRepo.fetchPlacesForCity(
-        location,
-        limit: 20,
-      );
-
-      if (places.isEmpty) {
-        throw StateError('No places found for this destination');
-      }
-
-      await _repo.startSwipeSession(
-        groupId: group.groupId,
-        destination:
-            resolvedDestination.isNotEmpty ? resolvedDestination : destination,
-        participantUids: group.members,
-        swipeLimit: places.length,
-        placePool: places.map((p) => p.id).toList(),
-      );
-    } catch (e) {
-      state = savedState;
-      rethrow;
-    } finally {
-      _isStartingSession = false;
-    }
-  }
-
-  Future<void> castVote({
-    required String placeId,
-    required bool liked,
-  }) async {
-    final group = state.value;
-    final sessionId = group?.activeSessionId;
-    if (group == null || sessionId == null) {
-      throw StateError('No active group session');
-    }
-
-    final currentUser = ref.read(authControllerProvider).value;
-    if (currentUser == null) {
-      throw StateError('User not authenticated');
-    }
-
-    await _repo.recordSwipeInSession(
-      groupId: group.groupId,
-      sessionId: sessionId,
-      userId: currentUser.uid,
-      placeId: placeId,
-      liked: liked,
-    );
-  }
-
-  Future<void> endSession() async {
-    final group = state.value;
-    final sessionId = group?.activeSessionId;
-    final currentUser = ref.read(authControllerProvider).value;
-    if (group == null || sessionId == null || currentUser == null) return;
-
-    if (!isAdmin) {
-      throw StateError('Only the admin can end the session');
-    }
-
-    await _repo.endSessionManually(
-      groupId: group.groupId,
-      sessionId: sessionId,
-      adminUid: currentUser.uid,
-    );
-  }
-
-  Future<void> updateSessionOrder(
-      String sessionId, List<String> orderedPlaceIds) async {
-    final group = state.value;
-    if (group == null) return;
-    if (!isAdmin) {
-      throw StateError('Only the admin can reorder the session list');
-    }
-    await _repo.updateSessionOrder(group.groupId, sessionId, orderedPlaceIds);
-  }
-
-  /// The admin's position for planning, or null when it is unavailable.
-  /// [orderDayRoute] ignores it when it is far from the places.
-  Future<({double lat, double lng})?> planningOrigin() async {
-    try {
-      final position =
-          await ref.read(locationServiceProvider).getCurrentLocation();
-      return (lat: position.latitude, lng: position.longitude);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  /// Builds the day plan from the [selected] matches (group favourite
-  /// first) as a short route and stores it on the session. Admin only.
-  Future<DayPlan> createDayPlan(
-    String sessionId,
-    List<PlaceModel> selected, {
-    required bool endNearOrigin,
-    ({double lat, double lng})? origin,
-  }) async {
-    final group = state.value;
-    if (group == null || !isAdmin) {
-      throw StateError('Only the admin can plan the day');
-    }
-    final route = orderDayRoute(
-      [for (final p in selected) RouteStop(id: p.id, lat: p.lat, lng: p.lng)],
-      origin: origin,
-      endNearOrigin: endNearOrigin,
-    );
-    final plan = DayPlan(
-      placeIds: [for (final stop in route) stop.id],
-      endNearOrigin: endNearOrigin,
-    );
-    await _repo.saveDayPlan(group.groupId, sessionId, plan);
-    return plan;
-  }
-
-  /// Saves a day plan the admin reordered by hand.
-  Future<void> saveDayPlan(String sessionId, DayPlan plan) async {
-    final group = state.value;
-    if (group == null || !isAdmin) {
-      throw StateError('Only the admin can plan the day');
-    }
-    await _repo.saveDayPlan(group.groupId, sessionId, plan);
-  }
-}
-
-final activeSessionProvider =
-    StreamNotifierProvider<ActiveSessionNotifier, GroupSessionModel?>(
-  ActiveSessionNotifier.new,
-);
-
-class ActiveSessionNotifier extends StreamNotifier<GroupSessionModel?> {
-  @override
-  Stream<GroupSessionModel?> build() {
-    final group = ref.watch(groupControllerProvider).value;
-    final sessionId = group?.activeSessionId;
-    if (group == null || sessionId == null) return Stream.value(null);
-
-    return ref.read(groupRepositoryProvider).streamSession(
-          groupId: group.groupId,
-          sessionId: sessionId,
-        );
   }
 }

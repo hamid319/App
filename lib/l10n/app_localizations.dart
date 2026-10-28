@@ -3806,6 +3806,102 @@ abstract class AppLocalizations {
   /// **'STAMPS'**
   String get passportPageTitle;
 
+  /// No description provided for @superLike.
+  ///
+  /// In en, this message translates to:
+  /// **'Super-like'**
+  String get superLike;
+
+  /// No description provided for @superStamp.
+  ///
+  /// In en, this message translates to:
+  /// **'SUPER'**
+  String get superStamp;
+
+  /// No description provided for @tripSwipeVeto.
+  ///
+  /// In en, this message translates to:
+  /// **'Veto'**
+  String get tripSwipeVeto;
+
+  /// No description provided for @tripSwipeVetoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your veto?'**
+  String get tripSwipeVetoTitle;
+
+  /// No description provided for @tripSwipeVetoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{place} won\'t go on the wishlist, however many like it. You have one veto per trip.'**
+  String tripSwipeVetoBody(String place);
+
+  /// No description provided for @tripSwipeVetoMove.
+  ///
+  /// In en, this message translates to:
+  /// **'Your veto is on {current}. Move it to {place}?'**
+  String tripSwipeVetoMove(String current, String place);
+
+  /// No description provided for @tripSwipeVetoConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Use veto'**
+  String get tripSwipeVetoConfirm;
+
+  /// No description provided for @tripSwipeVetoSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Veto on {place}'**
+  String tripSwipeVetoSet(String place);
+
+  /// No description provided for @tripSwipeMatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s a match!'**
+  String get tripSwipeMatchTitle;
+
+  /// No description provided for @tripSwipeMatchBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} want to go too. It\'s on the wishlist now.'**
+  String tripSwipeMatchBody(String names);
+
+  /// No description provided for @tripSwipeMatchContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep swiping'**
+  String get tripSwipeMatchContinue;
+
+  /// No description provided for @tripSwipeDone.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve seen every place'**
+  String get tripSwipeDone;
+
+  /// No description provided for @tripSwipeDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches land on the trip\'s wishlist as the others swipe.'**
+  String get tripSwipeDoneBody;
+
+  /// No description provided for @tripSwipeToWishlist.
+  ///
+  /// In en, this message translates to:
+  /// **'To the wishlist'**
+  String get tripSwipeToWishlist;
+
+  /// No description provided for @tripSwipeNoPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'No places for this city yet.'**
+  String get tripSwipeNoPlaces;
+
+  /// No description provided for @tripSwipeLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{All places seen} =1{1 place left} other{{count} places left}}'**
+  String tripSwipeLeft(int count);
+
   /// No description provided for @passportTapToOpen.
   ///
   /// In en, this message translates to:

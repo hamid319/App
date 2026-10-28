@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/errors/user_message.dart';
 import '../../swipe/logic/swipe_controller.dart';
-import '../../swipe/widgets/swipe_deck.dart';
+import '../../../common/widgets/swipe_deck.dart';
 import '../../swipe/widgets/discover_filters.dart';
 import '../../swipe/logic/discover_preferences_controller.dart';
 import '../../../l10n/l10n.dart';

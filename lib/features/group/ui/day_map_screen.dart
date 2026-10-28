@@ -38,7 +38,7 @@ class _DayMapScreenState extends ConsumerState<DayMapScreen> {
 
   Future<void> _build(GroupModel group) async {
     final l10n = context.l10n;
-    final ideas = ref.read(tripIdeasProvider(widget.groupId)).value ?? const [];
+    final ideas = ref.read(tripWishlistProvider(widget.groupId)).value ?? const [];
     setState(() => _building = true);
     try {
       await ref.read(tripActionsProvider.notifier).buildPlan(group, ideas);
@@ -98,7 +98,7 @@ class _DayMapScreenState extends ConsumerState<DayMapScreen> {
           final plan = group.tripPlan;
           if (plan == null || plan.isEmpty) {
             final ideas =
-                ref.watch(tripIdeasProvider(widget.groupId)).value ?? const [];
+                ref.watch(tripWishlistProvider(widget.groupId)).value ?? const [];
             final plannable = ideas.where((i) => i.placeId != null).length;
             return Stack(
               children: [

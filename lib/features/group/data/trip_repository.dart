@@ -8,6 +8,7 @@ import '../../../common/models/trip_expense.dart';
 import '../../../common/models/trip_idea.dart';
 import '../../../common/models/trip_plan.dart';
 import '../../../common/models/trip_poll.dart';
+import '../../../common/utils/group_swipes.dart';
 
 /// Planning data of a trip (a group): wishlist ideas, polls, expenses and
 /// the day plan. Everything lives under `groups/{groupId}`.
@@ -156,6 +157,36 @@ class TripRepository {
 
   Future<void> deleteIdea(String groupId, String ideaId) =>
       _ideas(groupId).doc(ideaId).delete();
+
+  // --- Swipe deck ---
+
+  CollectionReference<Map<String, dynamic>> _swipes(String groupId) =>
+      _group(groupId).collection('swipes');
+
+  /// Every member's swipes on the trip, live: the deck and the matches
+  /// both come from these (one small document per member).
+  Stream<List<MemberSwipes>> streamSwipes(String groupId) =>
+      _swipes(groupId).snapshots().map((snap) => [
+            for (final d in snap.docs) MemberSwipes.fromJson(d.id, d.data()),
+          ]);
+
+  /// Records [uid]'s [vote] on [placeId]; null takes it back (undo).
+  /// One write, no transaction: each member only writes their own document.
+  Future<void> setSwipeVote(
+          String groupId, String uid, String placeId, SwipeVote? vote) =>
+      _swipes(groupId).doc(uid).set({
+        'votes': {placeId: vote?.value ?? FieldValue.delete()},
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+  /// Sets [uid]'s one veto to [placeId] (replacing an earlier one); a veto
+  /// is also a "nope" for the deck. Null withdraws the veto.
+  Future<void> setSwipeVeto(String groupId, String uid, String? placeId) =>
+      _swipes(groupId).doc(uid).set({
+        'veto': placeId,
+        if (placeId != null) 'votes': {placeId: SwipeVote.nope.value},
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
 
   // --- Polls ---
 

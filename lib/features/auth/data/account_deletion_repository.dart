@@ -65,8 +65,10 @@ class AccountDeletionRepository {
     Map<String, dynamic> group,
     String uid,
   ) async {
-    // Personal memories go; before leaving, while the rules still see a member.
+    // Personal memories and swipes go; before leaving, while the rules
+    // still see a member.
     await _deleteJournal(groupRef, authorUid: uid);
+    await groupRef.collection('swipes').doc(uid).delete();
     if (group['ownerUid'] == uid) {
       // The web invite shows the organizer's first name; drop it while the
       // user still owns the trip (only the owner may write the entry).
@@ -98,9 +100,10 @@ class AccountDeletionRepository {
     Map<String, dynamic> group,
   ) async {
     await _deleteJournal(groupRef);
-    for (final name in const ['ideas', 'polls', 'expenses']) {
+    for (final name in const ['ideas', 'polls', 'expenses', 'swipes']) {
       await _deleteDocs(await groupRef.collection(name).get());
     }
+    // Swipe rounds of earlier versions.
     final sessions = await groupRef.collection('sessions').get();
     for (final session in sessions.docs) {
       await _deleteDocs(await session.reference.collection('votes').get());

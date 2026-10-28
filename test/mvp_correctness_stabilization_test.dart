@@ -1,7 +1,6 @@
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:swipetrip/app/routes.dart';
 import 'package:swipetrip/common/models/place_model.dart';
 import 'package:swipetrip/features/swipe/data/places_repository.dart';
 import 'package:swipetrip/main.dart' as app_main;
@@ -57,21 +56,6 @@ void main() {
         places.map((place) => place.id),
         equals([outsideRadius.id, eiffelTower.id]),
       );
-    });
-
-    test('active sessions still allow intentional navigation to app sections',
-        () {
-      expect(isActiveSessionRouteAllowed('/swipe/group-a'), isTrue);
-      expect(isActiveSessionRouteAllowed('/group-matches/group-a'), isTrue);
-      expect(isActiveSessionRouteAllowed('/profile'), isTrue);
-      expect(isActiveSessionRouteAllowed('/settings'), isTrue);
-      expect(isActiveSessionRouteAllowed('/favorites'), isTrue);
-      expect(isActiveSessionRouteAllowed('/group'), isTrue);
-      expect(isActiveSessionRouteAllowed('/group/join'), isTrue);
-      // The details button on a session card opens the place.
-      expect(isActiveSessionRouteAllowed('/place/places-eiffel'), isTrue);
-
-      expect(isActiveSessionRouteAllowed('/home'), isFalse);
     });
 
     test('bootstrap initializes Env before Firebase reads configuration',

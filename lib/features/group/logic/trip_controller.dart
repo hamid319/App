@@ -13,8 +13,10 @@ import '../../../common/models/trip_plan.dart';
 import '../../../common/models/trip_poll.dart';
 import '../../../common/models/user_model.dart';
 import '../../../common/utils/day_route.dart';
+import '../../../common/utils/group_swipes.dart';
 import '../../../common/utils/trip_days.dart';
 import '../../../common/widgets/member_avatar.dart' show friendlyMemberName;
+import '../../../core/config/app_config.dart';
 import '../../../core/services/maps_availability.dart';
 import '../../../main_providers.dart';
 import '../../auth/logic/auth_controller.dart';
@@ -38,6 +40,53 @@ final tripProvider =
 final tripIdeasProvider = StreamProvider.autoDispose
     .family<List<TripIdea>, String>((ref, groupId) =>
         ref.watch(tripRepositoryProvider).streamIdeas(groupId));
+
+/// Every member's swipes on the trip's deck.
+final tripSwipesProvider = StreamProvider.autoDispose
+    .family<List<MemberSwipes>, String>((ref, groupId) =>
+        ref.watch(tripRepositoryProvider).streamSwipes(groupId));
+
+/// How the group answered each place it swiped on.
+final tripSwipeTallyProvider = Provider.autoDispose
+    .family<Map<String, PlaceTally>, String>((ref, groupId) {
+  final swipes = ref.watch(tripSwipesProvider(groupId)).value ?? const [];
+  final members = ref.watch(tripProvider(groupId)).value?.members ?? const [];
+  return tallySwipes(swipes, members);
+});
+
+/// The wishlist as the screens show it: the ideas plus the group's swipe
+/// matches, best liked first.
+final tripWishlistProvider = Provider.autoDispose
+    .family<AsyncValue<List<TripIdea>>, String>((ref, groupId) {
+  final tally = ref.watch(tripSwipeTallyProvider(groupId));
+  final members = ref.watch(tripProvider(groupId)).value?.members ?? const [];
+  return ref
+      .watch(tripIdeasProvider(groupId))
+      .whenData((ideas) => wishlistWithMatches(ideas, tally, members.length));
+});
+
+/// The places the group swipes on: the trip city's sights, best known
+/// first and in the same order for everyone, so matches come early.
+final tripSwipePlacesProvider = FutureProvider.autoDispose
+    .family<List<PlaceModel>, String>((ref, groupId) async {
+  // Only a change of city reloads the deck, not every trip update.
+  final cityId = ref.watch(
+      tripProvider(groupId).select((t) => t.value?.location?.cityId));
+  final location = ref.read(tripProvider(groupId)).value?.location;
+  if (cityId == null || location == null) return const [];
+  final repo = ref.read(placesRepositoryProvider);
+  final curated =
+      await repo.loadCityPlaces(PlacesRepository.curatedCityId(location));
+  final sights = curated
+      .where((p) => !p.isVenue)
+      .take(AppConfig.groupDeckSize)
+      .toList();
+  if (sights.isNotEmpty) return sights;
+  // A city without a curated import: the shared pool, in a fixed order.
+  final pool = await repo.fetchPlacesForCity(location,
+      limit: AppConfig.maxPlacesLimit);
+  return pool..sort((a, b) => a.id.compareTo(b.id));
+});
 
 final tripPollsProvider = StreamProvider.autoDispose
     .family<List<TripPoll>, String>((ref, groupId) =>
@@ -142,10 +191,24 @@ class TripActions extends Notifier<void> {
     );
   }
 
+  /// A match from the swipe deck has no idea document: its heart is the
+  /// member's swipe vote.
   Future<void> toggleLike(String groupId, TripIdea idea) {
     final uid = _uid;
+    if (isSwipeMatchIdea(idea)) {
+      return _repo.setSwipeVote(groupId, uid, idea.placeId!,
+          idea.isLikedBy(uid) ? SwipeVote.nope : SwipeVote.like);
+    }
     return _repo.setIdeaLiked(groupId, idea.id, uid, !idea.isLikedBy(uid));
   }
+
+  /// Records a swipe on [placeId]; null takes it back.
+  Future<void> swipe(String groupId, String placeId, SwipeVote? vote) =>
+      _repo.setSwipeVote(groupId, _uid, placeId, vote);
+
+  /// Puts the member's one veto on [placeId]; null withdraws it.
+  Future<void> setVeto(String groupId, String? placeId) =>
+      _repo.setSwipeVeto(groupId, _uid, placeId);
 
   Future<void> deleteIdea(String groupId, String ideaId) =>
       _repo.deleteIdea(groupId, ideaId);
@@ -254,44 +317,6 @@ class TripActions extends Notifier<void> {
     );
     await _repo.saveTripPlan(group.groupId, plan);
     return plan;
-  }
-
-  /// Adds the places the group matched on in its last finished swipe
-  /// session to the wishlist, skipping places already on it. Returns how
-  /// many ideas were added.
-  Future<int> importSwipeMatches(
-    GroupModel group,
-    List<TripIdea> existing,
-    String languageCode,
-  ) async {
-    final uid = _uid;
-    final groupRepo = ref.read(groupRepositoryProvider);
-    final sessions = await groupRepo.getCompletedSessions(group.groupId);
-    if (sessions.isEmpty) return 0;
-    final session = sessions.first;
-    final votes = await groupRepo.getQualifiedPlaces(
-      groupId: group.groupId,
-      sessionId: session.sessionId,
-      participantCount: session.participants.length,
-    );
-    final known = {for (final i in existing) i.placeId};
-    final ids = [
-      for (final v in votes)
-        if (v['placeId'] is String && !known.contains(v['placeId']))
-          v['placeId'] as String,
-    ];
-    final places =
-        await ref.read(placesRepositoryProvider).loadPlacesByIds(ids);
-    for (final place in places) {
-      await _repo.addIdea(
-        group.groupId,
-        title: place.nameFor(languageCode),
-        uid: uid,
-        placeId: place.id,
-        source: IdeaSource.swipe,
-      );
-    }
-    return places.length;
   }
 }
 

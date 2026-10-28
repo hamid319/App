@@ -10,7 +10,6 @@ import '../features/home/ui/home_screen.dart';
 import '../features/home/ui/favorites_map_screen.dart';
 import '../features/auth/ui/forgot_password_screen.dart';
 import '../features/home/ui/favorites_screen.dart';
-import '../features/swipe/ui/swipe_screen.dart';
 import '../features/places/ui/place_detail_screen.dart';
 import '../features/group/ui/costs_screen.dart';
 import '../features/group/ui/day_map_screen.dart';
@@ -19,14 +18,11 @@ import '../features/group/ui/journal_screen.dart';
 import '../features/group/ui/recap_screen.dart';
 import '../features/group/ui/trip_detail_screen.dart';
 import '../features/group/ui/trips_screen.dart';
-import '../features/group/ui/group_matches_screen.dart';
-import '../features/group/ui/day_plan_screen.dart';
+import '../features/group/ui/trip_swipe_screen.dart';
 import '../features/profile/ui/simplified_profile_screen.dart';
 import '../features/profile/ui/settings_screen.dart';
 import '../features/profile/ui/passport_screen.dart';
 import '../core/services/preferences_service.dart';
-import '../features/group/logic/group_controller.dart';
-import '../common/models/group_model.dart';
 import '../features/auth/logic/auth_controller.dart';
 import 'account_gate.dart';
 import 'shell_navigation.dart';
@@ -36,7 +32,6 @@ final routerProvider = Provider<GoRouter>((ref) => createRouter(ref));
 
 GoRouter createRouter(Ref ref) {
   final refreshNotifier = ValueNotifier<int>(0);
-  ref.listen(userGroupsProvider, (_, __) => refreshNotifier.value++);
   ref.listen(authControllerProvider, (_, __) => refreshNotifier.value++);
 
   return GoRouter(
@@ -63,19 +58,6 @@ GoRouter createRouter(Ref ref) {
         hasAccount: user != null && !user.isAnonymous,
       );
       if (authRedirect != null) return authRedirect;
-
-      // Guests cannot be in groups, so there is no active session to resume.
-      if (user == null || user.isAnonymous) return null;
-
-      final List<GroupModel> groupsSnapshot =
-          ref.read(userGroupsProvider).value ??
-              await ref.read(userGroupsProvider.future);
-      final activeGroup = _pickActiveSessionGroup(groupsSnapshot);
-      if (activeGroup != null) {
-        if (!isActiveSessionRouteAllowed(currentPath)) {
-          return '/swipe/${activeGroup.groupId}';
-        }
-      }
 
       return null;
     },
@@ -143,6 +125,14 @@ GoRouter createRouter(Ref ref) {
             ),
           ),
           GoRoute(
+            path: 'swipe',
+            builder: (ctx, state) => AccountGate(
+              reason: GateReason.groupSwipe,
+              icon: Icons.swipe_rounded,
+              child: TripSwipeScreen(groupId: state.pathParameters['groupId']!),
+            ),
+          ),
+          GoRoute(
             path: 'costs',
             builder: (ctx, state) => AccountGate(
               reason: GateReason.groups,
@@ -195,13 +185,11 @@ GoRouter createRouter(Ref ref) {
             builder: (ctx, state) =>
                 CollectionScreen(theme: state.pathParameters['theme']!),
           ),
+          // Old links into a swipe round: the trip's deck replaced rounds.
           GoRoute(
             path: '/swipe/:groupId',
-            builder: (ctx, state) => AccountGate(
-              reason: GateReason.groupSwipe,
-              icon: Icons.group,
-              child: SwipeScreen(groupId: state.pathParameters['groupId']!),
-            ),
+            redirect: (ctx, state) =>
+                '/trip/${state.pathParameters['groupId']}/swipe',
           ),
           GoRoute(
             path: '/trips',
@@ -230,28 +218,14 @@ GoRouter createRouter(Ref ref) {
               );
             },
           ),
+          // Results and day plans of the old swipe rounds live on the trip.
           GoRoute(
             path: '/day-plan/:groupId/:sessionId',
-            builder: (ctx, state) => AccountGate(
-              reason: GateReason.groupMatches,
-              icon: Icons.route,
-              child: DayPlanScreen(
-                groupId: state.pathParameters['groupId']!,
-                sessionId: state.pathParameters['sessionId']!,
-              ),
-            ),
+            redirect: (ctx, state) => '/trip/${state.pathParameters['groupId']}',
           ),
           GoRoute(
             path: '/group-matches/:groupId',
-            builder: (ctx, state) => AccountGate(
-              reason: GateReason.groupMatches,
-              icon: Icons.group,
-              child: GroupMatchesScreen(
-                groupId: state.pathParameters['groupId']!,
-                // Set when arriving straight from a session that just ended.
-                celebrate: state.uri.queryParameters['celebrate'] == '1',
-              ),
-            ),
+            redirect: (ctx, state) => '/trip/${state.pathParameters['groupId']}',
           ),
           GoRoute(
             path: '/profile',
@@ -313,26 +287,4 @@ String? resolveAuthRedirect({
   if (hasAccount && isGoingToAuth) return '/trips';
   if (path == '/') return hasAccount ? '/trips' : '/home';
   return null;
-}
-
-GroupModel? _pickActiveSessionGroup(List<GroupModel> groups) {
-  for (final group in groups) {
-    if (group.activeSessionId != null) return group;
-  }
-  return null;
-}
-
-bool isActiveSessionRouteAllowed(String currentPath) {
-  return currentPath.startsWith('/swipe') ||
-      // Details of a card being voted on.
-      currentPath.startsWith('/place/') ||
-      currentPath.startsWith('/group-matches') ||
-      currentPath.startsWith('/day-plan') ||
-      currentPath == '/group' ||
-      currentPath.startsWith('/group/') ||
-      currentPath == '/trips' ||
-      currentPath.startsWith('/trip/') ||
-      currentPath == '/profile' ||
-      currentPath == '/settings' ||
-      currentPath == '/favorites';
 }

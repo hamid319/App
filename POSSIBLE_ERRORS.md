@@ -186,4 +186,4 @@ them are on hold until then.
 
 | # | Decision | Options | Blocks |
 |---|---|---|---|
-| 10.1 | ~~**When does a place count as a group match?**~~ **Decided 2026-10-23: (a) majority of participants, minimum 2 likes** (`GroupSessionModel.matchThreshold`, used by the results list). Apply the same rule to the live counter when it is built. | — | — |
+| 10.1 | ~~**When does a place count as a group match?**~~ **Decided 2026-10-23: (a) majority of participants, minimum 2 likes** (`matchThreshold` in `common/utils/group_swipes.dart`; alone on a trip every like counts). A super-like matches with one more like; one veto per member removes a place. | — | — |

@@ -94,9 +94,6 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
       }
     }
 
-    final groupState = ref.watch(groupControllerProvider).value;
-    final sessionId = groupState?.activeSessionId;
-
     // Reload when the account changes (guest -> login). A guest upgrade keeps
     // the UID, so it does not reset the stack.
     ref.watch(authControllerProvider.select((s) => s.value?.uid));
@@ -124,40 +121,13 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
         debugPrint('Loading favorites failed: $e');
       }
       try {
-        if (groupState != null && sessionId != null) {
-          final groupRepo = ref.read(groupRepositoryProvider);
-          _swipedPlaceIds = await groupRepo.getUserSwipedPlaceIds(
-            groupId: groupState.groupId,
-            sessionId: sessionId,
-            userId: userId,
-          );
-        } else {
-          _swipedPlaceIds = await _placesRepo.getSwipedPlaceIds(userId);
-        }
+        _swipedPlaceIds = await _placesRepo.getSwipedPlaceIds(userId);
       } catch (e) {
         debugPrint('Loading swipe history failed: $e');
         _swipedPlaceIds = {};
       }
     }
 
-    if (groupState != null && sessionId != null) {
-      final groupRepo = ref.read(groupRepositoryProvider);
-      final session = await groupRepo.getSession(
-          groupId: groupState.groupId, sessionId: sessionId);
-      if (session != null) {
-        List<PlaceModel> sessionPlaces = [];
-        for (var pid in session.placePool) {
-          final p = await _placesRepo.getPlaceById(pid);
-          if (p != null) sessionPlaces.add(p);
-        }
-        final filtered = sessionPlaces
-            .where((p) => !_swipedPlaceIds.contains(p.id))
-            .toList();
-        filtered.shuffle();
-        if (filtered.isEmpty) _emptyReason = DeckEmptyReason.allSeen;
-        return filtered;
-      }
-    }
 
     final allPlaces = await _loadSoloPlaces(prefs);
     final matching = allPlaces
@@ -201,12 +171,7 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     return data[next];
   }
 
-  /// Undo is solo-only: in a group session a vote is already counted for
-  /// everyone and the session may complete on it.
-  bool get canUndo => _undoStack.isNotEmpty && !_inGroupSession;
-
-  bool get _inGroupSession =>
-      ref.read(groupControllerProvider).value?.activeSessionId != null;
+  bool get canUndo => _undoStack.isNotEmpty;
 
   PlaceModel? get currentPlace {
     final data = state.value;
@@ -227,19 +192,6 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     final authState = ref.read(authControllerProvider);
     if (authState.value != null) {
       final userId = authState.value!.uid;
-      final groupState = ref.read(groupControllerProvider).value;
-      final hasActiveSession = groupState?.activeSessionId != null;
-
-      if (hasActiveSession) {
-        _swipedPlaceIds.add(place.id);
-        try {
-          await ref
-              .read(groupControllerProvider.notifier)
-              .castVote(placeId: place.id, liked: true);
-        } catch (_) {}
-        return;
-      }
-
       if (!_favorites.contains(place.id)) {
         _favorites.add(place.id);
       }
@@ -281,19 +233,6 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     final authState = ref.read(authControllerProvider);
     if (authState.value != null) {
       final userId = authState.value!.uid;
-      final groupState = ref.read(groupControllerProvider).value;
-      final hasActiveSession = groupState?.activeSessionId != null;
-
-      if (hasActiveSession) {
-        _swipedPlaceIds.add(place.id);
-        try {
-          await ref
-              .read(groupControllerProvider.notifier)
-              .castVote(placeId: place.id, liked: false);
-        } catch (_) {}
-        return;
-      }
-
       Future<void> save() async {
         try {
           await _placesRepo.recordSwipe(
@@ -322,10 +261,6 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
   }
 
   _SwipeStep? _pushUndo(PlaceModel place, {required bool liked}) {
-    if (_inGroupSession) {
-      _undoStack.clear();
-      return null;
-    }
     final step = _SwipeStep(index: _currentIndex, place: place, liked: liked);
     _undoStack.add(step);
     if (_undoStack.length > _maxUndo) _undoStack.removeAt(0);

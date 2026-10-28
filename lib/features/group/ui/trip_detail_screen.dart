@@ -6,6 +6,7 @@ import '../../../common/models/group_model.dart';
 import '../../../common/models/place_model.dart';
 import '../../../common/models/trip_idea.dart';
 import '../../../common/models/trip_poll.dart';
+import '../../../common/utils/group_swipes.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../../common/widgets/place_photo.dart';
 import '../../../core/errors/user_message.dart';
@@ -16,7 +17,6 @@ import '../logic/group_controller.dart';
 import '../logic/trip_controller.dart';
 import '../widgets/idea_sheet.dart';
 import '../widgets/poll_sheet.dart';
-import '../widgets/swipe_session_sheet.dart';
 import '../widgets/sync_badge.dart';
 import '../widgets/trip_members_sheet.dart';
 import '../widgets/trip_ui.dart';
@@ -137,7 +137,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
             );
           }
           final ideas =
-              ref.watch(tripIdeasProvider(widget.groupId)).value ?? const [];
+              ref.watch(tripWishlistProvider(widget.groupId)).value ??
+                  const [];
           final plannable = ideas.where((i) => i.placeId != null).length;
           return Stack(
             children: [
@@ -577,7 +578,9 @@ class _IdeaRow extends ConsumerWidget {
 
     return InkWell(
       onTap: open,
-      onLongPress: idea.addedBy == uid ? delete : null,
+      // A swipe match has no idea document to delete; a veto removes it.
+      onLongPress:
+          idea.addedBy == uid && !isSwipeMatchIdea(idea) ? delete : null,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         child: Row(
@@ -687,43 +690,29 @@ class _MoreSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final isAdmin = group.ownerUid == uid;
-    final live = group.activeSessionId != null;
     final id = group.groupId;
     final city = group.location?.cityName ?? '';
     final plan = group.tripPlan;
-
-    Future<void> startSwipe() async {
-      // The start sheet works on the selected group; wait until it is ours.
-      ref.read(selectedGroupIdProvider.notifier).updateState(id);
-      final selected = await ref.read(groupControllerProvider.future);
-      if (!context.mounted || selected?.groupId != id) return;
-      if (await showStartSessionSheet(context) && context.mounted) {
-        context.push('/swipe/$id');
-      }
-    }
-
-    Future<void> importMatches() async {
-      final lang = Localizations.localeOf(context).languageCode;
-      try {
-        final added = await ref
-            .read(tripActionsProvider.notifier)
-            .importSwipeMatches(group, ideas, lang);
-        if (context.mounted) {
-          showTripSnack(context, l10n.tripMatchesImported(added));
-        }
-      } catch (e) {
-        if (context.mounted) {
-          showTripSnack(context,
-              userMessage(e, fallback: l10n.errorLoadResults, l10n: l10n),
-              error: true);
-        }
-      }
-    }
+    final places = ref.watch(tripSwipePlacesProvider(id)).value;
+    final mine = (ref.watch(tripSwipesProvider(id)).value ?? const [])
+        .where((m) => m.uid == uid)
+        .firstOrNull;
+    final left = places
+        ?.where((p) => !(mine?.votes.containsKey(p.id) ?? false))
+        .length;
 
     return InsetGroup(
       separatorIndent: 14 + 28 + 12,
       children: [
+        // Open to every member at any time; matches go to the wishlist.
+        _ActionRow(
+          icon: Icons.swipe_rounded,
+          title: l10n.tripSwipeTitle,
+          subtitle: left == null || mine == null
+              ? l10n.tripSwipeSubtitle(city)
+              : l10n.tripSwipeLeft(left),
+          onTap: () => context.push('/trip/$id/swipe'),
+        ),
         if (plan != null && !plan.isEmpty)
           _ActionRow(
             icon: Icons.map_outlined,
@@ -731,33 +720,6 @@ class _MoreSection extends ConsumerWidget {
             subtitle: l10n.tripPlanStops(plan.stopCount),
             onTap: () => context.push('/trip/$id/day/0'),
           ),
-        if (live)
-          _ActionRow(
-            icon: Icons.swipe_rounded,
-            title: l10n.tripSwipeLive,
-            subtitle: l10n.continueSwiping,
-            onTap: () => context.push('/swipe/$id'),
-          )
-        else
-          _ActionRow(
-            icon: Icons.swipe_rounded,
-            title: l10n.tripSwipeTitle,
-            subtitle:
-                isAdmin ? l10n.tripSwipeSubtitle(city) : l10n.waitingForAdmin,
-            onTap: isAdmin ? startSwipe : null,
-          ),
-        if (group.hasCompletedSession) ...[
-          _ActionRow(
-            icon: Icons.emoji_events_outlined,
-            title: l10n.viewMatches,
-            onTap: () => context.push('/group-matches/$id'),
-          ),
-          _ActionRow(
-            icon: Icons.playlist_add_rounded,
-            title: l10n.tripImportMatches,
-            onTap: importMatches,
-          ),
-        ],
         _ActionRow(
           icon: Icons.group_outlined,
           title: l10n.membersHeader(group.members.length),
