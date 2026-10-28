@@ -48,9 +48,11 @@
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>This app requires access to the photo library to upload profile images.</string>
+		<string>TripFam uses your photos for your profile picture and for journal entries on your trips.</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>TripFam saves pictures you create, such as your trip recap or a passport page, to your photos.</string>
 		<key>NSCameraUsageDescription</key>
-		<string>This app requires access to the camera to take profile photos.</string>
+		<string>TripFam uses the camera for your profile picture and for journal photos on your trips.</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>This app uses your location to show places to swipe near you.</string>
 		<key>LSApplicationQueriesSchemes</key>
