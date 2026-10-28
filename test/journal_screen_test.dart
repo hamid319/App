@@ -51,8 +51,9 @@ void main() {
   testWidgets('empty journal invites the first memory', (tester) async {
     await _pump(tester, const []);
     expect(find.text('No memories yet'), findsOneWidget);
-    expect(find.text('Add entry'), findsOneWidget);
-    expect(find.text('View recap'), findsOneWidget);
+    // The trip has ended, so both buttons share the row (short labels).
+    expect(find.text('Entry'), findsOneWidget);
+    expect(find.text('Recap'), findsOneWidget);
   });
 
   testWidgets('entries are grouped under their trip day', (tester) async {
