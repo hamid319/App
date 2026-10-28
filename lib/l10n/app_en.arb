@@ -1092,6 +1092,8 @@
     }
   },
   "journalOpenRecap": "View recap",
+  "journalRecapShort": "Recap",
+  "journalAddShort": "Entry",
   "journalPhotoOf": "Photo {index} of {total}",
   "@journalPhotoOf": {
     "placeholders": {

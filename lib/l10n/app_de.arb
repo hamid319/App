@@ -602,6 +602,8 @@
   "journalDeleteBody": "Die Fotos werden mit gelöscht.",
   "journalPhotoCount": "{count, plural, =1{1 Foto} other{{count} Fotos}}",
   "journalOpenRecap": "Rückblick ansehen",
+  "journalRecapShort": "Rückblick",
+  "journalAddShort": "Eintrag",
   "journalPhotoOf": "Foto {index} von {total}",
   "recapTitle": "Rückblick",
   "recapStatDays": "{count, plural, =1{Tag} other{Tage}}",

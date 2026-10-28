@@ -2135,6 +2135,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get journalOpenRecap => 'Rückblick ansehen';
 
   @override
+  String get journalRecapShort => 'Rückblick';
+
+  @override
+  String get journalAddShort => 'Eintrag';
+
+  @override
   String journalPhotoOf(int index, int total) {
     return 'Foto $index von $total';
   }

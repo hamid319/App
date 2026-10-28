@@ -2104,6 +2104,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journalOpenRecap => 'View recap';
 
   @override
+  String get journalRecapShort => 'Recap';
+
+  @override
+  String get journalAddShort => 'Entry';
+
+  @override
   String journalPhotoOf(int index, int total) {
     return 'Photo $index of $total';
   }

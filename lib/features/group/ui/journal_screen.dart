@@ -53,11 +53,13 @@ class JournalScreen extends ConsumerWidget {
           final entries = journal.value ?? const <JournalEntry>[];
           final canRecap = entries.isNotEmpty ||
               isTripOver(group.tripStart, group.tripEnd, DateTime.now());
-          final add = FloatingPrimaryButton(
-            label: l10n.journalAddEntry,
-            icon: Icons.add_rounded,
-            onPressed: () => showJournalEntrySheet(context, group),
-          );
+          // Side by side with the recap button the long label does not fit.
+          FloatingPrimaryButton add({required bool short}) =>
+              FloatingPrimaryButton(
+                label: short ? l10n.journalAddShort : l10n.journalAddEntry,
+                icon: Icons.add_rounded,
+                onPressed: () => showJournalEntrySheet(context, group),
+              );
           return Stack(
             children: [
               journal.when(
@@ -86,17 +88,17 @@ class JournalScreen extends ConsumerWidget {
                                 ),
                                 onPressed: () =>
                                     context.push('/trip/$groupId/recap'),
-                                child: Text(l10n.journalOpenRecap,
+                                child: Text(l10n.journalRecapShort,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis),
                               ),
                             ),
                           ),
                           const SizedBox(width: 10),
-                          Expanded(child: add),
+                          Expanded(child: add(short: true)),
                         ],
                       )
-                    : add,
+                    : add(short: false),
               ),
             ],
           );

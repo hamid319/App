@@ -3710,6 +3710,18 @@ abstract class AppLocalizations {
   /// **'View recap'**
   String get journalOpenRecap;
 
+  /// No description provided for @journalRecapShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Recap'**
+  String get journalRecapShort;
+
+  /// No description provided for @journalAddShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry'**
+  String get journalAddShort;
+
   /// No description provided for @journalPhotoOf.
   ///
   /// In en, this message translates to:

@@ -206,7 +206,6 @@ class _JournalEntrySheetState extends ConsumerState<_JournalEntrySheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SheetGrabber(),
               Text(_editing ? l10n.journalEditText : l10n.journalAddEntry,
                   style: text.headlineSmall),
               const SizedBox(height: 12),
