@@ -20,7 +20,7 @@ passport stamp for every city they travel to.
 - **Costs**: shared expenses, who owes whom, edit and delete.
 - **Journal**: entries with up to 6 photos per day, and a shareable trip
   recap (stats, collage, map, PNG via the share sheet).
-- **Passport** (profile): a booklet with a data page, 3D page turns, and a
+- **TripFam Pass** (profile): a passport-style booklet with a data page, 3D page turns, and a
   stamp per city of trips that have begun.
 - **Discover** (`/home`): curated places per city with must-sees, tonight and
   hidden gems; reviews and favourites.

@@ -14,7 +14,6 @@ import '../../../common/widgets/error_view.dart';
 import '../../../common/widgets/member_avatar.dart';
 import '../../../common/widgets/tripfam_mark.dart';
 import '../../../common/widgets/widget_capture.dart';
-import '../../../core/config/app_config.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../core/services/preferences_service.dart';
@@ -353,30 +352,36 @@ class _Turning extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (amount >= 1) return const SizedBox.shrink();
-    return Transform(
-      alignment: Alignment.centerLeft,
-      transform: Matrix4.identity()
-        ..setEntry(3, 2, 0.0012)
-        ..rotateY(amount * math.pi / 2),
-      child: _Shaded(
-        amount: amount * 0.3,
-        child: Stack(fit: StackFit.expand, children: [
-          child,
-          // Light catching the page as it lifts.
-          if (amount > 0)
-            IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: _pageRadius,
-                  gradient: LinearGradient(colors: [
-                    Colors.white.withValues(alpha: 0),
-                    Colors.white
-                        .withValues(alpha: math.sin(amount * math.pi) * 0.25),
-                  ]),
+    // Mild perspective: the free edge comes towards the viewer, and with a
+    // strong one it would swell across the screen near the end. The page
+    // fades over the last part of the turn for the same reason.
+    return Opacity(
+      opacity: (1 - (amount - 0.6) / 0.4).clamp(0.0, 1.0),
+      child: Transform(
+        alignment: Alignment.centerLeft,
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, 0.0006)
+          ..rotateY(amount * math.pi / 2),
+        child: _Shaded(
+          amount: amount * 0.3,
+          child: Stack(fit: StackFit.expand, children: [
+            child,
+            // Light catching the page as it lifts.
+            if (amount > 0)
+              IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: _pageRadius,
+                    gradient: LinearGradient(colors: [
+                      Colors.white.withValues(alpha: 0),
+                      Colors.white
+                          .withValues(alpha: math.sin(amount * math.pi) * 0.25),
+                    ]),
+                  ),
                 ),
               ),
-            ),
-        ]),
+          ]),
+        ),
       ),
     );
   }
@@ -564,8 +569,6 @@ class _Cover extends StatelessWidget {
                 child: const TripFamMark(size: 96),
               ),
               const SizedBox(height: 24),
-              foil(Text(AppConfig.appName.toUpperCase(),
-                  style: gold(15, spacing: 4, weight: FontWeight.w600))),
               if (name != null && name!.trim().isNotEmpty) ...[
                 const SizedBox(height: 6),
                 Text(name!, style: gold(13)),
@@ -755,7 +758,7 @@ class _PassportPage extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(l10n.passportVisas,
+                    Text(l10n.passportPageTitle,
                         style: const TextStyle(
                             color: _ink,
                             fontSize: 11,

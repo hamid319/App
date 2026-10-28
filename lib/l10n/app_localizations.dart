@@ -3725,19 +3725,19 @@ abstract class AppLocalizations {
   /// No description provided for @passportTitle.
   ///
   /// In en, this message translates to:
-  /// **'Passport'**
+  /// **'TripFam Pass'**
   String get passportTitle;
 
   /// No description provided for @passportCoverTitle.
   ///
   /// In en, this message translates to:
-  /// **'PASSPORT'**
+  /// **'TRIPFAM PASS'**
   String get passportCoverTitle;
 
   /// No description provided for @passportCoverSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'OF YOUR TRIPS'**
+  /// **'YOUR TRAVEL STAMPS'**
   String get passportCoverSubtitle;
 
   /// No description provided for @passportDataName.
@@ -3779,7 +3779,7 @@ abstract class AppLocalizations {
   /// No description provided for @passportShareTitle.
   ///
   /// In en, this message translates to:
-  /// **'My travel passport'**
+  /// **'My TripFam Pass'**
   String get passportShareTitle;
 
   /// No description provided for @passportShareStats.
@@ -3800,11 +3800,11 @@ abstract class AppLocalizations {
   /// **'Couldn\'t create the image.'**
   String get passportShareError;
 
-  /// No description provided for @passportVisas.
+  /// No description provided for @passportPageTitle.
   ///
   /// In en, this message translates to:
-  /// **'VISAS'**
-  String get passportVisas;
+  /// **'STAMPS'**
+  String get passportPageTitle;
 
   /// No description provided for @passportTapToOpen.
   ///

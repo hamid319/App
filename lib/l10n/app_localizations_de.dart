@@ -2141,13 +2141,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get journalAddShort => 'Eintrag';
 
   @override
-  String get passportTitle => 'Reisepass';
+  String get passportTitle => 'TripFam Pass';
 
   @override
-  String get passportCoverTitle => 'REISEPASS';
+  String get passportCoverTitle => 'TRIPFAM PASS';
 
   @override
-  String get passportCoverSubtitle => 'DEINER REISEN';
+  String get passportCoverSubtitle => 'DEINE REISESTEMPEL';
 
   @override
   String get passportDataName => 'Name';
@@ -2168,7 +2168,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get passportShare => 'Seite teilen';
 
   @override
-  String get passportShareTitle => 'Mein Reisepass';
+  String get passportShareTitle => 'Mein TripFam Pass';
 
   @override
   String passportShareStats(int countries, int cities) {
@@ -2194,7 +2194,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get passportShareError => 'Das Bild konnte nicht erstellt werden.';
 
   @override
-  String get passportVisas => 'VISA';
+  String get passportPageTitle => 'STEMPEL';
 
   @override
   String get passportTapToOpen => 'Zum Öffnen tippen';
