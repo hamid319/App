@@ -6,7 +6,7 @@ swipe places, day plans on a map, split costs, journal with photos, and a
 passport with a stamp per city. Owner: Hamid (GitHub `hamid319/App`).
 
 ## Stack
-Flutter · Riverpod 3 · Firebase (Auth, Firestore, Storage, Hosting) · GoRouter 17 · Mapbox Maps · share_plus · audioplayers · flutter_dotenv
+Flutter · Riverpod 3 · Firebase (Auth, Firestore, Storage, Hosting) · GoRouter 17 · Mapbox Maps · share_plus · audioplayers · flutter_local_notifications · flutter_dotenv
 
 ## Architecture: Feature-First Clean Architecture
 
@@ -74,7 +74,8 @@ Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so
 
 ## Firestore structure (short form)
 ```
-/users/{uid}           favorites: string[], groups: string[]
+/users/{uid}           favorites: string[], groups: string[],
+                       checkIns: map<cityKey, Timestamp> (passport GPS check-ins; no check-in = pale stamp)
 /inviteCodes/{code}    groupId, createdAt, title, cityName, ownerName (get only, no list; written by the owner)
 /groups/{groupId}      members: string[], invite.code: string, tripPlan
   /ideas/{id}          wishlist entries (placeId?, title, addedBy, likedBy, source)
@@ -115,7 +116,7 @@ Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so
 Built and on `main`: trips with invites (web invite page in `web_invite/` on
 Firebase Hosting), group swipe and wishlist, add to trip, day plans on
 Mapbox, costs (edit/delete), offline mode, journal with photos and trip
-recap, TripFam Pass with stamps and sharing (profile), the trip's group
+recap, TripFam Pass with stamps, GPS check-in on site and sharing (profile), the trip's group
 swipe deck with super-like, one veto per member and matches on the
 wishlist, password reset, onboarding, dark mode, account deletion, iOS
 privacy manifest.
@@ -123,7 +124,6 @@ privacy manifest.
 Not started or open:
 - FCM push notifications
 - Affiliate links (GetYourGuide/Viator, check their terms first)
-- Passport: GPS check-in on site
 - Untested by the owner: account deletion (throwaway account), offline mode,
   a real web-invite join with a second account, sound and haptics on a real
   iPhone, the Android runtime

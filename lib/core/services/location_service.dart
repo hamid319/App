@@ -6,13 +6,17 @@ class LocationService {
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      return permission == LocationPermission.always || permission == LocationPermission.whileInUse;
+      return permission == LocationPermission.always ||
+          permission == LocationPermission.whileInUse;
     }
-    return permission == LocationPermission.always || permission == LocationPermission.whileInUse;
+    return permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse;
   }
 
-  Future<Position> getCurrentLocation() async {
-    if (AppConfig.useFixedDevLocation) return _defaultPosition();
+  /// [real] skips the dev location: a passport check-in must be where
+  /// the device really is.
+  Future<Position> getCurrentLocation({bool real = false}) async {
+    if (AppConfig.useFixedDevLocation && !real) return _defaultPosition();
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) throw Exception('Location services are disabled.');
     await requestPermission();

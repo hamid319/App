@@ -14,6 +14,8 @@ import UIKit
       .trimmingCharacters(in: .whitespaces) ?? ""
     let mapsConfigured = !mapboxToken.isEmpty && !mapboxToken.hasPrefix("$(")
     GeneratedPluginRegistrant.register(with: self)
+    // Local notifications (check-in reminders), also while the app is open.
+    UNUserNotificationCenter.current().delegate = self
     if let controller = window?.rootViewController as? FlutterViewController {
       FlutterMethodChannel(name: "swipetrip/maps", binaryMessenger: controller.binaryMessenger)
         .setMethodCallHandler { call, result in

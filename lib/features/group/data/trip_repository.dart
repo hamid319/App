@@ -41,6 +41,27 @@ class TripRepository {
       .map((snap) =>
           snap.docs.map((doc) => GroupModel.fromJson(doc.data())).toList());
 
+  // --- Passport check-ins ---
+
+  /// City key -> when [uid] checked in there on site.
+  Stream<Map<String, DateTime>> streamCheckIns(String uid) =>
+      _db.collection('users').doc(uid).snapshots().map((doc) {
+        final raw = doc.data()?['checkIns'];
+        return {
+          if (raw is Map)
+            for (final e in raw.entries)
+              if (e.value is Timestamp)
+                '${e.key}': (e.value as Timestamp).toDate(),
+        };
+      });
+
+  /// `uid` goes along because the users update rule requires it.
+  Future<void> checkIn(String uid, String cityKey) =>
+      _db.collection('users').doc(uid).set({
+        'uid': uid,
+        'checkIns': {cityKey: FieldValue.serverTimestamp()},
+      }, SetOptions(merge: true));
+
   // --- Sync state ---
 
   /// Whether one trip (its document, wishlist, polls and expenses) is
@@ -140,8 +161,7 @@ class TripRepository {
     if (existing.docs.isNotEmpty) {
       return (id: existing.docs.first.id, added: false);
     }
-    final id =
-        await addIdea(groupId, title: title, uid: uid, placeId: placeId);
+    final id = await addIdea(groupId, title: title, uid: uid, placeId: placeId);
     return (id: id, added: true);
   }
 
@@ -149,9 +169,8 @@ class TripRepository {
   Future<void> setIdeaLiked(
       String groupId, String ideaId, String uid, bool liked) {
     return _ideas(groupId).doc(ideaId).update({
-      'likedBy': liked
-          ? FieldValue.arrayUnion([uid])
-          : FieldValue.arrayRemove([uid]),
+      'likedBy':
+          liked ? FieldValue.arrayUnion([uid]) : FieldValue.arrayRemove([uid]),
     });
   }
 
@@ -252,8 +271,7 @@ class TripRepository {
             snap.docs.map((d) => TripExpense.fromJson(d.id, d.data())).toList();
         final far = DateTime(9999);
         // Pending server timestamps (null) are the newest.
-        list.sort(
-            (a, b) => (b.createdAt ?? far).compareTo(a.createdAt ?? far));
+        list.sort((a, b) => (b.createdAt ?? far).compareTo(a.createdAt ?? far));
         return list;
       });
 

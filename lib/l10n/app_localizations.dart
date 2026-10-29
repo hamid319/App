@@ -98,6 +98,66 @@ abstract class AppLocalizations {
     Locale('en')
   ];
 
+  /// No description provided for @checkInReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived in {city}?'**
+  String checkInReminderTitle(String city);
+
+  /// No description provided for @checkInReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open TripFam and get your passport stamp.'**
+  String get checkInReminderBody;
+
+  /// No description provided for @checkInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get your stamp'**
+  String get checkInTitle;
+
+  /// No description provided for @checkInSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'In {city}? Check in on site'**
+  String checkInSubtitle(String city);
+
+  /// No description provided for @checkInStamped.
+  ///
+  /// In en, this message translates to:
+  /// **'Stamped'**
+  String get checkInStamped;
+
+  /// No description provided for @checkInOpenPass.
+  ///
+  /// In en, this message translates to:
+  /// **'See it in your TripFam Pass'**
+  String get checkInOpenPass;
+
+  /// No description provided for @checkInDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Stamped! {city} is now in your pass.'**
+  String checkInDone(String city);
+
+  /// No description provided for @checkInTooFar.
+  ///
+  /// In en, this message translates to:
+  /// **'You are still {km} km from {city}. Check in once you are there.'**
+  String checkInTooFar(int km, String city);
+
+  /// No description provided for @checkInNoLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'We need your location for the stamp. Allow it in the settings.'**
+  String get checkInNoLocation;
+
+  /// No description provided for @passportStampPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Check in on site'**
+  String get passportStampPending;
+
   /// No description provided for @cancel.
   ///
   /// In en, this message translates to:

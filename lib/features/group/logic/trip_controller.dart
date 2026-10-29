@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../common/models/group_model.dart';
@@ -14,6 +16,7 @@ import '../../../common/models/trip_poll.dart';
 import '../../../common/models/user_model.dart';
 import '../../../common/utils/day_route.dart';
 import '../../../common/utils/group_swipes.dart';
+import '../../../common/utils/passport_stamps.dart';
 import '../../../common/utils/trip_days.dart';
 import '../../../common/widgets/member_avatar.dart' show friendlyMemberName;
 import '../../../core/config/app_config.dart';
@@ -70,21 +73,19 @@ final tripWishlistProvider = Provider.autoDispose
 final tripSwipePlacesProvider = FutureProvider.autoDispose
     .family<List<PlaceModel>, String>((ref, groupId) async {
   // Only a change of city reloads the deck, not every trip update.
-  final cityId = ref.watch(
-      tripProvider(groupId).select((t) => t.value?.location?.cityId));
+  final cityId =
+      ref.watch(tripProvider(groupId).select((t) => t.value?.location?.cityId));
   final location = ref.read(tripProvider(groupId)).value?.location;
   if (cityId == null || location == null) return const [];
   final repo = ref.read(placesRepositoryProvider);
   final curated =
       await repo.loadCityPlaces(PlacesRepository.curatedCityId(location));
-  final sights = curated
-      .where((p) => !p.isVenue)
-      .take(AppConfig.groupDeckSize)
-      .toList();
+  final sights =
+      curated.where((p) => !p.isVenue).take(AppConfig.groupDeckSize).toList();
   if (sights.isNotEmpty) return sights;
   // A city without a curated import: the shared pool, in a fixed order.
-  final pool = await repo.fetchPlacesForCity(location,
-      limit: AppConfig.maxPlacesLimit);
+  final pool =
+      await repo.fetchPlacesForCity(location, limit: AppConfig.maxPlacesLimit);
   return pool..sort((a, b) => a.id.compareTo(b.id));
 });
 
@@ -178,6 +179,49 @@ class TripActions extends Notifier<void> {
     if (uid == null) throw StateError('Not authenticated');
     return uid;
   }
+
+  /// Checks in at the trip's city for the passport stamp when the device
+  /// is near it. Returns null when checked in, else the distance in km.
+  Future<int?> checkIn(GroupModel trip) async {
+    final uid = _uid;
+    final pos =
+        await ref.read(locationServiceProvider).getCurrentLocation(real: true);
+    final km = _km(pos, trip.location!);
+    if (km > AppConfig.checkInRadiusKm) return km.round();
+    _checkIn(uid, trip.location!);
+    return null;
+  }
+
+  /// Checks in silently at those of [trips] the device is near, if the
+  /// location is already allowed and on (never asks). Returns those.
+  Future<List<GroupModel>> autoCheckIn(List<GroupModel> trips) async {
+    final uid = _uid;
+    final allowed = await Geolocator.checkPermission();
+    if (allowed != LocationPermission.whileInUse &&
+        allowed != LocationPermission.always) {
+      return const [];
+    }
+    if (!await Geolocator.isLocationServiceEnabled()) return const [];
+    final pos =
+        await ref.read(locationServiceProvider).getCurrentLocation(real: true);
+    final near = [
+      for (final t in trips)
+        if (_km(pos, t.location!) <= AppConfig.checkInRadiusKm) t,
+    ];
+    for (final t in near) {
+      _checkIn(uid, t.location!);
+    }
+    return near;
+  }
+
+  double _km(Position pos, GroupLocation place) =>
+      Geolocator.distanceBetween(
+          pos.latitude, pos.longitude, place.lat, place.lng) /
+      1000;
+
+  // Not awaited: offline it is queued and applied locally at once.
+  void _checkIn(String uid, GroupLocation place) =>
+      unawaited(_repo.checkIn(uid, stampKey(place)));
 
   Future<void> addIdea(String groupId, String title, {String? placeId}) {
     final text = title.trim();

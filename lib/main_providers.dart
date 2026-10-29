@@ -3,6 +3,7 @@ import 'core/services/auth_service.dart';
 import 'core/services/calendar_service.dart';
 import 'core/services/firestore_service.dart';
 import 'core/services/location_service.dart';
+import 'core/services/trip_reminder_service.dart';
 import 'common/models/group_model.dart';
 import 'features/group/data/trip_repository.dart';
 import 'features/profile/data/profile_repository.dart';
@@ -19,6 +20,9 @@ final profileRepositoryProvider = Provider<ProfileRepository>(
 final placesRepositoryProvider = Provider<PlacesRepository>(
   (ref) => PlacesRepository(),
 );
+/// Local notifications (check-in reminders).
+final tripReminderServiceProvider =
+    Provider<TripReminderService>((ref) => TripReminderService());
 final calendarServiceProvider =
     Provider<CalendarService>((ref) => CalendarService());
 
@@ -40,6 +44,13 @@ final myTripsProvider = StreamProvider<List<GroupModel>>((ref) {
   final uid = ref.watch(currentAccountProvider).value?.uid;
   if (uid == null) return Stream.value(const []);
   return ref.watch(tripRepositoryProvider).streamUserTrips(uid);
+});
+
+/// Cities the signed-in user checked in at on site (passport stamps).
+final checkInsProvider = StreamProvider<Map<String, DateTime>>((ref) {
+  final uid = ref.watch(currentAccountProvider).value?.uid;
+  if (uid == null) return Stream.value(const {});
+  return ref.watch(tripRepositoryProvider).streamCheckIns(uid);
 });
 
 /// Whether a trip's wishlist already has an idea for a place.

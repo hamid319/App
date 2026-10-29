@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -7,11 +8,13 @@ import '../../../common/models/place_model.dart';
 import '../../../common/models/trip_idea.dart';
 import '../../../common/models/trip_poll.dart';
 import '../../../common/utils/group_swipes.dart';
+import '../../../common/utils/passport_stamps.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../../common/widgets/place_photo.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../core/services/link_launcher.dart';
 import '../../../l10n/l10n.dart';
+import '../../../main_providers.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../logic/group_controller.dart';
 import '../logic/trip_controller.dart';
@@ -137,8 +140,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
             );
           }
           final ideas =
-              ref.watch(tripWishlistProvider(widget.groupId)).value ??
-                  const [];
+              ref.watch(tripWishlistProvider(widget.groupId)).value ?? const [];
           final plannable = ideas.where((i) => i.placeId != null).length;
           return Stack(
             children: [
@@ -255,6 +257,11 @@ class _PlanBody extends ConsumerWidget {
                 TripSectionControl(
                     groupId: group.groupId, selected: TripSection.plan),
                 const SizedBox(height: 16),
+                // During the trip, up top: the passport check-in.
+                if (_canCheckIn(group)) ...[
+                  InsetGroup(children: [_CheckInRow(group: group)]),
+                  const SizedBox(height: 16),
+                ],
                 for (final poll in polls) ...[
                   _PollCard(group: group, poll: poll, uid: uid),
                   const SizedBox(height: 12),
@@ -571,8 +578,7 @@ class _IdeaRow extends ConsumerWidget {
       );
       if (ok == true && context.mounted) {
         final actions = ref.read(tripActionsProvider.notifier);
-        runTripWrite(
-            context, () => actions.deleteIdea(group.groupId, idea.id));
+        runTripWrite(context, () => actions.deleteIdea(group.groupId, idea.id));
       }
     }
 
@@ -697,9 +703,8 @@ class _MoreSection extends ConsumerWidget {
     final mine = (ref.watch(tripSwipesProvider(id)).value ?? const [])
         .where((m) => m.uid == uid)
         .firstOrNull;
-    final left = places
-        ?.where((p) => !(mine?.votes.containsKey(p.id) ?? false))
-        .length;
+    final left =
+        places?.where((p) => !(mine?.votes.containsKey(p.id) ?? false)).length;
 
     return InsetGroup(
       separatorIndent: 14 + 28 + 12,
@@ -727,6 +732,64 @@ class _MoreSection extends ConsumerWidget {
           onTap: () => showTripMembersSheet(context, group, uid),
         ),
       ],
+    );
+  }
+}
+
+bool _canCheckIn(GroupModel group) {
+  final place = group.location;
+  return place != null &&
+      (place.lat != 0 || place.lng != 0) &&
+      isTripNow(group, DateTime.now());
+}
+
+/// During the trip: check in on site for the city's passport stamp.
+class _CheckInRow extends ConsumerStatefulWidget {
+  const _CheckInRow({required this.group});
+
+  final GroupModel group;
+
+  @override
+  ConsumerState<_CheckInRow> createState() => _CheckInRowState();
+}
+
+class _CheckInRowState extends ConsumerState<_CheckInRow> {
+  bool _busy = false;
+
+  Future<void> _checkIn() async {
+    final l10n = context.l10n;
+    final city = widget.group.location!.cityName;
+    setState(() => _busy = true);
+    try {
+      final km =
+          await ref.read(tripActionsProvider.notifier).checkIn(widget.group);
+      if (!mounted) return;
+      HapticFeedback.mediumImpact();
+      showTripSnack(context,
+          km == null ? l10n.checkInDone(city) : l10n.checkInTooFar(km, city));
+    } catch (_) {
+      // No permission, location off or no fix in time.
+      if (mounted) showTripSnack(context, l10n.checkInNoLocation, error: true);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final place = widget.group.location!;
+    final done = ref.watch(checkInsProvider).value?[stampKey(place)] != null;
+    return _ActionRow(
+      icon: done ? Icons.verified_rounded : Icons.approval_rounded,
+      title: done ? l10n.checkInStamped : l10n.checkInTitle,
+      subtitle:
+          done ? l10n.checkInOpenPass : l10n.checkInSubtitle(place.cityName),
+      trailing: _busy
+          ? const SizedBox.square(
+              dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+          : null,
+      onTap: _busy ? null : (done ? () => context.push('/passport') : _checkIn),
     );
   }
 }

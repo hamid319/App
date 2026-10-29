@@ -32,6 +32,9 @@ class AppConfig {
   // Places in a trip's group swipe deck: the city's best-known sights.
   static const int groupDeckSize = 60;
 
+  // How close to a trip's city (its centre) a passport check-in counts.
+  static const double checkInRadiusKm = 40;
+
   // Location used when GPS is skipped or fails: Los Angeles, where the
   // current Firestore test places are. Switch to Hamburg (53.5511, 9.9937)
   // once real Places data for Hamburg is loaded.

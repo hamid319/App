@@ -9,6 +9,45 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String checkInReminderTitle(String city) {
+    return 'Arrived in $city?';
+  }
+
+  @override
+  String get checkInReminderBody => 'Open TripFam and get your passport stamp.';
+
+  @override
+  String get checkInTitle => 'Get your stamp';
+
+  @override
+  String checkInSubtitle(String city) {
+    return 'In $city? Check in on site';
+  }
+
+  @override
+  String get checkInStamped => 'Stamped';
+
+  @override
+  String get checkInOpenPass => 'See it in your TripFam Pass';
+
+  @override
+  String checkInDone(String city) {
+    return 'Stamped! $city is now in your pass.';
+  }
+
+  @override
+  String checkInTooFar(int km, String city) {
+    return 'You are still $km km from $city. Check in once you are there.';
+  }
+
+  @override
+  String get checkInNoLocation =>
+      'We need your location for the stamp. Allow it in the settings.';
+
+  @override
+  String get passportStampPending => 'Check in on site';
+
+  @override
   String get cancel => 'Cancel';
 
   @override

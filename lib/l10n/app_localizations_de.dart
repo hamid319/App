@@ -9,6 +9,45 @@ class AppLocalizationsDe extends AppLocalizations {
   AppLocalizationsDe([String locale = 'de']) : super(locale);
 
   @override
+  String checkInReminderTitle(String city) {
+    return 'Angekommen in $city?';
+  }
+
+  @override
+  String get checkInReminderBody => 'Öffne TripFam und hol dir deinen Stempel.';
+
+  @override
+  String get checkInTitle => 'Stempel holen';
+
+  @override
+  String checkInSubtitle(String city) {
+    return 'In $city? Check vor Ort ein';
+  }
+
+  @override
+  String get checkInStamped => 'Gestempelt';
+
+  @override
+  String get checkInOpenPass => 'In deinem TripFam Pass ansehen';
+
+  @override
+  String checkInDone(String city) {
+    return 'Gestempelt! $city ist jetzt in deinem Pass.';
+  }
+
+  @override
+  String checkInTooFar(int km, String city) {
+    return 'Du bist noch $km km von $city entfernt. Check ein, sobald du da bist.';
+  }
+
+  @override
+  String get checkInNoLocation =>
+      'Für den Stempel brauchen wir deinen Standort. Erlaube ihn in den Einstellungen.';
+
+  @override
+  String get passportStampPending => 'Vor Ort einchecken';
+
+  @override
   String get cancel => 'Abbrechen';
 
   @override

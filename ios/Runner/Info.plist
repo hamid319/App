@@ -54,7 +54,7 @@
 		<key>NSCameraUsageDescription</key>
 		<string>TripFam uses the camera for your profile picture and for journal photos on your trips.</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>This app uses your location to show places to swipe near you.</string>
+		<string>TripFam uses your location to show places near you and to check you in on site for your passport stamp.</string>
 		<key>LSApplicationQueriesSchemes</key>
 		<array>
 			<string>comgooglemaps</string>

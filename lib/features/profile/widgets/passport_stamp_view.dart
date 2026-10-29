@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import '../../../common/utils/passport_stamps.dart';
+import '../../../l10n/l10n.dart';
 
 // Stamp ink on passport paper. The paper stays light in dark mode too
 // (it is a physical object), so these do not follow the theme.
@@ -42,6 +43,8 @@ class PassportStampView extends StatelessWidget {
     final icon = _icons[(seed >> 14) % _icons.length];
     final locale = Localizations.localeOf(context).toLanguageTag();
     final date = DateFormat.yMMMd(locale).format(stamp.date);
+    // Not checked in on site: a faint stamp asking for the check-in.
+    final line = stamp.checkedIn ? date : context.l10n.passportStampPending;
 
     final radius = switch (shape) {
       0 => null,
@@ -63,55 +66,57 @@ class PassportStampView extends StatelessWidget {
         );
 
     return Semantics(
-      label: '${stamp.cityName}, $date',
-      child: Transform.rotate(
-        angle: angle,
-        // Uneven ink: one side pressed harder than the other, as with a
-        // real rubber stamp. The light spot sits where the seed puts it.
-        child: ShaderMask(
-          blendMode: BlendMode.dstIn,
-          shaderCallback: (r) => RadialGradient(
-            center: Alignment(
-              ((seed >> 20) % 21 - 10) / 10,
-              ((seed >> 26) % 21 - 10) / 10,
-            ),
-            radius: 1.1,
-            colors: const [Color(0xF0FFFFFF), Color(0x8CFFFFFF)],
-          ).createShader(r),
-          child: Container(
-            width: shape == 1 ? size * 1.4 : size,
-            height: size,
-            decoration: ring(size * 0.03),
-            child: Container(
-              margin: EdgeInsets.all(size * 0.04),
-              padding: EdgeInsets.symmetric(horizontal: size * 0.12),
-              decoration: ring(size * 0.012),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (stamp.countryCode.isNotEmpty)
-                    Text(stamp.countryCode.toUpperCase(),
-                        style: style(0.09,
-                            weight: FontWeight.w700, spacing: size * 0.02)),
-                  Icon(icon, color: ink, size: size * 0.2),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(stamp.cityName.toUpperCase(),
-                        maxLines: 1,
-                        style: style(0.13, weight: FontWeight.w900)),
+        label: '${stamp.cityName}, $line',
+        child: Opacity(
+          opacity: stamp.checkedIn ? 1 : 0.32,
+          child: Transform.rotate(
+            angle: angle,
+            // Uneven ink: one side pressed harder than the other, as with a
+            // real rubber stamp. The light spot sits where the seed puts it.
+            child: ShaderMask(
+              blendMode: BlendMode.dstIn,
+              shaderCallback: (r) => RadialGradient(
+                center: Alignment(
+                  ((seed >> 20) % 21 - 10) / 10,
+                  ((seed >> 26) % 21 - 10) / 10,
+                ),
+                radius: 1.1,
+                colors: const [Color(0xF0FFFFFF), Color(0x8CFFFFFF)],
+              ).createShader(r),
+              child: Container(
+                width: shape == 1 ? size * 1.4 : size,
+                height: size,
+                decoration: ring(size * 0.03),
+                child: Container(
+                  margin: EdgeInsets.all(size * 0.04),
+                  padding: EdgeInsets.symmetric(horizontal: size * 0.12),
+                  decoration: ring(size * 0.012),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (stamp.countryCode.isNotEmpty)
+                        Text(stamp.countryCode.toUpperCase(),
+                            style: style(0.09,
+                                weight: FontWeight.w700, spacing: size * 0.02)),
+                      Icon(icon, color: ink, size: size * 0.2),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(stamp.cityName.toUpperCase(),
+                            maxLines: 1,
+                            style: style(0.13, weight: FontWeight.w900)),
+                      ),
+                      SizedBox(height: size * 0.02),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(line.toUpperCase(), style: style(0.08)),
+                      ),
+                    ],
                   ),
-                  SizedBox(height: size * 0.02),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(date.toUpperCase(), style: style(0.08)),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 }
 

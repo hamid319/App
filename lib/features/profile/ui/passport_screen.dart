@@ -69,12 +69,18 @@ class _PassportScreenState extends ConsumerState<PassportScreen>
   Future<void> _loadSeen(String uid, List<PassportStamp> stamps) async {
     _loadingSeen = true;
     final seen = await PreferencesService.getSeenStamps(uid);
-    final all = stamps.map((s) => s.cityId).toSet();
+    // Only checked-in stamps are pressed on; ':in' so a stamp checked in
+    // after it was first seen pencilled in is pressed on once more.
+    final all = {
+      for (final s in stamps)
+        if (s.checkedIn) '${s.cityId}:in',
+    };
     await PreferencesService.setSeenStamps(uid, {...seen, ...all});
     if (!mounted) return;
     setState(() => _fresh = all.difference(seen));
     // Leaf to the first page with a new stamp once the cover is open.
-    final first = stamps.indexWhere((s) => !seen.contains(s.cityId));
+    final first = stamps
+        .indexWhere((s) => s.checkedIn && !seen.contains('${s.cityId}:in'));
     if (first < 0) return;
     void leaf() => _turnTo((first ~/ _stampsPerPage + 1).toDouble());
     if (_open.isCompleted) return leaf();
@@ -253,7 +259,7 @@ class _PassportScreenState extends ConsumerState<PassportScreen>
               showNext: i == pages - 1,
               empty: stamps.isEmpty,
               isFresh: (s) =>
-                  (_fresh?.contains(s.cityId) ?? false) &&
+                  (_fresh?.contains('${s.cityId}:in') ?? false) &&
                   !_played.contains(s.cityId),
               onPlayed: (s) => _played.add(s.cityId),
               // Before the cover is open, wait for it and the turn from the

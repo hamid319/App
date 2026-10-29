@@ -44,4 +44,17 @@ void main() {
     await repo.setSwipeVeto('g', 'me', null);
     expect((await mine()).veto, isNull);
   });
+
+  test('check-ins merge into the user document', () async {
+    await db.collection('users').doc('me').set({
+      'uid': 'me',
+      'favorites': ['x']
+    });
+    await repo.checkIn('me', 'lisbon');
+    await repo.checkIn('me', 'porto');
+    expect((await repo.streamCheckIns('me').first).keys,
+        unorderedEquals(['lisbon', 'porto']));
+    expect((await db.collection('users').doc('me').get()).data()!['favorites'],
+        ['x']);
+  });
 }
