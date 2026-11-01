@@ -76,14 +76,13 @@ void main() {
       expect(places.map((p) => p.id), ['near']);
     });
 
-    test('falls back to the legacy cache of that city only', () async {
+    test('ignores old Google cache places of the city', () async {
       final db = FakeFirebaseFirestore();
       await _addPlace(db, 'legacy', cityId: 'DE_berlin', status: null);
-      await _addPlace(db, 'other', cityId: 'PT_lisbon', status: null);
 
       final places = await PlacesRepository(firestore: db)
           .loadNearbyPlaces(_berlinLat, _berlinLng);
-      expect(places.map((p) => p.id), ['legacy']);
+      expect(places, isEmpty);
     });
 
     test('empty, not a full scan, when no curated city is near', () async {
@@ -119,9 +118,9 @@ void main() {
           cityId: 'pt_lisbon', lat: 38.72, lng: -9.14, radiusKm: 50);
 
       verifyNever(() => collection.get());
-      // Curated + legacy query for each of the two cities.
-      verify(() => query.limit(any())).called(4);
-      verify(() => query.get()).called(4);
+      // One curated query for each of the two cities.
+      verify(() => query.limit(any())).called(2);
+      verify(() => query.get()).called(2);
     });
   });
 

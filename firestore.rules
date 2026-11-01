@@ -130,20 +130,11 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && resource.data.uid == request.auth.uid;
     }
 
-    // Shared place cache. The client still writes it today; once the
-    // ingestion Cloud Function owns these writes, set write to false.
+    // Places are written only by the import tool (tools/city-import) with
+    // admin credentials; the app reads them.
     match /places/{placeId} {
       allow read: if isAuthenticated();
-      // Curated places (source "wikidata") are written only by the import
-      // tool with admin credentials; the legacy client cache may still
-      // write its own documents.
-      allow create: if isAuthenticated()
-                    && request.resource.data.get('source', '') != 'wikidata';
-      allow update: if isAuthenticated()
-                    && resource.data.get('source', '') != 'wikidata'
-                    && request.resource.data.get('source', '') != 'wikidata';
-      allow delete: if isAuthenticated()
-                    && resource.data.get('source', '') != 'wikidata';
+      allow write: if false;
 
       // One review per signed-in (non-guest) user, under their uid. Others
       // may only hide a review by reporting it; moderators clear the flag
@@ -193,9 +184,9 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Left over from the removed Google Places cache; nothing uses it.
     match /placeCacheMetadata/{cityKey} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
+      allow read, write: if false;
     }
 
     // Solo-mode swipe history, private to its author.

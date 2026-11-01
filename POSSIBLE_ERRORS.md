@@ -18,14 +18,11 @@ Status legend: **FIXED** = fixed on this branch · **OPEN** = still present ·
 rules (`firebase deploy --only firestore:rules,firestore:indexes,storage`).
 Firebase Storage was set up in the console the same day.
 
-**Still not deployed:** the Cloud Functions (`getCityPlaces`, photo caching,
-Gemini descriptions). They require the Blaze plan:
-
-```bash
-firebase deploy --only functions --project travelapp-31255
-```
-
-Until then group sessions use the dev fallback in 9.2.
+**Update 2026-11-01:** the Google Places Cloud Functions (`getCityPlaces`,
+photo caching, Gemini descriptions) were never deployed and are removed, as
+is the app's Google Places client path. Place data comes only from
+`tools/city-import`. The functions package now holds only the trip push
+notifications.
 
 The Google Places API key in `.env` is a **13-character placeholder**, not a
 real key. A live probe returned `HTTP 400 — API key not valid`, which means
@@ -173,11 +170,9 @@ must be reverted before a public release.
 
 | # | Shortcut | Where | What to do before launch |
 |---|---|---|---|
-| 9.1 | **Fixed dev location.** `AppConfig.useFixedDevLocation = true` skips GPS entirely and always uses `defaultLat` / `defaultLng` (currently Los Angeles, where the Firestore test places are). Real users would only ever see places around that point, and the app never asks for location permission. | `lib/core/config/app_config.dart`, used in `lib/core/services/location_service.dart` | Set `useFixedDevLocation` to `false`. Set `defaultLat`/`defaultLng` to the intended fallback for when GPS fails (planned: Hamburg, 53.5511 / 9.9937, once real Places data exists). |
-| 9.2 | **Dev places fallback.** `AppConfig.useDevPlacesFallback = true` builds group sessions from places already in Firestore near the group's city when the `getCityPlaces` Cloud Function is missing. Hides a broken backend in production. | `lib/core/config/app_config.dart`, used in `places_repository.dart` (`fetchPlacesForCity`) | Set to `false` once the Cloud Functions are deployed. |
-
----
-| 9.3 | **Legacy place sources.** The deck and group pools use the curated import (`tools/city-import`) when a city has places, and otherwise fall back to the old paths: `loadNearbyPlaces` (reads the whole `places` collection, audit 3.1) and the `getCityPlaces` Cloud Function. | `swipe_controller.dart` (`_loadSoloPlaces`), `places_repository.dart` (`fetchPlacesForCity`) | Once all offered cities are imported, remove the fallbacks, the 51 test places and the Google Places client path. |
+| 9.1 | ~~**Fixed dev location.**~~ **Done 2026-11-01:** `AppConfig.useFixedDevLocation` is `false`; the fallback when GPS is denied or fails is Berlin (a curated city). | `lib/core/config/app_config.dart` | Switch the fallback to Hamburg once Hamburg is imported. |
+| 9.2 | ~~**Dev places fallback.**~~ **Removed 2026-11-01** with the `getCityPlaces` path. | — | — |
+| 9.3 | **Legacy place data.** The app code reads only curated places now; the Google path, Cloud Functions and the `placeCacheMetadata` writes are gone (rules: `places` and `placeCacheMetadata` are write-protected). Left: the 51 old Google test places in `places` (and their `placeCacheMetadata`), and `PlacePhotoUrlBuilder`, which builds Google photo URLs for them only when a local `.env` key exists. Hamburg, Cologne and Zürich are offered but not imported: their decks are empty. | Firestore `places` (non-`wikidata` docs), `lib/common/utils/place_photo_url_builder.dart`, `tools/city-import` | Import Hamburg, Cologne, Zürich (owner's OK to publish). Then delete the 51 test places with the owner's OK, and `PlacePhotoUrlBuilder`. |
 
 ## 10. Open product decisions
 

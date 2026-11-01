@@ -3,32 +3,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:swipetrip/core/config/env.dart';
 
 void main() {
-  test('demo config trims required API keys and uses configured model', () {
-    dotenv.loadFromString(envString: '''
-GOOGLE_PLACES_API_KEY=  places-value  
-GEMINI_API_KEY=  gemini-value  
-GEMINI_MODEL=  gemini-test-model  
-''');
-
+  test('trims the optional local Places key', () {
+    dotenv.loadFromString(envString: 'GOOGLE_PLACES_API_KEY=  places-value  ');
     expect(Env.googlePlacesApiKey, 'places-value');
-    expect(Env.geminiApiKey, 'gemini-value');
-    expect(Env.geminiModel, 'gemini-test-model');
-    expect(Env.missingDemoVariables, isEmpty);
   });
 
-  test('missing variables are named without exposing configured values', () {
+  test('a blank key is empty', () {
     dotenv.loadFromString(envString: 'GOOGLE_PLACES_API_KEY=   ');
-
-    expect(
-      Env.missingDemoVariables,
-      containsAll(<String>['GOOGLE_PLACES_API_KEY', 'GEMINI_API_KEY']),
-    );
-    expect(Env.missingDemoVariables.join(','), isNot(contains('value')));
-  });
-
-  test('blank Gemini model uses the demo fallback', () {
-    dotenv.loadFromString(envString: 'GEMINI_MODEL=   ');
-
-    expect(Env.geminiModel, 'gemini-2.5-flash');
+    expect(Env.googlePlacesApiKey, '');
   });
 }
