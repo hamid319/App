@@ -16,6 +16,50 @@ class TripPlan {
 
   List<String> get allPlaceIds => [for (final d in days) ...d];
 
+  // Manual edits. Each returns a new plan without [updatedAt], so saving it
+  // writes the server time.
+
+  List<List<String>> get _copy => [
+        for (final d in days) [...d]
+      ];
+
+  /// Moves the stop at [from] to [to] within [day] ([to] as in the list
+  /// after removing it).
+  TripPlan reorder(int day, int from, int to) {
+    final copy = _copy;
+    if (day >= copy.length || from < 0 || from >= copy[day].length) {
+      return this;
+    }
+    final id = copy[day].removeAt(from);
+    copy[day].insert(to.clamp(0, copy[day].length), id);
+    return TripPlan(days: copy);
+  }
+
+  /// Takes [placeId] out of whichever day has it and adds it at the end of
+  /// [day]; also how a wishlist place is added.
+  TripPlan moveToDay(String placeId, int day) {
+    if (day < 0 || day >= days.length) return this;
+    final copy = [
+      for (final d in days) d.where((id) => id != placeId).toList()
+    ];
+    copy[day].add(placeId);
+    return TripPlan(days: copy);
+  }
+
+  TripPlan remove(String placeId) => TripPlan(days: [
+        for (final d in days) d.where((id) => id != placeId).toList(),
+      ]);
+
+  /// Swaps the stops of two days, e.g. when it rains on one of them.
+  TripPlan swapDays(int a, int b) {
+    if (a == b || a >= days.length || b >= days.length) return this;
+    final copy = _copy;
+    final first = copy[a];
+    copy[a] = copy[b];
+    copy[b] = first;
+    return TripPlan(days: copy);
+  }
+
   // Firestore has no nested arrays, so each day is a map.
   factory TripPlan.fromJson(Map<String, dynamic> json) => TripPlan(
         days: [

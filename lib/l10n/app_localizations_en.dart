@@ -9,6 +9,47 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get dayPlanMoveTo => 'Move to another day';
+
+  @override
+  String get dayPlanRemove => 'Remove from plan';
+
+  @override
+  String get dayPlanAddStop => 'Add a place';
+
+  @override
+  String get dayPlanAddNone => 'Every wishlist place is already planned.';
+
+  @override
+  String get dayPlanSwapDay => 'Swap with another day';
+
+  @override
+  String get dayPlanPickDay => 'Which day?';
+
+  @override
+  String dayPlanMoved(String day) {
+    return 'Moved to $day.';
+  }
+
+  @override
+  String dayPlanSwapped(String day) {
+    return 'Swapped with $day.';
+  }
+
+  @override
+  String get dayPlanDrag => 'Drag to reorder';
+
+  @override
+  String get dayPlanReplan => 'Plan again';
+
+  @override
+  String get dayPlanReplanTitle => 'Plan again?';
+
+  @override
+  String get dayPlanReplanBody =>
+      'The plan is made again from the wishlist. Your changes to the days are replaced.';
+
+  @override
   String get pushSettingTitle => 'Notifications';
 
   @override

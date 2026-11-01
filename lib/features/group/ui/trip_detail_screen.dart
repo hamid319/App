@@ -98,6 +98,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
 
   Future<void> _buildPlan(GroupModel group, List<TripIdea> ideas) async {
     final l10n = context.l10n;
+    if (!(group.tripPlan?.isEmpty ?? true) && !await confirmReplan(context)) {
+      return;
+    }
+    if (!mounted) return;
     setState(() => _building = true);
     try {
       await ref.read(tripActionsProvider.notifier).buildPlan(group, ideas);

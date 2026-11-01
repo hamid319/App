@@ -114,6 +114,33 @@ void main() {
     expect(GroupModel.fromJson({'groupId': 'g'}).tripPlan, isNull);
   });
 
+  test('TripPlan edits: reorder, move, remove, swap days', () {
+    const plan = TripPlan(days: [
+      ['a', 'b', 'c'],
+      ['d'],
+    ]);
+    expect(plan.reorder(0, 0, 2).days[0], ['b', 'c', 'a']);
+    expect(plan.reorder(0, 2, 0).days[0], ['c', 'a', 'b']);
+    expect(plan.moveToDay('b', 1).days, [
+      ['a', 'c'],
+      ['d', 'b'],
+    ]);
+    // A wishlist place that was not planned yet.
+    expect(plan.moveToDay('x', 0).days[0], ['a', 'b', 'c', 'x']);
+    expect(plan.remove('d').days, [
+      ['a', 'b', 'c'],
+      <String>[],
+    ]);
+    expect(plan.swapDays(0, 1).days, [
+      ['d'],
+      ['a', 'b', 'c'],
+    ]);
+    // The original is unchanged; out-of-range edits do nothing.
+    expect(plan.days[0], ['a', 'b', 'c']);
+    expect(plan.moveToDay('a', 5).days, plan.days);
+    expect(plan.reorder(0, 0, 2).updatedAt, isNull);
+  });
+
   test('UserModel keeps an optional PayPal handle', () {
     final user = UserModel.fromJson(
         {'uid': 'u', 'email': '', 'paypalHandle': 'lea'});

@@ -98,6 +98,78 @@ abstract class AppLocalizations {
     Locale('en')
   ];
 
+  /// No description provided for @dayPlanMoveTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to another day'**
+  String get dayPlanMoveTo;
+
+  /// No description provided for @dayPlanRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from plan'**
+  String get dayPlanRemove;
+
+  /// No description provided for @dayPlanAddStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a place'**
+  String get dayPlanAddStop;
+
+  /// No description provided for @dayPlanAddNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Every wishlist place is already planned.'**
+  String get dayPlanAddNone;
+
+  /// No description provided for @dayPlanSwapDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap with another day'**
+  String get dayPlanSwapDay;
+
+  /// No description provided for @dayPlanPickDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Which day?'**
+  String get dayPlanPickDay;
+
+  /// No description provided for @dayPlanMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to {day}.'**
+  String dayPlanMoved(String day);
+
+  /// No description provided for @dayPlanSwapped.
+  ///
+  /// In en, this message translates to:
+  /// **'Swapped with {day}.'**
+  String dayPlanSwapped(String day);
+
+  /// No description provided for @dayPlanDrag.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to reorder'**
+  String get dayPlanDrag;
+
+  /// No description provided for @dayPlanReplan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan again'**
+  String get dayPlanReplan;
+
+  /// No description provided for @dayPlanReplanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan again?'**
+  String get dayPlanReplanTitle;
+
+  /// No description provided for @dayPlanReplanBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The plan is made again from the wishlist. Your changes to the days are replaced.'**
+  String get dayPlanReplanBody;
+
   /// No description provided for @pushSettingTitle.
   ///
   /// In en, this message translates to:

@@ -8,6 +8,8 @@ import 'package:intl/intl.dart';
 
 import '../../../common/models/group_model.dart';
 import '../../../common/models/place_model.dart';
+import '../../../common/models/trip_idea.dart';
+import '../../../common/models/trip_plan.dart';
 import '../../../common/utils/day_route.dart';
 import '../../../common/utils/place_type_labels.dart';
 import '../../../common/utils/trip_days.dart';
@@ -36,9 +38,111 @@ class _DayMapScreenState extends ConsumerState<DayMapScreen> {
   late int _day = widget.day;
   bool _building = false;
 
+  /// The plan right after a manual change, until the trip stream brings it
+  /// back; keeps a dragged stop from jumping back for a frame.
+  TripPlan? _local;
+
+  /// [GroupModel.tripPlan]'s updatedAt when [_local] was made; once the
+  /// stream has a different one, the stream is current again.
+  DateTime? _localBase;
+
+  void _edit(GroupModel group, TripPlan next) {
+    setState(() {
+      _local = next;
+      _localBase = group.tripPlan?.updatedAt;
+    });
+    runTripWrite(
+      context,
+      () =>
+          ref.read(tripActionsProvider.notifier).savePlan(group.groupId, next),
+      onError: () {
+        if (mounted) setState(() => _local = null);
+      },
+    );
+  }
+
+  String _dayLabel(BuildContext context, GroupModel group, int d) {
+    final dates = tripDays(group.tripStart, group.tripEnd);
+    return d < dates.length
+        ? DateFormat.MMMMEEEEd(Localizations.localeOf(context).toLanguageTag())
+            .format(dates[d])
+        : context.l10n.tripDayN(d + 1);
+  }
+
+  /// A day other than [except], or null when cancelled.
+  Future<int?> _pickDay(
+      GroupModel group, int dayCount, int except, String title) {
+    return showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+              child: Text(title,
+                  style: Theme.of(sheetContext).textTheme.titleMedium),
+            ),
+            for (var d = 0; d < dayCount; d++)
+              if (d != except)
+                ListTile(
+                  leading: const Icon(Icons.calendar_today_outlined),
+                  title: Text(_dayLabel(context, group, d)),
+                  onTap: () => Navigator.pop(sheetContext, d),
+                ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _moveStop(
+      GroupModel group, TripPlan plan, int day, PlaceModel place) async {
+    final l10n = context.l10n;
+    final to = await _pickDay(group, plan.days.length, day, l10n.dayPlanMoveTo);
+    if (to == null || !mounted) return;
+    _edit(group, plan.moveToDay(place.id, to));
+    showTripSnack(context, l10n.dayPlanMoved(_dayLabel(context, group, to)));
+  }
+
+  Future<void> _swapDay(GroupModel group, TripPlan plan, int day) async {
+    final l10n = context.l10n;
+    final other =
+        await _pickDay(group, plan.days.length, day, l10n.dayPlanSwapDay);
+    if (other == null || !mounted) return;
+    _edit(group, plan.swapDays(day, other));
+    showTripSnack(
+        context, l10n.dayPlanSwapped(_dayLabel(context, group, other)));
+  }
+
+  /// Wishlist places that are on no day yet.
+  Future<void> _addStop(GroupModel group, TripPlan plan, int day) async {
+    final planned = plan.allPlaceIds.toSet();
+    final ideas = <TripIdea>[
+      for (final i in ref.read(tripWishlistProvider(group.groupId)).value ??
+          const <TripIdea>[])
+        if (i.placeId != null && !planned.contains(i.placeId)) i,
+    ];
+    final placeId = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => _AddStopSheet(ideas: ideas),
+    );
+    if (placeId == null || !mounted) return;
+    _edit(group, plan.moveToDay(placeId, day));
+  }
+
+  Future<void> _replan(GroupModel group) async {
+    if (!await confirmReplan(context) || !mounted) return;
+    await _build(group);
+  }
+
   Future<void> _build(GroupModel group) async {
     final l10n = context.l10n;
-    final ideas = ref.read(tripWishlistProvider(widget.groupId)).value ?? const [];
+    final ideas =
+        ref.read(tripWishlistProvider(widget.groupId)).value ?? const [];
     setState(() => _building = true);
     try {
       await ref.read(tripActionsProvider.notifier).buildPlan(group, ideas);
@@ -95,10 +199,14 @@ class _DayMapScreenState extends ConsumerState<DayMapScreen> {
               onRetry: () => context.go('/trips'),
             );
           }
-          final plan = group.tripPlan;
+          if (_local != null && group.tripPlan?.updatedAt != _localBase) {
+            _local = null;
+          }
+          final plan = _local ?? group.tripPlan;
           if (plan == null || plan.isEmpty) {
             final ideas =
-                ref.watch(tripWishlistProvider(widget.groupId)).value ?? const [];
+                ref.watch(tripWishlistProvider(widget.groupId)).value ??
+                    const [];
             final plannable = ideas.where((i) => i.placeId != null).length;
             return Stack(
               children: [
@@ -161,6 +269,17 @@ class _DayMapScreenState extends ConsumerState<DayMapScreen> {
                 stops: stops,
                 loading: places.isLoading,
                 onDay: (d) => setState(() => _day = d),
+                onReorder: (from, to) {
+                  // shortcut: assumes every stop of the day is shown; a
+                  // place that failed to load can shift the target by one.
+                  final index = plan.days[day].indexOf(stops[from].id);
+                  _edit(group, plan.reorder(day, index, to));
+                },
+                onMove: (place) => _moveStop(group, plan, day, place),
+                onRemove: (place) => _edit(group, plan.remove(place.id)),
+                onAdd: () => _addStop(group, plan, day),
+                onSwap: () => _swapDay(group, plan, day),
+                onReplan: () => _replan(group),
               ),
             ],
           );
@@ -201,6 +320,12 @@ class _DaySheet extends StatelessWidget {
     required this.stops,
     required this.loading,
     required this.onDay,
+    required this.onReorder,
+    required this.onMove,
+    required this.onRemove,
+    required this.onAdd,
+    required this.onSwap,
+    required this.onReplan,
   });
 
   final GroupModel group;
@@ -209,6 +334,12 @@ class _DaySheet extends StatelessWidget {
   final List<PlaceModel> stops;
   final bool loading;
   final ValueChanged<int> onDay;
+  final void Function(int from, int to) onReorder;
+  final ValueChanged<PlaceModel> onMove;
+  final ValueChanged<PlaceModel> onRemove;
+  final VoidCallback onAdd;
+  final VoidCallback onSwap;
+  final VoidCallback onReplan;
 
   @override
   Widget build(BuildContext context) {
@@ -230,6 +361,133 @@ class _DaySheet extends StatelessWidget {
     final totalWalk = walks.fold(0, (a, b) => a + b);
     final starts = stopStartMinutes(walks);
 
+    final header = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SheetGrabber(),
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    date != null
+                        ? DateFormat.MMMMEEEEd(locale).format(date)
+                        : l10n.tripDayN(day + 1),
+                    style: text.headlineSmall,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    l10n.tripDaySummary(
+                      stops.length,
+                      _distance(context, totalKm),
+                      totalWalk,
+                    ),
+                    style: text.bodyMedium
+                        ?.copyWith(color: scheme.onSurfaceVariant),
+                  ),
+                ],
+              ),
+            ),
+            Tooltip(
+              message: l10n.dayPlanOpenRoute,
+              child: Material(
+                color: scheme.primary.withValues(alpha: 0.16),
+                shape: const CircleBorder(),
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap:
+                      stops.isEmpty ? null : () => _openRoute(context, stops),
+                  child: SizedBox.square(
+                    dimension: 44,
+                    child: Icon(Icons.directions_walk_rounded,
+                        color: scheme.primary),
+                  ),
+                ),
+              ),
+            ),
+            PopupMenuButton<VoidCallback>(
+              tooltip: l10n.moreOptions,
+              icon: const Icon(Icons.more_horiz_rounded),
+              onSelected: (action) => action(),
+              itemBuilder: (_) => [
+                if (dayCount > 1)
+                  PopupMenuItem(
+                    value: onSwap,
+                    child: ListTile(
+                      leading: const Icon(Icons.swap_vert_rounded),
+                      title: Text(l10n.dayPlanSwapDay),
+                    ),
+                  ),
+                PopupMenuItem(
+                  value: onReplan,
+                  child: ListTile(
+                    leading: const Icon(Icons.auto_awesome_rounded),
+                    title: Text(l10n.dayPlanReplan),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        if (dayCount > 1) ...[
+          const SizedBox(height: 14),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (var d = 0; d < dayCount; d++) ...[
+                  if (d > 0) const SizedBox(width: 8),
+                  _DayChip(
+                    label: d < dates.length
+                        ? DateFormat.E(locale).format(dates[d])
+                        : l10n.tripDayN(d + 1),
+                    selected: d == day,
+                    onTap: () => onDay(d),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+        const SizedBox(height: 14),
+        if (loading)
+          const Padding(
+            padding: EdgeInsets.all(24),
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else if (stops.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Text(
+              l10n.tripDayEmpty,
+              style: text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+            ),
+          ),
+      ],
+    );
+
+    final footer = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        TextButton.icon(
+          onPressed: loading ? null : onAdd,
+          icon: const Icon(Icons.add_rounded, size: 20),
+          label: Text(l10n.dayPlanAddStop),
+        ),
+        if (stops.length > MapsLauncher.maxRouteStops)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(l10n.dayPlanRouteCapped,
+                style:
+                    text.labelSmall?.copyWith(color: scheme.onSurfaceVariant)),
+          ),
+      ],
+    );
+
+    final shown = loading ? const <PlaceModel>[] : stops;
     return DraggableScrollableSheet(
       initialChildSize: _sheetStart,
       minChildSize: 0.22,
@@ -249,106 +507,35 @@ class _DaySheet extends StatelessWidget {
                     color: scheme.onSurface.withValues(alpha: 0.08),
                     width: 0.5),
               ),
-              child: ListView(
-                controller: controller,
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              child: ReorderableListView(
+                scrollController: controller,
+                padding: const EdgeInsets.fromLTRB(16, 0, 8, 24),
+                buildDefaultDragHandles: false,
+                header: Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: header,
+                ),
+                footer: footer,
+                onReorderItem: onReorder,
+                // No lifted card look over the frosted sheet.
+                proxyDecorator: (child, _, __) =>
+                    Material(color: Colors.transparent, child: child),
                 children: [
-                  const SheetGrabber(),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              date != null
-                                  ? DateFormat.MMMMEEEEd(locale).format(date)
-                                  : l10n.tripDayN(day + 1),
-                              style: text.headlineSmall,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              l10n.tripDaySummary(
-                                stops.length,
-                                _distance(context, totalKm),
-                                totalWalk,
-                              ),
-                              style: text.bodyMedium
-                                  ?.copyWith(color: scheme.onSurfaceVariant),
-                            ),
-                          ],
+                  for (final (i, place) in shown.indexed)
+                    Column(
+                      key: ValueKey(place.id),
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (i > 0) _WalkLeg(minutes: walks[i - 1]),
+                        _StopRow(
+                          index: i,
+                          place: place,
+                          startMinute: starts[i],
+                          canMove: dayCount > 1,
+                          onMove: () => onMove(place),
+                          onRemove: () => onRemove(place),
                         ),
-                      ),
-                      Tooltip(
-                        message: l10n.dayPlanOpenRoute,
-                        child: Material(
-                          color: scheme.primary.withValues(alpha: 0.16),
-                          shape: const CircleBorder(),
-                          child: InkWell(
-                            customBorder: const CircleBorder(),
-                            onTap: stops.isEmpty
-                                ? null
-                                : () => _openRoute(context, stops),
-                            child: SizedBox.square(
-                              dimension: 44,
-                              child: Icon(Icons.directions_walk_rounded,
-                                  color: scheme.primary),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (dayCount > 1) ...[
-                    const SizedBox(height: 14),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          for (var d = 0; d < dayCount; d++) ...[
-                            if (d > 0) const SizedBox(width: 8),
-                            _DayChip(
-                              label: d < dates.length
-                                  ? DateFormat.E(locale).format(dates[d])
-                                  : l10n.tripDayN(d + 1),
-                              selected: d == day,
-                              onTap: () => onDay(d),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 14),
-                  if (loading)
-                    const Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Center(child: CircularProgressIndicator()),
-                    )
-                  else if (stops.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Text(
-                        l10n.tripDayEmpty,
-                        style: text.bodyMedium
-                            ?.copyWith(color: scheme.onSurfaceVariant),
-                      ),
-                    )
-                  else
-                    for (final (i, place) in stops.indexed) ...[
-                      if (i > 0) _WalkLeg(minutes: walks[i - 1]),
-                      _StopRow(
-                        number: i + 1,
-                        place: place,
-                        startMinute: starts[i],
-                      ),
-                    ],
-                  if (stops.length > MapsLauncher.maxRouteStops)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: Text(l10n.dayPlanRouteCapped,
-                          style: text.labelSmall
-                              ?.copyWith(color: scheme.onSurfaceVariant)),
+                      ],
                     ),
                 ],
               ),
@@ -423,14 +610,21 @@ class _DayChip extends StatelessWidget {
 
 class _StopRow extends StatelessWidget {
   const _StopRow({
-    required this.number,
+    required this.index,
     required this.place,
     required this.startMinute,
+    required this.canMove,
+    required this.onMove,
+    required this.onRemove,
   });
 
-  final int number;
+  /// Position in the day, 0-based (shown as number + 1).
+  final int index;
   final PlaceModel place;
   final int startMinute;
+  final bool canMove;
+  final VoidCallback onMove;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -447,7 +641,7 @@ class _StopRow extends StatelessWidget {
     return InkWell(
       onTap: () => context.push('/place/${place.id}'),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
           children: [
             Container(
@@ -457,7 +651,7 @@ class _StopRow extends StatelessWidget {
               decoration:
                   BoxDecoration(color: scheme.primary, shape: BoxShape.circle),
               child: Text(
-                '$number',
+                '${index + 1}',
                 style: text.labelSmall?.copyWith(
                   color: scheme.onPrimary,
                   fontWeight: FontWeight.w700,
@@ -486,6 +680,88 @@ class _StopRow extends StatelessWidget {
                 ],
               ),
             ),
+            PopupMenuButton<VoidCallback>(
+              tooltip: l10n.moreOptions,
+              icon:
+                  Icon(Icons.more_vert_rounded, color: scheme.onSurfaceVariant),
+              onSelected: (action) => action(),
+              itemBuilder: (_) => [
+                if (canMove)
+                  PopupMenuItem(
+                    value: onMove,
+                    child: ListTile(
+                      leading: const Icon(Icons.event_repeat_rounded),
+                      title: Text(l10n.dayPlanMoveTo),
+                    ),
+                  ),
+                PopupMenuItem(
+                  value: onRemove,
+                  child: ListTile(
+                    leading: const Icon(Icons.remove_circle_outline_rounded),
+                    title: Text(l10n.dayPlanRemove),
+                  ),
+                ),
+              ],
+            ),
+            ReorderableDragStartListener(
+              index: index,
+              child: Tooltip(
+                message: l10n.dayPlanDrag,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Icon(Icons.drag_indicator_rounded,
+                      color: scheme.onSurfaceVariant),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Wishlist places not on any day yet; returns the chosen place id.
+class _AddStopSheet extends ConsumerWidget {
+  const _AddStopSheet({required this.ideas});
+
+  final List<TripIdea> ideas;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final lang = Localizations.localeOf(context).languageCode;
+    // Swipe matches have no title of their own; their name is the place's.
+    final places = ref
+            .watch(tripPlacesProvider(
+                placesKey([for (final i in ideas) i.placeId!])))
+            .value ??
+        const <PlaceModel>[];
+    final byId = {for (final p in places) p.id: p};
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints:
+            BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.7),
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+              child: Text(l10n.dayPlanAddStop,
+                  style: Theme.of(context).textTheme.titleMedium),
+            ),
+            if (ideas.isEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                child: Text(l10n.dayPlanAddNone),
+              ),
+            for (final idea in ideas)
+              ListTile(
+                leading: const Icon(Icons.place_outlined),
+                title: Text(byId[idea.placeId]?.nameFor(lang) ??
+                    (idea.title.isNotEmpty ? idea.title : '…')),
+                onTap: () => Navigator.pop(context, idea.placeId),
+              ),
           ],
         ),
       ),

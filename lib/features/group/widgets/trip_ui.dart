@@ -544,3 +544,27 @@ class WithBackButton extends StatelessWidget {
     );
   }
 }
+
+/// Before building the day plan again over an existing one: manual changes
+/// to the days would be lost.
+Future<bool> confirmReplan(BuildContext context) async {
+  final l10n = context.l10n;
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: Text(l10n.dayPlanReplanTitle),
+      content: Text(l10n.dayPlanReplanBody),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: Text(l10n.cancel),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, true),
+          child: Text(l10n.dayPlanReplan),
+        ),
+      ],
+    ),
+  );
+  return ok ?? false;
+}

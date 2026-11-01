@@ -341,6 +341,14 @@ class TripActions extends Notifier<void> {
   Future<void> deleteJournalEntry(String groupId, JournalEntry entry) =>
       ref.read(journalRepositoryProvider).deleteEntry(groupId, entry);
 
+  /// Saves a manually changed day plan (reorder, move, remove, swap days).
+  /// The screen applies each change to the plan it shows, which follows
+  /// the trip stream, so another member's change from before is kept.
+  // shortcut: no transaction (they fail offline); two members editing in
+  // the same second: the last write wins.
+  Future<void> savePlan(String groupId, TripPlan plan) =>
+      _repo.saveTripPlan(groupId, plan);
+
   /// Builds the trip's day plan from the wishlist ideas that have a place,
   /// most liked first, spread over the trip days as short walking routes.
   Future<TripPlan> buildPlan(GroupModel group, List<TripIdea> ideas) async {

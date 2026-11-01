@@ -9,6 +9,48 @@ class AppLocalizationsDe extends AppLocalizations {
   AppLocalizationsDe([String locale = 'de']) : super(locale);
 
   @override
+  String get dayPlanMoveTo => 'Auf anderen Tag verschieben';
+
+  @override
+  String get dayPlanRemove => 'Aus dem Plan entfernen';
+
+  @override
+  String get dayPlanAddStop => 'Ort hinzufügen';
+
+  @override
+  String get dayPlanAddNone =>
+      'Alle Orte der Wunschliste sind schon eingeplant.';
+
+  @override
+  String get dayPlanSwapDay => 'Mit anderem Tag tauschen';
+
+  @override
+  String get dayPlanPickDay => 'Welcher Tag?';
+
+  @override
+  String dayPlanMoved(String day) {
+    return 'Auf $day verschoben.';
+  }
+
+  @override
+  String dayPlanSwapped(String day) {
+    return 'Mit $day getauscht.';
+  }
+
+  @override
+  String get dayPlanDrag => 'Ziehen zum Sortieren';
+
+  @override
+  String get dayPlanReplan => 'Neu planen';
+
+  @override
+  String get dayPlanReplanTitle => 'Neu planen?';
+
+  @override
+  String get dayPlanReplanBody =>
+      'Der Plan wird neu aus der Wunschliste erstellt. Deine Änderungen an den Tagen gehen verloren.';
+
+  @override
   String get pushSettingTitle => 'Benachrichtigungen';
 
   @override
