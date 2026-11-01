@@ -9,6 +9,12 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get pushSettingTitle => 'Notifications';
+
+  @override
+  String get pushSettingSubtitle => 'Matches, new members, costs and journal';
+
+  @override
   String checkInReminderTitle(String city) {
     return 'Arrived in $city?';
   }

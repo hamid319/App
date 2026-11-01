@@ -6,6 +6,18 @@ class PreferencesService {
   static const String _keyLanguageCode = 'language_code';
   static const String _keyThemeMode = 'theme_mode';
   static const String _keyDiscoverPreferences = 'discover_preferences';
+  static const String _keyPushEnabled = 'push_enabled';
+
+  /// Trip push notifications on this device; on unless turned off.
+  static Future<bool> isPushEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyPushEnabled) ?? true;
+  }
+
+  static Future<void> setPushEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyPushEnabled, enabled);
+  }
 
   static Future<bool> hasSeenOnboarding() async {
     final prefs = await SharedPreferences.getInstance();

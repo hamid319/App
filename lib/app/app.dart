@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'check_in_watcher.dart';
+import 'push_watcher.dart';
 import 'theme.dart';
 import 'routes.dart';
 import 'locale_controller.dart';
@@ -21,7 +22,8 @@ class SwipeTripApp extends ConsumerWidget {
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
       routerConfig: router,
-      builder: (context, child) => CheckInWatcher(child: child!),
+      builder: (context, child) =>
+          CheckInWatcher(child: PushWatcher(child: child!)),
       locale: locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

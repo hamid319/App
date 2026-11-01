@@ -9,7 +9,8 @@
   "scripts": {
     "serve": "firebase emulators:start --only functions",
     "logs": "firebase functions:log",
-    "deploy": "firebase deploy --only functions"
+    "deploy": "firebase deploy --only functions",
+    "test": "node --test"
   },
   "dependencies": {
     "firebase-admin": "^13.0.0",

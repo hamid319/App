@@ -3,6 +3,7 @@ import 'core/services/auth_service.dart';
 import 'core/services/calendar_service.dart';
 import 'core/services/firestore_service.dart';
 import 'core/services/location_service.dart';
+import 'core/services/push_service.dart';
 import 'core/services/trip_reminder_service.dart';
 import 'common/models/group_model.dart';
 import 'features/group/data/trip_repository.dart';
@@ -20,7 +21,9 @@ final profileRepositoryProvider = Provider<ProfileRepository>(
 final placesRepositoryProvider = Provider<PlacesRepository>(
   (ref) => PlacesRepository(),
 );
+
 /// Local notifications (check-in reminders).
+final pushServiceProvider = Provider<PushService>((ref) => PushService());
 final tripReminderServiceProvider =
     Provider<TripReminderService>((ref) => TripReminderService());
 final calendarServiceProvider =

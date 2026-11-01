@@ -1,4 +1,6 @@
 {
+  "pushSettingTitle": "Notifications",
+  "pushSettingSubtitle": "Matches, new members, costs and journal",
   "checkInReminderTitle": "Arrived in {city}?",
   "@checkInReminderTitle": {"placeholders": {"city": {"type": "String"}}},
   "checkInReminderBody": "Open TripFam and get your passport stamp.",

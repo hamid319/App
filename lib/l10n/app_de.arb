@@ -1,4 +1,6 @@
 {
+  "pushSettingTitle": "Benachrichtigungen",
+  "pushSettingSubtitle": "Matches, neue Mitglieder, Kosten und Tagebuch",
   "checkInReminderTitle": "Angekommen in {city}?",
   "checkInReminderBody": "Öffne TripFam und hol dir deinen Stempel.",
   "checkInTitle": "Stempel holen",

@@ -6,7 +6,7 @@ swipe places, day plans on a map, split costs, journal with photos, and a
 passport with a stamp per city. Owner: Hamid (GitHub `hamid319/App`).
 
 ## Stack
-Flutter · Riverpod 3 · Firebase (Auth, Firestore, Storage, Hosting) · GoRouter 17 · Mapbox Maps · share_plus · audioplayers · flutter_local_notifications · flutter_dotenv
+Flutter · Riverpod 3 · Firebase (Auth, Firestore, Storage, Hosting) · GoRouter 17 · Mapbox Maps · share_plus · audioplayers · flutter_local_notifications · firebase_messaging · flutter_dotenv
 
 ## Architecture: Feature-First Clean Architecture
 
@@ -76,6 +76,8 @@ Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so
 ```
 /users/{uid}           favorites: string[], groups: string[],
                        checkIns: map<cityKey, Timestamp> (passport GPS check-ins; no check-in = pale stamp)
+/pushTokens/{token}    uid, lang, updatedAt (one per device; written by the app, read only by the
+                       push Cloud Functions in functions/push.js: match, member joined, expense, journal)
 /inviteCodes/{code}    groupId, createdAt, title, cityName, ownerName (get only, no list; written by the owner)
 /groups/{groupId}      members: string[], invite.code: string, tripPlan
   /ideas/{id}          wishlist entries (placeId?, title, addedBy, likedBy, source)
@@ -122,7 +124,9 @@ wishlist, password reset, onboarding, dark mode, account deletion, iOS
 privacy manifest.
 
 Not started or open:
-- FCM push notifications
+- FCM push on iOS: needs the Apple Developer account, an APNs key in the
+  Firebase console, and the Push Notifications + Background Modes (remote
+  notifications) capabilities in Xcode. Android push is built.
 - Affiliate links (GetYourGuide/Viator, check their terms first)
 - Untested by the owner: account deletion (throwaway account), offline mode,
   a real web-invite join with a second account, sound and haptics on a real

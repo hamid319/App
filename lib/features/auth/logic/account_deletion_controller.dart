@@ -62,6 +62,8 @@ class AccountDeletionController extends AsyncNotifier<void> {
       }
     }
 
+    // While still signed in: the token doc only lets its owner delete it.
+    await ref.read(pushServiceProvider).unregister();
     await ref.read(accountDeletionRepositoryProvider).deleteUserData(user.uid);
 
     try {

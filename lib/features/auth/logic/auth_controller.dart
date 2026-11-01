@@ -162,6 +162,7 @@ class AuthController extends AsyncNotifier<UserModel?> {
 
   /// Signs out and drops straight back into a fresh guest session.
   Future<void> logout() async {
+    await ref.read(pushServiceProvider).unregister();
     await _authRepo.logout();
     state = const AsyncData(null);
     final guest = await _startGuestSession();

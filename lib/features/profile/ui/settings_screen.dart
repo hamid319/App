@@ -12,6 +12,7 @@ import '../../../common/widgets/ticket.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
+import '../logic/push_settings_controller.dart';
 import '../../../common/widgets/member_avatar.dart';
 import '../../group/logic/group_controller.dart';
 import '../logic/profile_controller.dart';
@@ -61,6 +62,19 @@ class SettingsScreen extends ConsumerWidget {
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => showThemeModePicker(context, ref),
               ),
+              if (hasAccount)
+                SwitchListTile(
+                  secondary: const Icon(Icons.notifications_outlined),
+                  title: Text(l10n.pushSettingTitle),
+                  subtitle: Text(l10n.pushSettingSubtitle),
+                  value:
+                      ref.watch(pushSettingsControllerProvider).value ?? true,
+                  onChanged: (on) => ref
+                      .read(pushSettingsControllerProvider.notifier)
+                      .setEnabled(on,
+                          languageCode:
+                              Localizations.localeOf(context).languageCode),
+                ),
               ListTile(
                 leading: const Icon(Icons.privacy_tip_outlined),
                 title: Text(l10n.privacy),

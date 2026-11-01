@@ -9,6 +9,13 @@ class AppLocalizationsDe extends AppLocalizations {
   AppLocalizationsDe([String locale = 'de']) : super(locale);
 
   @override
+  String get pushSettingTitle => 'Benachrichtigungen';
+
+  @override
+  String get pushSettingSubtitle =>
+      'Matches, neue Mitglieder, Kosten und Tagebuch';
+
+  @override
   String checkInReminderTitle(String city) {
     return 'Angekommen in $city?';
   }

@@ -118,6 +118,18 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && request.auth.uid == userId;
     }
 
+    // One doc per device (the FCM token is the id), owned by whoever is
+    // signed in on it; a new sign-in on the device takes it over. Only the
+    // push Cloud Functions read these.
+    match /pushTokens/{token} {
+      allow read: if false;
+      allow create, update: if isAuthenticated()
+                            && request.resource.data.keys().hasOnly(['uid', 'lang', 'updatedAt'])
+                            && request.resource.data.uid == request.auth.uid
+                            && request.resource.data.lang is string;
+      allow delete: if isAuthenticated() && resource.data.uid == request.auth.uid;
+    }
+
     // Shared place cache. The client still writes it today; once the
     // ingestion Cloud Function owns these writes, set write to false.
     match /places/{placeId} {

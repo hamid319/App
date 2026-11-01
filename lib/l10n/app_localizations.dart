@@ -98,6 +98,18 @@ abstract class AppLocalizations {
     Locale('en')
   ];
 
+  /// No description provided for @pushSettingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get pushSettingTitle;
+
+  /// No description provided for @pushSettingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches, new members, costs and journal'**
+  String get pushSettingSubtitle;
+
   /// No description provided for @checkInReminderTitle.
   ///
   /// In en, this message translates to:
