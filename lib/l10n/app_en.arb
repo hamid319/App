@@ -807,23 +807,7 @@
   },
   "tripPlanNeedsIdeas": "Add ideas with a place first",
   "tripShowDayPlan": "Day plan",
-  "tripPlanStops": "{count, plural, =1{1 stop} other{{count} stops}}",
-  "@tripPlanStops": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "tripSwipeTitle": "Collect ideas by swiping",
-  "tripSwipeSubtitle": "Everyone swipes through places in {city}",
-  "@tripSwipeSubtitle": {
-    "placeholders": {
-      "city": {
-        "type": "String"
-      }
-    }
-  },
   "tripSwipeSheetBody": "Everyone swipes through the same places. Afterwards you see what the group likes and can add it to the wishlist.",
   "tripSwipeLive": "Swipe round is running",
   "tripImportMatches": "Add matches to the wishlist",
@@ -1163,8 +1147,6 @@
   "tripSwipeDoneBody": "Matches land on the trip's wishlist as the others swipe.",
   "tripSwipeToWishlist": "To the wishlist",
   "tripSwipeNoPlaces": "No places for this city yet.",
-  "tripSwipeLeft": "{count, plural, =0{All places seen} =1{1 place left} other{{count} places left}}",
-  "@tripSwipeLeft": {"placeholders": {"count": {"type": "int"}}},
   "passportTapToOpen": "Tap to open",
   "passportNextStamp": "Next stamp",
   "passportEmpty": "Every city you travel to gets a stamp here once the trip begins.",
@@ -1237,8 +1219,6 @@
   "recapPlaces": "Your places",
   "recapShare": "Share",
   "recapShareError": "Couldn't create the image.",
-  "tripPhrasesTitle": "Phrases & translation",
-  "tripPhrasesSubtitle": "Everyday phrases, translate a photo",
   "phrasesChangeLanguage": "Change language",
   "phrasesLoadError": "Couldn't load the phrases.",
   "phrasesCatBasics": "Basics",
@@ -1265,5 +1245,11 @@
   "phrasesRestart": "Start over",
   "photoTranslateTitle": "Translate a photo",
   "photoTranslateSubtitle": "Menus, labels, signs. Opens Google Translate.",
-  "photoTranslateError": "Couldn't open Google Translate."
+  "photoTranslateError": "Couldn't open Google Translate.",
+  "quickSwipe": "Swipe",
+  "quickPhrases": "Phrases",
+  "quickMembers": "Members",
+  "wishlistShowAll": "Show all ({count})",
+  "wishlistShowLess": "Show less",
+  "@wishlistShowAll": {"placeholders": {"count": {"type": "int"}}}
 }

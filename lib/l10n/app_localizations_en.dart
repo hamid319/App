@@ -1760,23 +1760,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tripShowDayPlan => 'Day plan';
 
   @override
-  String tripPlanStops(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count stops',
-      one: '1 stop',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get tripSwipeTitle => 'Collect ideas by swiping';
-
-  @override
-  String tripSwipeSubtitle(String city) {
-    return 'Everyone swipes through places in $city';
-  }
 
   @override
   String get tripSwipeSheetBody =>
@@ -2306,18 +2290,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tripSwipeNoPlaces => 'No places for this city yet.';
 
   @override
-  String tripSwipeLeft(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count places left',
-      one: '1 place left',
-      zero: 'All places seen',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get passportTapToOpen => 'Tap to open';
 
   @override
@@ -2414,12 +2386,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recapShareError => 'Couldn\'t create the image.';
 
   @override
-  String get tripPhrasesTitle => 'Phrases & translation';
-
-  @override
-  String get tripPhrasesSubtitle => 'Everyday phrases, translate a photo';
-
-  @override
   String get phrasesChangeLanguage => 'Change language';
 
   @override
@@ -2496,4 +2462,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get photoTranslateError => 'Couldn\'t open Google Translate.';
+
+  @override
+  String get quickSwipe => 'Swipe';
+
+  @override
+  String get quickPhrases => 'Phrases';
+
+  @override
+  String get quickMembers => 'Members';
+
+  @override
+  String wishlistShowAll(int count) {
+    return 'Show all ($count)';
+  }
+
+  @override
+  String get wishlistShowLess => 'Show less';
 }

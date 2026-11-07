@@ -261,6 +261,8 @@ class _PlanBody extends ConsumerWidget {
                 TripSectionControl(
                     groupId: group.groupId, selected: TripSection.plan),
                 const SizedBox(height: 16),
+                _QuickActions(group: group, uid: uid),
+                const SizedBox(height: 20),
                 // During the trip, up top: the passport check-in.
                 if (_canCheckIn(group)) ...[
                   InsetGroup(children: [_CheckInRow(group: group)]),
@@ -286,8 +288,6 @@ class _PlanBody extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 _Wishlist(group: group, uid: uid, ideas: ideas),
-                const SizedBox(height: 24),
-                _MoreSection(group: group, uid: uid, ideas: ideas),
               ],
             ),
           ),
@@ -469,7 +469,7 @@ class _PollOptionBar extends StatelessWidget {
   }
 }
 
-class _Wishlist extends ConsumerWidget {
+class _Wishlist extends ConsumerStatefulWidget {
   const _Wishlist(
       {required this.group, required this.uid, required this.ideas});
 
@@ -478,7 +478,19 @@ class _Wishlist extends ConsumerWidget {
   final List<TripIdea> ideas;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_Wishlist> createState() => _WishlistState();
+}
+
+class _WishlistState extends ConsumerState<_Wishlist> {
+  /// Ideas shown before "show all", so the page stays short.
+  static const _collapsedCount = 5;
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final group = widget.group;
+    final uid = widget.uid;
+    final ideas = widget.ideas;
     final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
@@ -504,15 +516,30 @@ class _Wishlist extends ConsumerWidget {
     final places = ref.watch(tripPlacesProvider(placesKey(ids))).value ??
         const <PlaceModel>[];
     final byId = {for (final p in places) p.id: p};
-    return InsetGroup(
-      separatorIndent: 14 + 48 + 12,
+    final collapsible = ideas.length > _collapsedCount;
+    final shown =
+        collapsible && !_expanded ? ideas.take(_collapsedCount) : ideas;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final idea in ideas)
-          _IdeaRow(
-            group: group,
-            idea: idea,
-            place: byId[idea.placeId],
-            uid: uid,
+        InsetGroup(
+          separatorIndent: 14 + 48 + 12,
+          children: [
+            for (final idea in shown)
+              _IdeaRow(
+                group: group,
+                idea: idea,
+                place: byId[idea.placeId],
+                uid: uid,
+              ),
+          ],
+        ),
+        if (collapsible)
+          TextButton(
+            onPressed: () => setState(() => _expanded = !_expanded),
+            child: Text(_expanded
+                ? l10n.wishlistShowLess
+                : l10n.wishlistShowAll(ideas.length)),
           ),
       ],
     );
@@ -688,62 +715,111 @@ class _IdeaRow extends ConsumerWidget {
   }
 }
 
-/// Day plan, the group swipe round and the members.
-class _MoreSection extends ConsumerWidget {
-  const _MoreSection(
-      {required this.group, required this.uid, required this.ideas});
+/// Shortcuts under the segments, so they stay in reach however long the
+/// wishlist gets: group swipe, day plan, phrasebook and members.
+class _QuickActions extends ConsumerWidget {
+  const _QuickActions({required this.group, required this.uid});
 
   final GroupModel group;
   final String uid;
-  final List<TripIdea> ideas;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final id = group.groupId;
-    final city = group.location?.cityName ?? '';
     final plan = group.tripPlan;
     final places = ref.watch(tripSwipePlacesProvider(id)).value;
     final mine = (ref.watch(tripSwipesProvider(id)).value ?? const [])
         .where((m) => m.uid == uid)
         .firstOrNull;
-    final left =
-        places?.where((p) => !(mine?.votes.containsKey(p.id) ?? false)).length;
+    final left = places == null
+        ? 0
+        : places.where((p) => !(mine?.votes.containsKey(p.id) ?? false)).length;
 
-    return InsetGroup(
-      separatorIndent: 14 + 28 + 12,
+    return Row(
       children: [
         // Open to every member at any time; matches go to the wishlist.
-        _ActionRow(
+        _QuickAction(
           icon: Icons.swipe_rounded,
-          title: l10n.tripSwipeTitle,
-          subtitle: left == null || mine == null
-              ? l10n.tripSwipeSubtitle(city)
-              : l10n.tripSwipeLeft(left),
+          label: l10n.quickSwipe,
+          badge: left,
           onTap: () => context.push('/trip/$id/swipe'),
         ),
         if (plan != null && !plan.isEmpty)
-          _ActionRow(
+          _QuickAction(
             icon: Icons.map_outlined,
-            title: l10n.tripShowDayPlan,
-            subtitle: l10n.tripPlanStops(plan.stopCount),
+            label: l10n.tripShowDayPlan,
             onTap: () => context.push('/trip/$id/day/0'),
           ),
-        _ActionRow(
+        _QuickAction(
           icon: Icons.translate_rounded,
-          title: l10n.tripPhrasesTitle,
-          subtitle: l10n.tripPhrasesSubtitle,
+          label: l10n.quickPhrases,
           onTap: () => context.push(Uri(path: '/phrases', queryParameters: {
             if (group.location != null) 'country': group.location!.countryCode,
           }).toString()),
         ),
-        _ActionRow(
+        _QuickAction(
           icon: Icons.group_outlined,
-          title: l10n.membersHeader(group.members.length),
-          trailing: AvatarRow(memberIds: group.members, size: 26, max: 4),
+          label: l10n.quickMembers,
           onTap: () => showTripMembersSheet(context, group, uid),
         ),
       ],
+    );
+  }
+}
+
+class _QuickAction extends StatelessWidget {
+  const _QuickAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.badge = 0,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  /// Places left to swipe; shown on the circle when above zero.
+  final int badge;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Column(
+            children: [
+              Badge(
+                isLabelVisible: badge > 0,
+                label: Text('$badge'),
+                // Brand colour, not alert red: a count, not a warning.
+                backgroundColor: scheme.primary,
+                textColor: scheme.onPrimary,
+                child: Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: scheme.surfaceContainerHigh,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: scheme.primary),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: text.labelMedium),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

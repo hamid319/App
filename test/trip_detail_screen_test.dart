@@ -114,7 +114,10 @@ void main() {
 
     // Only the idea with a place can go into the plan.
     expect(find.text('Build day plan from 1 idea'), findsOneWidget);
-    expect(find.text('Collect ideas by swiping'), findsOneWidget);
+    // Shortcuts sit under the segments.
+    expect(find.text('Swipe'), findsOneWidget);
+    expect(find.text('Phrases'), findsOneWidget);
+    expect(find.text('Members'), findsOneWidget);
   });
 
   testWidgets('German texts', (tester) async {

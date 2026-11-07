@@ -1791,23 +1791,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get tripShowDayPlan => 'Tagesplan';
 
   @override
-  String tripPlanStops(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count Stopps',
-      one: '1 Stopp',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get tripSwipeTitle => 'Ideen per Swipe sammeln';
-
-  @override
-  String tripSwipeSubtitle(String city) {
-    return 'Alle swipen durch Orte in $city';
-  }
 
   @override
   String get tripSwipeSheetBody =>
@@ -2339,18 +2323,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get tripSwipeNoPlaces => 'Für diese Stadt gibt es noch keine Orte.';
 
   @override
-  String tripSwipeLeft(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Noch $count Orte',
-      one: 'Noch 1 Ort',
-      zero: 'Alle Orte gesehen',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get passportTapToOpen => 'Zum Öffnen tippen';
 
   @override
@@ -2447,12 +2419,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get recapShareError => 'Das Bild konnte nicht erstellt werden.';
 
   @override
-  String get tripPhrasesTitle => 'Sätze & Übersetzen';
-
-  @override
-  String get tripPhrasesSubtitle => 'Alltagssätze, Foto übersetzen';
-
-  @override
   String get phrasesChangeLanguage => 'Sprache wechseln';
 
   @override
@@ -2529,4 +2495,21 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get photoTranslateError => 'Google Übersetzer ließ sich nicht öffnen.';
+
+  @override
+  String get quickSwipe => 'Swipen';
+
+  @override
+  String get quickPhrases => 'Sätze';
+
+  @override
+  String get quickMembers => 'Mitglieder';
+
+  @override
+  String wishlistShowAll(int count) {
+    return 'Alle anzeigen ($count)';
+  }
+
+  @override
+  String get wishlistShowLess => 'Weniger anzeigen';
 }

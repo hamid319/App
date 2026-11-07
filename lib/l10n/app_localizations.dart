@@ -3200,23 +3200,11 @@ abstract class AppLocalizations {
   /// **'Day plan'**
   String get tripShowDayPlan;
 
-  /// No description provided for @tripPlanStops.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{1 stop} other{{count} stops}}'**
-  String tripPlanStops(int count);
-
   /// No description provided for @tripSwipeTitle.
   ///
   /// In en, this message translates to:
   /// **'Collect ideas by swiping'**
   String get tripSwipeTitle;
-
-  /// No description provided for @tripSwipeSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Everyone swipes through places in {city}'**
-  String tripSwipeSubtitle(String city);
 
   /// No description provided for @tripSwipeSheetBody.
   ///
@@ -4040,12 +4028,6 @@ abstract class AppLocalizations {
   /// **'No places for this city yet.'**
   String get tripSwipeNoPlaces;
 
-  /// No description provided for @tripSwipeLeft.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =0{All places seen} =1{1 place left} other{{count} places left}}'**
-  String tripSwipeLeft(int count);
-
   /// No description provided for @passportTapToOpen.
   ///
   /// In en, this message translates to:
@@ -4141,18 +4123,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t create the image.'**
   String get recapShareError;
-
-  /// No description provided for @tripPhrasesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Phrases & translation'**
-  String get tripPhrasesTitle;
-
-  /// No description provided for @tripPhrasesSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Everyday phrases, translate a photo'**
-  String get tripPhrasesSubtitle;
 
   /// No description provided for @phrasesChangeLanguage.
   ///
@@ -4291,6 +4261,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t open Google Translate.'**
   String get photoTranslateError;
+
+  /// No description provided for @quickSwipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe'**
+  String get quickSwipe;
+
+  /// No description provided for @quickPhrases.
+  ///
+  /// In en, this message translates to:
+  /// **'Phrases'**
+  String get quickPhrases;
+
+  /// No description provided for @quickMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get quickMembers;
+
+  /// No description provided for @wishlistShowAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all ({count})'**
+  String wishlistShowAll(int count);
+
+  /// No description provided for @wishlistShowLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get wishlistShowLess;
 }
 
 class _AppLocalizationsDelegate

@@ -517,9 +517,7 @@
   "tripBuildPlan": "{count, plural, =1{Tagesplan aus 1 Idee erstellen} other{Tagesplan aus {count} Ideen erstellen}}",
   "tripPlanNeedsIdeas": "Erst Ideen mit Ort sammeln",
   "tripShowDayPlan": "Tagesplan",
-  "tripPlanStops": "{count, plural, =1{1 Stopp} other{{count} Stopps}}",
   "tripSwipeTitle": "Ideen per Swipe sammeln",
-  "tripSwipeSubtitle": "Alle swipen durch Orte in {city}",
   "tripSwipeSheetBody": "Alle swipen durch dieselben Orte. Danach seht ihr, was der Gruppe gefällt, und könnt es zur Wunschliste hinzufügen.",
   "tripSwipeLive": "Swipe-Runde läuft",
   "tripImportMatches": "Treffer zur Wunschliste hinzufügen",
@@ -657,7 +655,6 @@
   "tripSwipeDoneBody": "Matches landen auf der Wunschliste, sobald die anderen swipen.",
   "tripSwipeToWishlist": "Zur Wunschliste",
   "tripSwipeNoPlaces": "Für diese Stadt gibt es noch keine Orte.",
-  "tripSwipeLeft": "{count, plural, =0{Alle Orte gesehen} =1{Noch 1 Ort} other{Noch {count} Orte}}",
   "passportTapToOpen": "Zum Öffnen tippen",
   "passportNextStamp": "Nächster Stempel",
   "passportEmpty": "Jede Stadt, in die du reist, bekommt hier einen Stempel, sobald die Reise beginnt.",
@@ -674,8 +671,6 @@
   "recapPlaces": "Eure Orte",
   "recapShare": "Teilen",
   "recapShareError": "Das Bild konnte nicht erstellt werden.",
-  "tripPhrasesTitle": "Sätze & Übersetzen",
-  "tripPhrasesSubtitle": "Alltagssätze, Foto übersetzen",
   "phrasesChangeLanguage": "Sprache wechseln",
   "phrasesLoadError": "Die Sätze konnten nicht geladen werden.",
   "phrasesCatBasics": "Grundlagen",
@@ -698,5 +693,10 @@
   "phrasesRestart": "Von vorn",
   "photoTranslateTitle": "Foto übersetzen",
   "photoTranslateSubtitle": "Speisekarten, Etiketten, Schilder. Öffnet Google Übersetzer.",
-  "photoTranslateError": "Google Übersetzer ließ sich nicht öffnen."
+  "photoTranslateError": "Google Übersetzer ließ sich nicht öffnen.",
+  "quickSwipe": "Swipen",
+  "quickPhrases": "Sätze",
+  "quickMembers": "Mitglieder",
+  "wishlistShowAll": "Alle anzeigen ({count})",
+  "wishlistShowLess": "Weniger anzeigen"
 }
