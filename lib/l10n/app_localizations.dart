@@ -4141,6 +4141,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t create the image.'**
   String get recapShareError;
+
+  /// No description provided for @tripPhrasesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Phrases & translation'**
+  String get tripPhrasesTitle;
+
+  /// No description provided for @tripPhrasesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyday phrases, translate a photo'**
+  String get tripPhrasesSubtitle;
+
+  /// No description provided for @phrasesChangeLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Change language'**
+  String get phrasesChangeLanguage;
+
+  /// No description provided for @phrasesLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the phrases.'**
+  String get phrasesLoadError;
+
+  /// No description provided for @phrasesCatBasics.
+  ///
+  /// In en, this message translates to:
+  /// **'Basics'**
+  String get phrasesCatBasics;
+
+  /// No description provided for @phrasesCatFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant'**
+  String get phrasesCatFood;
+
+  /// No description provided for @phrasesCatShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get phrasesCatShopping;
+
+  /// No description provided for @phrasesCatDirections.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting around'**
+  String get phrasesCatDirections;
+
+  /// No description provided for @phrasesCatEmergency.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency'**
+  String get phrasesCatEmergency;
+
+  /// No description provided for @phrasesPractice.
+  ///
+  /// In en, this message translates to:
+  /// **'Practise'**
+  String get phrasesPractice;
+
+  /// No description provided for @phrasesProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{known} of {total} learned'**
+  String phrasesProgress(int known, int total);
+
+  /// No description provided for @phrasesNoVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'This device has no {language} voice. You can download one in the system settings.'**
+  String phrasesNoVoice(String language);
+
+  /// No description provided for @phrasesListen.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen'**
+  String get phrasesListen;
+
+  /// No description provided for @phrasesYourName.
+  ///
+  /// In en, this message translates to:
+  /// **'your name'**
+  String get phrasesYourName;
+
+  /// No description provided for @phrasesMarkKnown.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as learned'**
+  String get phrasesMarkKnown;
+
+  /// No description provided for @phrasesHowToSay.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you say this in {language}?'**
+  String phrasesHowToSay(String language);
+
+  /// No description provided for @phrasesShowAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Show answer'**
+  String get phrasesShowAnswer;
+
+  /// No description provided for @phrasesAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Again'**
+  String get phrasesAgain;
+
+  /// No description provided for @phrasesKnowIt.
+  ///
+  /// In en, this message translates to:
+  /// **'I know it'**
+  String get phrasesKnowIt;
+
+  /// No description provided for @phrasesDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Well done!'**
+  String get phrasesDoneTitle;
+
+  /// No description provided for @phrasesDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You went through {count} phrases.'**
+  String phrasesDoneBody(int count);
+
+  /// No description provided for @phrasesRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start over'**
+  String get phrasesRestart;
+
+  /// No description provided for @photoTranslateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate a photo'**
+  String get photoTranslateTitle;
+
+  /// No description provided for @photoTranslateSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Menus, labels, signs. Opens Google Translate.'**
+  String get photoTranslateSubtitle;
+
+  /// No description provided for @photoTranslateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open Google Translate.'**
+  String get photoTranslateError;
 }
 
 class _AppLocalizationsDelegate

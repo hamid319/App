@@ -730,6 +730,14 @@ class _MoreSection extends ConsumerWidget {
             onTap: () => context.push('/trip/$id/day/0'),
           ),
         _ActionRow(
+          icon: Icons.translate_rounded,
+          title: l10n.tripPhrasesTitle,
+          subtitle: l10n.tripPhrasesSubtitle,
+          onTap: () => context.push(Uri(path: '/phrases', queryParameters: {
+            if (group.location != null) 'country': group.location!.countryCode,
+          }).toString()),
+        ),
+        _ActionRow(
           icon: Icons.group_outlined,
           title: l10n.membersHeader(group.members.length),
           trailing: AvatarRow(memberIds: group.members, size: 26, max: 4),

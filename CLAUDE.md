@@ -60,6 +60,7 @@ routerProvider           // Provider<GoRouter>
 /trip/:groupId/swipe (group deck)   /group → /trips   /group/join?groupId=&code=
 (old /swipe/:groupId, /group-matches/:groupId, /day-plan/… redirect to the trip)
 /profile   /passport   /settings   /favorites   /favorites-map
+/phrases?lang=|country=   /phrases/practice?lang=   (phrasebook, assets/phrases/phrases.json)
 ```
 - Always use `context.go()` or `context.push()`. Never `Navigator.push()`.
 - New routes go in `app/routes.dart` only. Path format: lowercase kebab-case.

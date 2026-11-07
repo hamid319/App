@@ -16,6 +16,8 @@ import '../features/group/ui/day_map_screen.dart';
 import '../features/group/ui/group_join_screen.dart';
 import '../features/group/ui/journal_screen.dart';
 import '../features/group/ui/recap_screen.dart';
+import '../features/phrases/ui/phrase_practice_screen.dart';
+import '../features/phrases/ui/phrasebook_screen.dart';
 import '../features/group/ui/trip_detail_screen.dart';
 import '../features/group/ui/trips_screen.dart';
 import '../features/group/ui/trip_swipe_screen.dart';
@@ -155,6 +157,22 @@ GoRouter createRouter(Ref ref) {
               icon: Icons.auto_stories_outlined,
               child: RecapScreen(groupId: state.pathParameters['groupId']!),
             ),
+          ),
+        ],
+      ),
+      // Phrasebook: open to guests too. ?lang= picks the language, or
+      // ?country= (from a trip) the language spoken there.
+      GoRoute(
+        path: '/phrases',
+        builder: (ctx, state) => PhrasebookScreen(
+          language: state.uri.queryParameters['lang'],
+          country: state.uri.queryParameters['country'],
+        ),
+        routes: [
+          GoRoute(
+            path: 'practice',
+            builder: (ctx, state) => PhrasePracticeScreen(
+                language: state.uri.queryParameters['lang'] ?? 'en'),
           ),
         ],
       ),

@@ -2445,4 +2445,88 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get recapShareError => 'Das Bild konnte nicht erstellt werden.';
+
+  @override
+  String get tripPhrasesTitle => 'Sätze & Übersetzen';
+
+  @override
+  String get tripPhrasesSubtitle => 'Alltagssätze, Foto übersetzen';
+
+  @override
+  String get phrasesChangeLanguage => 'Sprache wechseln';
+
+  @override
+  String get phrasesLoadError => 'Die Sätze konnten nicht geladen werden.';
+
+  @override
+  String get phrasesCatBasics => 'Grundlagen';
+
+  @override
+  String get phrasesCatFood => 'Restaurant';
+
+  @override
+  String get phrasesCatShopping => 'Einkaufen';
+
+  @override
+  String get phrasesCatDirections => 'Unterwegs';
+
+  @override
+  String get phrasesCatEmergency => 'Notfall';
+
+  @override
+  String get phrasesPractice => 'Üben';
+
+  @override
+  String phrasesProgress(int known, int total) {
+    return '$known von $total gelernt';
+  }
+
+  @override
+  String phrasesNoVoice(String language) {
+    return 'Auf diesem Gerät gibt es keine Stimme für $language. Du kannst sie in den Systemeinstellungen laden.';
+  }
+
+  @override
+  String get phrasesListen => 'Anhören';
+
+  @override
+  String get phrasesYourName => 'dein Name';
+
+  @override
+  String get phrasesMarkKnown => 'Als gelernt markieren';
+
+  @override
+  String phrasesHowToSay(String language) {
+    return 'Wie sagt man das auf $language?';
+  }
+
+  @override
+  String get phrasesShowAnswer => 'Lösung zeigen';
+
+  @override
+  String get phrasesAgain => 'Nochmal';
+
+  @override
+  String get phrasesKnowIt => 'Kann ich';
+
+  @override
+  String get phrasesDoneTitle => 'Geschafft!';
+
+  @override
+  String phrasesDoneBody(int count) {
+    return 'Du hast $count Sätze durchgearbeitet.';
+  }
+
+  @override
+  String get phrasesRestart => 'Von vorn';
+
+  @override
+  String get photoTranslateTitle => 'Foto übersetzen';
+
+  @override
+  String get photoTranslateSubtitle =>
+      'Speisekarten, Etiketten, Schilder. Öffnet Google Übersetzer.';
+
+  @override
+  String get photoTranslateError => 'Google Übersetzer ließ sich nicht öffnen.';
 }

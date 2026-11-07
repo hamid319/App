@@ -2412,4 +2412,88 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recapShareError => 'Couldn\'t create the image.';
+
+  @override
+  String get tripPhrasesTitle => 'Phrases & translation';
+
+  @override
+  String get tripPhrasesSubtitle => 'Everyday phrases, translate a photo';
+
+  @override
+  String get phrasesChangeLanguage => 'Change language';
+
+  @override
+  String get phrasesLoadError => 'Couldn\'t load the phrases.';
+
+  @override
+  String get phrasesCatBasics => 'Basics';
+
+  @override
+  String get phrasesCatFood => 'Restaurant';
+
+  @override
+  String get phrasesCatShopping => 'Shopping';
+
+  @override
+  String get phrasesCatDirections => 'Getting around';
+
+  @override
+  String get phrasesCatEmergency => 'Emergency';
+
+  @override
+  String get phrasesPractice => 'Practise';
+
+  @override
+  String phrasesProgress(int known, int total) {
+    return '$known of $total learned';
+  }
+
+  @override
+  String phrasesNoVoice(String language) {
+    return 'This device has no $language voice. You can download one in the system settings.';
+  }
+
+  @override
+  String get phrasesListen => 'Listen';
+
+  @override
+  String get phrasesYourName => 'your name';
+
+  @override
+  String get phrasesMarkKnown => 'Mark as learned';
+
+  @override
+  String phrasesHowToSay(String language) {
+    return 'How do you say this in $language?';
+  }
+
+  @override
+  String get phrasesShowAnswer => 'Show answer';
+
+  @override
+  String get phrasesAgain => 'Again';
+
+  @override
+  String get phrasesKnowIt => 'I know it';
+
+  @override
+  String get phrasesDoneTitle => 'Well done!';
+
+  @override
+  String phrasesDoneBody(int count) {
+    return 'You went through $count phrases.';
+  }
+
+  @override
+  String get phrasesRestart => 'Start over';
+
+  @override
+  String get photoTranslateTitle => 'Translate a photo';
+
+  @override
+  String get photoTranslateSubtitle =>
+      'Menus, labels, signs. Opens Google Translate.';
+
+  @override
+  String get photoTranslateError => 'Couldn\'t open Google Translate.';
 }

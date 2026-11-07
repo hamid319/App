@@ -6,6 +6,11 @@ class AppConfig {
   /// domain once it is connected to Hosting.
   static const String inviteBaseUrl = 'https://travelapp-31255.web.app/join';
 
+  /// Google Translate's photo mode (menus, labels); the phrasebook adds the
+  /// target language as `tl`. On phones it can hand over to the app.
+  static const String photoTranslateUrl =
+      'https://translate.google.com/?sl=auto&op=images';
+
   // Firestore's on-device cache (persistence is on by default on mobile).
   // Trips, wishlists, day plans and costs are read from it offline and
   // writes wait in it until the connection is back. 100 MB keeps a few

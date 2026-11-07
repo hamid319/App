@@ -1,0 +1,335 @@
+{
+  "phrases": [
+    {"id": "hello", "cat": "basics", "en": "Hello", "de": "Hallo"},
+    {"id": "goodbye", "cat": "basics", "en": "Goodbye", "de": "Tschüss"},
+    {"id": "please", "cat": "basics", "en": "Please", "de": "Bitte"},
+    {"id": "thanks", "cat": "basics", "en": "Thank you", "de": "Danke"},
+    {"id": "yes", "cat": "basics", "en": "Yes", "de": "Ja"},
+    {"id": "no", "cat": "basics", "en": "No", "de": "Nein"},
+    {"id": "sorry", "cat": "basics", "en": "Excuse me", "de": "Entschuldigung"},
+    {"id": "name", "cat": "basics", "en": "My name is {name}", "de": "Ich heiße {name}"},
+    {"id": "noUnderstand", "cat": "basics", "en": "I don't understand", "de": "Ich verstehe nicht"},
+    {"id": "speakEnglish", "cat": "basics", "en": "Do you speak English?", "de": "Sprechen Sie Englisch?"},
+    {"id": "table", "cat": "food", "en": "A table for two, please", "de": "Einen Tisch für zwei, bitte"},
+    {"id": "menu", "cat": "food", "en": "The menu, please", "de": "Die Speisekarte, bitte"},
+    {"id": "water", "cat": "food", "en": "Water, please", "de": "Wasser, bitte"},
+    {"id": "vegetarian", "cat": "food", "en": "I'm vegetarian", "de": "Ich bin Vegetarier(in)"},
+    {"id": "bill", "cat": "food", "en": "The bill, please", "de": "Die Rechnung, bitte"},
+    {"id": "delicious", "cat": "food", "en": "Delicious!", "de": "Lecker!"},
+    {"id": "howMuch", "cat": "shopping", "en": "How much is this?", "de": "Wie viel kostet das?"},
+    {"id": "card", "cat": "shopping", "en": "Can I pay by card?", "de": "Kann ich mit Karte zahlen?"},
+    {"id": "takeIt", "cat": "shopping", "en": "I'll take it", "de": "Ich nehme es"},
+    {"id": "toilet", "cat": "directions", "en": "Where is the toilet?", "de": "Wo ist die Toilette?"},
+    {"id": "station", "cat": "directions", "en": "Where is the train station?", "de": "Wo ist der Bahnhof?"},
+    {"id": "far", "cat": "directions", "en": "Is it far?", "de": "Ist es weit?"},
+    {"id": "help", "cat": "emergency", "en": "Help!", "de": "Hilfe!"},
+    {"id": "doctor", "cat": "emergency", "en": "I need a doctor", "de": "Ich brauche einen Arzt"},
+    {"id": "police", "cat": "emergency", "en": "Please call the police", "de": "Bitte rufen Sie die Polizei"}
+  ],
+  "languages": [
+    {
+      "code": "en", "tts": "en-GB", "native": "English", "name": {"en": "English", "de": "Englisch"},
+      "countries": ["GB", "US", "IE", "AU", "NZ", "CA", "MT", "ZA", "IN", "SG"],
+      "t": {
+        "hello": ["Hello"], "goodbye": ["Goodbye"], "please": ["Please"], "thanks": ["Thank you"],
+        "yes": ["Yes"], "no": ["No"], "sorry": ["Excuse me"], "name": ["My name is {name}"],
+        "noUnderstand": ["I don't understand"],
+        "table": ["A table for two, please"], "menu": ["The menu, please"], "water": ["Water, please"],
+        "vegetarian": ["I'm vegetarian"], "bill": ["The bill, please"], "delicious": ["Delicious!"],
+        "howMuch": ["How much is this?"], "card": ["Can I pay by card?"], "takeIt": ["I'll take it"],
+        "toilet": ["Where is the toilet?"], "station": ["Where is the train station?"], "far": ["Is it far?"],
+        "help": ["Help!"], "doctor": ["I need a doctor"], "police": ["Please call the police"]
+      }
+    },
+    {
+      "code": "es", "tts": "es-ES", "native": "Español", "name": {"en": "Spanish", "de": "Spanisch"},
+      "countries": ["ES", "MX", "AR", "CO", "CL", "PE", "CU", "CR", "UY", "EC", "DO", "VE", "BO", "PY", "GT", "PA"],
+      "t": {
+        "hello": ["Hola"], "goodbye": ["Adiós"], "please": ["Por favor"], "thanks": ["Gracias"],
+        "yes": ["Sí"], "no": ["No"], "sorry": ["Perdón"], "name": ["Me llamo {name}"],
+        "noUnderstand": ["No entiendo"], "speakEnglish": ["¿Habla inglés?"],
+        "table": ["Una mesa para dos, por favor"], "menu": ["La carta, por favor"], "water": ["Agua, por favor"],
+        "vegetarian": ["Soy vegetariano / vegetariana"], "bill": ["La cuenta, por favor"], "delicious": ["¡Delicioso!"],
+        "howMuch": ["¿Cuánto cuesta?"], "card": ["¿Puedo pagar con tarjeta?"], "takeIt": ["Me lo llevo"],
+        "toilet": ["¿Dónde está el baño?"], "station": ["¿Dónde está la estación de tren?"], "far": ["¿Está lejos?"],
+        "help": ["¡Ayuda!"], "doctor": ["Necesito un médico"], "police": ["Llame a la policía, por favor"]
+      }
+    },
+    {
+      "code": "fr", "tts": "fr-FR", "native": "Français", "name": {"en": "French", "de": "Französisch"},
+      "countries": ["FR", "BE", "LU", "MC", "MA", "TN", "SN"],
+      "t": {
+        "hello": ["Bonjour"], "goodbye": ["Au revoir"], "please": ["S'il vous plaît"], "thanks": ["Merci"],
+        "yes": ["Oui"], "no": ["Non"], "sorry": ["Pardon"], "name": ["Je m'appelle {name}"],
+        "noUnderstand": ["Je ne comprends pas"], "speakEnglish": ["Parlez-vous anglais ?"],
+        "table": ["Une table pour deux, s'il vous plaît"], "menu": ["La carte, s'il vous plaît"], "water": ["De l'eau, s'il vous plaît"],
+        "vegetarian": ["Je suis végétarien / végétarienne"], "bill": ["L'addition, s'il vous plaît"], "delicious": ["C'est délicieux !"],
+        "howMuch": ["Combien ça coûte ?"], "card": ["Je peux payer par carte ?"], "takeIt": ["Je le prends"],
+        "toilet": ["Où sont les toilettes ?"], "station": ["Où est la gare ?"], "far": ["C'est loin ?"],
+        "help": ["Au secours !"], "doctor": ["J'ai besoin d'un médecin"], "police": ["Appelez la police, s'il vous plaît"]
+      }
+    },
+    {
+      "code": "it", "tts": "it-IT", "native": "Italiano", "name": {"en": "Italian", "de": "Italienisch"},
+      "countries": ["IT", "SM", "VA"],
+      "t": {
+        "hello": ["Buongiorno"], "goodbye": ["Arrivederci"], "please": ["Per favore"], "thanks": ["Grazie"],
+        "yes": ["Sì"], "no": ["No"], "sorry": ["Scusi"], "name": ["Mi chiamo {name}"],
+        "noUnderstand": ["Non capisco"], "speakEnglish": ["Parla inglese?"],
+        "table": ["Un tavolo per due, per favore"], "menu": ["Il menù, per favore"], "water": ["Dell'acqua, per favore"],
+        "vegetarian": ["Sono vegetariano / vegetariana"], "bill": ["Il conto, per favore"], "delicious": ["Delizioso!"],
+        "howMuch": ["Quanto costa?"], "card": ["Posso pagare con la carta?"], "takeIt": ["Lo prendo"],
+        "toilet": ["Dov'è il bagno?"], "station": ["Dov'è la stazione?"], "far": ["È lontano?"],
+        "help": ["Aiuto!"], "doctor": ["Ho bisogno di un medico"], "police": ["Chiami la polizia, per favore"]
+      }
+    },
+    {
+      "code": "pt", "tts": "pt-PT", "native": "Português", "name": {"en": "Portuguese", "de": "Portugiesisch"},
+      "countries": ["PT", "BR", "AO", "MZ", "CV"],
+      "t": {
+        "hello": ["Olá"], "goodbye": ["Adeus"], "please": ["Por favor"], "thanks": ["Obrigado / Obrigada"],
+        "yes": ["Sim"], "no": ["Não"], "sorry": ["Desculpe"], "name": ["Chamo-me {name}"],
+        "noUnderstand": ["Não entendo"], "speakEnglish": ["Fala inglês?"],
+        "table": ["Uma mesa para dois, por favor"], "menu": ["O menu, por favor"], "water": ["Água, por favor"],
+        "vegetarian": ["Sou vegetariano / vegetariana"], "bill": ["A conta, por favor"], "delicious": ["Delicioso!"],
+        "howMuch": ["Quanto custa?"], "card": ["Posso pagar com cartão?"], "takeIt": ["Vou levar"],
+        "toilet": ["Onde é a casa de banho?"], "station": ["Onde fica a estação de comboios?"], "far": ["É longe?"],
+        "help": ["Socorro!"], "doctor": ["Preciso de um médico"], "police": ["Chame a polícia, por favor"]
+      }
+    },
+    {
+      "code": "de", "tts": "de-DE", "native": "Deutsch", "name": {"en": "German", "de": "Deutsch"},
+      "countries": ["DE", "AT", "CH", "LI"],
+      "t": {
+        "hello": ["Hallo"], "goodbye": ["Tschüss"], "please": ["Bitte"], "thanks": ["Danke"],
+        "yes": ["Ja"], "no": ["Nein"], "sorry": ["Entschuldigung"], "name": ["Ich heiße {name}"],
+        "noUnderstand": ["Ich verstehe nicht"], "speakEnglish": ["Sprechen Sie Englisch?"],
+        "table": ["Einen Tisch für zwei, bitte"], "menu": ["Die Speisekarte, bitte"], "water": ["Wasser, bitte"],
+        "vegetarian": ["Ich bin Vegetarier / Vegetarierin"], "bill": ["Die Rechnung, bitte"], "delicious": ["Lecker!"],
+        "howMuch": ["Wie viel kostet das?"], "card": ["Kann ich mit Karte zahlen?"], "takeIt": ["Ich nehme es"],
+        "toilet": ["Wo ist die Toilette?"], "station": ["Wo ist der Bahnhof?"], "far": ["Ist es weit?"],
+        "help": ["Hilfe!"], "doctor": ["Ich brauche einen Arzt"], "police": ["Bitte rufen Sie die Polizei"]
+      }
+    },
+    {
+      "code": "nl", "tts": "nl-NL", "native": "Nederlands", "name": {"en": "Dutch", "de": "Niederländisch"},
+      "countries": ["NL", "SR"],
+      "t": {
+        "hello": ["Hallo"], "goodbye": ["Tot ziens"], "please": ["Alstublieft"], "thanks": ["Dank u wel"],
+        "yes": ["Ja"], "no": ["Nee"], "sorry": ["Pardon"], "name": ["Ik heet {name}"],
+        "noUnderstand": ["Ik begrijp het niet"], "speakEnglish": ["Spreekt u Engels?"],
+        "table": ["Een tafel voor twee, alstublieft"], "menu": ["De menukaart, alstublieft"], "water": ["Water, alstublieft"],
+        "vegetarian": ["Ik ben vegetariër"], "bill": ["De rekening, alstublieft"], "delicious": ["Heerlijk!"],
+        "howMuch": ["Hoeveel kost dit?"], "card": ["Kan ik met de kaart betalen?"], "takeIt": ["Ik neem het"],
+        "toilet": ["Waar is het toilet?"], "station": ["Waar is het station?"], "far": ["Is het ver?"],
+        "help": ["Help!"], "doctor": ["Ik heb een dokter nodig"], "police": ["Bel de politie, alstublieft"]
+      }
+    },
+    {
+      "code": "da", "tts": "da-DK", "native": "Dansk", "name": {"en": "Danish", "de": "Dänisch"},
+      "countries": ["DK", "FO", "GL"],
+      "t": {
+        "hello": ["Hej"], "goodbye": ["Farvel"], "please": ["Vær så venlig"], "thanks": ["Tak"],
+        "yes": ["Ja"], "no": ["Nej"], "sorry": ["Undskyld"], "name": ["Jeg hedder {name}"],
+        "noUnderstand": ["Jeg forstår det ikke"], "speakEnglish": ["Taler du engelsk?"],
+        "table": ["Et bord til to, tak"], "menu": ["Menukortet, tak"], "water": ["Vand, tak"],
+        "vegetarian": ["Jeg er vegetar"], "bill": ["Regningen, tak"], "delicious": ["Lækkert!"],
+        "howMuch": ["Hvor meget koster det?"], "card": ["Kan jeg betale med kort?"], "takeIt": ["Jeg tager den"],
+        "toilet": ["Hvor er toilettet?"], "station": ["Hvor er banegården?"], "far": ["Er det langt væk?"],
+        "help": ["Hjælp!"], "doctor": ["Jeg har brug for en læge"], "police": ["Ring venligst til politiet"]
+      }
+    },
+    {
+      "code": "sv", "tts": "sv-SE", "native": "Svenska", "name": {"en": "Swedish", "de": "Schwedisch"},
+      "countries": ["SE"],
+      "t": {
+        "hello": ["Hej"], "goodbye": ["Hej då"], "please": ["Snälla"], "thanks": ["Tack"],
+        "yes": ["Ja"], "no": ["Nej"], "sorry": ["Ursäkta"], "name": ["Jag heter {name}"],
+        "noUnderstand": ["Jag förstår inte"], "speakEnglish": ["Talar du engelska?"],
+        "table": ["Ett bord för två, tack"], "menu": ["Menyn, tack"], "water": ["Vatten, tack"],
+        "vegetarian": ["Jag är vegetarian"], "bill": ["Notan, tack"], "delicious": ["Jättegott!"],
+        "howMuch": ["Hur mycket kostar det?"], "card": ["Kan jag betala med kort?"], "takeIt": ["Jag tar den"],
+        "toilet": ["Var är toaletten?"], "station": ["Var är tågstationen?"], "far": ["Är det långt?"],
+        "help": ["Hjälp!"], "doctor": ["Jag behöver en läkare"], "police": ["Ring polisen, tack"]
+      }
+    },
+    {
+      "code": "pl", "tts": "pl-PL", "native": "Polski", "name": {"en": "Polish", "de": "Polnisch"},
+      "countries": ["PL"],
+      "t": {
+        "hello": ["Dzień dobry"], "goodbye": ["Do widzenia"], "please": ["Proszę"], "thanks": ["Dziękuję"],
+        "yes": ["Tak"], "no": ["Nie"], "sorry": ["Przepraszam"], "name": ["Mam na imię {name}"],
+        "noUnderstand": ["Nie rozumiem"], "speakEnglish": ["Czy mówi pan / pani po angielsku?"],
+        "table": ["Stolik dla dwóch osób, proszę"], "menu": ["Poproszę menu"], "water": ["Poproszę wodę"],
+        "vegetarian": ["Jestem wegetarianinem / wegetarianką"], "bill": ["Poproszę rachunek"], "delicious": ["Pyszne!"],
+        "howMuch": ["Ile to kosztuje?"], "card": ["Czy mogę zapłacić kartą?"], "takeIt": ["Wezmę to"],
+        "toilet": ["Gdzie jest toaleta?"], "station": ["Gdzie jest dworzec kolejowy?"], "far": ["Czy to daleko?"],
+        "help": ["Pomocy!"], "doctor": ["Potrzebuję lekarza"], "police": ["Proszę wezwać policję"]
+      }
+    },
+    {
+      "code": "cs", "tts": "cs-CZ", "native": "Čeština", "name": {"en": "Czech", "de": "Tschechisch"},
+      "countries": ["CZ"],
+      "t": {
+        "hello": ["Dobrý den"], "goodbye": ["Na shledanou"], "please": ["Prosím"], "thanks": ["Děkuji"],
+        "yes": ["Ano"], "no": ["Ne"], "sorry": ["Promiňte"], "name": ["Jmenuji se {name}"],
+        "noUnderstand": ["Nerozumím"], "speakEnglish": ["Mluvíte anglicky?"],
+        "table": ["Stůl pro dva, prosím"], "menu": ["Jídelní lístek, prosím"], "water": ["Vodu, prosím"],
+        "vegetarian": ["Jsem vegetarián / vegetariánka"], "bill": ["Účet, prosím"], "delicious": ["Výborné!"],
+        "howMuch": ["Kolik to stojí?"], "card": ["Můžu platit kartou?"], "takeIt": ["Vezmu si to"],
+        "toilet": ["Kde je toaleta?"], "station": ["Kde je nádraží?"], "far": ["Je to daleko?"],
+        "help": ["Pomoc!"], "doctor": ["Potřebuji lékaře"], "police": ["Zavolejte policii, prosím"]
+      }
+    },
+    {
+      "code": "hu", "tts": "hu-HU", "native": "Magyar", "name": {"en": "Hungarian", "de": "Ungarisch"},
+      "countries": ["HU"],
+      "t": {
+        "hello": ["Jó napot!"], "goodbye": ["Viszontlátásra"], "please": ["Kérem"], "thanks": ["Köszönöm"],
+        "yes": ["Igen"], "no": ["Nem"], "sorry": ["Elnézést"], "name": ["A nevem {name}"],
+        "noUnderstand": ["Nem értem"], "speakEnglish": ["Beszél angolul?"],
+        "table": ["Egy asztalt két főre, kérem"], "menu": ["Az étlapot, kérem"], "water": ["Vizet, kérem"],
+        "vegetarian": ["Vegetáriánus vagyok"], "bill": ["A számlát, kérem"], "delicious": ["Finom!"],
+        "howMuch": ["Mennyibe kerül?"], "card": ["Fizethetek kártyával?"], "takeIt": ["Megveszem"],
+        "toilet": ["Hol van a mosdó?"], "station": ["Hol van a vasútállomás?"], "far": ["Messze van?"],
+        "help": ["Segítség!"], "doctor": ["Orvosra van szükségem"], "police": ["Kérem, hívja a rendőrséget"]
+      }
+    },
+    {
+      "code": "hr", "tts": "hr-HR", "native": "Hrvatski", "name": {"en": "Croatian", "de": "Kroatisch"},
+      "countries": ["HR", "BA", "ME", "RS"],
+      "t": {
+        "hello": ["Dobar dan"], "goodbye": ["Doviđenja"], "please": ["Molim"], "thanks": ["Hvala"],
+        "yes": ["Da"], "no": ["Ne"], "sorry": ["Oprostite"], "name": ["Zovem se {name}"],
+        "noUnderstand": ["Ne razumijem"], "speakEnglish": ["Govorite li engleski?"],
+        "table": ["Stol za dvoje, molim"], "menu": ["Jelovnik, molim"], "water": ["Vodu, molim"],
+        "vegetarian": ["Ja sam vegetarijanac / vegetarijanka"], "bill": ["Račun, molim"], "delicious": ["Ukusno!"],
+        "howMuch": ["Koliko ovo košta?"], "card": ["Mogu li platiti karticom?"], "takeIt": ["Uzet ću to"],
+        "toilet": ["Gdje je toalet?"], "station": ["Gdje je željeznički kolodvor?"], "far": ["Je li daleko?"],
+        "help": ["Upomoć!"], "doctor": ["Trebam liječnika"], "police": ["Molim vas, zovite policiju"]
+      }
+    },
+    {
+      "code": "el", "tts": "el-GR", "native": "Ελληνικά", "name": {"en": "Greek", "de": "Griechisch"},
+      "countries": ["GR", "CY"],
+      "t": {
+        "hello": ["Γεια σας", "Yia sas"], "goodbye": ["Αντίο", "Adío"], "please": ["Παρακαλώ", "Parakaló"],
+        "thanks": ["Ευχαριστώ", "Efcharistó"], "yes": ["Ναι", "Ne"], "no": ["Όχι", "Óchi"],
+        "sorry": ["Συγγνώμη", "Signómi"], "name": ["Με λένε {name}", "Me léne {name}"],
+        "noUnderstand": ["Δεν καταλαβαίνω", "Den katalavéno"], "speakEnglish": ["Μιλάτε αγγλικά;", "Miláte angliká?"],
+        "table": ["Ένα τραπέζι για δύο, παρακαλώ", "Éna trapézi ya dío, parakaló"],
+        "menu": ["Τον κατάλογο, παρακαλώ", "Ton katálogo, parakaló"], "water": ["Νερό, παρακαλώ", "Neró, parakaló"],
+        "vegetarian": ["Είμαι χορτοφάγος", "Íme chortofágos"], "bill": ["Τον λογαριασμό, παρακαλώ", "Ton logariasmó, parakaló"],
+        "delicious": ["Νόστιμο!", "Nóstimo!"], "howMuch": ["Πόσο κοστίζει;", "Póso kostízi?"],
+        "card": ["Μπορώ να πληρώσω με κάρτα;", "Boró na pliróso me kárta?"], "takeIt": ["Θα το πάρω", "Tha to páro"],
+        "toilet": ["Πού είναι η τουαλέτα;", "Pu íne i tualéta?"],
+        "station": ["Πού είναι ο σιδηροδρομικός σταθμός;", "Pu íne o sidirodromikós stathmós?"],
+        "far": ["Είναι μακριά;", "Íne makriá?"], "help": ["Βοήθεια!", "Voíthia!"],
+        "doctor": ["Χρειάζομαι γιατρό", "Chriázome yatró"], "police": ["Καλέστε την αστυνομία, παρακαλώ", "Kaléste tin astinomía, parakaló"]
+      }
+    },
+    {
+      "code": "tr", "tts": "tr-TR", "native": "Türkçe", "name": {"en": "Turkish", "de": "Türkisch"},
+      "countries": ["TR"],
+      "t": {
+        "hello": ["Merhaba"], "goodbye": ["Hoşça kalın"], "please": ["Lütfen"], "thanks": ["Teşekkür ederim"],
+        "yes": ["Evet"], "no": ["Hayır"], "sorry": ["Affedersiniz"], "name": ["Benim adım {name}"],
+        "noUnderstand": ["Anlamıyorum"], "speakEnglish": ["İngilizce biliyor musunuz?"],
+        "table": ["İki kişilik bir masa, lütfen"], "menu": ["Menü, lütfen"], "water": ["Su, lütfen"],
+        "vegetarian": ["Vejetaryenim"], "bill": ["Hesap, lütfen"], "delicious": ["Çok lezzetli!"],
+        "howMuch": ["Bu ne kadar?"], "card": ["Kartla ödeyebilir miyim?"], "takeIt": ["Bunu alıyorum"],
+        "toilet": ["Tuvalet nerede?"], "station": ["Tren istasyonu nerede?"], "far": ["Uzak mı?"],
+        "help": ["İmdat!"], "doctor": ["Doktora ihtiyacım var"], "police": ["Lütfen polisi arayın"]
+      }
+    },
+    {
+      "code": "zh", "tts": "zh-CN", "native": "中文", "name": {"en": "Chinese (Mandarin)", "de": "Chinesisch (Mandarin)"},
+      "countries": ["CN", "TW", "HK", "MO"],
+      "t": {
+        "hello": ["你好", "nǐ hǎo"], "goodbye": ["再见", "zàijiàn"], "please": ["请", "qǐng"],
+        "thanks": ["谢谢", "xièxie"], "yes": ["是的", "shì de"], "no": ["不是", "bú shì"],
+        "sorry": ["不好意思", "bù hǎoyìsi"], "name": ["我叫{name}", "wǒ jiào {name}"],
+        "noUnderstand": ["我听不懂", "wǒ tīng bu dǒng"], "speakEnglish": ["你会说英语吗？", "nǐ huì shuō yīngyǔ ma?"],
+        "table": ["两个人，谢谢", "liǎng ge rén, xièxie"], "menu": ["请给我菜单", "qǐng gěi wǒ càidān"],
+        "water": ["请给我一杯水", "qǐng gěi wǒ yì bēi shuǐ"], "vegetarian": ["我吃素", "wǒ chī sù"],
+        "bill": ["买单，谢谢", "mǎidān, xièxie"], "delicious": ["很好吃！", "hěn hǎochī!"],
+        "howMuch": ["这个多少钱？", "zhège duōshao qián?"], "card": ["可以刷卡吗？", "kěyǐ shuākǎ ma?"],
+        "takeIt": ["我要这个", "wǒ yào zhège"], "toilet": ["洗手间在哪里？", "xǐshǒujiān zài nǎlǐ?"],
+        "station": ["火车站在哪里？", "huǒchēzhàn zài nǎlǐ?"], "far": ["远吗？", "yuǎn ma?"],
+        "help": ["救命！", "jiùmìng!"], "doctor": ["我需要看医生", "wǒ xūyào kàn yīshēng"], "police": ["请报警", "qǐng bàojǐng"]
+      }
+    },
+    {
+      "code": "ja", "tts": "ja-JP", "native": "日本語", "name": {"en": "Japanese", "de": "Japanisch"},
+      "countries": ["JP"],
+      "t": {
+        "hello": ["こんにちは", "konnichiwa"], "goodbye": ["さようなら", "sayōnara"], "please": ["お願いします", "onegaishimasu"],
+        "thanks": ["ありがとうございます", "arigatō gozaimasu"], "yes": ["はい", "hai"], "no": ["いいえ", "iie"],
+        "sorry": ["すみません", "sumimasen"], "name": ["私は{name}です", "watashi wa {name} desu"],
+        "noUnderstand": ["わかりません", "wakarimasen"], "speakEnglish": ["英語を話せますか？", "eigo o hanasemasu ka?"],
+        "table": ["二人です", "futari desu"], "menu": ["メニューをお願いします", "menyū o onegaishimasu"],
+        "water": ["お水をお願いします", "o-mizu o onegaishimasu"], "vegetarian": ["ベジタリアンです", "bejitarian desu"],
+        "bill": ["お会計をお願いします", "o-kaikei o onegaishimasu"], "delicious": ["おいしい！", "oishii!"],
+        "howMuch": ["これはいくらですか？", "kore wa ikura desu ka?"], "card": ["カードで払えますか？", "kādo de haraemasu ka?"],
+        "takeIt": ["これにします", "kore ni shimasu"], "toilet": ["トイレはどこですか？", "toire wa doko desu ka?"],
+        "station": ["駅はどこですか？", "eki wa doko desu ka?"], "far": ["遠いですか？", "tōi desu ka?"],
+        "help": ["助けて！", "tasukete!"], "doctor": ["医者が必要です", "isha ga hitsuyō desu"],
+        "police": ["警察を呼んでください", "keisatsu o yonde kudasai"]
+      }
+    },
+    {
+      "code": "ko", "tts": "ko-KR", "native": "한국어", "name": {"en": "Korean", "de": "Koreanisch"},
+      "countries": ["KR"],
+      "t": {
+        "hello": ["안녕하세요", "annyeonghaseyo"], "goodbye": ["안녕히 계세요", "annyeonghi gyeseyo"], "please": ["주세요", "juseyo"],
+        "thanks": ["감사합니다", "gamsahamnida"], "yes": ["네", "ne"], "no": ["아니요", "aniyo"],
+        "sorry": ["실례합니다", "sillyehamnida"], "name": ["제 이름은 {name}입니다", "je ireumeun {name}imnida"],
+        "noUnderstand": ["이해가 안 돼요", "ihaega an dwaeyo"], "speakEnglish": ["영어 하세요?", "yeongeo haseyo?"],
+        "table": ["두 명이요", "du myeong-iyo"], "menu": ["메뉴 주세요", "menyu juseyo"], "water": ["물 주세요", "mul juseyo"],
+        "vegetarian": ["저는 채식주의자예요", "jeoneun chaesikjuuijayeyo"], "bill": ["계산해 주세요", "gyesanhae juseyo"],
+        "delicious": ["맛있어요!", "masisseoyo!"], "howMuch": ["이거 얼마예요?", "igeo eolmayeyo?"],
+        "card": ["카드 돼요?", "kadeu dwaeyo?"], "takeIt": ["이걸로 할게요", "igeollo halgeyo"],
+        "toilet": ["화장실이 어디예요?", "hwajangsiri eodiyeyo?"], "station": ["기차역이 어디예요?", "gichayeogi eodiyeyo?"],
+        "far": ["멀어요?", "meoreoyo?"], "help": ["도와주세요!", "dowajuseyo!"],
+        "doctor": ["의사가 필요해요", "uisaga piryohaeyo"], "police": ["경찰을 불러 주세요", "gyeongchareul bulleo juseyo"]
+      }
+    },
+    {
+      "code": "th", "tts": "th-TH", "native": "ไทย", "name": {"en": "Thai", "de": "Thai"},
+      "countries": ["TH"],
+      "t": {
+        "hello": ["สวัสดีครับ / ค่ะ", "sawatdee khrap / kha"], "goodbye": ["ลาก่อนครับ / ค่ะ", "laa gon khrap / kha"],
+        "please": ["กรุณา", "karunaa"], "thanks": ["ขอบคุณครับ / ค่ะ", "khop khun khrap / kha"],
+        "yes": ["ใช่", "chai"], "no": ["ไม่ใช่", "mai chai"], "sorry": ["ขอโทษครับ / ค่ะ", "kho thot khrap / kha"],
+        "name": ["ผม / ฉันชื่อ {name}", "phom / chan chue {name}"], "noUnderstand": ["ไม่เข้าใจ", "mai khao jai"],
+        "speakEnglish": ["พูดภาษาอังกฤษได้ไหม", "phuut phaasaa angkrit dai mai?"],
+        "table": ["โต๊ะสำหรับสองคน", "to samrap song khon"], "menu": ["ขอเมนูหน่อย", "kho menu noi"],
+        "water": ["ขอน้ำเปล่าหน่อย", "kho nam plao noi"], "vegetarian": ["กินมังสวิรัติ", "kin mangsawirat"],
+        "bill": ["เช็คบิลด้วย", "chek bin duay"], "delicious": ["อร่อย!", "aroi!"],
+        "howMuch": ["อันนี้เท่าไหร่", "an nee thao rai?"], "card": ["จ่ายด้วยบัตรได้ไหม", "jaai duay bat dai mai?"],
+        "takeIt": ["เอาอันนี้", "ao an nee"], "toilet": ["ห้องน้ำอยู่ที่ไหน", "hong nam yuu thee nai?"],
+        "station": ["สถานีรถไฟอยู่ที่ไหน", "sathaanee rot fai yuu thee nai?"], "far": ["ไกลไหม", "glai mai?"],
+        "help": ["ช่วยด้วย!", "chuay duay!"], "doctor": ["ต้องการหมอ", "tong gaan mor"],
+        "police": ["ช่วยเรียกตำรวจหน่อย", "chuay riak tamruat noi"]
+      }
+    },
+    {
+      "code": "ar", "tts": "ar-SA", "native": "العربية", "name": {"en": "Arabic", "de": "Arabisch"}, "rtl": true,
+      "countries": ["AE", "SA", "QA", "OM", "BH", "KW", "JO", "EG", "LB"],
+      "t": {
+        "hello": ["مرحبا", "marhaba"], "goodbye": ["مع السلامة", "ma'a as-salama"], "please": ["من فضلك", "min fadlak"],
+        "thanks": ["شكراً", "shukran"], "yes": ["نعم", "na'am"], "no": ["لا", "la"], "sorry": ["عفواً", "'afwan"],
+        "name": ["اسمي {name}", "ismi {name}"], "noUnderstand": ["لا أفهم", "la afham"],
+        "speakEnglish": ["هل تتكلم الإنجليزية؟", "hal tatakallam al-ingliziya?"],
+        "table": ["طاولة لشخصين من فضلك", "tawila li-shakhsayn min fadlak"], "menu": ["القائمة من فضلك", "al-qa'ima min fadlak"],
+        "water": ["ماء من فضلك", "ma' min fadlak"], "vegetarian": ["أنا نباتي", "ana nabati"],
+        "bill": ["الحساب من فضلك", "al-hisab min fadlak"], "delicious": ["لذيذ!", "ladhidh!"],
+        "howMuch": ["بكم هذا؟", "bikam hadha?"], "card": ["هل يمكنني الدفع بالبطاقة؟", "hal yumkinuni ad-daf' bil-bitaqa?"],
+        "takeIt": ["سآخذه", "sa'akhudhuh"], "toilet": ["أين الحمام؟", "ayna al-hammam?"],
+        "station": ["أين محطة القطار؟", "ayna mahattat al-qitar?"], "far": ["هل هو بعيد؟", "hal huwa ba'id?"],
+        "help": ["النجدة!", "an-najda!"], "doctor": ["أحتاج إلى طبيب", "ahtaj ila tabib"],
+        "police": ["اتصل بالشرطة من فضلك", "ittasil bish-shurta min fadlak"]
+      }
+    }
+  ]
+}
