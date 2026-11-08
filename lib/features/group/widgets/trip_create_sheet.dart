@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../common/models/group_model.dart';
+import '../../../common/utils/passport_stamps.dart';
 import '../../../common/utils/trip_dates.dart';
 import '../../../common/widgets/city_picker.dart';
 import '../../../core/constants/popular_cities.dart';
@@ -10,6 +11,7 @@ import '../../../l10n/l10n.dart';
 import '../../../main_providers.dart';
 import '../logic/group_controller.dart';
 import 'calendar_trip_sheet.dart';
+import 'trip_created_celebration.dart';
 import 'trip_ui.dart';
 
 /// Sheet to plan a new trip: name, city and optional dates (also from a
@@ -111,7 +113,14 @@ class _CreateTripSheetState extends ConsumerState<_CreateTripSheet> {
       );
       return;
     }
-    Navigator.of(context).pop(ref.read(selectedGroupIdProvider));
+    final id = ref.read(selectedGroupIdProvider);
+    await showTripCreatedCelebration(
+      context,
+      cityName: city.nameFor(Localizations.localeOf(context).languageCode),
+      stickerSeed: stampSeed(location.cityId),
+    );
+    if (!mounted) return;
+    Navigator.of(context).pop(id);
   }
 
   @override

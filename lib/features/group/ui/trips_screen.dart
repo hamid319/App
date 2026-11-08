@@ -144,10 +144,8 @@ class TripsScreen extends ConsumerWidget {
 
   Future<void> _create(BuildContext context) async {
     final id = await showCreateTripSheet(context);
-    if (id != null && context.mounted) {
-      showTripSnack(context, context.l10n.groupCreated);
-      context.push('/trip/$id');
-    }
+    // The sheet already celebrated the new trip.
+    if (id != null && context.mounted) context.push('/trip/$id');
   }
 
   Future<void> _join(BuildContext context, WidgetRef ref) async {
@@ -298,8 +296,8 @@ class _HeroTripCard extends ConsumerWidget {
                       if (openPolls > 0)
                         Text(
                           l10n.tripOpenPolls(openPolls),
-                          style: text.labelLarge
-                              ?.copyWith(color: scheme.primary),
+                          style:
+                              text.labelLarge?.copyWith(color: scheme.primary),
                         ),
                     ],
                   ),

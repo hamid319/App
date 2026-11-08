@@ -21,6 +21,7 @@ import '../logic/trip_controller.dart';
 import '../widgets/idea_sheet.dart';
 import '../widgets/poll_sheet.dart';
 import '../widgets/sync_badge.dart';
+import '../widgets/trip_packing_bar.dart';
 import '../widgets/trip_members_sheet.dart';
 import '../widgets/trip_ui.dart';
 
@@ -263,6 +264,8 @@ class _PlanBody extends ConsumerWidget {
                 const SizedBox(height: 16),
                 _QuickActions(group: group, uid: uid),
                 const SizedBox(height: 20),
+                TripPackingBar(group: group, uid: uid, ideas: ideas.length),
+                const SizedBox(height: 16),
                 // During the trip, up top: the passport check-in.
                 if (_canCheckIn(group)) ...[
                   InsetGroup(children: [_CheckInRow(group: group)]),

@@ -2685,4 +2685,147 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get cityTipSaveError =>
       'Dein Tipp konnte nicht gesendet werden. Bitte versuch es noch einmal.';
+
+  @override
+  String get tripCreatedTitle => 'Koffer gepackt!';
+
+  @override
+  String tripCreatedBody(String city) {
+    return 'Deine Reise nach $city steht. Jetzt noch deine Leute einladen.';
+  }
+
+  @override
+  String get tripCreatedOpen => 'Zur Reise';
+
+  @override
+  String tripPackTitle(int percent) {
+    return 'Koffer zu $percent % gepackt';
+  }
+
+  @override
+  String get tripPackDone => 'Alles gepackt. Gute Reise!';
+
+  @override
+  String tripPackNext(String step) {
+    return 'Als Nächstes: $step';
+  }
+
+  @override
+  String get tripPackFriends => 'Freunde einladen';
+
+  @override
+  String get tripPackSwipe => 'Orte swipen';
+
+  @override
+  String get tripPackWishlist => '3 Ideen sammeln';
+
+  @override
+  String get tripPackDayPlan => 'Tagesplan erstellen';
+
+  @override
+  String get suitcaseTitle => 'Dein Koffer';
+
+  @override
+  String suitcaseLevel(int level) {
+    return 'Stufe $level';
+  }
+
+  @override
+  String get suitcaseLevel0 => 'Handgepäck';
+
+  @override
+  String get suitcaseLevel1 => 'Trolley';
+
+  @override
+  String get suitcaseLevel2 => 'Reisekoffer';
+
+  @override
+  String get suitcaseLevel3 => 'Weltenbummler';
+
+  @override
+  String get suitcaseLevel4 => 'Globetrotter';
+
+  @override
+  String suitcaseMiles(int miles, int next) {
+    return '$miles / $next Meilen';
+  }
+
+  @override
+  String suitcaseMilesTotal(int miles) {
+    return '$miles Meilen';
+  }
+
+  @override
+  String suitcaseNextExtra(String extra, String missing) {
+    return 'Nächstes Extra: $extra, noch $missing';
+  }
+
+  @override
+  String get suitcaseAllExtras => 'Alle Extras gesammelt';
+
+  @override
+  String get suitcaseExtraTag => 'Gepäckanhänger';
+
+  @override
+  String get suitcaseExtraStrap => 'Kofferband';
+
+  @override
+  String get suitcaseExtraGoldWheels => 'Goldene Rollen';
+
+  @override
+  String get suitcaseExtraGoldHandle => 'Goldener Griff';
+
+  @override
+  String suitcaseTrips(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Reisen',
+      one: '1 Reise',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String suitcaseCities(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Städte',
+      one: '1 Stadt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String suitcaseCountries(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Länder',
+      one: '1 Land',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get suitcaseHowTitle => 'So wächst dein Koffer';
+
+  @override
+  String get suitcaseEarnHeader => 'Meilen sammeln';
+
+  @override
+  String get suitcaseEarnTrip => 'Reise geplant oder beigetreten';
+
+  @override
+  String get suitcaseEarnCity => 'Neue Stadt im Pass';
+
+  @override
+  String get suitcaseEarnCheckIn => 'Check-in vor Ort';
+
+  @override
+  String get suitcaseEarnCountry => 'Neues Land';
+
+  @override
+  String get suitcaseExtrasHeader => 'Extras';
 }

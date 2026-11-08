@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../logic/profile_controller.dart';
 import '../logic/passport_controller.dart';
+import '../widgets/suitcase_card.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../../core/errors/user_message.dart';
@@ -194,6 +195,8 @@ class SimplifiedProfileScreen extends ConsumerWidget {
             label: Text(l10n.editProfile),
           ),
           const SizedBox(height: AppSizes.groupGap),
+          const SuitcaseCard(),
+          const SizedBox(height: AppSizes.space16),
           const _PassportRow(),
           const SizedBox(height: AppSizes.space16),
           // Favorites moved here from their own tab.

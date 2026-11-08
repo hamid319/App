@@ -1314,5 +1314,70 @@
   "cityTipNoteLabel": "Why is it special? (optional)",
   "cityTipSubmit": "Send tip",
   "cityTipThanks": "Thanks! We'll take a look at your tip.",
-  "cityTipSaveError": "Your tip could not be sent. Please try again."
+  "cityTipSaveError": "Your tip could not be sent. Please try again.",
+  "tripCreatedTitle": "Bags packed!",
+  "tripCreatedBody": "Your trip to {city} is set. Now invite your people.",
+  "@tripCreatedBody": {
+    "placeholders": {"city": {"type": "String"}}
+  },
+  "tripCreatedOpen": "Open trip",
+  "tripPackTitle": "Suitcase {percent}% packed",
+  "@tripPackTitle": {
+    "placeholders": {"percent": {"type": "int"}}
+  },
+  "tripPackDone": "All packed. Have a great trip!",
+  "tripPackNext": "Next: {step}",
+  "@tripPackNext": {
+    "placeholders": {"step": {"type": "String"}}
+  },
+  "tripPackFriends": "invite friends",
+  "tripPackSwipe": "swipe places",
+  "tripPackWishlist": "collect 3 ideas",
+  "tripPackDayPlan": "build the day plan",
+  "suitcaseTitle": "Your suitcase",
+  "suitcaseLevel": "Level {level}",
+  "@suitcaseLevel": {
+    "placeholders": {"level": {"type": "int"}}
+  },
+  "suitcaseLevel0": "Carry-on",
+  "suitcaseLevel1": "Trolley",
+  "suitcaseLevel2": "Big suitcase",
+  "suitcaseLevel3": "Wanderer",
+  "suitcaseLevel4": "Globetrotter",
+  "suitcaseMiles": "{miles} / {next} miles",
+  "@suitcaseMiles": {
+    "placeholders": {"miles": {"type": "int"}, "next": {"type": "int"}}
+  },
+  "suitcaseMilesTotal": "{miles} miles",
+  "@suitcaseMilesTotal": {
+    "placeholders": {"miles": {"type": "int"}}
+  },
+  "suitcaseNextExtra": "Next extra: {extra}, {missing} to go",
+  "@suitcaseNextExtra": {
+    "placeholders": {"extra": {"type": "String"}, "missing": {"type": "String"}}
+  },
+  "suitcaseAllExtras": "All extras collected",
+  "suitcaseExtraTag": "Luggage tag",
+  "suitcaseExtraStrap": "Suitcase strap",
+  "suitcaseExtraGoldWheels": "Golden wheels",
+  "suitcaseExtraGoldHandle": "Golden handle",
+  "suitcaseTrips": "{count, plural, =1{1 trip} other{{count} trips}}",
+  "@suitcaseTrips": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "suitcaseCities": "{count, plural, =1{1 city} other{{count} cities}}",
+  "@suitcaseCities": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "suitcaseCountries": "{count, plural, =1{1 country} other{{count} countries}}",
+  "@suitcaseCountries": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "suitcaseHowTitle": "How your suitcase grows",
+  "suitcaseEarnHeader": "Earn miles",
+  "suitcaseEarnTrip": "Trip planned or joined",
+  "suitcaseEarnCity": "New city in your passport",
+  "suitcaseEarnCheckIn": "Check-in on site",
+  "suitcaseEarnCountry": "New country",
+  "suitcaseExtrasHeader": "Extras"
 }

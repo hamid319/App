@@ -2650,4 +2650,147 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get cityTipSaveError =>
       'Your tip could not be sent. Please try again.';
+
+  @override
+  String get tripCreatedTitle => 'Bags packed!';
+
+  @override
+  String tripCreatedBody(String city) {
+    return 'Your trip to $city is set. Now invite your people.';
+  }
+
+  @override
+  String get tripCreatedOpen => 'Open trip';
+
+  @override
+  String tripPackTitle(int percent) {
+    return 'Suitcase $percent% packed';
+  }
+
+  @override
+  String get tripPackDone => 'All packed. Have a great trip!';
+
+  @override
+  String tripPackNext(String step) {
+    return 'Next: $step';
+  }
+
+  @override
+  String get tripPackFriends => 'invite friends';
+
+  @override
+  String get tripPackSwipe => 'swipe places';
+
+  @override
+  String get tripPackWishlist => 'collect 3 ideas';
+
+  @override
+  String get tripPackDayPlan => 'build the day plan';
+
+  @override
+  String get suitcaseTitle => 'Your suitcase';
+
+  @override
+  String suitcaseLevel(int level) {
+    return 'Level $level';
+  }
+
+  @override
+  String get suitcaseLevel0 => 'Carry-on';
+
+  @override
+  String get suitcaseLevel1 => 'Trolley';
+
+  @override
+  String get suitcaseLevel2 => 'Big suitcase';
+
+  @override
+  String get suitcaseLevel3 => 'Wanderer';
+
+  @override
+  String get suitcaseLevel4 => 'Globetrotter';
+
+  @override
+  String suitcaseMiles(int miles, int next) {
+    return '$miles / $next miles';
+  }
+
+  @override
+  String suitcaseMilesTotal(int miles) {
+    return '$miles miles';
+  }
+
+  @override
+  String suitcaseNextExtra(String extra, String missing) {
+    return 'Next extra: $extra, $missing to go';
+  }
+
+  @override
+  String get suitcaseAllExtras => 'All extras collected';
+
+  @override
+  String get suitcaseExtraTag => 'Luggage tag';
+
+  @override
+  String get suitcaseExtraStrap => 'Suitcase strap';
+
+  @override
+  String get suitcaseExtraGoldWheels => 'Golden wheels';
+
+  @override
+  String get suitcaseExtraGoldHandle => 'Golden handle';
+
+  @override
+  String suitcaseTrips(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count trips',
+      one: '1 trip',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String suitcaseCities(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cities',
+      one: '1 city',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String suitcaseCountries(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count countries',
+      one: '1 country',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get suitcaseHowTitle => 'How your suitcase grows';
+
+  @override
+  String get suitcaseEarnHeader => 'Earn miles';
+
+  @override
+  String get suitcaseEarnTrip => 'Trip planned or joined';
+
+  @override
+  String get suitcaseEarnCity => 'New city in your passport';
+
+  @override
+  String get suitcaseEarnCheckIn => 'Check-in on site';
+
+  @override
+  String get suitcaseEarnCountry => 'New country';
+
+  @override
+  String get suitcaseExtrasHeader => 'Extras';
 }

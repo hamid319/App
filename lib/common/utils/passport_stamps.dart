@@ -22,14 +22,17 @@ class PassportStamp {
   final bool checkedIn;
 
   /// Stable across app starts (unlike String.hashCode), so a stamp keeps
-  /// its shape, colour and tilt. FNV-1a, 32 bit.
-  int get seed {
-    var h = 0x811c9dc5;
-    for (final c in cityId.codeUnits) {
-      h = ((h ^ c) * 0x01000193) & 0xffffffff;
-    }
-    return h;
+  /// its shape, colour and tilt.
+  int get seed => stampSeed(cityId);
+}
+
+/// Stable hash of a city key (unlike String.hashCode): FNV-1a, 32 bit.
+int stampSeed(String key) {
+  var h = 0x811c9dc5;
+  for (final c in key.codeUnits) {
+    h = ((h ^ c) * 0x01000193) & 0xffffffff;
   }
+  return h;
 }
 
 /// The key of a city in the passport and in `users/{uid}.checkIns`.

@@ -4573,6 +4573,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your tip could not be sent. Please try again.'**
   String get cityTipSaveError;
+
+  /// No description provided for @tripCreatedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bags packed!'**
+  String get tripCreatedTitle;
+
+  /// No description provided for @tripCreatedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your trip to {city} is set. Now invite your people.'**
+  String tripCreatedBody(String city);
+
+  /// No description provided for @tripCreatedOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open trip'**
+  String get tripCreatedOpen;
+
+  /// No description provided for @tripPackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Suitcase {percent}% packed'**
+  String tripPackTitle(int percent);
+
+  /// No description provided for @tripPackDone.
+  ///
+  /// In en, this message translates to:
+  /// **'All packed. Have a great trip!'**
+  String get tripPackDone;
+
+  /// No description provided for @tripPackNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {step}'**
+  String tripPackNext(String step);
+
+  /// No description provided for @tripPackFriends.
+  ///
+  /// In en, this message translates to:
+  /// **'invite friends'**
+  String get tripPackFriends;
+
+  /// No description provided for @tripPackSwipe.
+  ///
+  /// In en, this message translates to:
+  /// **'swipe places'**
+  String get tripPackSwipe;
+
+  /// No description provided for @tripPackWishlist.
+  ///
+  /// In en, this message translates to:
+  /// **'collect 3 ideas'**
+  String get tripPackWishlist;
+
+  /// No description provided for @tripPackDayPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'build the day plan'**
+  String get tripPackDayPlan;
+
+  /// No description provided for @suitcaseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your suitcase'**
+  String get suitcaseTitle;
+
+  /// No description provided for @suitcaseLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level {level}'**
+  String suitcaseLevel(int level);
+
+  /// No description provided for @suitcaseLevel0.
+  ///
+  /// In en, this message translates to:
+  /// **'Carry-on'**
+  String get suitcaseLevel0;
+
+  /// No description provided for @suitcaseLevel1.
+  ///
+  /// In en, this message translates to:
+  /// **'Trolley'**
+  String get suitcaseLevel1;
+
+  /// No description provided for @suitcaseLevel2.
+  ///
+  /// In en, this message translates to:
+  /// **'Big suitcase'**
+  String get suitcaseLevel2;
+
+  /// No description provided for @suitcaseLevel3.
+  ///
+  /// In en, this message translates to:
+  /// **'Wanderer'**
+  String get suitcaseLevel3;
+
+  /// No description provided for @suitcaseLevel4.
+  ///
+  /// In en, this message translates to:
+  /// **'Globetrotter'**
+  String get suitcaseLevel4;
+
+  /// No description provided for @suitcaseMiles.
+  ///
+  /// In en, this message translates to:
+  /// **'{miles} / {next} miles'**
+  String suitcaseMiles(int miles, int next);
+
+  /// No description provided for @suitcaseMilesTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{miles} miles'**
+  String suitcaseMilesTotal(int miles);
+
+  /// No description provided for @suitcaseNextExtra.
+  ///
+  /// In en, this message translates to:
+  /// **'Next extra: {extra}, {missing} to go'**
+  String suitcaseNextExtra(String extra, String missing);
+
+  /// No description provided for @suitcaseAllExtras.
+  ///
+  /// In en, this message translates to:
+  /// **'All extras collected'**
+  String get suitcaseAllExtras;
+
+  /// No description provided for @suitcaseExtraTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Luggage tag'**
+  String get suitcaseExtraTag;
+
+  /// No description provided for @suitcaseExtraStrap.
+  ///
+  /// In en, this message translates to:
+  /// **'Suitcase strap'**
+  String get suitcaseExtraStrap;
+
+  /// No description provided for @suitcaseExtraGoldWheels.
+  ///
+  /// In en, this message translates to:
+  /// **'Golden wheels'**
+  String get suitcaseExtraGoldWheels;
+
+  /// No description provided for @suitcaseExtraGoldHandle.
+  ///
+  /// In en, this message translates to:
+  /// **'Golden handle'**
+  String get suitcaseExtraGoldHandle;
+
+  /// No description provided for @suitcaseTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 trip} other{{count} trips}}'**
+  String suitcaseTrips(int count);
+
+  /// No description provided for @suitcaseCities.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 city} other{{count} cities}}'**
+  String suitcaseCities(int count);
+
+  /// No description provided for @suitcaseCountries.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 country} other{{count} countries}}'**
+  String suitcaseCountries(int count);
+
+  /// No description provided for @suitcaseHowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How your suitcase grows'**
+  String get suitcaseHowTitle;
+
+  /// No description provided for @suitcaseEarnHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Earn miles'**
+  String get suitcaseEarnHeader;
+
+  /// No description provided for @suitcaseEarnTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip planned or joined'**
+  String get suitcaseEarnTrip;
+
+  /// No description provided for @suitcaseEarnCity.
+  ///
+  /// In en, this message translates to:
+  /// **'New city in your passport'**
+  String get suitcaseEarnCity;
+
+  /// No description provided for @suitcaseEarnCheckIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Check-in on site'**
+  String get suitcaseEarnCheckIn;
+
+  /// No description provided for @suitcaseEarnCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'New country'**
+  String get suitcaseEarnCountry;
+
+  /// No description provided for @suitcaseExtrasHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Extras'**
+  String get suitcaseExtrasHeader;
 }
 
 class _AppLocalizationsDelegate
