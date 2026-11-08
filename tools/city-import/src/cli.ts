@@ -21,8 +21,10 @@ import { DEFAULT_LIMITS, UploadBudget, gb } from "./budget.js";
 import { toWebp } from "./images.js";
 import type { CatalogAttraction, CityCollection, CityConfig } from "./model.js";
 import { fetchCityPlaces, fetchCityVenues } from "./osm.js";
+import type { OvertureRow } from "./overture.js";
 import { selectPhotos } from "./picks.js";
-import { publishCity } from "./publish.js";
+import { publishCity, toPlaceDoc } from "./publish.js";
+import { buildTiles } from "./tiles.js";
 import { renderReport } from "./report.js";
 import { readPicks, startReview } from "./review.js";
 import { FirestoreDataStore, R2PhotoStore } from "./stores.js";
@@ -84,8 +86,12 @@ async function collect(cities: CityConfig[]) {
     try {
       const attractions = catalog.cities.find((c) => c.id === city.catalogId)?.attractions;
       if (!attractions) throw new Error(`catalog.json has no city "${city.catalogId}"`);
+      // Optional second venue source, exported by scripts/overture.sh.
+      const overturePath = join(ROOT, "data", "overture", `${city.id}.json`);
+      const overtureRows = existsSync(overturePath) ? readJson<OvertureRow[]>(overturePath) : undefined;
       const collection = await collectCity(city, attractions, {
         wikimedia,
+        overtureRows,
         osmPlaces: (center, radiusKm) => fetchCityPlaces(http, center, radiusKm),
         osmVenues: (center, radiusKm) => fetchCityVenues(http, center, radiusKm),
       }, console.log, new Set(excluded[city.id] ?? []));
@@ -125,14 +131,22 @@ async function publish(cities: CityConfig[], dryRun: boolean) {
       const skip = new Set(excluded[c.city.id] ?? []);
       const places = c.places.filter((p) => !skip.has(p.id));
       const sightIds = new Set(c.places.map((p) => p.id));
+      const extras = (c.extras ?? []).filter((e) => !skip.has(e.id) && !sightIds.has(e.id));
+      for (const e of extras) sightIds.add(e.id);
       const venues = (c.venues ?? []).filter((v) => !skip.has(v.id) && !sightIds.has(v.id));
-      const photos = [...places, ...venues].reduce((sum, p) => sum + selectPhotos(p, picks).length, 0);
+      const photos = [...places, ...extras, ...venues].reduce((sum, p) => sum + selectPhotos(p, picks).length, 0);
       const picked = [...places, ...venues].filter((p) => picks[p.id]?.length).length;
       const byType = Object.entries(
         venues.reduce<Record<string, number>>((acc, v) => ({ ...acc, [v.category]: (acc[v.category] ?? 0) + 1 }), {}),
       ).map(([type, n]) => `${n} ${type}`).join(", ");
       const venuePhotos = venues.filter((v) => v.photos.length > 0).length;
-      console.log(`${c.city.id}: would publish ${places.length} places and ${venues.length} venues ` +
+      const fromOverture = venues.filter((v) => v.overtureId).length;
+      const tiles = buildTiles(c.city.id, [...places, ...extras, ...venues].map((d) => toPlaceDoc(d, [], "dry-run", "")), "dry-run", "");
+      const tileKb = tiles.map((t) => Math.round(Buffer.byteLength(JSON.stringify(t)) / 1024));
+      console.log(`${c.city.id}: ${tiles.length} tiles, largest ${Math.max(0, ...tileKb)} KB, total ${tileKb.reduce((a, b) => a + b, 0)} KB`);
+      console.log(`${c.city.id}: would publish ${places.length} places, ${extras.length} extra sights ` +
+        `(${extras.filter((e) => e.photos.length).length} with photos) and ${venues.length} venues ` +
+        `(${fromOverture} from Overture) ` +
         `(${venuePhotos} with photos${byType ? `; ${byType}` : ""}) with up to ${photos} photos ` +
         `(${picked} with photos picked in review)` +
         (c.venues ? "" : " – no venues collected yet, run collect again"));

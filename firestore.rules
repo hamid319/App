@@ -136,6 +136,14 @@ service cloud.firestore {
 
     // Places are written only by the import tool (tools/city-import) with
     // admin credentials; the app reads them.
+    // Compact per-area place lists (tools/city-import src/tiles.ts),
+    // read around the user's position; written only by the import.
+    match /placeTiles/{tileId} {
+      allow get: if isAuthenticated();
+      allow list: if false;
+      allow write: if false;
+    }
+
     match /places/{placeId} {
       allow read: if isAuthenticated();
       allow write: if false;

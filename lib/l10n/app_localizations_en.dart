@@ -2588,4 +2588,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get receiptNotParticipant => 'You are not part of this receipt.';
+
+  @override
+  String get overtureAttribution => 'Place data: Overture Maps Foundation';
 }

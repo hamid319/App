@@ -16,6 +16,8 @@ export interface VenueCandidate {
   type: string;
   distanceKm: number;
   score: number;
+  /** Set for a venue found only in Overture Maps; [place] is then built from its fields. */
+  overtureId?: string;
 }
 
 /** App type for an OSM element, or null when it is not a venue we offer (e.g. fast_food). */
@@ -108,9 +110,11 @@ export function venueCandidates(
   center: Coordinates,
   radiusKm: number,
   skipIds: ReadonlySet<string> = new Set(),
+  /** App type of an element, null to skip it (default: venues; extras.ts passes sight types). */
+  typeOf: (tags: Record<string, string>) => string | null = venueType,
 ): VenueCandidate[] {
   const named = places.filter(
-    (p) => p.tags.name && venueType(p.tags) && !isChain(p.tags) && !isUnavailable(p.tags),
+    (p) => p.tags.name && typeOf(p.tags) && !isChain(p.tags) && !isUnavailable(p.tags),
   );
   const nameCounts = new Map<string, number>();
   for (const p of named) {
@@ -129,7 +133,7 @@ export function venueCandidates(
     const candidate: VenueCandidate = {
       place,
       id,
-      type: venueType(place.tags)!,
+      type: typeOf(place.tags)!,
       distanceKm: distance,
       score: venueScore(place.tags, distance, radiusKm),
     };
@@ -184,11 +188,12 @@ export function venueDraft(city: CityConfig, candidate: VenueCandidate, rank: nu
     id: candidate.id,
     kind: "venue",
     ...(isQid(tags.wikidata) ? { wikidataId: tags.wikidata } : {}),
+    ...(candidate.overtureId ? { overtureId: candidate.overtureId } : {}),
     cityId: city.id,
     rank,
     catalogName: tags.name,
     category: type,
-    osm: { type: place.type, id: place.id, url: osmUrl(place) },
+    ...(candidate.overtureId ? {} : { osm: { type: place.type, id: place.id, url: osmUrl(place) } }),
     ...(address ? { address } : {}),
     ...(tags.opening_hours ? { openingHours: tags.opening_hours } : {}),
     ...(website ? { website } : {}),

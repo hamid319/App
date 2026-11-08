@@ -1286,5 +1286,6 @@
   "@receiptOpenLines": {"placeholders": {"count": {"type": "int"}}},
   "receiptTakenBy": "Taken by {names}",
   "@receiptTakenBy": {"placeholders": {"names": {"type": "String"}}},
-  "receiptNotParticipant": "You are not part of this receipt."
+  "receiptNotParticipant": "You are not part of this receipt.",
+  "overtureAttribution": "Place data: Overture Maps Foundation"
 }

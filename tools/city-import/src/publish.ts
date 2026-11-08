@@ -4,6 +4,7 @@ import type { ProcessedImage } from "./images.js";
 import type { CityCollection, CityDoc, PlaceDoc, PlaceDraft, StoredPhoto } from "./model.js";
 import { selectPhotos, type PhotoPicks } from "./picks.js";
 import type { DataStore, PhotoStore } from "./stores.js";
+import { buildTiles } from "./tiles.js";
 
 export interface PublishDeps {
   photos: PhotoStore;
@@ -28,6 +29,8 @@ export interface CityPublishResult {
   /** Venues published (included in [published]) and how many of them have no photo. */
   venues: number;
   venuesWithoutPhotos: number;
+  /** placeTiles documents written. */
+  tiles: number;
 }
 
 /**
@@ -55,15 +58,18 @@ export async function publishCity(
     placesWithoutPhotos: 0,
     venues: 0,
     venuesWithoutPhotos: 0,
+    tiles: 0,
   };
 
   const docs: PlaceDoc[] = [];
   const venueIds = new Set((collection.venues ?? []).map((v) => v.id));
   const sightIds = new Set(collection.places.map((p) => p.id));
+  const extraIds = new Set((collection.extras ?? []).map((e) => e.id));
   const drafts = [
     ...collection.places,
+    ...(collection.extras ?? []).filter((e) => !sightIds.has(e.id)),
     // A venue that is also a sight is published once, as the sight.
-    ...(collection.venues ?? []).filter((v) => !sightIds.has(v.id)),
+    ...(collection.venues ?? []).filter((v) => !sightIds.has(v.id) && !extraIds.has(v.id)),
   ];
   for (const draft of drafts) {
     if (excludedIds.has(draft.id)) continue;
@@ -106,7 +112,8 @@ export async function publishCity(
       // The app draws a placeholder for venues without a photo.
       result.venues += 1;
       if (photos.length === 0) result.venuesWithoutPhotos += 1;
-    } else if (photos.length === 0) {
+    } else if (photos.length === 0 && !extraIds.has(draft.id)) {
+      // Catalog sights need a photo; extra sights get the app's placeholder.
       result.placesWithoutPhotos += 1;
       continue;
     }
@@ -125,6 +132,11 @@ export async function publishCity(
   await deps.data.hidePlaces(toHide, importRunId);
   result.hidden = toHide.length;
 
+  // Compact per-area lists the app reads around the user (src/tiles.ts).
+  const tiles = buildTiles(cityId, docs, importRunId, now);
+  await deps.data.replaceTiles(cityId, tiles);
+  result.tiles = tiles.length;
+
   const city: CityDoc = {
     id: cityId,
     nameEn: collection.city.nameEn,
@@ -138,7 +150,7 @@ export async function publishCity(
     updatedAt: now,
   };
   await deps.data.writeCity(city);
-  log(`${cityId}: ${result.published} published (${result.venues} venues), ${result.hidden} hidden, ` +
+  log(`${cityId}: ${result.published} published (${result.venues} venues), ${result.hidden} hidden, ${result.tiles} tiles, ` +
     `${result.photosUploaded} photos uploaded, ${result.photosReused} reused`);
   return result;
 }
@@ -147,12 +159,13 @@ export function toPlaceDoc(draft: PlaceDraft, photos: StoredPhoto[], importRunId
   return {
     id: draft.id,
     source: "wikidata",
-    sourceId: draft.wikidataId ?? `${draft.osm?.type}/${draft.osm?.id}`,
+    sourceId: draft.wikidataId ?? (draft.overtureId ? `overture/${draft.overtureId}` : `${draft.osm?.type}/${draft.osm?.id}`),
     cityId: draft.cityId,
     status: "active",
     kind: draft.kind ?? "sight",
     // No undefined fields: Firestore rejects them.
     ...(draft.kind === "venue" && draft.cuisine ? { cuisine: draft.cuisine } : {}),
+    ...(draft.overtureId ? { overtureId: draft.overtureId } : {}),
     name: draft.names.en ?? draft.names.de ?? draft.catalogName,
     description: draft.descriptions.en ?? draft.descriptions.de ?? null,
     names: draft.names,

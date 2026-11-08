@@ -52,9 +52,15 @@ function renderCity(c: CityCollection, excluded: Set<string>, picks: PhotoPicks)
   ).map(([type, n]) => `${n} ${esc(type)}`).join(" · ");
   const venueSection = c.venues
     ? `<h3>Lokale (Heute Abend)</h3>
-<p class="muted">${venues.length} von ${c.venueCandidates?.eligible ?? "?"} geeigneten OSM-Lokalen (${c.venueCandidates?.downloaded ?? "?"} geladen) · ${venues.filter((v) => v.photos.length).length} mit Foto · ${venueCounts}</p>
+<p class="muted">${venues.length} von ${c.venueCandidates?.eligible ?? "?"} geeigneten Lokalen (${c.venueCandidates?.downloaded ?? "?"} aus OSM geladen${c.overture ? `, Overture: ${c.overture.added} zusätzlich von ${c.overture.usable} brauchbaren` : ""}) · ${venues.filter((v) => v.photos.length).length} mit Foto · ${venueCounts}</p>
 <div class="grid">${venues.map((v) => renderCard(v, excluded, picks)).join("")}</div>`
     : `<p class="muted">Noch keine Lokale gesammelt (collect erneut ausführen).</p>`;
+  const extras = c.extras ?? [];
+  const extraSection = extras.length
+    ? `<h3>Weitere Sehenswürdigkeiten (OSM, nicht im Katalog)</h3>
+<p class="muted">${extras.length} · ${extras.filter((e) => e.photos.length).length} mit Foto</p>
+<div class="grid">${extras.map((e) => renderCard(e, excluded, picks)).join("")}</div>`
+    : "";
   const skipped = c.skipped.length
     ? `<details><summary>${c.skipped.length} Einträge aus dem Katalog nicht übernommen</summary><p class="muted">${
       c.skipped.map((s) => `${s.rank}. ${esc(s.name)} (${esc(s.reason)})`).join(" · ")
@@ -62,7 +68,7 @@ function renderCity(c: CityCollection, excluded: Set<string>, picks: PhotoPicks)
     : "";
   return `<section id="${esc(c.city.id)}"><h2>${esc(c.city.nameDe)}</h2>
 <p class="muted">${c.places.length} von ${c.candidateCount} Katalog-Orten · ${c.osmMatched} in OpenStreetMap gefunden · gesammelt ${esc(c.collectedAt.slice(0, 16).replace("T", " "))}</p>
-${skipped}<h3>Sehenswürdigkeiten</h3><div class="grid">${cards}</div>${venueSection}</section>`;
+${skipped}<h3>Sehenswürdigkeiten</h3><div class="grid">${cards}</div>${extraSection}${venueSection}</section>`;
 }
 
 function renderCard(p: PlaceDraft, excluded: Set<string>, picks: PhotoPicks): string {

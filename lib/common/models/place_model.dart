@@ -53,6 +53,10 @@ class PlaceModel {
   /// app must credit "© OpenStreetMap contributors" (ODbL).
   final String? osmUrl;
 
+  /// Overture Maps id when the place comes from Overture instead of
+  /// OpenStreetMap; the app then credits the Overture Maps Foundation.
+  final String? overtureId;
+
   final PlaceKind kind;
 
   /// Import ranking, higher is better known (sights >= 950, venues 0..499).
@@ -83,6 +87,7 @@ class PlaceModel {
     this.openingHours,
     this.website,
     this.osmUrl,
+    this.overtureId,
     this.kind = PlaceKind.sight,
     this.popularity,
     this.cuisine,
@@ -136,6 +141,7 @@ class PlaceModel {
       openingHours: openingHours,
       website: website,
       osmUrl: osmUrl,
+      overtureId: overtureId,
       kind: kind,
       popularity: popularity,
       cuisine: cuisine,
@@ -165,6 +171,7 @@ class PlaceModel {
         openingHours: _text(json['openingHours']),
         website: _text(json['website']),
         osmUrl: _text(json['osmUrl']),
+        overtureId: _text(json['overtureId']),
         kind: PlaceKind.fromJson(json['kind']),
         popularity: _int(json['popularity']),
         cuisine: _text(json['cuisine']),
@@ -211,5 +218,6 @@ class PlaceModel {
         'kind': kind.name,
         if (popularity != null) 'popularity': popularity,
         if (cuisine != null) 'cuisine': cuisine,
+        if (overtureId != null) 'overtureId': overtureId,
       };
 }

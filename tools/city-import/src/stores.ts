@@ -4,6 +4,7 @@
 import { HeadObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { Firestore } from "firebase-admin/firestore";
 import type { CityDoc, PlaceDoc } from "./model.js";
+import type { TileDoc } from "./tiles.js";
 
 export interface StoredObjectInfo {
   width: number;
@@ -24,6 +25,8 @@ export interface DataStore {
   writePlaces(places: PlaceDoc[]): Promise<void>;
   hidePlaces(ids: string[], importRunId: string): Promise<void>;
   writeCity(city: CityDoc): Promise<void>;
+  /** Replaces the city's place tiles: writes [tiles], deletes the city's other tiles. */
+  replaceTiles(cityId: string, tiles: TileDoc[]): Promise<void>;
   writeRun(id: string, run: Record<string, unknown>): Promise<void>;
 }
 
@@ -129,6 +132,23 @@ export class FirestoreDataStore implements DataStore {
 
   async writeCity(city: CityDoc): Promise<void> {
     await this.db.collection("cities").doc(city.id).set(city);
+  }
+
+  async replaceTiles(cityId: string, tiles: TileDoc[]): Promise<void> {
+    const keep = new Set(tiles.map((t) => t.id));
+    const old = await this.db.collection("placeTiles").where("cityId", "==", cityId).select().get();
+    const stale = old.docs.map((d) => d.id).filter((id) => !keep.has(id));
+    // Tiles can be large; a few per batch keeps each commit under 10 MiB.
+    for (let i = 0; i < tiles.length; i += 10) {
+      const batch = this.db.batch();
+      for (const tile of tiles.slice(i, i + 10)) batch.set(this.db.collection("placeTiles").doc(tile.id), tile);
+      await batch.commit();
+    }
+    for (let i = 0; i < stale.length; i += 400) {
+      const batch = this.db.batch();
+      for (const id of stale.slice(i, i + 400)) batch.delete(this.db.collection("placeTiles").doc(id));
+      await batch.commit();
+    }
   }
 
   async writeRun(id: string, run: Record<string, unknown>): Promise<void> {

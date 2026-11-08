@@ -4465,6 +4465,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You are not part of this receipt.'**
   String get receiptNotParticipant;
+
+  /// No description provided for @overtureAttribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Place data: Overture Maps Foundation'**
+  String get overtureAttribution;
 }
 
 class _AppLocalizationsDelegate

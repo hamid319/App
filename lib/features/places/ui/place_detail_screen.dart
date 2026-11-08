@@ -10,6 +10,7 @@ import '../../../common/widgets/add_to_trip_sheet.dart';
 import '../../../common/widgets/place_photo.dart';
 import '../../../common/widgets/skeleton.dart';
 import '../../../common/widgets/ticket.dart';
+import '../../../core/config/app_config.dart';
 import '../../../core/constants/popular_cities.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/errors/user_message.dart';
@@ -148,6 +149,7 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
     final hasFacts = place.openingHours != null || place.website != null;
     final hasSources = wikipediaUrl != null ||
         place.osmUrl != null ||
+        place.overtureId != null ||
         place.photoCredits.isNotEmpty;
 
     Future<void> toggleFavorite() async {
@@ -571,7 +573,8 @@ class _PlaceFacts extends StatelessWidget {
 }
 
 /// Where text, photos and facts come from (Wikipedia CC BY-SA, photo
-/// licences, OpenStreetMap ODbL all require naming and linking them).
+/// licences, OpenStreetMap ODbL all require naming and linking them;
+/// Overture Maps data is credited too).
 class _Sources extends StatelessWidget {
   const _Sources({required this.place, required this.wikipediaUrl});
 
@@ -602,6 +605,12 @@ class _Sources extends StatelessWidget {
             icon: Icons.map_outlined,
             value: l10n.osmAttribution,
             onTap: () => _openLink(context, osm),
+          ),
+        if (place.overtureId != null)
+          _InfoRow(
+            icon: Icons.map_outlined,
+            value: l10n.overtureAttribution,
+            onTap: () => _openLink(context, AppConfig.overtureAttributionUrl),
           ),
       ],
     );

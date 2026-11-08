@@ -45,7 +45,7 @@ class HomeFeed {
   final List<PlaceModel> tonight;
   final List<PlaceModel> hiddenGems;
 
-  /// False until the venue import has reached this city (or in GPS mode):
+  /// False until the venue import has reached this city or this area:
   /// the "Tonight" row then shows a "coming soon" ticket.
   final bool hasVenues;
 
@@ -138,7 +138,7 @@ List<PlaceModel> selectTonight(Iterable<PlaceModel> venues,
 }
 
 /// Builds the feed from loaded [sights] and [venues] (null: venues are not
-/// available here, e.g. in GPS mode).
+/// available here, e.g. no import for this city yet).
 HomeFeed buildHomeFeed({
   required List<PlaceModel> sights,
   required List<PlaceModel>? venues,
@@ -151,7 +151,8 @@ HomeFeed buildHomeFeed({
     mustSees: selectMustSees(onlySights),
     hiddenGems: selectHiddenGems(onlySights, day: now, salt: salt),
     tonight: selectTonight(
-      rankByPopularity(venues ?? const []),
+      // Already ordered: by popularity in a city, by relevance near the user.
+      venues ?? const [],
       now: now,
     ),
     hasVenues: venues != null && venues.isNotEmpty,
@@ -197,8 +198,9 @@ final cityVenuesProvider =
 });
 
 /// Sights around the user's position ("near me"), within [radiusKm]: the
-/// same lookup as the solo deck (nearest curated city, else nearby).
-final nearbySightsProvider =
+/// same lookup as the solo deck (nearest curated city plus the place
+/// tiles around the user), nearby and well-known first. Venues included.
+final nearbyPlacesProvider =
     FutureProvider.family<List<PlaceModel>, int>((ref, radiusKm) async {
   var lat = AppConfig.defaultLat, lng = AppConfig.defaultLng;
   try {
@@ -213,7 +215,7 @@ final nearbySightsProvider =
         lng: lng,
         radiusKm: radiusKm.toDouble(),
       );
-  return rankByPopularity(places.where((p) => !p.isVenue));
+  return places;
 });
 
 /// The home feed for the place chosen on Discover. Follows the city picker;
@@ -223,8 +225,12 @@ final homeFeedProvider = FutureProvider<HomeFeed>((ref) async {
   final city = prefs.city;
   final now = DateTime.now();
   if (city == null) {
-    final sights = await ref.watch(nearbySightsProvider(prefs.radiusKm).future);
-    return buildHomeFeed(sights: sights, venues: null, now: now);
+    final places = await ref.watch(nearbyPlacesProvider(prefs.radiusKm).future);
+    return buildHomeFeed(
+      sights: places.where((p) => !p.isVenue).toList(),
+      venues: places.where((p) => p.isVenue).toList(),
+      now: now,
+    );
   }
   final sights = ref.watch(citySightsProvider(city.id).future);
   final venues = ref.watch(cityVenuesProvider(city.id).future);
@@ -242,7 +248,7 @@ void refreshHomeFeed(WidgetRef ref) {
   ref.read(placesRepositoryProvider).clearCityCache();
   final city = ref.read(discoverPreferencesProvider).value?.city;
   if (city == null) {
-    ref.invalidate(nearbySightsProvider);
+    ref.invalidate(nearbyPlacesProvider);
   } else {
     ref.invalidate(citySightsProvider(city.id));
     ref.invalidate(cityVenuesProvider(city.id));

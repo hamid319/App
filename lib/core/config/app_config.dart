@@ -18,6 +18,10 @@ class AppConfig {
   /// Receipt scans per user and day, so one account cannot run up costs.
   static const int receiptScansPerDay = 15;
 
+  /// Credit link for places from Overture Maps (place detail sources).
+  static const String overtureAttributionUrl =
+      'https://docs.overturemaps.org/attribution/';
+
   // Firestore's on-device cache (persistence is on by default on mobile).
   // Trips, wishlists, day plans and costs are read from it offline and
   // writes wait in it until the connection is back. 100 MB keeps a few

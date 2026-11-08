@@ -25,6 +25,10 @@ export interface CityConfig {
   radiusKm?: number;
   /** Overrides VENUES.radiusKm for this city. */
   venueRadiusKm?: number;
+  /** All eligible venues up to this many, without the per-type caps (default: VENUES.maxPerCity with caps). */
+  venueMax?: number;
+  /** Also collect OSM sights that are not in the catalog (photos optional). */
+  extraSights?: boolean;
 }
 
 /** One curated attraction from catalog.json. */
@@ -68,6 +72,8 @@ export interface PlaceDraft {
   /** Venues: first value of the OSM cuisine tag, e.g. "portuguese". */
   cuisine?: string;
   wikidataId?: string;
+  /** Venue found only in Overture Maps (no OSM element); the app credits Overture. */
+  overtureId?: string;
   cityId: string;
   /** Position in the curated catalog (1 = first); venues: position by score. */
   rank: number;
@@ -109,6 +115,10 @@ export interface CityCollection {
   venues?: PlaceDraft[];
   /** How many OSM venues were downloaded and how many survived the chain filter. */
   venueCandidates?: { downloaded: number; eligible: number };
+  /** Overture rows read, how many passed the filters, and how many were added (not on OSM). */
+  overture?: { rows: number; usable: number; added: number };
+  /** OSM sights outside the catalog (cities.json extraSights); photos optional. */
+  extras?: PlaceDraft[];
 }
 
 /** Stored photo, as read by the app's PhotoCredit (lib/common/models/photo_credit.dart). */
@@ -130,7 +140,7 @@ export interface PlaceDoc {
   id: string;
   /** "wikidata" for every curated place (also those found only on OSM), so rules treat them alike. */
   source: "wikidata";
-  /** Wikidata QID, or the OSM element ("way/123") when there is none. */
+  /** Wikidata QID, the OSM element ("way/123"), or "overture/<id>". */
   sourceId: string;
   cityId: string;
   status: "active" | "hidden";
@@ -138,6 +148,8 @@ export interface PlaceDoc {
   kind: PlaceKind;
   /** Venues only: OSM cuisine (first value). */
   cuisine?: string;
+  /** Overture Maps id when the place comes from Overture, not OSM; the app credits Overture. */
+  overtureId?: string;
   /** English name/description for older app versions; names/descriptions per language. */
   name: string;
   description: string | null;

@@ -19,6 +19,8 @@ import type {
   PlaceDraft,
 } from "./model.js";
 import { isQid, osmAddress, osmCommonsFile, osmUrl, safeWebsite, type OsmPlace } from "./osm.js";
+import { extraDraft, extraPopularity, extraType } from "./extras.js";
+import { overtureCandidates, type OvertureRow } from "./overture.js";
 import { selectVenues, venueCandidates, venueDraft, venuePopularity, venueScore, type VenueCandidate } from "./venues.js";
 import type { EntityInfo, PhotoMetadata, WikimediaSource } from "./wikimedia.js";
 
@@ -27,6 +29,8 @@ export interface CollectSources {
   osmPlaces(center: Coordinates, radiusKm: number): Promise<OsmPlace[]>;
   /** Restaurants, cafés, bars ... (one extra Overpass request). Without it no venues are collected. */
   osmVenues?(center: Coordinates, radiusKm: number): Promise<OsmPlace[]>;
+  /** Overture Maps rows for the city (scripts/overture.sh); more venues besides OSM. */
+  overtureRows?: OvertureRow[];
   wikimedia: Pick<
     WikimediaSource,
     "entityInfo" | "searchEntities" | "wikipediaSummary" | "photoFiles" | "photoMetadata" | "categoryFiles"
@@ -155,13 +159,31 @@ export async function collectCity(
   places.sort((a, b) => a.rank - b.rank);
   log(`${city.id}: ${places.length} places, ${skipped.length} skipped`);
 
-  // 6. Evening/food venues: scored from OSM tags, photos optional.
+  // 6. OSM sights outside the catalog, photos optional.
+  let extras: PlaceDraft[] | undefined;
+  if (city.extraSights) {
+    const candidates = venueCandidates(osmPlaces, center, radiusKm, new Set([...excludedIds, ...usedIds]), extraType);
+    extras = await enrichVenues(city, candidates, radiusKm, sources.wikimedia, usedPages, extraDraft, extraPopularity);
+    for (const e of extras) usedIds.add(e.id);
+    log(`${city.id}: ${extras.length} extra sights (${extras.filter((e) => e.photos.length).length} with photos)`);
+  }
+
+  // 7. Evening/food venues: scored from OSM tags (plus Overture), photos optional.
   let venues: PlaceDraft[] | undefined;
   let venueStats: CityCollection["venueCandidates"];
+  let overtureStats: CityCollection["overture"];
   if (osmVenues) {
     const skipIds = new Set([...excludedIds, ...usedIds]);
     const candidates = venueCandidates(osmVenues, center, venueRadiusKm, skipIds);
-    venues = await enrichVenues(city, selectVenues(candidates), venueRadiusKm, sources.wikimedia, usedPages);
+    if (sources.overtureRows) {
+      const ovt = overtureCandidates(sources.overtureRows, osmVenues, center, venueRadiusKm, skipIds);
+      overtureStats = { rows: sources.overtureRows.length, usable: ovt.usable, added: ovt.candidates.length };
+      candidates.push(...ovt.candidates);
+      candidates.sort((a, b) => b.score - a.score || a.distanceKm - b.distanceKm);
+      log(`${city.id}: Overture ${ovt.usable} usable of ${sources.overtureRows.length}, ${ovt.candidates.length} not on OSM`);
+    }
+    const selected = city.venueMax ? candidates.slice(0, city.venueMax) : selectVenues(candidates);
+    venues = await enrichVenues(city, selected, venueRadiusKm, sources.wikimedia, usedPages);
     venueStats = { downloaded: osmVenues.length, eligible: candidates.length };
     log(`${city.id}: ${venues.length} venues (${venues.filter((v) => v.photos.length).length} with photos) ` +
       `of ${candidates.length} eligible`);
@@ -175,14 +197,17 @@ export async function collectCity(
     places,
     skipped,
     ...(venues ? { venues, venueCandidates: venueStats } : {}),
+    ...(overtureStats ? { overture: overtureStats } : {}),
+    ...(extras ? { extras } : {}),
   };
 }
 
 /**
  * Photos (Wikidata main image, OSM image tags, Commons depicts/category)
  * and texts (Wikipedia lead, else the Wikidata description) for the
- * selected venues. Venues without a usable photo are kept. Popularity is
- * scored again with the real photo result; best first.
+ * selected venues (or extra sights, via [build] and [popularity]). Drafts
+ * without a usable photo are kept. Popularity is scored again with the
+ * real photo result; best first.
  */
 async function enrichVenues(
   city: CityConfig,
@@ -190,8 +215,10 @@ async function enrichVenues(
   radiusKm: number,
   wikimedia: CollectSources["wikimedia"],
   usedPages: Set<number>,
+  build: (city: CityConfig, candidate: VenueCandidate, rank: number) => PlaceDraft = venueDraft,
+  popularity: (score: number) => number = venuePopularity,
 ): Promise<PlaceDraft[]> {
-  const drafts = selected.map((c, i) => ({ candidate: c, draft: venueDraft(city, c, i + 1) }));
+  const drafts = selected.map((c, i) => ({ candidate: c, draft: build(city, c, i + 1) }));
   const qids = [...new Set(drafts.flatMap((d) => (d.draft.wikidataId ? [d.draft.wikidataId] : [])))];
   const info = qids.length ? await wikimedia.entityInfo(qids) : new Map<string, EntityInfo>();
 
@@ -220,7 +247,7 @@ async function enrichVenues(
 
   for (const { candidate, draft } of drafts) {
     draft.photos = choosePhotos(files.get(draft.id) ?? [], metadata, usedPages);
-    draft.popularity = venuePopularity(
+    draft.popularity = popularity(
       venueScore(candidate.place.tags, candidate.distanceKm, radiusKm, draft.photos.length > 0),
     );
     const entity = draft.wikidataId ? info.get(draft.wikidataId) : undefined;

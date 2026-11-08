@@ -1,3 +1,4 @@
+import type { TileDoc } from "../src/tiles.js";
 import { describe, expect, it } from "vitest";
 import { collectCity, type CollectSources } from "../src/collect.js";
 import { VENUE_CAPS, VENUES } from "../src/config.js";
@@ -258,6 +259,10 @@ class FakePhotos implements PhotoStore {
 }
 
 class FakeData implements DataStore {
+  tiles: TileDoc[] = [];
+  async replaceTiles(_cityId: string, tiles: TileDoc[]) {
+    this.tiles = tiles;
+  }
   places = new Map<string, PlaceDoc>();
   cities = new Map<string, CityDoc>();
   async existingPlaces(cityId: string) {

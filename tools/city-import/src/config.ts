@@ -123,3 +123,62 @@ export const VENUE_SCORE = Object.freeze({
 
 /** Venues always rank below sights (sights use 1000 - rank, so >= 950). */
 export const VENUE_MAX_POPULARITY = 499;
+
+/**
+ * OSM sights outside the catalog (cities.json extraSights): popularity
+ * 500..949, between venues and catalog sights. Scored like venues.
+ */
+export const EXTRA_POPULARITY = Object.freeze({ min: 500, max: 949 });
+
+/** App place type per OSM tag for sights outside the catalog; first match wins. */
+export const EXTRA_SIGHT_TYPES: ReadonlyArray<{ key: string; values: ReadonlyArray<string>; type: string; needsWikidata?: boolean }> = [
+  { key: "tourism", values: ["museum"], type: "museum" },
+  { key: "tourism", values: ["gallery"], type: "art_gallery" },
+  { key: "tourism", values: ["viewpoint"], type: "viewpoint" },
+  { key: "tourism", values: ["zoo"], type: "zoo" },
+  { key: "tourism", values: ["aquarium"], type: "aquarium" },
+  { key: "tourism", values: ["theme_park"], type: "amusement_park" },
+  { key: "historic", values: ["monument"], type: "monument" },
+  { key: "historic", values: ["church", "monastery"], type: "church" },
+  { key: "historic", values: ["castle", "palace", "fort", "city_gate", "tower", "manor", "ruins", "archaeological_site"], type: "historical_landmark" },
+  { key: "amenity", values: ["theatre"], type: "performing_arts_theater" },
+  { key: "amenity", values: ["arts_centre"], type: "culture" },
+  { key: "amenity", values: ["planetarium"], type: "science" },
+  { key: "amenity", values: ["marketplace"], type: "market" },
+  { key: "amenity", values: ["place_of_worship"], type: "church", needsWikidata: true },
+  { key: "building", values: ["cathedral", "church", "chapel", "mosque", "temple", "synagogue", "shrine"], type: "church", needsWikidata: true },
+  { key: "leisure", values: ["park", "nature_reserve"], type: "park", needsWikidata: true },
+  { key: "leisure", values: ["garden"], type: "garden", needsWikidata: true },
+  { key: "natural", values: ["*"], type: "natural_feature", needsWikidata: true },
+  { key: "tourism", values: ["attraction"], type: "tourist_attraction" },
+  { key: "historic", values: ["*"], type: "historical_landmark", needsWikidata: true },
+  { key: "man_made", values: ["*"], type: "landmark", needsWikidata: true },
+  { key: "bridge", values: ["*"], type: "landmark", needsWikidata: true },
+  { key: "place", values: ["square"], type: "landmark", needsWikidata: true },
+];
+
+/**
+ * Overture Maps places (scripts/overture.sh) as a second venue source.
+ * Overture has more venues than OSM but also stale and mislabelled ones,
+ * so only well-confirmed entries are taken and OSM wins on conflicts.
+ */
+export const OVERTURE = Object.freeze({
+  minConfidence: 0.9,
+  /** Not confirmed by any source for this long: probably closed. */
+  maxAgeMonths: 18,
+  /** Same place as an OSM venue: this close and a similar name. */
+  matchKm: 0.08,
+  /** A differently named OSM venue this close: Overture is likely the old tenant. */
+  conflictKm: 0.015,
+});
+
+/** App venue type per Overture category (taxonomy.primary). Restaurants come from the hierarchy. */
+export const OVERTURE_TYPES: Readonly<Record<string, string>> = {
+  bar: "bar", cocktail_bar: "bar", wine_bar: "bar", sports_bar: "bar", lounge: "bar", gay_bar: "bar",
+  beer_bar: "bar", dive_bar: "bar", hookah_bar: "bar", tapas_bar: "restaurant",
+  pub: "pub", irish_pub: "pub", gastropub: "pub", brewery: "pub",
+  beer_garden: "biergarten",
+  cafe: "cafe", coffee_shop: "cafe", tea_room: "cafe",
+  dance_club: "night_club",
+  bistro: "restaurant", diner: "restaurant",
+};

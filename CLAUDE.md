@@ -97,9 +97,12 @@ Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so
                        curated (tools/city-import): id wd_<QID> or osm_<type>_<id>, source 'wikidata', cityId, status,
                        names/descriptions/wikipediaUrls per language, interests, popularity,
                        address/openingHours/website/osmUrl (OpenStreetMap, ODbL: credit it in the UI)
+                       venues from Overture Maps: id ovt_<id>, overtureId, no osmUrl (credit "Overture Maps Foundation")
   /reviews/{uid}       rating 1-5, text ≤500, authorName, language, hidden, createdAt, updatedAt
                        (signed-in non-guests only; a report sets hidden=true, moderate in the console)
     /reports/{uid}     createdAt (write-only for clients)
+/placeTiles/{cityId}_{geohash5}  places: [compact PlaceModel json] (best 80 sights + 150 venues per ~5 km cell;
+                       written by the import, get only; the app reads the 9 tiles around the user in "near me")
 /cities/{cityId}       curated cities (read-only for clients); cityId = PopularCity id
                        prompts: [{kind, text: {en, de}}]   (prompt tiles; kinds in PlacePromptKind)
                        photos: [{publicUrl, creator, licenseName, licenseUrl, commonsFilePageUrl}]  (Wikidata pipeline)
@@ -158,7 +161,7 @@ Not started or open:
 - iOS: run `pod install` with `LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8`.
 - **Place data:** OpenStreetMap, Wikidata, Wikipedia, Wikimedia Commons via
   `tools/city-import` (Node 22, `npm run check`; collect → report → review →
-  publish). **No Google Places content in the database** (Google's terms
+  publish), plus Overture Maps for more venues (`scripts/overture.sh`). **No Google Places content in the database** (Google's terms
   forbid storing it). No Instagram images. Keep within the R2 free tier
   (the tool has a 5 GB budget guard). Publishing city data needs the
   owner's OK.

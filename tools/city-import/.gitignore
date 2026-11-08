@@ -4,3 +4,5 @@ out/
 # Local credentials (R2 keys, service account). Never commit.
 .env
 .secrets/
+# Overture exports (scripts/overture.sh): regenerated, large.
+data/

@@ -3,6 +3,7 @@ import '../../../common/models/place_model.dart';
 import '../../../common/models/swipe_result_model.dart';
 import '../../../common/models/group_model.dart';
 import '../../../common/utils/geo_utils.dart';
+import '../../../common/utils/geohash.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:swipetrip/core/constants/popular_cities.dart';
 
@@ -23,6 +24,10 @@ class PlacesRepository {
 
   final Map<String, ({DateTime at, Future<List<PlaceModel>> places})>
       _cityCache = {};
+
+  /// Loaded place tiles (placeTiles/{cityId}_{geohash}), kept like cities.
+  final Map<String, ({DateTime at, Future<List<PlaceModel>> places})>
+      _tileCache = {};
 
   /// Curated places of a city from the batch import (tools/city-import):
   /// active ones only, best-known first. One bounded query per city (never
@@ -50,8 +55,11 @@ class PlacesRepository {
     return future;
   }
 
-  /// Forgets the cached city places (pull to refresh).
-  void clearCityCache() => _cityCache.clear();
+  /// Forgets the cached city places and tiles (pull to refresh).
+  void clearCityCache() {
+    _cityCache.clear();
+    _tileCache.clear();
+  }
 
   Future<List<PlaceModel>> _queryCityPlaces(String cityId, int limit) async {
     final snapshot = await _db
@@ -100,6 +108,11 @@ class PlacesRepository {
   /// [cityId] (or of the nearest curated city, see [nearestCityId]) within
   /// [radiusKm]. Empty when no curated city is near: the collection is
   /// never read as a whole.
+  ///
+  /// Near the user ([cityId] null) this adds the place tiles around the
+  /// position (sights and venues of the area, 9 reads) and ranks by
+  /// [rankByRelevance], so a user anywhere in a big city gets what is
+  /// close to them, not the same city-wide top list.
   Future<List<PlaceModel>> loadPlacesAround({
     String? cityId,
     required double lat,
@@ -108,10 +121,55 @@ class PlacesRepository {
   }) async {
     final id = cityId ?? nearestCityId(lat, lng, radiusKm: radiusKm);
     if (id == null) return const [];
-    final places = await _loadCity(id);
-    return places
+    final city = await _loadCity(id);
+    final tiles = cityId == null
+        ? await _loadTilesAround(id, lat, lng)
+        : const <PlaceModel>[];
+    // Full documents win over the compact tile entries.
+    final byId = {
+      for (final p in tiles) p.id: p,
+      for (final p in city) p.id: p,
+    };
+    final inRange = byId.values
         .where((p) => GeoUtils.isWithinRadius(lat, lng, p.lat, p.lng, radiusKm))
         .toList();
+    return cityId == null ? rankByRelevance(inRange, lat, lng) : inRange;
+  }
+
+  Future<List<PlaceModel>> _loadTilesAround(
+      String cityId, double lat, double lng) async {
+    final tiles = await Future.wait([
+      for (final cell in geohashesAround(lat, lng))
+        _loadTile('${cityId}_$cell'),
+    ]);
+    return [for (final tile in tiles) ...tile];
+  }
+
+  /// One tile; a missing or failed tile is empty (and retried next time).
+  Future<List<PlaceModel>> _loadTile(String tileId) {
+    final cached = _tileCache[tileId];
+    if (cached != null && DateTime.now().difference(cached.at) < cityCacheTtl) {
+      return cached.places;
+    }
+    // Runs after the cache entry below is set, so a failure can drop it.
+    final future = Future(() async {
+      try {
+        final doc = await _db.collection('placeTiles').doc(tileId).get();
+        final entries = doc.data()?['places'];
+        if (entries is! List) return const <PlaceModel>[];
+        return [
+          for (final entry in entries)
+            if (entry is Map)
+              PlaceModel.fromJson(Map<String, dynamic>.from(entry)),
+        ];
+      } catch (e) {
+        debugPrint('Loading place tile $tileId failed: $e');
+        _tileCache.remove(tileId);
+        return const <PlaceModel>[];
+      }
+    });
+    _tileCache[tileId] = (at: DateTime.now(), places: future);
+    return future;
   }
 
   Future<List<PlaceModel>> _loadCity(String cityId) async {
@@ -247,4 +305,16 @@ class PlacesRepository {
 
     return query.docs.map((doc) => doc.data()['placeId'] as String).toList();
   }
+}
+
+/// Nearby and well-known first: popularity divided by (1 + distance / 2 km),
+/// so a good bar around the corner beats a famous sight across town.
+List<PlaceModel> rankByRelevance(
+    Iterable<PlaceModel> places, double lat, double lng) {
+  double score(PlaceModel p) =>
+      (p.popularity ?? 0) /
+      (1 + GeoUtils.calculateDistance(lat, lng, p.lat, p.lng) / 2);
+  final scored = [for (final p in places) (place: p, score: score(p))]
+    ..sort((a, b) => b.score.compareTo(a.score));
+  return [for (final s in scored) s.place];
 }

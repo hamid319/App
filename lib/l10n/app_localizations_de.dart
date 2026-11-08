@@ -2622,4 +2622,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get receiptNotParticipant => 'Du bist bei diesem Beleg nicht dabei.';
+
+  @override
+  String get overtureAttribution => 'Ortsdaten: Overture Maps Foundation';
 }

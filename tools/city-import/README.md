@@ -38,6 +38,8 @@ Sources, all free and storable long-term:
 | Descriptions (EN/DE) | Wikipedia lead paragraph | CC BY-SA, "Text: Wikipedia" link |
 | Photos (up to 3 per place) | Wikimedia Commons | author + licence per photo |
 
+| More venues (optional, `scripts/overture.sh`) | Overture Maps Places | CDLA Permissive 2.0 (Meta, Microsoft, …), Apache 2.0 (Foursquare), CC0 (AllThePlaces); "Place data: Overture Maps Foundation" on the detail page |
+
 Not mixed in: Google data (its terms forbid storing it next to ODbL data).
 
 ## Setup
@@ -137,6 +139,36 @@ Ids in `exclusions.json` are skipped at collect time (the next-best venue
 takes the slot) and never published. A venue that is also a catalog sight
 is published once, as the sight. `report` and `review` show venues in
 their own section; `publish -- --dry-run` prints the counts per type.
+
+## Everything for a city (Berlin trial)
+
+Three per-city switches in `cities.json` lift the "best 50 + 40" limits:
+
+- `"venueMax": 20000` (with `"venueRadiusKm"`): every eligible venue up to
+  that many, ranked by score, without the per-type caps.
+- `"extraSights": true`: OSM sights that are not in the catalog (museums,
+  galleries, viewpoints, castles, theatres; churches, parks, memorials and
+  other landmarks only with a Wikidata item; no Stolpersteine or plaques;
+  `EXTRA_SIGHT_TYPES` in `src/config.ts`). Photos and texts like venues,
+  published without a photo too (the app draws a placeholder), popularity
+  500..949 (between venues and catalog sights).
+- Overture: `bash scripts/overture.sh de_berlin` (needs `brew install duckdb`)
+  writes `data/overture/de_berlin.json` (git-ignored) from Overture's public
+  S3 bucket; `collect` uses it when present. Only rows with confidence ≥ 0.9,
+  no brand or company name (GmbH, UG …), confirmed by Meta or two sources
+  within 18 months, mapped to our six venue types (no fast food, bakeries,
+  shops). A row is dropped when OSM has the same place (≤ 80 m, similar
+  name) or any other venue within 15 m (usually the previous tenant). The
+  rest become venues with id `ovt_<overture id>`, no `osmUrl`, and
+  `overtureId` set. Rerun the script for a new monthly release.
+
+Place tiles: `publish` also writes `placeTiles/{cityId}_{geohash5}`, one
+document per ~4.9 km cell with the cell's best 80 sights and 150 venues in
+compact form (`src/tiles.ts`), and deletes the city's old tiles. In "near
+me" mode the app reads the 9 tiles around the user (plus the city's top 150
+as before) and ranks by popularity and distance, so users anywhere in a big
+city see what is close to them. The full place document is read only on
+the detail page. `publish -- --dry-run` prints the tile count and sizes.
 
 ## Data model
 
