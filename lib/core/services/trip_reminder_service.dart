@@ -3,7 +3,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
-/// A local notification to show at [at].
+/// A local notification to show at [at]. [groupId] opens that trip; a
+/// value starting with `/` is a route to open instead.
 typedef TripReminder = ({
   String groupId,
   DateTime at,
@@ -12,7 +13,8 @@ typedef TripReminder = ({
 });
 
 /// Local notifications the app schedules on the device itself: the
-/// check-in reminder on a trip's first day. Also shows pushes that arrive
+/// check-in reminder on a trip's first day and the packing reminder the
+/// evening before. Also shows pushes that arrive
 /// while the app is open (Android shows none of its own then).
 class TripReminderService {
   final _plugin = FlutterLocalNotificationsPlugin();
@@ -105,7 +107,7 @@ class TripReminderService {
           r.title,
           r.body,
           // shortcut: fixed instant in the phone's zone at scheduling time;
-          // after flying into another zone it fires at home-time 10:00.
+          // after flying into another zone it fires at home time.
           tz.TZDateTime.from(r.at, tz.UTC),
           const NotificationDetails(
             android: AndroidNotificationDetails(

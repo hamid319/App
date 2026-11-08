@@ -4595,13 +4595,13 @@ abstract class AppLocalizations {
   /// No description provided for @tripPackTitle.
   ///
   /// In en, this message translates to:
-  /// **'Suitcase {percent}% packed'**
+  /// **'Trip {percent}% planned'**
   String tripPackTitle(int percent);
 
   /// No description provided for @tripPackDone.
   ///
   /// In en, this message translates to:
-  /// **'All packed. Have a great trip!'**
+  /// **'Trip fully planned. Now pack your bags!'**
   String get tripPackDone;
 
   /// No description provided for @tripPackNext.
@@ -4783,6 +4783,426 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Extras'**
   String get suitcaseExtrasHeader;
+
+  /// No description provided for @packingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Packing list'**
+  String get packingTitle;
+
+  /// No description provided for @packingMine.
+  ///
+  /// In en, this message translates to:
+  /// **'My stuff'**
+  String get packingMine;
+
+  /// No description provided for @packingShared.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared'**
+  String get packingShared;
+
+  /// No description provided for @packingAllReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone is packed and ready!'**
+  String get packingAllReady;
+
+  /// No description provided for @packingCategoryDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get packingCategoryDocuments;
+
+  /// No description provided for @packingCategoryTech.
+  ///
+  /// In en, this message translates to:
+  /// **'Tech'**
+  String get packingCategoryTech;
+
+  /// No description provided for @packingCategoryClothes.
+  ///
+  /// In en, this message translates to:
+  /// **'Clothes'**
+  String get packingCategoryClothes;
+
+  /// No description provided for @packingCategoryToiletries.
+  ///
+  /// In en, this message translates to:
+  /// **'Toiletries'**
+  String get packingCategoryToiletries;
+
+  /// No description provided for @packingCategoryWeather.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather'**
+  String get packingCategoryWeather;
+
+  /// No description provided for @packingCategoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get packingCategoryOther;
+
+  /// No description provided for @packingCategoryOwn.
+  ///
+  /// In en, this message translates to:
+  /// **'Your own items'**
+  String get packingCategoryOwn;
+
+  /// No description provided for @packingAddOwn.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your own'**
+  String get packingAddOwn;
+
+  /// No description provided for @packingAddOwnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. camera'**
+  String get packingAddOwnHint;
+
+  /// No description provided for @packingAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get packingAdd;
+
+  /// No description provided for @packingPrivateNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Only you see your list. The others only see how far you are.'**
+  String get packingPrivateNote;
+
+  /// No description provided for @packingSharedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Things only one person needs to bring. Tap “I’ll bring it” so nobody packs a second one.'**
+  String get packingSharedNote;
+
+  /// No description provided for @packingSharedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing on the shared list yet.'**
+  String get packingSharedEmpty;
+
+  /// No description provided for @packingBring.
+  ///
+  /// In en, this message translates to:
+  /// **'I’ll bring it'**
+  String get packingBring;
+
+  /// No description provided for @packingYouBring.
+  ///
+  /// In en, this message translates to:
+  /// **'You’re bringing it'**
+  String get packingYouBring;
+
+  /// No description provided for @packingNobody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody yet'**
+  String get packingNobody;
+
+  /// No description provided for @packingHandBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Don’t bring it after all'**
+  String get packingHandBack;
+
+  /// No description provided for @packingSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions'**
+  String get packingSuggestions;
+
+  /// No description provided for @packingAddShared.
+  ///
+  /// In en, this message translates to:
+  /// **'Add something for everyone'**
+  String get packingAddShared;
+
+  /// No description provided for @packingAddSharedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. speaker'**
+  String get packingAddSharedHint;
+
+  /// No description provided for @packingDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All packed!'**
+  String get packingDoneTitle;
+
+  /// No description provided for @packingDoneClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Great'**
+  String get packingDoneClose;
+
+  /// No description provided for @packingReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your suitcase isn’t packed yet. Open the packing list.'**
+  String get packingReminderBody;
+
+  /// No description provided for @packingGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get packingGroup;
+
+  /// No description provided for @suitcaseEarnPacked.
+  ///
+  /// In en, this message translates to:
+  /// **'Fully packed for a trip'**
+  String get suitcaseEarnPacked;
+
+  /// No description provided for @packingYouProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'You’re {percent}% packed'**
+  String packingYouProgress(int percent);
+
+  /// No description provided for @packingRowSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You: {percent}% · {ready} of {total} ready'**
+  String packingRowSubtitle(int percent, int ready, int total);
+
+  /// No description provided for @packingQty.
+  ///
+  /// In en, this message translates to:
+  /// **'{item} ×{qty}'**
+  String packingQty(String item, int qty);
+
+  /// No description provided for @packingBringer.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} brings it'**
+  String packingBringer(String name);
+
+  /// No description provided for @packingDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your suitcase for {city} is shut. Have a great trip!'**
+  String packingDoneBody(String city);
+
+  /// No description provided for @packingDoneMiles.
+  ///
+  /// In en, this message translates to:
+  /// **'+{miles} miles for your suitcase'**
+  String packingDoneMiles(int miles);
+
+  /// No description provided for @packingReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Off to {city} tomorrow!'**
+  String packingReminderTitle(String city);
+
+  /// No description provided for @packingPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String packingPercent(int percent);
+
+  /// No description provided for @packingItemIdCard.
+  ///
+  /// In en, this message translates to:
+  /// **'ID card / passport'**
+  String get packingItemIdCard;
+
+  /// No description provided for @packingItemHealthCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Health insurance card'**
+  String get packingItemHealthCard;
+
+  /// No description provided for @packingItemTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets & bookings'**
+  String get packingItemTickets;
+
+  /// No description provided for @packingItemWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet & cards'**
+  String get packingItemWallet;
+
+  /// No description provided for @packingItemPhoneCharger.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone charger'**
+  String get packingItemPhoneCharger;
+
+  /// No description provided for @packingItemPowerBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Power bank'**
+  String get packingItemPowerBank;
+
+  /// No description provided for @packingItemHeadphones.
+  ///
+  /// In en, this message translates to:
+  /// **'Headphones'**
+  String get packingItemHeadphones;
+
+  /// No description provided for @packingItemPlugAdapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Plug adapter'**
+  String get packingItemPlugAdapter;
+
+  /// No description provided for @packingItemUnderwear.
+  ///
+  /// In en, this message translates to:
+  /// **'Underwear'**
+  String get packingItemUnderwear;
+
+  /// No description provided for @packingItemSocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Socks'**
+  String get packingItemSocks;
+
+  /// No description provided for @packingItemTshirts.
+  ///
+  /// In en, this message translates to:
+  /// **'T-shirts'**
+  String get packingItemTshirts;
+
+  /// No description provided for @packingItemTrousers.
+  ///
+  /// In en, this message translates to:
+  /// **'Trousers'**
+  String get packingItemTrousers;
+
+  /// No description provided for @packingItemPajamas.
+  ///
+  /// In en, this message translates to:
+  /// **'Pyjamas'**
+  String get packingItemPajamas;
+
+  /// No description provided for @packingItemShoes.
+  ///
+  /// In en, this message translates to:
+  /// **'Comfy shoes'**
+  String get packingItemShoes;
+
+  /// No description provided for @packingItemToothbrush.
+  ///
+  /// In en, this message translates to:
+  /// **'Toothbrush'**
+  String get packingItemToothbrush;
+
+  /// No description provided for @packingItemToothpaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Toothpaste'**
+  String get packingItemToothpaste;
+
+  /// No description provided for @packingItemDeodorant.
+  ///
+  /// In en, this message translates to:
+  /// **'Deodorant'**
+  String get packingItemDeodorant;
+
+  /// No description provided for @packingItemMedication.
+  ///
+  /// In en, this message translates to:
+  /// **'Medication'**
+  String get packingItemMedication;
+
+  /// No description provided for @packingItemSunscreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunscreen'**
+  String get packingItemSunscreen;
+
+  /// No description provided for @packingItemSunglasses.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunglasses'**
+  String get packingItemSunglasses;
+
+  /// No description provided for @packingItemSwimwear.
+  ///
+  /// In en, this message translates to:
+  /// **'Swimwear'**
+  String get packingItemSwimwear;
+
+  /// No description provided for @packingItemWarmJacket.
+  ///
+  /// In en, this message translates to:
+  /// **'Warm jacket'**
+  String get packingItemWarmJacket;
+
+  /// No description provided for @packingItemGloves.
+  ///
+  /// In en, this message translates to:
+  /// **'Gloves'**
+  String get packingItemGloves;
+
+  /// No description provided for @packingItemBeanie.
+  ///
+  /// In en, this message translates to:
+  /// **'Beanie'**
+  String get packingItemBeanie;
+
+  /// No description provided for @packingItemRainJacket.
+  ///
+  /// In en, this message translates to:
+  /// **'Rain jacket'**
+  String get packingItemRainJacket;
+
+  /// No description provided for @packingItemKeys.
+  ///
+  /// In en, this message translates to:
+  /// **'House keys'**
+  String get packingItemKeys;
+
+  /// No description provided for @packingItemWaterBottle.
+  ///
+  /// In en, this message translates to:
+  /// **'Water bottle'**
+  String get packingItemWaterBottle;
+
+  /// No description provided for @packingItemSpeaker.
+  ///
+  /// In en, this message translates to:
+  /// **'Speaker'**
+  String get packingItemSpeaker;
+
+  /// No description provided for @packingItemFirstAid.
+  ///
+  /// In en, this message translates to:
+  /// **'First aid kit'**
+  String get packingItemFirstAid;
+
+  /// No description provided for @packingItemPowerStrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Power strip'**
+  String get packingItemPowerStrip;
+
+  /// No description provided for @packingItemCardGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Card game'**
+  String get packingItemCardGame;
+
+  /// No description provided for @packingItemHairDryer.
+  ///
+  /// In en, this message translates to:
+  /// **'Hair dryer'**
+  String get packingItemHairDryer;
+
+  /// No description provided for @packingItemShampoo.
+  ///
+  /// In en, this message translates to:
+  /// **'Shampoo & shower gel'**
+  String get packingItemShampoo;
 }
 
 class _AppLocalizationsDelegate

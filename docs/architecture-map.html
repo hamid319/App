@@ -212,6 +212,13 @@ const LINES = [
     ["functions", "Eine Funktion schickt den anderen Bescheid."],
     ["fcm", "Die Push-Nachricht geht raus."],
     ["friends", "Alle sehen den neuen Eintrag."] ] },
+  { id: "packing", c: "--l-swipe", n: "Packliste", steps: [
+    ["ui", "Du öffnest die Packliste deiner Reise."],
+    ["logic", "Die App schlägt eine Liste vor: Basics, Kleidung nach Reisetagen, Sachen für die Jahreszeit."],
+    ["ui", "Du hakst ab, fügst Eigenes hinzu oder sagst „Ich bring’s mit“ bei der gemeinsamen Liste."],
+    ["firestore", "Deine Liste liegt privat bei dir. In der Reise steht nur dein Fortschritt (z. B. 8 von 10)."],
+    ["friends", "Die anderen sehen deine Prozent und wer was für alle mitbringt."],
+    ["local", "Am Abend vor der Abreise erinnert das Handy selbst, falls noch etwas fehlt. Kostet nichts."] ] },
   { id: "import", c: "--l-import", n: "Neue Stadt", steps: [
     ["osm", "Sehenswürdigkeiten, Cafés und Bars aus OpenStreetMap."],
     ["wikidata", "Namen, Beschreibungen und freie Fotos."],

@@ -13,6 +13,7 @@ import '../features/home/ui/favorites_screen.dart';
 import '../features/places/ui/place_detail_screen.dart';
 import '../features/group/data/receipt_scan_repository.dart';
 import '../features/group/ui/costs_screen.dart';
+import '../features/group/ui/packing_screen.dart';
 import '../features/group/ui/day_map_screen.dart';
 import '../features/group/ui/group_join_screen.dart';
 import '../features/group/ui/journal_screen.dart';
@@ -186,6 +187,14 @@ GoRouter createRouter(Ref ref) {
               reason: GateReason.groups,
               icon: Icons.photo_library_outlined,
               child: JournalScreen(groupId: state.pathParameters['groupId']!),
+            ),
+          ),
+          GoRoute(
+            path: 'packing',
+            builder: (ctx, state) => AccountGate(
+              reason: GateReason.groups,
+              icon: Icons.luggage_rounded,
+              child: PackingScreen(groupId: state.pathParameters['groupId']!),
             ),
           ),
           GoRoute(

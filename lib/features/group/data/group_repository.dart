@@ -176,8 +176,16 @@ class GroupRepository {
   /// sessions again. The last member leaving deletes the group.
   Future<void> leaveGroup(String groupId, String userId) async {
     final groupRef = _db.collection('groups').doc(groupId);
-    // The member's swipes go with them (the matches ignore them anyway).
+    // The member's swipes and packing go with them (the matches ignore
+    // them anyway).
     await groupRef.collection('swipes').doc(userId).delete();
+    await groupRef.collection('packingProgress').doc(userId).delete();
+    await _db
+        .collection('users')
+        .doc(userId)
+        .collection('packing')
+        .doc(groupId)
+        .delete();
     await _db.runTransaction((transaction) async {
       final snap = await transaction.get(groupRef);
       if (!snap.exists || snap.data() == null) {

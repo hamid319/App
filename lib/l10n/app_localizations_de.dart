@@ -2699,11 +2699,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String tripPackTitle(int percent) {
-    return 'Koffer zu $percent % gepackt';
+    return 'Reise zu $percent % geplant';
   }
 
   @override
-  String get tripPackDone => 'Alles gepackt. Gute Reise!';
+  String get tripPackDone => 'Reise fertig geplant. Jetzt nur noch packen!';
 
   @override
   String tripPackNext(String step) {
@@ -2828,4 +2828,233 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get suitcaseExtrasHeader => 'Extras';
+
+  @override
+  String get packingTitle => 'Packliste';
+
+  @override
+  String get packingMine => 'Meine Sachen';
+
+  @override
+  String get packingShared => 'Gemeinsam';
+
+  @override
+  String get packingAllReady => 'Alle sind startklar!';
+
+  @override
+  String get packingCategoryDocuments => 'Dokumente';
+
+  @override
+  String get packingCategoryTech => 'Technik';
+
+  @override
+  String get packingCategoryClothes => 'Kleidung';
+
+  @override
+  String get packingCategoryToiletries => 'Hygiene';
+
+  @override
+  String get packingCategoryWeather => 'Wetter';
+
+  @override
+  String get packingCategoryOther => 'Sonstiges';
+
+  @override
+  String get packingCategoryOwn => 'Eigene Sachen';
+
+  @override
+  String get packingAddOwn => 'Eigenes hinzufügen';
+
+  @override
+  String get packingAddOwnHint => 'z. B. Kamera';
+
+  @override
+  String get packingAdd => 'Hinzufügen';
+
+  @override
+  String get packingPrivateNote =>
+      'Deine Liste siehst nur du. Die anderen sehen nur, wie weit du bist.';
+
+  @override
+  String get packingSharedNote =>
+      'Sachen, die nur einer mitbringen muss. Tippe auf „Ich bring’s mit“, damit es keiner doppelt einpackt.';
+
+  @override
+  String get packingSharedEmpty => 'Noch nichts auf der gemeinsamen Liste.';
+
+  @override
+  String get packingBring => 'Ich bring’s mit';
+
+  @override
+  String get packingYouBring => 'Du bringst es mit';
+
+  @override
+  String get packingNobody => 'Noch niemand';
+
+  @override
+  String get packingHandBack => 'Doch nicht mitbringen';
+
+  @override
+  String get packingSuggestions => 'Vorschläge';
+
+  @override
+  String get packingAddShared => 'Etwas für alle hinzufügen';
+
+  @override
+  String get packingAddSharedHint => 'z. B. Musikbox';
+
+  @override
+  String get packingDoneTitle => 'Fertig gepackt!';
+
+  @override
+  String get packingDoneClose => 'Super';
+
+  @override
+  String get packingReminderBody =>
+      'Dein Koffer ist noch nicht fertig gepackt. Zur Packliste.';
+
+  @override
+  String get packingGroup => 'Gruppe';
+
+  @override
+  String get suitcaseEarnPacked => 'Für eine Reise fertig gepackt';
+
+  @override
+  String packingYouProgress(int percent) {
+    return 'Du bist zu $percent % gepackt';
+  }
+
+  @override
+  String packingRowSubtitle(int percent, int ready, int total) {
+    return 'Du: $percent % · $ready von $total startklar';
+  }
+
+  @override
+  String packingQty(String item, int qty) {
+    return '$item ×$qty';
+  }
+
+  @override
+  String packingBringer(String name) {
+    return '$name bringt es mit';
+  }
+
+  @override
+  String packingDoneBody(String city) {
+    return 'Dein Koffer für $city ist zu. Gute Reise!';
+  }
+
+  @override
+  String packingDoneMiles(int miles) {
+    return '+$miles Meilen für deinen Koffer';
+  }
+
+  @override
+  String packingReminderTitle(String city) {
+    return 'Morgen geht’s nach $city!';
+  }
+
+  @override
+  String packingPercent(int percent) {
+    return '$percent %';
+  }
+
+  @override
+  String get packingItemIdCard => 'Ausweis / Reisepass';
+
+  @override
+  String get packingItemHealthCard => 'Krankenversicherungskarte';
+
+  @override
+  String get packingItemTickets => 'Tickets & Buchungen';
+
+  @override
+  String get packingItemWallet => 'Geldbeutel & Karten';
+
+  @override
+  String get packingItemPhoneCharger => 'Handy-Ladekabel';
+
+  @override
+  String get packingItemPowerBank => 'Powerbank';
+
+  @override
+  String get packingItemHeadphones => 'Kopfhörer';
+
+  @override
+  String get packingItemPlugAdapter => 'Reiseadapter';
+
+  @override
+  String get packingItemUnderwear => 'Unterwäsche';
+
+  @override
+  String get packingItemSocks => 'Socken';
+
+  @override
+  String get packingItemTshirts => 'T-Shirts';
+
+  @override
+  String get packingItemTrousers => 'Hosen';
+
+  @override
+  String get packingItemPajamas => 'Schlafsachen';
+
+  @override
+  String get packingItemShoes => 'Bequeme Schuhe';
+
+  @override
+  String get packingItemToothbrush => 'Zahnbürste';
+
+  @override
+  String get packingItemToothpaste => 'Zahnpasta';
+
+  @override
+  String get packingItemDeodorant => 'Deo';
+
+  @override
+  String get packingItemMedication => 'Medikamente';
+
+  @override
+  String get packingItemSunscreen => 'Sonnencreme';
+
+  @override
+  String get packingItemSunglasses => 'Sonnenbrille';
+
+  @override
+  String get packingItemSwimwear => 'Badesachen';
+
+  @override
+  String get packingItemWarmJacket => 'Warme Jacke';
+
+  @override
+  String get packingItemGloves => 'Handschuhe';
+
+  @override
+  String get packingItemBeanie => 'Mütze';
+
+  @override
+  String get packingItemRainJacket => 'Regenjacke';
+
+  @override
+  String get packingItemKeys => 'Haustürschlüssel';
+
+  @override
+  String get packingItemWaterBottle => 'Trinkflasche';
+
+  @override
+  String get packingItemSpeaker => 'Musikbox';
+
+  @override
+  String get packingItemFirstAid => 'Erste-Hilfe-Set';
+
+  @override
+  String get packingItemPowerStrip => 'Mehrfachstecker';
+
+  @override
+  String get packingItemCardGame => 'Kartenspiel';
+
+  @override
+  String get packingItemHairDryer => 'Föhn';
+
+  @override
+  String get packingItemShampoo => 'Shampoo & Duschgel';
 }

@@ -69,6 +69,7 @@ class AccountDeletionRepository {
     // still see a member.
     await _deleteJournal(groupRef, authorUid: uid);
     await groupRef.collection('swipes').doc(uid).delete();
+    await groupRef.collection('packingProgress').doc(uid).delete();
     if (group['ownerUid'] == uid) {
       // The web invite shows the organizer's first name; drop it while the
       // user still owns the trip (only the owner may write the entry).
@@ -105,7 +106,9 @@ class AccountDeletionRepository {
       'polls',
       'expenses',
       'claims',
-      'swipes'
+      'swipes',
+      'packingProgress',
+      'packingShared',
     ]) {
       await _deleteDocs(await groupRef.collection(name).get());
     }
@@ -199,10 +202,12 @@ class AccountDeletionRepository {
     }
   }
 
-  /// The user document and its subcollections (hidden-gem tips).
+  /// The user document and its subcollections (hidden-gem tips, packing
+  /// lists).
   Future<void> deleteUserDocument(String uid) async {
     final user = _db.collection('users').doc(uid);
     await _deleteDocs(await user.collection('cityTips').get());
+    await _deleteDocs(await user.collection('packing').get());
     await user.delete();
   }
 

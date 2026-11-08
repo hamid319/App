@@ -166,6 +166,11 @@ class SuitcaseCard extends ConsumerWidget {
                     l10n.suitcaseEarnCountry,
                     milesPerCountry
                   ),
+                  (
+                    Icons.checklist_rounded,
+                    l10n.suitcaseEarnPacked,
+                    milesPerPackedTrip
+                  ),
                 ])
                   row(icon, label, '+$miles'),
               ]),

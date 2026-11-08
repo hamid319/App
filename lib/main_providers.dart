@@ -6,6 +6,7 @@ import 'core/services/location_service.dart';
 import 'core/services/push_service.dart';
 import 'core/services/trip_reminder_service.dart';
 import 'common/models/group_model.dart';
+import 'features/group/data/packing_repository.dart';
 import 'features/group/data/trip_repository.dart';
 import 'features/profile/data/profile_repository.dart';
 import 'features/swipe/data/places_repository.dart';
@@ -54,6 +55,18 @@ final checkInsProvider = StreamProvider<Map<String, DateTime>>((ref) {
   final uid = ref.watch(currentAccountProvider).value?.uid;
   if (uid == null) return Stream.value(const {});
   return ref.watch(tripRepositoryProvider).streamCheckIns(uid);
+});
+
+/// Packing lists. Global because the profile (miles) and the reminders
+/// need the trips the user has fully packed for.
+final packingRepositoryProvider =
+    Provider<PackingRepository>((ref) => PackingRepository());
+
+/// Ids of the trips the signed-in user has fully packed for.
+final packedTripIdsProvider = StreamProvider<Set<String>>((ref) {
+  final uid = ref.watch(currentAccountProvider).value?.uid;
+  if (uid == null) return Stream.value(const {});
+  return ref.watch(packingRepositoryProvider).streamPackedTripIds(uid);
 });
 
 /// Whether a trip's wishlist already has an idea for a place.

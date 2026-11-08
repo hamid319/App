@@ -18,5 +18,12 @@ final suitcaseProgressProvider = Provider<SuitcaseProgress?>((ref) {
   final stamps = ref.watch(passportStampsProvider).value;
   final trips = ref.watch(myTripsProvider).value;
   if (stamps == null || trips == null) return null;
-  return suitcaseProgress(trips: trips.length, stamps: stamps);
+  // Not waited for: the suitcase shows without it (also before the rules
+  // for packing lists are deployed).
+  final packed = ref.watch(packedTripIdsProvider).value ?? const {};
+  return suitcaseProgress(
+    trips: trips.length,
+    stamps: stamps,
+    packedTrips: trips.where((t) => packed.contains(t.groupId)).length,
+  );
 });

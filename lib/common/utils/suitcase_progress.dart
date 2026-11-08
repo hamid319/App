@@ -25,9 +25,12 @@ const milesPerCity = 30;
 const milesPerCheckIn = 20;
 const milesPerCountry = 40;
 
+/// Miles per trip the user has fully packed for (packing list at 100 %).
+const milesPerPackedTrip = 15;
+
 /// The user's suitcase: level, miles, extras and city stickers. Derived
-/// from the trips and passport stamps the app already loads, so it costs
-/// no extra reads and cannot be gamed by writing a counter.
+/// from the trips, passport stamps and packed trips the app already
+/// loads, so it costs no extra reads and has no counter to write.
 class SuitcaseProgress {
   const SuitcaseProgress({
     required this.miles,
@@ -90,6 +93,7 @@ class SuitcaseProgress {
 SuitcaseProgress suitcaseProgress({
   required int trips,
   required List<PassportStamp> stamps,
+  int packedTrips = 0,
 }) {
   final countries = {
     for (final s in stamps)
@@ -100,16 +104,17 @@ SuitcaseProgress suitcaseProgress({
     miles: trips * milesPerTrip +
         stamps.length * milesPerCity +
         checkIns * milesPerCheckIn +
-        countries * milesPerCountry,
+        countries * milesPerCountry +
+        packedTrips * milesPerPackedTrip,
     trips: trips,
     stickers: stamps,
   );
 }
 
-/// Steps of packing for one trip, in the order they are suggested.
+/// Steps of planning one trip, in the order they are suggested.
 enum TripPackStep { friends, swipe, wishlist, dayPlan }
 
-/// Which packing steps a trip has done. A trip "packed" to 100 % has a
+/// Which planning steps a trip has done. A trip planned to 100 % has a
 /// second member, the user's swipes, three wishlist ideas and a day plan.
 Map<TripPackStep, bool> tripPacking({
   required int members,

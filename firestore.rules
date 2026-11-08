@@ -136,6 +136,20 @@ service cloud.firestore {
                       && request.resource.data.createdAt == request.time;
         allow update: if false;
       }
+
+      // Own packing list per trip, private to the user. complete feeds the
+      // suitcase miles and the packing reminder.
+      match /packing/{groupId} {
+        allow read, delete: if isAuthenticated() && request.auth.uid == userId;
+        allow create, update: if isAuthenticated()
+                              && request.auth.uid == userId
+                              && request.resource.data.keys().hasOnly(['items', 'complete', 'updatedAt'])
+                              && (!('items' in request.resource.data)
+                                  || (request.resource.data.items is list
+                                      && request.resource.data.items.size() <= 150))
+                              && request.resource.data.complete is bool
+                              && request.resource.data.updatedAt == request.time;
+      }
     }
 
     // One doc per device (the FCM token is the id), owned by whoever is
@@ -402,6 +416,57 @@ service cloud.firestore {
                                       && request.resource.data.veto.size() <= 200));
         // Also when leaving the trip; the owner when clearing it.
         allow delete: if request.auth.uid == uid || isOwner(groupData(groupId));
+      }
+
+      // Packing progress per member: only counts, so the group sees how far
+      // everyone is without seeing their list. Only the member writes it.
+      match /packingProgress/{uid} {
+        allow read: if isMember(groupData(groupId));
+        allow create, update: if isMember(groupData(groupId))
+                              && request.auth.uid == uid
+                              && request.resource.data.keys().hasOnly(['done', 'total', 'updatedAt'])
+                              && request.resource.data.done is int
+                              && request.resource.data.total is int
+                              && request.resource.data.done >= 0
+                              && request.resource.data.done <= request.resource.data.total
+                              && request.resource.data.total <= 1000
+                              && request.resource.data.updatedAt == request.time;
+        allow delete: if request.auth.uid == uid || isOwner(groupData(groupId));
+      }
+
+      // Shared packing list: things one member brings for everybody. A
+      // member may only take a free item, hand back their own, and tick
+      // their own as packed.
+      match /packingShared/{itemId} {
+        allow read: if isMember(groupData(groupId));
+        allow create: if isMember(groupData(groupId))
+                      && request.resource.data.keys().hasOnly(['title', 'addedBy', 'bringer', 'packed', 'createdAt'])
+                      && request.resource.data.title is string
+                      && request.resource.data.title.size() > 0
+                      && request.resource.data.title.size() <= 60
+                      && request.resource.data.addedBy == request.auth.uid
+                      && request.resource.data.bringer == null
+                      && request.resource.data.packed == false
+                      && request.resource.data.createdAt == request.time;
+        allow update: if isMember(groupData(groupId))
+                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bringer', 'packed'])
+                      && request.resource.data.packed is bool
+                      && (
+                        // take a free item
+                        (resource.data.bringer == null
+                          && request.resource.data.bringer == request.auth.uid
+                          && request.resource.data.packed == false) ||
+                        // hand it back
+                        (resource.data.bringer == request.auth.uid
+                          && request.resource.data.bringer == null
+                          && request.resource.data.packed == false) ||
+                        // tick it as packed or not
+                        (resource.data.bringer == request.auth.uid
+                          && request.resource.data.bringer == request.auth.uid)
+                      );
+        allow delete: if isMember(groupData(groupId))
+                      && (resource.data.addedBy == request.auth.uid
+                          || isOwner(groupData(groupId)));
       }
 
       // Swipe rounds of earlier versions, replaced by /swipes. Nothing

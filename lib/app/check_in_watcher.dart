@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../common/utils/packing_template.dart';
 import '../common/utils/passport_stamps.dart';
 import '../features/group/logic/trip_controller.dart';
 import '../l10n/l10n.dart';
@@ -10,7 +11,8 @@ import 'routes.dart';
 
 /// Passport check-ins without a tap: while a trip is on, the app checks in
 /// whenever it is opened near the city (if the location is allowed), and
-/// a local notification on the first trip day reminds the others.
+/// a local notification on the first trip day reminds the others. Also
+/// schedules the packing reminder the evening before a trip.
 class CheckInWatcher extends ConsumerStatefulWidget {
   const CheckInWatcher({super.key, required this.child});
 
@@ -31,7 +33,7 @@ class _CheckInWatcherState extends ConsumerState<CheckInWatcher> {
   void initState() {
     super.initState();
     final reminders = ref.read(tripReminderServiceProvider);
-    reminders.onOpen = (id) => ref.read(routerProvider).go('/trip/$id');
+    reminders.onOpen = (route) => ref.read(routerProvider).go(route);
     // No plugin in widget tests (and on unsupported platforms).
     reminders.start().catchError((Object e) => debugPrint('Reminders: $e'));
     _lifecycle = AppLifecycleListener(onResume: _run);
@@ -69,10 +71,14 @@ class _CheckInWatcherState extends ConsumerState<CheckInWatcher> {
       if (!mounted) return;
       final l10n = context.l10n;
       final times = checkInReminderTimes(trips, checkIns, now);
+      final packing = packingReminderTimes(
+          trips, ref.read(packedTripIdsProvider).value ?? const {}, now);
       final service = ref.read(tripReminderServiceProvider);
       // Asked only once there is a reminder to show, i.e. right after
       // creating or joining a dated trip; the system asks only once.
-      if (times.isNotEmpty) await service.requestPermission();
+      if (times.isNotEmpty || packing.isNotEmpty) {
+        await service.requestPermission();
+      }
       await service.sync([
         // iOS keeps at most 64 pending notifications per app.
         for (final t in times.take(20))
@@ -81,6 +87,14 @@ class _CheckInWatcherState extends ConsumerState<CheckInWatcher> {
             at: t.at,
             title: l10n.checkInReminderTitle(t.trip.location!.cityName),
             body: l10n.checkInReminderBody,
+          ),
+        for (final t in packing.take(20))
+          (
+            groupId: '/trip/${t.trip.groupId}/packing',
+            at: t.at,
+            title: l10n.packingReminderTitle(
+                t.trip.location?.cityName ?? t.trip.groupName ?? ''),
+            body: l10n.packingReminderBody,
           ),
       ]);
     } catch (e) {
@@ -95,6 +109,7 @@ class _CheckInWatcherState extends ConsumerState<CheckInWatcher> {
     // Runs again when trips or check-ins change (a new trip, a check-in).
     ref.listen(myTripsProvider, (_, __) => _run());
     ref.listen(checkInsProvider, (_, __) => _run());
+    ref.listen(packedTripIdsProvider, (_, __) => _run());
     return widget.child;
   }
 }

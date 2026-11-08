@@ -17,6 +17,7 @@ import '../../../l10n/l10n.dart';
 import '../../../main_providers.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../logic/group_controller.dart';
+import '../logic/packing_controller.dart';
 import '../logic/trip_controller.dart';
 import '../widgets/idea_sheet.dart';
 import '../widgets/poll_sheet.dart';
@@ -275,6 +276,8 @@ class _PlanBody extends ConsumerWidget {
                 _QuickActions(group: group, uid: uid),
                 const SizedBox(height: 20),
                 TripPackingBar(group: group, uid: uid, ideas: ideas.length),
+                const SizedBox(height: 16),
+                InsetGroup(children: [_PackingRow(group: group, uid: uid)]),
                 const SizedBox(height: 16),
                 // During the trip, up top: the passport check-in.
                 if (_canCheckIn(group)) ...[
@@ -833,6 +836,30 @@ class _QuickAction extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The packing list: the user's own progress and who is ready.
+class _PackingRow extends ConsumerWidget {
+  const _PackingRow({required this.group, required this.uid});
+
+  final GroupModel group;
+  final String uid;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final progress =
+        ref.watch(packingProgressProvider(group.groupId)).value ?? const {};
+    final ready =
+        group.members.where((m) => progress[m]?.complete ?? false).length;
+    return _ActionRow(
+      icon: Icons.luggage_rounded,
+      title: l10n.packingTitle,
+      subtitle: l10n.packingRowSubtitle(
+          progress[uid]?.percent ?? 0, ready, group.members.length),
+      onTap: () => context.push('/trip/${group.groupId}/packing'),
     );
   }
 }

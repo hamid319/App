@@ -55,7 +55,7 @@ routerProvider           // Provider<GoRouter>
 ## Routes (`app/routes.dart`)
 ```
 /onboarding   /login   /register
-/trips (start, tab Reisen)   /trip/:groupId   /trip/:groupId/day/:index   /trip/:groupId/costs   /trip/:groupId/costs/receipt(/:expenseId(/edit))   /trip/:groupId/journal   /trip/:groupId/recap
+/trips (start, tab Reisen)   /trip/:groupId   /trip/:groupId/day/:index   /trip/:groupId/costs   /trip/:groupId/costs/receipt(/:expenseId(/edit))   /trip/:groupId/journal   /trip/:groupId/recap   /trip/:groupId/packing
 /home (tab Entdecken, feed)  /discover (solo deck)   /collection/:theme   /place/:id
 /trip/:groupId/swipe (group deck)   /group → /trips   /group/join?groupId=&code=
 (old /swipe/:groupId, /group-matches/:groupId, /day-plan/… redirect to the trip)
@@ -77,6 +77,8 @@ Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so
 ```
 /users/{uid}           favorites: string[], groups: string[],
                        checkIns: map<cityKey, Timestamp> (passport GPS check-ins; no check-in = pale stamp)
+  /packing/{groupId}   items [{id, category, key?|name?, qty?, done}] ≤150, complete (own packing list, private;
+                       complete feeds suitcase miles and the evening-before reminder)
 /pushTokens/{token}    uid, lang, updatedAt (one per device; written by the app, read only by the
                        push Cloud Functions in functions/push.js: match, member joined, expense, journal)
 /inviteCodes/{code}    groupId, createdAt, title, cityName, ownerName (get only, no list; written by the owner)
@@ -91,6 +93,8 @@ Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so
                        (read by Gemini via Firebase AI Logic, App Check enforced; split in common/utils/expense_split.dart)
   /claims/{uid}        items: map<expenseId, itemId[]> (receipt lines a member took; only they write it;
                        lines for all, untaken lines and the tip are shared by all participants)
+  /packingProgress/{uid}  done, total (only the member writes; the group sees percentages, not the list)
+  /packingShared/{id}  title, addedBy, bringer?, packed (things one member brings for all; take/hand back/tick own)
   /journal/{id}        authorUid, day 'yyyy-MM-dd', text ≤500, photos [{path,url,width,height}] ≤6
                        (photos in Storage trips/{groupId}/journal/{id}/{i}.jpg)
 /places/{placeId}      imageUrls: string[], types: string[]

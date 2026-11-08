@@ -1321,11 +1321,11 @@
     "placeholders": {"city": {"type": "String"}}
   },
   "tripCreatedOpen": "Open trip",
-  "tripPackTitle": "Suitcase {percent}% packed",
+  "tripPackTitle": "Trip {percent}% planned",
   "@tripPackTitle": {
     "placeholders": {"percent": {"type": "int"}}
   },
-  "tripPackDone": "All packed. Have a great trip!",
+  "tripPackDone": "Trip fully planned. Now pack your bags!",
   "tripPackNext": "Next: {step}",
   "@tripPackNext": {
     "placeholders": {"step": {"type": "String"}}
@@ -1379,5 +1379,99 @@
   "suitcaseEarnCity": "New city in your passport",
   "suitcaseEarnCheckIn": "Check-in on site",
   "suitcaseEarnCountry": "New country",
-  "suitcaseExtrasHeader": "Extras"
+  "suitcaseExtrasHeader": "Extras",
+  "packingTitle": "Packing list",
+  "packingMine": "My stuff",
+  "packingShared": "Shared",
+  "packingAllReady": "Everyone is packed and ready!",
+  "packingCategoryDocuments": "Documents",
+  "packingCategoryTech": "Tech",
+  "packingCategoryClothes": "Clothes",
+  "packingCategoryToiletries": "Toiletries",
+  "packingCategoryWeather": "Weather",
+  "packingCategoryOther": "Other",
+  "packingCategoryOwn": "Your own items",
+  "packingAddOwn": "Add your own",
+  "packingAddOwnHint": "e.g. camera",
+  "packingAdd": "Add",
+  "packingPrivateNote": "Only you see your list. The others only see how far you are.",
+  "packingSharedNote": "Things only one person needs to bring. Tap “I’ll bring it” so nobody packs a second one.",
+  "packingSharedEmpty": "Nothing on the shared list yet.",
+  "packingBring": "I’ll bring it",
+  "packingYouBring": "You’re bringing it",
+  "packingNobody": "Nobody yet",
+  "packingHandBack": "Don’t bring it after all",
+  "packingSuggestions": "Suggestions",
+  "packingAddShared": "Add something for everyone",
+  "packingAddSharedHint": "e.g. speaker",
+  "packingDoneTitle": "All packed!",
+  "packingDoneClose": "Great",
+  "packingReminderBody": "Your suitcase isn’t packed yet. Open the packing list.",
+  "packingGroup": "Group",
+  "suitcaseEarnPacked": "Fully packed for a trip",
+  "packingYouProgress": "You’re {percent}% packed",
+  "@packingYouProgress": {
+    "placeholders": {"percent": {"type": "int"}}
+  },
+  "packingRowSubtitle": "You: {percent}% · {ready} of {total} ready",
+  "@packingRowSubtitle": {
+    "placeholders": {"percent": {"type": "int"}, "ready": {"type": "int"}, "total": {"type": "int"}}
+  },
+  "packingQty": "{item} ×{qty}",
+  "@packingQty": {
+    "placeholders": {"item": {"type": "String"}, "qty": {"type": "int"}}
+  },
+  "packingBringer": "{name} brings it",
+  "@packingBringer": {
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "packingDoneBody": "Your suitcase for {city} is shut. Have a great trip!",
+  "@packingDoneBody": {
+    "placeholders": {"city": {"type": "String"}}
+  },
+  "packingDoneMiles": "+{miles} miles for your suitcase",
+  "@packingDoneMiles": {
+    "placeholders": {"miles": {"type": "int"}}
+  },
+  "packingReminderTitle": "Off to {city} tomorrow!",
+  "@packingReminderTitle": {
+    "placeholders": {"city": {"type": "String"}}
+  },
+  "packingPercent": "{percent}%",
+  "@packingPercent": {
+    "placeholders": {"percent": {"type": "int"}}
+  },
+  "packingItemIdCard": "ID card / passport",
+  "packingItemHealthCard": "Health insurance card",
+  "packingItemTickets": "Tickets & bookings",
+  "packingItemWallet": "Wallet & cards",
+  "packingItemPhoneCharger": "Phone charger",
+  "packingItemPowerBank": "Power bank",
+  "packingItemHeadphones": "Headphones",
+  "packingItemPlugAdapter": "Plug adapter",
+  "packingItemUnderwear": "Underwear",
+  "packingItemSocks": "Socks",
+  "packingItemTshirts": "T-shirts",
+  "packingItemTrousers": "Trousers",
+  "packingItemPajamas": "Pyjamas",
+  "packingItemShoes": "Comfy shoes",
+  "packingItemToothbrush": "Toothbrush",
+  "packingItemToothpaste": "Toothpaste",
+  "packingItemDeodorant": "Deodorant",
+  "packingItemMedication": "Medication",
+  "packingItemSunscreen": "Sunscreen",
+  "packingItemSunglasses": "Sunglasses",
+  "packingItemSwimwear": "Swimwear",
+  "packingItemWarmJacket": "Warm jacket",
+  "packingItemGloves": "Gloves",
+  "packingItemBeanie": "Beanie",
+  "packingItemRainJacket": "Rain jacket",
+  "packingItemKeys": "House keys",
+  "packingItemWaterBottle": "Water bottle",
+  "packingItemSpeaker": "Speaker",
+  "packingItemFirstAid": "First aid kit",
+  "packingItemPowerStrip": "Power strip",
+  "packingItemCardGame": "Card game",
+  "packingItemHairDryer": "Hair dryer",
+  "packingItemShampoo": "Shampoo & shower gel"
 }
