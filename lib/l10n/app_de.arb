@@ -728,5 +728,22 @@
   "receiptOpenLines": "{count, plural, =0{Alle Positionen vergeben} =1{1 Position offen} other{{count} Positionen offen}}",
   "receiptTakenBy": "Genommen von {names}",
   "receiptNotParticipant": "Du bist bei diesem Beleg nicht dabei.",
-  "overtureAttribution": "Ortsdaten: Overture Maps Foundation"
+  "overtureAttribution": "Ortsdaten: Overture Maps Foundation",
+  "homeCityTitle": "Heimatstadt",
+  "homeCityPickerTitle": "Wo wohnst du?",
+  "homeCityNotSet": "Nicht festgelegt: Verrate uns, wo du wohnst, um Tipps zu teilen",
+  "homeCityClear": "Heimatstadt entfernen",
+  "cityTipBannerTitle": "Kennst du einen echten Geheimtipp in {city}?",
+  "cityTipBannerTitleNoCity": "Kennst du einen echten Geheimtipp in deiner Stadt?",
+  "cityTipBannerBody": "Verrate uns einen Ort, den Reisende lieben würden, aber selten finden.",
+  "cityTipStamp": "Insidertipp",
+  "cityTipBannerAction": "Tipp verraten",
+  "cityTipBannerNotNow": "Nicht jetzt",
+  "cityTipSheetTitle": "Dein Geheimtipp in {city}",
+  "cityTipSheetHint": "Wir prüfen jeden Tipp, bevor er in TripFam erscheint.",
+  "cityTipPlaceLabel": "Ort (Name oder Straße)",
+  "cityTipNoteLabel": "Was macht ihn besonders? (optional)",
+  "cityTipSubmit": "Tipp senden",
+  "cityTipThanks": "Danke! Wir schauen uns deinen Tipp an.",
+  "cityTipSaveError": "Dein Tipp konnte nicht gesendet werden. Bitte versuch es noch einmal."
 }

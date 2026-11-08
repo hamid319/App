@@ -90,4 +90,31 @@ class PreferencesService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('passport_seen_$uid', cityIds.toList());
   }
+
+  /// The user's home city (a PopularCity id), only stored on this device.
+  static Future<String?> getHomeCityId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('home_city_id');
+  }
+
+  static Future<void> setHomeCityId(String? id) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (id == null) {
+      await prefs.remove('home_city_id');
+    } else {
+      await prefs.setString('home_city_id', id);
+    }
+  }
+
+  /// When the home tip banner may show again (after a tip or "not now").
+  static Future<DateTime?> getCityTipBannerPausedUntil() async {
+    final prefs = await SharedPreferences.getInstance();
+    final millis = prefs.getInt('city_tip_paused_until');
+    return millis == null ? null : DateTime.fromMillisecondsSinceEpoch(millis);
+  }
+
+  static Future<void> setCityTipBannerPausedUntil(DateTime until) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('city_tip_paused_until', until.millisecondsSinceEpoch);
+  }
 }

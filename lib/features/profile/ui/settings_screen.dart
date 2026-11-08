@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../auth/logic/account_deletion_controller.dart';
 import '../../auth/logic/auth_controller.dart';
+import '../../../app/home_city_controller.dart';
 import '../../../app/language_picker.dart';
 import '../../../app/locale_controller.dart';
 import '../../../app/theme_mode_controller.dart';
 import '../../../app/theme_mode_picker.dart';
 import '../../../app/theme.dart';
+import '../../../common/widgets/city_picker.dart';
 import '../../../common/widgets/ticket.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/errors/user_message.dart';
@@ -30,6 +32,7 @@ class SettingsScreen extends ConsumerWidget {
     final hasAccount = user != null && !user.isAnonymous;
     final languageCode = ref.watch(localeControllerProvider)?.languageCode;
     final themeMode = ref.watch(themeModeControllerProvider);
+    final homeCity = ref.watch(homeCityProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -61,6 +64,32 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: Text(themeModeName(l10n, themeMode)),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => showThemeModePicker(context, ref),
+              ),
+              ListTile(
+                leading: const Icon(Icons.home_outlined),
+                title: Text(l10n.homeCityTitle),
+                subtitle: Text(homeCity?.nameFor(
+                        Localizations.localeOf(context).languageCode) ??
+                    l10n.homeCityNotSet),
+                trailing: homeCity == null
+                    ? const Icon(Icons.chevron_right_rounded)
+                    : IconButton(
+                        tooltip: l10n.homeCityClear,
+                        icon: const Icon(Icons.close_rounded),
+                        onPressed: () =>
+                            ref.read(homeCityProvider.notifier).setCity(null),
+                      ),
+                onTap: () => showCityPicker(
+                  context,
+                  offerCurrentLocation: false,
+                  selectedId: homeCity?.id,
+                  title: l10n.homeCityPickerTitle,
+                  onSelected: (city) {
+                    if (city != null) {
+                      ref.read(homeCityProvider.notifier).setCity(city);
+                    }
+                  },
+                ),
               ),
               if (hasAccount)
                 SwitchListTile(

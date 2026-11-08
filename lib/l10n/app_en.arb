@@ -1287,5 +1287,32 @@
   "receiptTakenBy": "Taken by {names}",
   "@receiptTakenBy": {"placeholders": {"names": {"type": "String"}}},
   "receiptNotParticipant": "You are not part of this receipt.",
-  "overtureAttribution": "Place data: Overture Maps Foundation"
+  "overtureAttribution": "Place data: Overture Maps Foundation",
+  "homeCityTitle": "Home city",
+  "homeCityPickerTitle": "Where do you live?",
+  "homeCityNotSet": "Not set: tell us where you live to share local tips",
+  "homeCityClear": "Remove home city",
+  "cityTipBannerTitle": "Know a real hidden gem in {city}?",
+  "@cityTipBannerTitle": {
+    "placeholders": {
+      "city": {"type": "String"}
+    }
+  },
+  "cityTipBannerTitleNoCity": "Know a real hidden gem in your city?",
+  "cityTipBannerBody": "Tell us a place travellers would love but rarely find.",
+  "cityTipStamp": "Local tip",
+  "cityTipBannerAction": "Share a tip",
+  "cityTipBannerNotNow": "Not now",
+  "cityTipSheetTitle": "Your hidden gem in {city}",
+  "@cityTipSheetTitle": {
+    "placeholders": {
+      "city": {"type": "String"}
+    }
+  },
+  "cityTipSheetHint": "We check every tip before it shows up in TripFam.",
+  "cityTipPlaceLabel": "Place (name or street)",
+  "cityTipNoteLabel": "Why is it special? (optional)",
+  "cityTipSubmit": "Send tip",
+  "cityTipThanks": "Thanks! We'll take a look at your tip.",
+  "cityTipSaveError": "Your tip could not be sent. Please try again."
 }

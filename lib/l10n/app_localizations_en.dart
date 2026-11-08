@@ -2591,4 +2591,63 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get overtureAttribution => 'Place data: Overture Maps Foundation';
+
+  @override
+  String get homeCityTitle => 'Home city';
+
+  @override
+  String get homeCityPickerTitle => 'Where do you live?';
+
+  @override
+  String get homeCityNotSet =>
+      'Not set: tell us where you live to share local tips';
+
+  @override
+  String get homeCityClear => 'Remove home city';
+
+  @override
+  String cityTipBannerTitle(String city) {
+    return 'Know a real hidden gem in $city?';
+  }
+
+  @override
+  String get cityTipBannerTitleNoCity => 'Know a real hidden gem in your city?';
+
+  @override
+  String get cityTipBannerBody =>
+      'Tell us a place travellers would love but rarely find.';
+
+  @override
+  String get cityTipStamp => 'Local tip';
+
+  @override
+  String get cityTipBannerAction => 'Share a tip';
+
+  @override
+  String get cityTipBannerNotNow => 'Not now';
+
+  @override
+  String cityTipSheetTitle(String city) {
+    return 'Your hidden gem in $city';
+  }
+
+  @override
+  String get cityTipSheetHint =>
+      'We check every tip before it shows up in TripFam.';
+
+  @override
+  String get cityTipPlaceLabel => 'Place (name or street)';
+
+  @override
+  String get cityTipNoteLabel => 'Why is it special? (optional)';
+
+  @override
+  String get cityTipSubmit => 'Send tip';
+
+  @override
+  String get cityTipThanks => 'Thanks! We\'ll take a look at your tip.';
+
+  @override
+  String get cityTipSaveError =>
+      'Your tip could not be sent. Please try again.';
 }

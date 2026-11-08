@@ -120,6 +120,22 @@ service cloud.firestore {
                     && request.auth.uid == userId
                     && request.resource.data.uid == userId;
       allow delete: if isAuthenticated() && request.auth.uid == userId;
+
+      // Hidden-gem tips from locals (home banner). Only the author reads
+      // them in the app; the team reviews them in the console. No edits.
+      match /cityTips/{tipId} {
+        allow read, delete: if isAuthenticated() && request.auth.uid == userId;
+        allow create: if isRegistered()
+                      && request.auth.uid == userId
+                      && request.resource.data.keys().hasOnly(['cityId', 'place', 'note', 'language', 'createdAt'])
+                      && request.resource.data.cityId is string && request.resource.data.cityId.size() <= 40
+                      && request.resource.data.place is string
+                      && request.resource.data.place.size() > 0 && request.resource.data.place.size() <= 80
+                      && request.resource.data.note is string && request.resource.data.note.size() <= 280
+                      && request.resource.data.language is string && request.resource.data.language.size() <= 8
+                      && request.resource.data.createdAt == request.time;
+        allow update: if false;
+      }
     }
 
     // One doc per device (the FCM token is the id), owned by whoever is
@@ -134,8 +150,6 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && resource.data.uid == request.auth.uid;
     }
 
-    // Places are written only by the import tool (tools/city-import) with
-    // admin credentials; the app reads them.
     // Compact per-area place lists (tools/city-import src/tiles.ts),
     // read around the user's position; written only by the import.
     match /placeTiles/{tileId} {
@@ -144,6 +158,8 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Places are written only by the import tool (tools/city-import) with
+    // admin credentials; the app reads them.
     match /places/{placeId} {
       allow read: if isAuthenticated();
       allow write: if false;

@@ -199,8 +199,12 @@ class AccountDeletionRepository {
     }
   }
 
-  Future<void> deleteUserDocument(String uid) =>
-      _db.collection('users').doc(uid).delete();
+  /// The user document and its subcollections (hidden-gem tips).
+  Future<void> deleteUserDocument(String uid) async {
+    final user = _db.collection('users').doc(uid);
+    await _deleteDocs(await user.collection('cityTips').get());
+    await user.delete();
+  }
 
   Future<void> _deleteDocs(QuerySnapshot<Map<String, dynamic>> snapshot) async {
     final docs = snapshot.docs;

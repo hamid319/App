@@ -16,6 +16,7 @@ import '../../swipe/logic/discover_preferences_controller.dart';
 import '../../swipe/logic/swipe_controller.dart';
 import '../../swipe/widgets/discover_filters.dart';
 import '../logic/home_feed_controller.dart';
+import '../widgets/city_tip_banner.dart';
 import '../widgets/place_ticket_tile.dart';
 
 /// Width and height of a slider ticket.
@@ -101,6 +102,7 @@ class _Feed extends ConsumerWidget {
             )
           else if (feed.tonight.isNotEmpty)
             _PlaceRow(collection: HomeCollection.tonight, places: feed.tonight),
+          const CityTipBanner(),
           if (feed.hiddenGems.isNotEmpty)
             _PlaceRow(
               collection: HomeCollection.hiddenGems,

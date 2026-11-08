@@ -2625,4 +2625,64 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get overtureAttribution => 'Ortsdaten: Overture Maps Foundation';
+
+  @override
+  String get homeCityTitle => 'Heimatstadt';
+
+  @override
+  String get homeCityPickerTitle => 'Wo wohnst du?';
+
+  @override
+  String get homeCityNotSet =>
+      'Nicht festgelegt: Verrate uns, wo du wohnst, um Tipps zu teilen';
+
+  @override
+  String get homeCityClear => 'Heimatstadt entfernen';
+
+  @override
+  String cityTipBannerTitle(String city) {
+    return 'Kennst du einen echten Geheimtipp in $city?';
+  }
+
+  @override
+  String get cityTipBannerTitleNoCity =>
+      'Kennst du einen echten Geheimtipp in deiner Stadt?';
+
+  @override
+  String get cityTipBannerBody =>
+      'Verrate uns einen Ort, den Reisende lieben würden, aber selten finden.';
+
+  @override
+  String get cityTipStamp => 'Insidertipp';
+
+  @override
+  String get cityTipBannerAction => 'Tipp verraten';
+
+  @override
+  String get cityTipBannerNotNow => 'Nicht jetzt';
+
+  @override
+  String cityTipSheetTitle(String city) {
+    return 'Dein Geheimtipp in $city';
+  }
+
+  @override
+  String get cityTipSheetHint =>
+      'Wir prüfen jeden Tipp, bevor er in TripFam erscheint.';
+
+  @override
+  String get cityTipPlaceLabel => 'Ort (Name oder Straße)';
+
+  @override
+  String get cityTipNoteLabel => 'Was macht ihn besonders? (optional)';
+
+  @override
+  String get cityTipSubmit => 'Tipp senden';
+
+  @override
+  String get cityTipThanks => 'Danke! Wir schauen uns deinen Tipp an.';
+
+  @override
+  String get cityTipSaveError =>
+      'Dein Tipp konnte nicht gesendet werden. Bitte versuch es noch einmal.';
 }

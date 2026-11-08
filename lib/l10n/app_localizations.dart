@@ -4471,6 +4471,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Place data: Overture Maps Foundation'**
   String get overtureAttribution;
+
+  /// No description provided for @homeCityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Home city'**
+  String get homeCityTitle;
+
+  /// No description provided for @homeCityPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where do you live?'**
+  String get homeCityPickerTitle;
+
+  /// No description provided for @homeCityNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set: tell us where you live to share local tips'**
+  String get homeCityNotSet;
+
+  /// No description provided for @homeCityClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove home city'**
+  String get homeCityClear;
+
+  /// No description provided for @cityTipBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Know a real hidden gem in {city}?'**
+  String cityTipBannerTitle(String city);
+
+  /// No description provided for @cityTipBannerTitleNoCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Know a real hidden gem in your city?'**
+  String get cityTipBannerTitleNoCity;
+
+  /// No description provided for @cityTipBannerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us a place travellers would love but rarely find.'**
+  String get cityTipBannerBody;
+
+  /// No description provided for @cityTipStamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Local tip'**
+  String get cityTipStamp;
+
+  /// No description provided for @cityTipBannerAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Share a tip'**
+  String get cityTipBannerAction;
+
+  /// No description provided for @cityTipBannerNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get cityTipBannerNotNow;
+
+  /// No description provided for @cityTipSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your hidden gem in {city}'**
+  String cityTipSheetTitle(String city);
+
+  /// No description provided for @cityTipSheetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We check every tip before it shows up in TripFam.'**
+  String get cityTipSheetHint;
+
+  /// No description provided for @cityTipPlaceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Place (name or street)'**
+  String get cityTipPlaceLabel;
+
+  /// No description provided for @cityTipNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Why is it special? (optional)'**
+  String get cityTipNoteLabel;
+
+  /// No description provided for @cityTipSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Send tip'**
+  String get cityTipSubmit;
+
+  /// No description provided for @cityTipThanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks! We\'ll take a look at your tip.'**
+  String get cityTipThanks;
+
+  /// No description provided for @cityTipSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Your tip could not be sent. Please try again.'**
+  String get cityTipSaveError;
 }
 
 class _AppLocalizationsDelegate

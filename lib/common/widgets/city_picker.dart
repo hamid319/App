@@ -13,6 +13,7 @@ Future<void> showCityPicker(
   required ValueChanged<PopularCity?> onSelected,
   String? selectedId,
   bool offerCurrentLocation = true,
+  String? title,
 }) {
   return showModalBottomSheet<void>(
     context: context,
@@ -22,6 +23,7 @@ Future<void> showCityPicker(
       onSelected: onSelected,
       selectedId: selectedId,
       offerCurrentLocation: offerCurrentLocation,
+      title: title,
     ),
   );
 }
@@ -31,11 +33,13 @@ class _CityPicker extends StatefulWidget {
     required this.onSelected,
     required this.selectedId,
     required this.offerCurrentLocation,
+    this.title,
   });
 
   final ValueChanged<PopularCity?> onSelected;
   final String? selectedId;
   final bool offerCurrentLocation;
+  final String? title;
 
   @override
   State<_CityPicker> createState() => _CityPickerState();
@@ -63,8 +67,9 @@ class _CityPickerState extends State<_CityPicker> {
         .toList()
       ..sort((a, b) => a.nameFor(lang).compareTo(b.nameFor(lang)));
 
-    Widget check(bool on) =>
-        on ? Icon(Icons.check_rounded, color: scheme.onSurface) : const SizedBox.shrink();
+    Widget check(bool on) => on
+        ? Icon(Icons.check_rounded, color: scheme.onSurface)
+        : const SizedBox.shrink();
     final edge = BorderSide(color: scheme.outline, width: AppSizes.edge);
 
     return DraggableScrollableSheet(
@@ -85,7 +90,7 @@ class _CityPickerState extends State<_CityPicker> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  l10n.locationTitle,
+                  widget.title ?? l10n.locationTitle,
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: AppSizes.space12),
