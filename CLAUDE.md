@@ -180,6 +180,13 @@ Dev-only shortcuts that must be reverted before release are listed in
 `POSSIBLE_ERRORS.md` section 9 (e.g. `AppConfig.useFixedDevLocation`).
 Add any new dev shortcut there too.
 
+## Architecture map
+`docs/architecture-map.html` (open in a browser): every system as a station,
+every user journey (sign-up, new trip, invite, swipe, receipt scan, near-me,
+journal, city import, hidden-gem tip, day plan, login) as an animated line.
+Written in German for the owner and new team members. When you add a system
+or change a journey, update its `S` / `LINES` entries there too.
+
 ## Review skills
 - `/flutter-review` — Dart code rules check
 - `/firestore-review` — rules vs model field names

@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="de">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Interactive architecture map. Open in a browser. Keep stations (S) and journeys (LINES) in sync with the code. -->
+<title>TripFam Netzplan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a transit map of the app's systems; lines are user journeys, a train rides each one step by step. */
+:root {
+  --bg: #EDF1F5; --grid: rgba(30, 50, 90, .07); --ink: #14213A; --muted: #56637C;
+  --zone: rgba(255, 255, 255, .62); --zone-line: #B5C0D2; --card: #FFFFFF; --card-line: #D3DAE5;
+  --station: #FFFFFF; --accent: #D9483E; --go: #15A04A;
+  --l-login: #3B6FD8; --l-near: #1C9A66; --l-swipe: #D9483E; --l-receipt: #B9850A; --l-invite: #8A4FD8;
+  --l-journal: #0C8A9E; --l-import: #8B5E3C; --l-tip: #C93F88; --l-map: #4B5A73;
+  --display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --go: #4ADE80; --bg: #0D1420; --grid: rgba(160, 190, 240, .06); --ink: #E7ECF5; --muted: #95A2BA;
+  --zone: rgba(255, 255, 255, .03); --zone-line: #2C3A52; --card: #141D2C; --card-line: #26334A;
+  --station: #0D1420; --accent: #FF7A6E;
+  --l-login: #7FA6FF; --l-near: #4CD69A; --l-swipe: #FF8077; --l-receipt: #F2C14E; --l-invite: #B98CFF;
+  --l-journal: #4CC9DC; --l-import: #CF9C72; --l-tip: #F27DB8; --l-map: #A7B4CC; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --go: #4ADE80; --bg: #0D1420; --grid: rgba(160, 190, 240, .06); --ink: #E7ECF5; --muted: #95A2BA;
+  --zone: rgba(255, 255, 255, .03); --zone-line: #2C3A52; --card: #141D2C; --card-line: #26334A;
+  --station: #0D1420; --accent: #FF7A6E;
+  --l-login: #7FA6FF; --l-near: #4CD69A; --l-swipe: #FF8077; --l-receipt: #F2C14E; --l-invite: #B98CFF;
+  --l-journal: #4CC9DC; --l-import: #CF9C72; --l-tip: #F27DB8; --l-map: #A7B4CC; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font: 16px/1.5 var(--body);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.wrap { max-width: 1440px; margin: 0 auto; padding-block: 28px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; margin-bottom: 18px; }
+h1 { font: 800 clamp(28px, 4vw, 44px)/1.05 var(--display); margin: 0; letter-spacing: -.01em; text-wrap: balance; }
+h1 span { color: var(--accent); }
+.sub { color: var(--muted); margin: 6px 0 0; max-width: 60ch; }
+.stamps { font: 500 13px var(--mono); color: var(--muted); border: 1.5px dashed var(--zone-line); border-radius: 999px; padding: 6px 14px; white-space: nowrap; }
+.stamps b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.lines { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.chip { display: inline-flex; align-items: center; gap: 8px; font: 700 14px var(--body); color: var(--ink);
+  background: var(--card); border: 1.5px solid var(--card-line); border-radius: 999px; padding: 6px 14px 6px 6px; cursor: pointer; }
+.chip i { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font: 700 12px var(--mono); font-style: normal; color: var(--bg); background: var(--c); }
+.chip[aria-pressed="true"] { border-color: var(--c); box-shadow: 0 0 0 2px var(--c) inset; }
+.chip:focus-visible, .ctrl:focus-visible, .st:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; align-items: start; }
+@media (max-width: 980px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.map { overflow-x: auto; border-radius: 18px; }
+svg { display: block; width: 100%; min-width: 860px; height: auto; }
+.zone rect { fill: var(--zone); stroke: var(--zone-line); stroke-width: 1.5; stroke-dasharray: 6 5; }
+.zone text { font: 500 12px var(--mono); letter-spacing: .08em; fill: var(--muted); text-transform: uppercase; }
+.track { fill: none; stroke-linecap: round; stroke-linejoin: round; transition: opacity .3s, stroke-width .3s; }
+.st { cursor: pointer; }
+.st circle { fill: var(--station); stroke: var(--ink); stroke-width: 3.5; transition: opacity .3s; }
+.st .name { font: 700 14px var(--body); fill: var(--ink); text-anchor: middle; }
+.st .tech { font: 500 10.5px var(--mono); fill: var(--muted); text-anchor: middle; }
+.st.dim { opacity: .35; }
+.st.on circle { stroke: var(--c); stroke-width: 5; }
+.st .stamp { fill: var(--accent); opacity: 0; }
+.st.seen .stamp { opacity: 1; }
+.st:hover circle { stroke-width: 6; }
+.train { transition: none; }
+.arrow { fill: none; stroke: var(--go); stroke-width: 3.5; stroke-dasharray: 9 7; stroke-linecap: round; animation: flow 1s linear infinite; transition: opacity .3s; }
+@keyframes flow { to { stroke-dashoffset: -32; } }
+.arrow.drawing { animation: none; }
+.badge circle { fill: var(--go); stroke: var(--card); stroke-width: 3; } .badge text { font: 700 13px var(--mono); fill: var(--bg); text-anchor: middle; }
+.badge { animation: pop .35s ease-out; } @keyframes pop { from { opacity: 0; transform: scale(.4); } }
+.badge { transform-box: fill-box; transform-origin: center; }
+@media (prefers-reduced-motion: reduce) { .badge { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .arrow { animation: none; } }
+.panel { display: grid; gap: 14px; }
+.card { background: var(--card); border: 1.5px solid var(--card-line); border-radius: 16px; padding: 18px; }
+.eyebrow { font: 500 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+.card h2 { font: 800 22px/1.15 var(--display); margin: 0 0 8px; text-wrap: balance; }
+.card p { margin: 0; }
+.step-at { display: flex; align-items: center; gap: 8px; font-weight: 700; margin-bottom: 6px; }
+.step-at i { width: 12px; height: 12px; border-radius: 50%; border: 3px solid var(--c); }
+.dots { display: flex; gap: 6px; margin: 14px 0; flex-wrap: wrap; }
+.dots span { width: 22px; height: 6px; border-radius: 3px; background: var(--card-line); }
+.dots span.done { background: var(--c); }
+.ctrls { display: flex; gap: 8px; }
+.ctrl { flex: 1; font: 700 14px var(--body); padding: 10px 8px; border-radius: 12px; border: 1.5px solid var(--card-line); background: transparent; color: var(--ink); cursor: pointer; }
+.ctrl.main { background: var(--c); border-color: var(--c); color: var(--bg); }
+.ctrl:disabled { opacity: .4; cursor: default; }
+dl { margin: 12px 0 0; display: grid; gap: 10px; }
+dt { font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+dd { margin: 2px 0 0; }
+code { font: 500 13px var(--mono); overflow-wrap: anywhere; }
+.cost { display: inline-block; font: 700 12px var(--mono); padding: 2px 10px; border-radius: 999px; border: 1.5px solid currentColor; }
+.cost.free { color: var(--l-near); } .cost.cheap { color: var(--l-receipt); } .cost.pay { color: var(--accent); }
+.hint { color: var(--muted); font-size: 14px; margin-top: 10px; }
+@media (prefers-reduced-motion: reduce) { .track, .st circle { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>So fährt <span>TripFam</span></h1>
+      <p class="sub">Jede Station ist ein System, jede Linie ein Ablauf in der App. Wähl eine Aktion und fahr sie Schritt für Schritt ab: Die grünen Pfeile zeigen, was in welcher Reihenfolge angesprochen wird. Tipp auf eine Station, um zu sehen, was sie macht und was sie kostet.</p>
+    </div>
+    <div class="stamps" id="stamps">Stationen besucht <b>0/23</b></div>
+  </header>
+  <nav class="lines" id="lines" aria-label="Linien"></nav>
+  <div class="grid">
+    <div class="map"><svg id="map" viewBox="0 0 1200 720" role="img" aria-label="Netzplan der TripFam-Systeme"></svg></div>
+    <div class="panel">
+      <section class="card" id="ride" aria-live="polite"></section>
+      <section class="card" id="info"></section>
+    </div>
+  </div>
+</div>
+
+<script>
+const ZONES = [
+  { x: 16, w: 228, label: "Dein Mac · Import" },
+  { x: 268, w: 300, label: "Dein Handy · die App" },
+  { x: 592, w: 360, label: "Google Firebase" },
+  { x: 976, w: 208, label: "Weitere Dienste" },
+];
+const S = {
+  osm:      { x: 130, y: 150, n: "OpenStreetMap", t: "freie Weltkarte", what: "Die freie Weltkarte, gepflegt von Freiwilligen. Daher kommen Sehenswürdigkeiten, Cafés, Bars, Adressen und Öffnungszeiten.", where: "Im Internet, wir laden es nur beim Import.", cost: ["free", "gratis"], code: "tools/city-import", note: "Muss in der App genannt werden (ODbL-Lizenz)." },
+  wikidata: { x: 130, y: 260, n: "Wikidata & Wikimedia", t: "Fakten + Fotos", what: "Namen in vielen Sprachen, Beschreibungen, Wikipedia-Links und freie Fotos mit Urheberangabe.", where: "Im Internet, nur beim Import.", cost: ["free", "gratis"], code: "tools/city-import" },
+  overture: { x: 130, y: 370, n: "Overture Maps", t: "Restaurant-Daten", what: "Offener Datensatz (u. a. von Meta, Microsoft, Foursquare) mit vielen Restaurants und Bars, die in OpenStreetMap fehlen.", where: "Öffentlicher Cloud-Speicher, nur beim Import.", cost: ["free", "gratis"], code: "tools/city-import/scripts/overture.sh" },
+  importer: { x: 130, y: 500, n: "Import-Tool", t: "city-import", what: "Ein kleines Programm auf deinem Mac. Es sammelt die Daten, filtert Schrott raus, rechnet die Beliebtheit aus und baut die Kacheln für „in der Nähe“.", where: "Nur auf deinem Mac, läuft nur wenn wir es starten.", cost: ["free", "gratis"], code: "tools/city-import" },
+  review:   { x: 130, y: 620, n: "Deine Freigabe", t: "du entscheidest", what: "Nichts wird veröffentlicht, ohne dass du Ja sagst. Hier prüfst du Städte und später auch Geheimtipps.", where: "Bei dir.", cost: ["free", "gratis"], code: "tools/city-import (review)" },
+  ui:       { x: 418, y: 150, n: "Bildschirme", t: "Flutter UI", what: "Alles, was du siehst und antippst: Startseite, Swipe-Stapel, Reise, Kosten, Pass.", where: "Auf dem Handy.", cost: ["free", "gratis"], code: "lib/features/*/ui" },
+  logic:    { x: 418, y: 260, n: "Logik", t: "Riverpod", what: "Entscheidet, was passiert. Zum Beispiel ob ein Ort ein Match ist, welche Orte in deiner Nähe zählen oder ob der Geheimtipp-Banner gerade dran ist.", where: "Auf dem Handy.", cost: ["free", "gratis"], code: "lib/features/*/logic" },
+  repo:     { x: 418, y: 370, n: "Datenzugriff", t: "Repositories", what: "Der einzige Teil der App, der mit der Datenbank spricht. So bleibt klar, wo gelesen und geschrieben wird, und das hält die Kosten im Griff.", where: "Auf dem Handy.", cost: ["free", "gratis"], code: "lib/features/*/data" },
+  local:    { x: 418, y: 500, n: "Auf dem Gerät", t: "Cache + Einstellungen", what: "Zwischenspeicher für den Offline-Modus, Sprache, Dark Mode, Heimatstadt und die Banner-Pause.", where: "Auf dem Handy, verlässt es nie.", cost: ["free", "gratis"], code: "lib/core/services" },
+  sensors:  { x: 418, y: 620, n: "Kamera & GPS", t: "Handy-Hardware", what: "Standort für „in der Nähe“ und den Pass-Check-in, Kamera für Kassenzettel und Tagebuch.", where: "Im Handy.", cost: ["free", "gratis"], code: "lib/core/services" },
+  auth:     { x: 680, y: 150, n: "Login", t: "Firebase Auth", what: "Prüft E-Mail und Passwort. Wir sehen Passwörter nie. Auch Gäste bekommen hier eine anonyme Kennung.", where: "Google Cloud.", cost: ["free", "gratis"], code: "lib/features/auth", note: "Gratis bis 50.000 aktive Nutzer im Monat." },
+  appcheck: { x: 864, y: 150, n: "Türsteher", t: "App Check", what: "Lässt nur unsere echte App an die KI. Sonst könnte jemand unseren Zugang kopieren und auf unsere Kosten benutzen.", where: "Google Cloud.", cost: ["free", "gratis"], code: "lib/main.dart" },
+  gemini:   { x: 864, y: 260, n: "Gemini KI", t: "Firebase AI Logic", what: "Liest Kassenzettel Zeile für Zeile aus und übersetzt Fotos im Sprachführer.", where: "Google Cloud.", cost: ["pay", "pro Nutzung"], code: "lib/features/group (Kosten)", note: "Kostet pro Scan einen kleinen Betrag, darum der Türsteher." },
+  firestore:{ x: 700, y: 330, r: 20, n: "Datenbank", t: "Firestore", what: "Das Herz: Nutzer, Reisen, Stimmen, Ausgaben, Tagebuch, Orte und Kacheln. Jedes Lesen und Schreiben wird gezählt.", where: "Google Cloud.", cost: ["cheap", "pro Lesen/Schreiben"], code: "firestore.rules", note: "Größter Kostenhebel. Deshalb Kacheln statt tausender Einzel-Orte." },
+  storage:  { x: 680, y: 500, n: "Foto-Speicher", t: "Firebase Storage", what: "Die Fotos aus dem Reisetagebuch. Nur Mitglieder der Reise kommen ran.", where: "Google Cloud.", cost: ["cheap", "pro GB"], code: "storage.rules" },
+  functions:{ x: 864, y: 430, n: "Push-Funktionen", t: "Cloud Functions", what: "Kleine Programme in der Cloud. Sie merken, wenn etwas passiert (Match, neues Mitglied, Ausgabe, Tagebuch) und stoßen die Push-Nachricht an.", where: "Google Cloud.", cost: ["cheap", "pro Aufruf"], code: "functions/push.js" },
+  hosting:  { x: 864, y: 600, n: "Einladungs-Webseite", t: "Firebase Hosting", what: "Die Webseite hinter dem Einladungslink. Sie zeigt die Reise und schickt Freunde in die App oder in den App Store.", where: "Google Cloud.", cost: ["free", "gratis"], code: "web_invite/" },
+  mapbox:   { x: 1080, y: 150, n: "Mapbox", t: "Karten", what: "Zeichnet alle Karten in der App: Tagespläne, Favoriten-Karte.", where: "Mapbox-Server.", cost: ["cheap", "Gratis-Kontingent"], code: "lib/common/widgets/places_map.dart" },
+  r2:       { x: 1080, y: 300, n: "Ortsfotos", t: "Cloudflare R2", what: "Die Fotos aller Orte, vom Import-Tool verkleinert. Abrufen kostet nichts.", where: "Cloudflare.", cost: ["free", "fast gratis"], code: "tools/city-import", note: "Rund 2 GB von 10 GB Gratis-Speicher." },
+  fcm:      { x: 1080, y: 450, n: "Push-Zustellung", t: "Apple & Google", what: "Apple und Google bringen Push-Nachrichten aufs Handy. Android läuft, iPhone braucht noch den Apple-Developer-Account.", where: "Apple und Google.", cost: ["free", "gratis"], code: "lib/core/services" },
+  friends:  { x: 1080, y: 600, n: "Mitreisende", t: "die anderen Handys", what: "Die TripFam-Apps deiner Freunde. Sie sehen Stimmen, Ausgaben und Tagebuch der gemeinsamen Reise.", where: "Deren Handys.", cost: ["free", "gratis"], code: "" },
+  photosrc: null,
+};
+delete S.photosrc;
+const LINES = [
+  { id: "signup", c: "--l-login", n: "Neu registrieren", steps: [
+    ["ui", "Du gibst Name, E-Mail und Passwort ein."],
+    ["logic", "Die App prüft die Eingaben, z. B. ob das Passwort lang genug ist."],
+    ["auth", "Firebase legt dein Konto an. Das Passwort sieht nur Firebase."],
+    ["repo", "Der Datenzugriff legt dein Profil an."],
+    ["firestore", "Dein Profil wird gespeichert: Name, noch keine Reisen, keine Favoriten."],
+    ["local", "Die App merkt sich, dass das Onboarding erledigt ist."],
+    ["ui", "Du landest bei „Reisen“."] ] },
+  { id: "trip", c: "--l-receipt", n: "Neue Reise", steps: [
+    ["ui", "Du gibst Ziel, Name und Datum ein."],
+    ["logic", "Die App baut daraus die Reise, du bist das erste Mitglied."],
+    ["repo", "Der Datenzugriff schickt sie los."],
+    ["firestore", "Die Reise wird gespeichert, mit Einladungscode."],
+    ["friends", "Noch niemand sonst ist dabei. Dafür gibt es „Leute hinzufügen“."],
+    ["ui", "Die Reise erscheint bei dir unter „Reisen“."] ] },
+  { id: "near", c: "--l-near", n: "Orte in der Nähe", steps: [
+    ["sensors", "Das Handy kennt deinen Standort."],
+    ["logic", "Die App rechnet aus, in welchen 5-km-Kacheln du stehst: deine und die 8 drumherum."],
+    ["repo", "Der Datenzugriff fragt genau diese 9 Kacheln an."],
+    ["firestore", "9 Lesevorgänge statt tausender einzelner Orte. Das spart richtig Geld."],
+    ["local", "Die Kacheln bleiben im Zwischenspeicher, beim nächsten Öffnen kostet es nichts."],
+    ["r2", "Die Fotos kommen von Cloudflare R2, Abrufen ist gratis."],
+    ["ui", "Du siehst die Orte, sortiert nach Beliebtheit und Nähe."] ] },
+  { id: "swipe", c: "--l-swipe", n: "Gemeinsam swipen", steps: [
+    ["ui", "Du wischst einen Ort nach rechts."],
+    ["repo", "Deine Stimme wird verschickt."],
+    ["firestore", "Sie landet in deinem eigenen Dokument. Nur du darfst es ändern."],
+    ["friends", "Die Apps der anderen sehen deine Stimme sofort."],
+    ["logic", "Jedes Handy rechnet selbst: Mögen es alle? Dann ist es ein Match."],
+    ["functions", "Eine Cloud-Funktion bemerkt das neue Match."],
+    ["fcm", "Apple bzw. Google stellen die Push-Nachricht zu."],
+    ["friends", "Alle bekommen: Neues Match auf der Wunschliste."] ] },
+  { id: "receipt", c: "--l-receipt", n: "Kassenzettel scannen", steps: [
+    ["sensors", "Du fotografierst den Kassenzettel."],
+    ["appcheck", "Der Türsteher prüft: Ist das wirklich unsere App?"],
+    ["gemini", "Gemini liest Positionen, Preise und Trinkgeld aus."],
+    ["ui", "Jeder tippt an, was er hatte."],
+    ["firestore", "Die Ausgabe wird in der Reise gespeichert, die Aufteilung rechnet die App."],
+    ["functions", "Eine Funktion schickt den anderen Bescheid."],
+    ["fcm", "Die Push-Nachricht geht raus."],
+    ["friends", "Alle sehen die neue Ausgabe."] ] },
+  { id: "invite", c: "--l-invite", n: "Leute hinzufügen", steps: [
+    ["ui", "Du teilst den Einladungslink."],
+    ["firestore", "Ein Einladungscode wird gespeichert."],
+    ["hosting", "Der Link öffnet die Einladungs-Webseite."],
+    ["friends", "Die eingeladene Person öffnet die App oder lädt sie herunter."],
+    ["auth", "Sie meldet sich an."],
+    ["firestore", "Mit dem Code tritt sie der Reise bei."],
+    ["functions", "Eine Funktion merkt: neues Mitglied."],
+    ["fcm", "Die Push-Nachricht geht raus."],
+    ["ui", "Du bekommst Bescheid."] ] },
+  { id: "journal", c: "--l-journal", n: "Reisetagebuch", steps: [
+    ["sensors", "Du machst ein Foto oder wählst eins aus."],
+    ["logic", "Die App verkleinert es vor dem Hochladen."],
+    ["storage", "Das Foto kommt in den Foto-Speicher."],
+    ["firestore", "Text, Tag und Foto-Link werden gespeichert."],
+    ["functions", "Eine Funktion schickt den anderen Bescheid."],
+    ["fcm", "Die Push-Nachricht geht raus."],
+    ["friends", "Alle sehen den neuen Eintrag."] ] },
+  { id: "import", c: "--l-import", n: "Neue Stadt", steps: [
+    ["osm", "Sehenswürdigkeiten, Cafés und Bars aus OpenStreetMap."],
+    ["wikidata", "Namen, Beschreibungen und freie Fotos."],
+    ["overture", "Zusätzliche Restaurants und Bars."],
+    ["importer", "Das Import-Tool filtert, bewertet und baut die Kacheln."],
+    ["review", "Du gibst die Stadt frei."],
+    ["r2", "Die Fotos werden verkleinert und nach R2 hochgeladen."],
+    ["firestore", "Orte und Kacheln landen in der Datenbank. Ab jetzt sieht jeder die Stadt."] ] },
+  { id: "tip", c: "--l-tip", n: "Geheimtipp", steps: [
+    ["local", "Die App kennt deine Heimatstadt und ob der Banner gerade Pause hat."],
+    ["ui", "Der Banner fragt: Kennst du einen Geheimtipp?"],
+    ["auth", "Nur angemeldete Nutzer dürfen Tipps schicken, keine Gäste."],
+    ["firestore", "Der Tipp wird privat gespeichert, nur du und wir sehen ihn."],
+    ["local", "Der Banner macht 30 Tage Pause."],
+    ["review", "Später: Du prüfst die Tipps und nimmst gute in die Stadt auf."] ] },
+  { id: "map", c: "--l-map", n: "Tagesplan", steps: [
+    ["ui", "Du öffnest einen Tag deiner Reise."],
+    ["repo", "Der Plan wird geladen."],
+    ["firestore", "Die Orte des Tages kommen aus der Reise."],
+    ["mapbox", "Mapbox zeichnet die Karte mit der Route."],
+    ["ui", "Du siehst deinen Tag auf der Karte."] ] },
+  { id: "login", c: "--l-login", n: "Anmelden", steps: [
+    ["ui", "Du gibst E-Mail und Passwort ein."],
+    ["auth", "Firebase prüft das Passwort. Wir sehen es nie."],
+    ["firestore", "Dein Profil wird geladen: Name, Favoriten, Reisen."],
+    ["local", "Einiges wird auf dem Handy gemerkt, damit es offline geht."],
+    ["ui", "Du bist drin."] ] },
+];
+
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById("map");
+const el = (tag, attrs = {}, parent = svg) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+const store = { get() { try { return JSON.parse(localStorage.getItem("tf-seen") || "[]"); } catch { return []; } },
+  set(v) { try { localStorage.setItem("tf-seen", JSON.stringify(v)); } catch {} } };
+const seen = new Set(store.get());
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function seg(a, b, o) {
+  const ax = a.x + o, ay = a.y + o, bx = b.x + o, by = b.y + o;
+  if (Math.abs(ax - bx) < 1 || Math.abs(ay - by) < 1) return `M${ax} ${ay}L${bx} ${by}`;
+  const mx = (ax + bx) / 2, sx = Math.sign(bx - ax), sy = Math.sign(by - ay);
+  const r = Math.min(18, Math.abs(bx - ax) / 2, Math.abs(by - ay) / 2);
+  return `M${ax} ${ay}H${mx - sx * r}Q${mx} ${ay} ${mx} ${ay + sy * r}V${by - sy * r}Q${mx} ${by} ${mx + sx * r} ${by}H${bx}`;
+}
+
+ZONES.forEach(z => { const g = el("g", { class: "zone" }); el("rect", { x: z.x, y: 56, width: z.w, height: 648, rx: 20 }, g);
+  el("text", { x: z.x + 16, y: 84 }, g).textContent = z.label; });
+
+const tracks = el("g");
+LINES.forEach((l, i) => {
+  l.o = (i - 4) * 2.5;
+  l.segs = l.steps.slice(1).map((s, k) => seg(S[l.steps[k][0]], S[s[0]], l.o));
+  l.path = el("path", { class: "track", d: l.segs.join(""), style: `stroke:var(${l.c})`, "stroke-width": 3 }, tracks);
+});
+
+const marker = el("marker", { id: "arr", viewBox: "0 0 10 10", refX: 21, refY: 5, markerWidth: 14, markerHeight: 14, markerUnits: "userSpaceOnUse", orient: "auto" }, el("defs"));
+el("path", { d: "M0 0L10 5L0 10z", fill: "var(--go)" }, marker);
+const arrows = el("g");
+const dur = len => Math.min(1400, 500 + len * 1.2);
+// Only hops already travelled get an arrow; the newest one grows with the train.
+function drawArrows(animate) {
+  arrows.innerHTML = ""; badges.innerHTML = "";
+  line.segs.slice(0, step).forEach((d, k) => {
+    const p = el("path", { d, class: "arrow", "marker-end": "url(#arr)" }, arrows);
+    const len = p.getTotalLength();
+    const badge = () => {
+      const m = p.getPointAtLength(len * .35);
+      const b = el("g", { class: "badge" }, badges);
+      el("circle", { cx: m.x, cy: m.y, r: 12 }, b);
+      el("text", { x: m.x, y: m.y + 4.5 }, b).textContent = k + 1;
+    };
+    if (!(animate && k === step - 1) || reduce) return badge();
+    p.classList.add("drawing"); p.removeAttribute("marker-end");
+    p.style.strokeDasharray = `${len} ${len}`;
+    const a = p.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }], { duration: dur(len), easing: "ease-in-out" });
+    a.onfinish = () => { p.classList.remove("drawing"); p.style.strokeDasharray = ""; p.setAttribute("marker-end", "url(#arr)"); badge(); };
+  });
+}
+const stationG = el("g");
+for (const id in S) {
+  const s = S[id], r = s.r || 13;
+  const g = el("g", { class: "st", tabindex: 0, role: "button", "aria-label": s.n }, stationG);
+  el("circle", { cx: s.x, cy: s.y, r }, g);
+  el("circle", { class: "stamp", cx: s.x + r - 2, cy: s.y - r + 2, r: 5 }, g);
+  el("text", { class: "name", x: s.x, y: s.y + r + 20 }, g).textContent = s.n;
+  el("text", { class: "tech", x: s.x, y: s.y + r + 35 }, g).textContent = s.t;
+  s.g = g;
+  const open = () => showInfo(id);
+  g.addEventListener("click", open);
+  g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+}
+const badges = el("g");
+const ghost = el("path", { d: "", fill: "none", stroke: "none" });
+const train = el("g", { class: "train" });
+el("circle", { r: 11, fill: "var(--station)", stroke: "var(--ink)", "stroke-width": 2 }, train);
+const trainDot = el("circle", { r: 6 }, train);
+
+const nav = document.getElementById("lines");
+LINES.forEach((l, i) => {
+  const b = document.createElement("button");
+  b.className = "chip"; b.style.setProperty("--c", `var(${l.c})`); b.setAttribute("aria-pressed", "false");
+  b.innerHTML = `<i>${i + 1}</i>${l.n}`;
+  b.addEventListener("click", () => choose(l.id));
+  nav.appendChild(b); l.btn = b;
+});
+
+let line = null, step = 0, timer = null, anim = null;
+const total = Object.keys(S).length;
+
+function mark(id) { if (!seen.has(id)) { seen.add(id); store.set([...seen]); } S[id].g.classList.add("seen");
+  document.getElementById("stamps").innerHTML = `Stationen besucht <b>${seen.size}/${total}</b>`; }
+seen.forEach(id => S[id] && mark(id));
+
+function costChip(c) { return `<span class="cost ${c[0]}">${c[1]}</span>`; }
+function showInfo(id) {
+  const s = S[id]; mark(id);
+  document.getElementById("info").innerHTML = `<p class="eyebrow">Station · ${s.t}</p><h2>${s.n}</h2><p>${s.what}</p>
+    <dl><div><dt>Wo liegt das?</dt><dd>${s.where}</dd></div><div><dt>Kosten</dt><dd>${costChip(s.cost)}${s.note ? `<div class="hint">${s.note}</div>` : ""}</dd></div>
+    ${s.code ? `<div><dt>Im Code</dt><dd><code>${s.code}</code></dd></div>` : ""}</dl>`;
+}
+
+function placeTrain(x, y) { train.setAttribute("transform", `translate(${x} ${y})`); }
+function moveTrain(d, done) {
+  cancelAnimationFrame(anim);
+  ghost.setAttribute("d", d); const len = ghost.getTotalLength();
+  if (reduce || !len) { const p = ghost.getPointAtLength(len); placeTrain(p.x, p.y); return done && done(); }
+  const t0 = performance.now(), ms = dur(len);
+  const tick = now => { const k = Math.min(1, (now - t0) / ms), e = k < .5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2;
+    const p = ghost.getPointAtLength(len * e); placeTrain(p.x, p.y);
+    if (k < 1) anim = requestAnimationFrame(tick); else done && done(); };
+  anim = requestAnimationFrame(tick);
+}
+
+function choose(id) {
+  stop(); line = LINES.find(l => l.id === id); step = 0;
+  LINES.forEach(l => { const on = l === line; l.btn.setAttribute("aria-pressed", on);
+    l.path.style.opacity = on ? .35 : .1; l.path.setAttribute("stroke-width", on ? 5 : 3); });
+  tracks.appendChild(line.path);
+  const used = new Set(line.steps.map(s => s[0]));
+  for (const sid in S) { S[sid].g.classList.toggle("dim", !used.has(sid)); S[sid].g.classList.toggle("on", used.has(sid));
+    S[sid].g.style.setProperty("--c", `var(${line.c})`); }
+  trainDot.setAttribute("fill", `var(${line.c})`);
+  const s0 = S[line.steps[0][0]]; placeTrain(s0.x + line.o, s0.y + line.o);
+  render();
+}
+function go(n) {
+  if (!line || n < 0 || n >= line.steps.length || n === step) return;
+  const forward = n === step + 1;
+  if (forward) moveTrain(line.segs[step]);
+  else { const s = S[line.steps[n][0]]; placeTrain(s.x + line.o, s.y + line.o); }
+  step = n; render(forward);
+}
+function play() {
+  if (timer) return stop();
+  if (step === line.steps.length - 1) choose(line.id);
+  timer = setInterval(() => { if (step >= line.steps.length - 1) return stop(); go(step + 1); }, reduce ? 2600 : 2400);
+  render();
+}
+function stop() { clearInterval(timer); timer = null; if (line) render(); }
+function render(animate) {
+  const [sid, text] = line.steps[step], last = line.steps.length - 1;
+  const ride = document.getElementById("ride");
+  ride.style.setProperty("--c", `var(${line.c})`);
+  ride.innerHTML = `<p class="eyebrow">Linie ${LINES.indexOf(line) + 1} · Schritt ${step + 1} von ${last + 1}</p>
+    <h2>${line.n}</h2><div class="step-at"><i></i>${S[sid].n}</div><p>${text}</p>
+    <div class="dots">${line.steps.map((_, k) => `<span class="${k <= step ? "done" : ""}"></span>`).join("")}</div>
+    <div class="ctrls"><button class="ctrl" id="back" ${step === 0 ? "disabled" : ""}>Zurück</button>
+    <button class="ctrl main" id="play">${timer ? "Pause" : step === last ? "Nochmal" : "Abfahren"}</button>
+    <button class="ctrl" id="next" ${step === last ? "disabled" : ""}>Weiter</button></div>`;
+  ride.querySelector("#back").onclick = () => { stop(); go(step - 1); };
+  ride.querySelector("#next").onclick = () => { stop(); go(step + 1); };
+  ride.querySelector("#play").onclick = play;
+  showInfo(sid);
+  drawArrows(animate);
+}
+choose("signup");
+</script>
