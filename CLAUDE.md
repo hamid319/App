@@ -131,7 +131,7 @@ Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so
 Built and on `main`: trips with invites (web invite page in `web_invite/` on
 Firebase Hosting), group swipe and wishlist, add to trip, day plans on
 Mapbox, costs (edit/delete), offline mode, journal with photos and trip
-recap, TripFam Pass with stamps, GPS check-in on site and sharing (profile), the trip's group
+recap, stamp book (EN "Stamps", DE "Stempelheft"), GPS check-in on site and sharing (profile), the trip's group
 swipe deck with super-like, one veto per member and matches on the
 wishlist, password reset, onboarding, dark mode, account deletion, iOS
 privacy manifest.

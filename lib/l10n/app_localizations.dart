@@ -191,7 +191,7 @@ abstract class AppLocalizations {
   /// No description provided for @checkInReminderBody.
   ///
   /// In en, this message translates to:
-  /// **'Open TripFam and get your passport stamp.'**
+  /// **'Open TripFam and get your stamp.'**
   String get checkInReminderBody;
 
   /// No description provided for @checkInTitle.
@@ -215,13 +215,13 @@ abstract class AppLocalizations {
   /// No description provided for @checkInOpenPass.
   ///
   /// In en, this message translates to:
-  /// **'See it in your TripFam Pass'**
+  /// **'See it in your Stamps'**
   String get checkInOpenPass;
 
   /// No description provided for @checkInDone.
   ///
   /// In en, this message translates to:
-  /// **'Stamped! {city} is now in your pass.'**
+  /// **'Stamped! {city} is now in your Stamps.'**
   String checkInDone(String city);
 
   /// No description provided for @checkInTooFar.
@@ -3857,19 +3857,19 @@ abstract class AppLocalizations {
   /// No description provided for @passportTitle.
   ///
   /// In en, this message translates to:
-  /// **'TripFam Pass'**
+  /// **'Stamps'**
   String get passportTitle;
 
   /// No description provided for @passportCoverTitle.
   ///
   /// In en, this message translates to:
-  /// **'TRIPFAM PASS'**
+  /// **'STAMPS'**
   String get passportCoverTitle;
 
   /// No description provided for @passportCoverSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'YOUR TRAVEL STAMPS'**
+  /// **'YOUR TRAVELS'**
   String get passportCoverSubtitle;
 
   /// No description provided for @passportDataName.
@@ -3887,7 +3887,7 @@ abstract class AppLocalizations {
   /// No description provided for @passportDataNumber.
   ///
   /// In en, this message translates to:
-  /// **'Passport no.'**
+  /// **'No.'**
   String get passportDataNumber;
 
   /// No description provided for @passportDataCountries.
@@ -3911,7 +3911,7 @@ abstract class AppLocalizations {
   /// No description provided for @passportShareTitle.
   ///
   /// In en, this message translates to:
-  /// **'My TripFam Pass'**
+  /// **'My Stamps'**
   String get passportShareTitle;
 
   /// No description provided for @passportShareStats.
@@ -4763,7 +4763,7 @@ abstract class AppLocalizations {
   /// No description provided for @suitcaseEarnCity.
   ///
   /// In en, this message translates to:
-  /// **'New city in your passport'**
+  /// **'New city in your Stamps'**
   String get suitcaseEarnCity;
 
   /// No description provided for @suitcaseEarnCheckIn.

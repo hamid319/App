@@ -77,11 +77,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get checkInStamped => 'Gestempelt';
 
   @override
-  String get checkInOpenPass => 'In deinem TripFam Pass ansehen';
+  String get checkInOpenPass => 'In deinem Stempelheft ansehen';
 
   @override
   String checkInDone(String city) {
-    return 'Gestempelt! $city ist jetzt in deinem Pass.';
+    return 'Gestempelt! $city ist jetzt in deinem Stempelheft.';
   }
 
   @override
@@ -2213,10 +2213,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get journalAddShort => 'Eintrag';
 
   @override
-  String get passportTitle => 'TripFam Pass';
+  String get passportTitle => 'Stempelheft';
 
   @override
-  String get passportCoverTitle => 'TRIPFAM PASS';
+  String get passportCoverTitle => 'STEMPELHEFT';
 
   @override
   String get passportCoverSubtitle => 'DEINE REISESTEMPEL';
@@ -2228,7 +2228,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get passportDataSince => 'Mitglied seit';
 
   @override
-  String get passportDataNumber => 'Pass-Nr.';
+  String get passportDataNumber => 'Heft-Nr.';
 
   @override
   String get passportDataCountries => 'Länder';
@@ -2240,7 +2240,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get passportShare => 'Seite teilen';
 
   @override
-  String get passportShareTitle => 'Mein TripFam Pass';
+  String get passportShareTitle => 'Mein Stempelheft';
 
   @override
   String passportShareStats(int countries, int cities) {
@@ -2818,7 +2818,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get suitcaseEarnTrip => 'Reise geplant oder beigetreten';
 
   @override
-  String get suitcaseEarnCity => 'Neue Stadt im Pass';
+  String get suitcaseEarnCity => 'Neue Stadt im Stempelheft';
 
   @override
   String get suitcaseEarnCheckIn => 'Check-in vor Ort';

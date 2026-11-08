@@ -61,7 +61,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get checkInReminderBody => 'Open TripFam and get your passport stamp.';
+  String get checkInReminderBody => 'Open TripFam and get your stamp.';
 
   @override
   String get checkInTitle => 'Get your stamp';
@@ -75,11 +75,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkInStamped => 'Stamped';
 
   @override
-  String get checkInOpenPass => 'See it in your TripFam Pass';
+  String get checkInOpenPass => 'See it in your Stamps';
 
   @override
   String checkInDone(String city) {
-    return 'Stamped! $city is now in your pass.';
+    return 'Stamped! $city is now in your Stamps.';
   }
 
   @override
@@ -2180,13 +2180,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journalAddShort => 'Entry';
 
   @override
-  String get passportTitle => 'TripFam Pass';
+  String get passportTitle => 'Stamps';
 
   @override
-  String get passportCoverTitle => 'TRIPFAM PASS';
+  String get passportCoverTitle => 'STAMPS';
 
   @override
-  String get passportCoverSubtitle => 'YOUR TRAVEL STAMPS';
+  String get passportCoverSubtitle => 'YOUR TRAVELS';
 
   @override
   String get passportDataName => 'Name';
@@ -2195,7 +2195,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passportDataSince => 'Member since';
 
   @override
-  String get passportDataNumber => 'Passport no.';
+  String get passportDataNumber => 'No.';
 
   @override
   String get passportDataCountries => 'Countries';
@@ -2207,7 +2207,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passportShare => 'Share page';
 
   @override
-  String get passportShareTitle => 'My TripFam Pass';
+  String get passportShareTitle => 'My Stamps';
 
   @override
   String passportShareStats(int countries, int cities) {
@@ -2783,7 +2783,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get suitcaseEarnTrip => 'Trip planned or joined';
 
   @override
-  String get suitcaseEarnCity => 'New city in your passport';
+  String get suitcaseEarnCity => 'New city in your Stamps';
 
   @override
   String get suitcaseEarnCheckIn => 'Check-in on site';
