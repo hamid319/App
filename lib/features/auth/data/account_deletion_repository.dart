@@ -100,7 +100,13 @@ class AccountDeletionRepository {
     Map<String, dynamic> group,
   ) async {
     await _deleteJournal(groupRef);
-    for (final name in const ['ideas', 'polls', 'expenses', 'swipes']) {
+    for (final name in const [
+      'ideas',
+      'polls',
+      'expenses',
+      'claims',
+      'swipes'
+    ]) {
       await _deleteDocs(await groupRef.collection(name).get());
     }
     // Swipe rounds of earlier versions.

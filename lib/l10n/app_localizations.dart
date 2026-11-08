@@ -4291,6 +4291,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show less'**
   String get wishlistShowLess;
+
+  /// No description provided for @receiptScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan receipt'**
+  String get receiptScan;
+
+  /// No description provided for @receiptScanSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone takes what they had'**
+  String get receiptScanSubtitle;
+
+  /// No description provided for @receiptTakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get receiptTakePhoto;
+
+  /// No description provided for @receiptFromLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from photos'**
+  String get receiptFromLibrary;
+
+  /// No description provided for @receiptReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the receipt …'**
+  String get receiptReading;
+
+  /// No description provided for @receiptNotReadable.
+  ///
+  /// In en, this message translates to:
+  /// **'No receipt found in this photo. Try a sharper photo of the whole receipt.'**
+  String get receiptNotReadable;
+
+  /// No description provided for @receiptLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'You scanned {count} receipts today. Try again tomorrow.'**
+  String receiptLimit(int count);
+
+  /// No description provided for @receiptScanError.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt could not be read. Check your connection and try again.'**
+  String get receiptScanError;
+
+  /// No description provided for @receiptCheckTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check receipt'**
+  String get receiptCheckTitle;
+
+  /// No description provided for @receiptForAll.
+  ///
+  /// In en, this message translates to:
+  /// **'For all'**
+  String get receiptForAll;
+
+  /// No description provided for @receiptForAllHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark what everyone shares, like bread or tax. Everyone takes the rest themselves.'**
+  String get receiptForAllHint;
+
+  /// No description provided for @receiptAddLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Add line'**
+  String get receiptAddLine;
+
+  /// No description provided for @receiptLineNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What?'**
+  String get receiptLineNameHint;
+
+  /// No description provided for @receiptTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax'**
+  String get receiptTax;
+
+  /// No description provided for @receiptTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip'**
+  String get receiptTip;
+
+  /// No description provided for @receiptTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get receiptTotal;
+
+  /// No description provided for @receiptMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The lines add up to {lines}, the receipt says {receipt}.'**
+  String receiptMismatch(String lines, String receipt);
+
+  /// No description provided for @receiptForeignTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt is in {currency} ({total}). How much did you pay in euros?'**
+  String receiptForeignTitle(String currency, String total);
+
+  /// No description provided for @receiptEuroHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid in euros'**
+  String get receiptEuroHint;
+
+  /// No description provided for @receiptEuroMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter what you paid in euros.'**
+  String get receiptEuroMissing;
+
+  /// No description provided for @receiptNoLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one line.'**
+  String get receiptNoLines;
+
+  /// No description provided for @receiptYourShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Your share'**
+  String get receiptYourShare;
+
+  /// No description provided for @receiptPaidByName.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid by {name}'**
+  String receiptPaidByName(String name);
+
+  /// No description provided for @receiptToClaim.
+  ///
+  /// In en, this message translates to:
+  /// **'Take what you had'**
+  String get receiptToClaim;
+
+  /// No description provided for @receiptSharedByAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared by all'**
+  String get receiptSharedByAll;
+
+  /// No description provided for @receiptUnclaimedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Lines nobody takes are shared by all.'**
+  String get receiptUnclaimedNote;
+
+  /// No description provided for @receiptOpenLines.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{All lines taken} =1{1 line open} other{{count} lines open}}'**
+  String receiptOpenLines(int count);
+
+  /// No description provided for @receiptTakenBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Taken by {names}'**
+  String receiptTakenBy(String names);
+
+  /// No description provided for @receiptNotParticipant.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not part of this receipt.'**
+  String get receiptNotParticipant;
 }
 
 class _AppLocalizationsDelegate

@@ -15,6 +15,7 @@ import '../../../common/models/trip_plan.dart';
 import '../../../common/models/trip_poll.dart';
 import '../../../common/models/user_model.dart';
 import '../../../common/utils/day_route.dart';
+import '../../../common/utils/expense_split.dart';
 import '../../../common/utils/group_swipes.dart';
 import '../../../common/utils/passport_stamps.dart';
 import '../../../common/utils/trip_days.dart';
@@ -25,6 +26,7 @@ import '../../../main_providers.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../swipe/data/places_repository.dart';
 import '../data/journal_repository.dart';
+import '../data/receipt_scan_repository.dart';
 import '../data/trip_repository.dart';
 import 'group_controller.dart';
 
@@ -96,6 +98,14 @@ final tripPollsProvider = StreamProvider.autoDispose
 final tripExpensesProvider = StreamProvider.autoDispose
     .family<List<TripExpense>, String>((ref, groupId) =>
         ref.watch(tripRepositoryProvider).streamExpenses(groupId));
+
+final receiptScanRepositoryProvider =
+    Provider<ReceiptScanRepository>((ref) => ReceiptScanRepository());
+
+/// Receipt lines each member took, for the balances and the claim screen.
+final tripClaimsProvider = StreamProvider.autoDispose
+    .family<ReceiptClaims, String>((ref, groupId) =>
+        ref.watch(tripRepositoryProvider).streamClaims(groupId));
 
 /// Whether Mapbox has a token, for the trip maps.
 final mapsConfiguredProvider =
@@ -279,6 +289,8 @@ class TripActions extends Notifier<void> {
     required int amountCents,
     required String paidBy,
     required List<String> participants,
+    List<ReceiptItem> items = const [],
+    int tipCents = 0,
   }) {
     final uid = _uid;
     return _repo.addExpense(
@@ -290,9 +302,22 @@ class TripActions extends Notifier<void> {
         paidBy: paidBy,
         participants: participants,
         createdBy: uid,
+        items: items,
+        tipCents: tipCents,
       ),
     );
   }
+
+  /// Reads a receipt photo with Gemini; names in [appLanguage].
+  Future<ScannedReceipt> scanReceipt(XFile photo, String appLanguage) async =>
+      ref
+          .read(receiptScanRepositoryProvider)
+          .scan(await photo.readAsBytes(), appLanguage);
+
+  /// Takes or gives back one line of a receipt.
+  Future<void> setClaim(
+          String groupId, String expenseId, String itemId, bool claimed) =>
+      _repo.setClaim(groupId, _uid, expenseId, itemId, claimed: claimed);
 
   /// Saves an edited expense; only its creator may.
   Future<void> updateExpense(String groupId, TripExpense expense) =>

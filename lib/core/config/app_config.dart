@@ -11,6 +11,13 @@ class AppConfig {
   static const String photoTranslateUrl =
       'https://translate.google.com/?sl=auto&op=images';
 
+  /// Gemini model that reads receipts (Firebase AI Logic, Gemini Developer
+  /// API). Flash is cheap: well under a cent per receipt.
+  static const String receiptScanModel = 'gemini-2.5-flash';
+
+  /// Receipt scans per user and day, so one account cannot run up costs.
+  static const int receiptScansPerDay = 15;
+
   // Firestore's on-device cache (persistence is on by default on mobile).
   // Trips, wishlists, day plans and costs are read from it offline and
   // writes wait in it until the connection is back. 100 MB keeps a few

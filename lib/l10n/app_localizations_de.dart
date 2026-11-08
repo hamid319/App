@@ -2512,4 +2512,114 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get wishlistShowLess => 'Weniger anzeigen';
+
+  @override
+  String get receiptScan => 'Beleg scannen';
+
+  @override
+  String get receiptScanSubtitle => 'Jeder nimmt, was er hatte';
+
+  @override
+  String get receiptTakePhoto => 'Foto aufnehmen';
+
+  @override
+  String get receiptFromLibrary => 'Aus Fotos wählen';
+
+  @override
+  String get receiptReading => 'Beleg wird gelesen …';
+
+  @override
+  String get receiptNotReadable =>
+      'Auf dem Foto wurde kein Beleg erkannt. Versuch es mit einem schärferen Foto vom ganzen Beleg.';
+
+  @override
+  String receiptLimit(int count) {
+    return 'Du hast heute $count Belege gescannt. Versuch es morgen wieder.';
+  }
+
+  @override
+  String get receiptScanError =>
+      'Der Beleg konnte nicht gelesen werden. Prüf deine Verbindung und versuch es noch einmal.';
+
+  @override
+  String get receiptCheckTitle => 'Beleg prüfen';
+
+  @override
+  String get receiptForAll => 'Für alle';
+
+  @override
+  String get receiptForAllHint =>
+      'Markiere, was alle teilen, z. B. Brot oder Steuer. Den Rest nimmt sich jeder selbst.';
+
+  @override
+  String get receiptAddLine => 'Position hinzufügen';
+
+  @override
+  String get receiptLineNameHint => 'Was?';
+
+  @override
+  String get receiptTax => 'Steuer';
+
+  @override
+  String get receiptTip => 'Trinkgeld';
+
+  @override
+  String get receiptTotal => 'Summe';
+
+  @override
+  String receiptMismatch(String lines, String receipt) {
+    return 'Die Positionen ergeben $lines, auf dem Beleg stehen $receipt.';
+  }
+
+  @override
+  String receiptForeignTitle(String currency, String total) {
+    return 'Der Beleg ist in $currency ($total). Wie viel hast du in Euro bezahlt?';
+  }
+
+  @override
+  String get receiptEuroHint => 'Bezahlt in Euro';
+
+  @override
+  String get receiptEuroMissing => 'Gib ein, was du in Euro bezahlt hast.';
+
+  @override
+  String get receiptNoLines => 'Füge mindestens eine Position hinzu.';
+
+  @override
+  String get receiptYourShare => 'Dein Anteil';
+
+  @override
+  String receiptPaidByName(String name) {
+    return 'Bezahlt von $name';
+  }
+
+  @override
+  String get receiptToClaim => 'Nimm, was du hattest';
+
+  @override
+  String get receiptSharedByAll => 'Teilen alle';
+
+  @override
+  String get receiptUnclaimedNote =>
+      'Positionen, die keiner nimmt, werden durch alle geteilt.';
+
+  @override
+  String receiptOpenLines(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Positionen offen',
+      one: '1 Position offen',
+      zero: 'Alle Positionen vergeben',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String receiptTakenBy(String names) {
+    return 'Genommen von $names';
+  }
+
+  @override
+  String get receiptNotParticipant => 'Du bist bei diesem Beleg nicht dabei.';
 }

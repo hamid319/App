@@ -70,7 +70,7 @@ service cloud.firestore {
     }
 
     function isValidExpense(data, group) {
-      return data.keys().hasOnly(['title', 'amountCents', 'currency', 'paidBy', 'participants', 'createdBy', 'createdAt'])
+      return data.keys().hasOnly(['title', 'amountCents', 'currency', 'paidBy', 'participants', 'createdBy', 'createdAt', 'items', 'tipCents'])
              && data.keys().hasAll(['title', 'amountCents', 'currency', 'paidBy', 'participants', 'createdBy', 'createdAt'])
              && data.title is string && data.title.size() > 0 && data.title.size() <= 80
              && data.amountCents is int && data.amountCents > 0 && data.amountCents <= 100000000
@@ -79,7 +79,11 @@ service cloud.firestore {
              && data.participants is list && data.participants.size() > 0
              && group.members.hasAll(data.participants)
              && data.createdBy is string
-             && data.createdAt is timestamp;
+             && data.createdAt is timestamp
+             // Receipt lines ({id, name, original?, amountCents, forAll});
+             // the app checks that they add up to the amount.
+             && (!('items' in data) || (data.items is list && data.items.size() <= 100))
+             && (!('tipCents' in data) || (data.tipCents is int && data.tipCents >= 0));
     }
 
     // Journal entry: text and/or up to 6 photos ({path, url, width, height}).
@@ -327,6 +331,19 @@ service cloud.firestore {
         allow delete: if isMember(groupData(groupId))
                       && (resource.data.createdBy == request.auth.uid
                           || isSoleOwner(groupId));
+      }
+
+      // Receipt lines one member took: items maps expense id -> item ids.
+      // Only that member writes it, so claims never collide (as /swipes).
+      match /claims/{uid} {
+        allow read: if isMember(groupData(groupId));
+        allow create, update: if isMember(groupData(groupId))
+                              && request.auth.uid == uid
+                              && request.resource.data.keys().hasOnly(['items', 'updatedAt'])
+                              && request.resource.data.items is map
+                              && request.resource.data.items.size() <= 500
+                              && request.resource.data.updatedAt == request.time;
+        allow delete: if request.auth.uid == uid || isOwner(groupData(groupId));
       }
 
       // Journal entry. Edited by its author (text only in the app); deleted

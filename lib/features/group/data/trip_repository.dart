@@ -8,6 +8,7 @@ import '../../../common/models/trip_expense.dart';
 import '../../../common/models/trip_idea.dart';
 import '../../../common/models/trip_plan.dart';
 import '../../../common/models/trip_poll.dart';
+import '../../../common/utils/expense_split.dart';
 import '../../../common/utils/group_swipes.dart';
 
 /// Planning data of a trip (a group): wishlist ideas, polls, expenses and
@@ -29,6 +30,9 @@ class TripRepository {
 
   CollectionReference<Map<String, dynamic>> _expenses(String groupId) =>
       _group(groupId).collection('expenses');
+
+  CollectionReference<Map<String, dynamic>> _claims(String groupId) =>
+      _group(groupId).collection('claims');
 
   // --- Trips ---
 
@@ -308,6 +312,37 @@ class TripRepository {
     await _expenses(groupId).doc(expense.id).delete();
   }
 
+  // --- Receipt claims ---
+
+  /// Which receipt lines each member took. One document per member, which
+  /// only that member writes, so claims never collide.
+  Stream<ReceiptClaims> streamClaims(String groupId) =>
+      _claims(groupId).snapshots().map((snap) => {
+            for (final doc in snap.docs)
+              doc.id: {
+                if (doc.data()['items'] case final Map items)
+                  for (final MapEntry(:key, :value) in items.entries)
+                    if (value is List) '$key': {for (final id in value) '$id'},
+              },
+          });
+
+  /// Takes ([claimed]) or gives back line [itemId] of receipt [expenseId].
+  Future<void> setClaim(
+    String groupId,
+    String uid,
+    String expenseId,
+    String itemId, {
+    required bool claimed,
+  }) =>
+      _claims(groupId).doc(uid).set({
+        'items': {
+          expenseId: claimed
+              ? FieldValue.arrayUnion([itemId])
+              : FieldValue.arrayRemove([itemId]),
+        },
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
   void _checkCreator(TripExpense expense, String uid) {
     if (expense.id.isEmpty || !expense.isEditableBy(uid)) {
       throw StateError(TripExpense.notCreatorMessage);
@@ -323,6 +358,11 @@ class TripRepository {
     }
     if (expense.participants.isEmpty) {
       throw ArgumentError('An expense needs participants');
+    }
+    if (expense.isReceipt &&
+        expense.items.fold(expense.tipCents, (s, i) => s + i.amountCents) !=
+            expense.amountCents) {
+      throw ArgumentError('A receipt amount must be its lines plus the tip');
     }
   }
 

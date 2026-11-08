@@ -11,11 +11,14 @@ import '../features/home/ui/favorites_map_screen.dart';
 import '../features/auth/ui/forgot_password_screen.dart';
 import '../features/home/ui/favorites_screen.dart';
 import '../features/places/ui/place_detail_screen.dart';
+import '../features/group/data/receipt_scan_repository.dart';
 import '../features/group/ui/costs_screen.dart';
 import '../features/group/ui/day_map_screen.dart';
 import '../features/group/ui/group_join_screen.dart';
 import '../features/group/ui/journal_screen.dart';
 import '../features/group/ui/recap_screen.dart';
+import '../features/group/ui/receipt_review_screen.dart';
+import '../features/group/ui/receipt_screen.dart';
 import '../features/phrases/ui/phrase_practice_screen.dart';
 import '../features/phrases/ui/phrasebook_screen.dart';
 import '../features/group/ui/trip_detail_screen.dart';
@@ -141,6 +144,41 @@ GoRouter createRouter(Ref ref) {
               icon: Icons.receipt_long_rounded,
               child: CostsScreen(groupId: state.pathParameters['groupId']!),
             ),
+            routes: [
+              // A fresh scan; without one (a reload) back to the costs.
+              GoRoute(
+                path: 'receipt',
+                redirect: (ctx, state) => state.extra is ScannedReceipt
+                    ? null
+                    : '/trip/${state.pathParameters['groupId']}/costs',
+                builder: (ctx, state) => ReceiptReviewScreen(
+                  groupId: state.pathParameters['groupId']!,
+                  scanned: state.extra as ScannedReceipt?,
+                ),
+              ),
+              GoRoute(
+                path: 'receipt/:expenseId',
+                builder: (ctx, state) => AccountGate(
+                  reason: GateReason.groups,
+                  icon: Icons.receipt_long_rounded,
+                  child: ReceiptScreen(
+                    groupId: state.pathParameters['groupId']!,
+                    expenseId: state.pathParameters['expenseId']!,
+                  ),
+                ),
+              ),
+              GoRoute(
+                path: 'receipt/:expenseId/edit',
+                builder: (ctx, state) => AccountGate(
+                  reason: GateReason.groups,
+                  icon: Icons.receipt_long_rounded,
+                  child: ReceiptReviewScreen(
+                    groupId: state.pathParameters['groupId']!,
+                    expenseId: state.pathParameters['expenseId']!,
+                  ),
+                ),
+              ),
+            ],
           ),
           GoRoute(
             path: 'journal',

@@ -2479,4 +2479,113 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wishlistShowLess => 'Show less';
+
+  @override
+  String get receiptScan => 'Scan receipt';
+
+  @override
+  String get receiptScanSubtitle => 'Everyone takes what they had';
+
+  @override
+  String get receiptTakePhoto => 'Take photo';
+
+  @override
+  String get receiptFromLibrary => 'Choose from photos';
+
+  @override
+  String get receiptReading => 'Reading the receipt …';
+
+  @override
+  String get receiptNotReadable =>
+      'No receipt found in this photo. Try a sharper photo of the whole receipt.';
+
+  @override
+  String receiptLimit(int count) {
+    return 'You scanned $count receipts today. Try again tomorrow.';
+  }
+
+  @override
+  String get receiptScanError =>
+      'The receipt could not be read. Check your connection and try again.';
+
+  @override
+  String get receiptCheckTitle => 'Check receipt';
+
+  @override
+  String get receiptForAll => 'For all';
+
+  @override
+  String get receiptForAllHint =>
+      'Mark what everyone shares, like bread or tax. Everyone takes the rest themselves.';
+
+  @override
+  String get receiptAddLine => 'Add line';
+
+  @override
+  String get receiptLineNameHint => 'What?';
+
+  @override
+  String get receiptTax => 'Tax';
+
+  @override
+  String get receiptTip => 'Tip';
+
+  @override
+  String get receiptTotal => 'Total';
+
+  @override
+  String receiptMismatch(String lines, String receipt) {
+    return 'The lines add up to $lines, the receipt says $receipt.';
+  }
+
+  @override
+  String receiptForeignTitle(String currency, String total) {
+    return 'The receipt is in $currency ($total). How much did you pay in euros?';
+  }
+
+  @override
+  String get receiptEuroHint => 'Paid in euros';
+
+  @override
+  String get receiptEuroMissing => 'Enter what you paid in euros.';
+
+  @override
+  String get receiptNoLines => 'Add at least one line.';
+
+  @override
+  String get receiptYourShare => 'Your share';
+
+  @override
+  String receiptPaidByName(String name) {
+    return 'Paid by $name';
+  }
+
+  @override
+  String get receiptToClaim => 'Take what you had';
+
+  @override
+  String get receiptSharedByAll => 'Shared by all';
+
+  @override
+  String get receiptUnclaimedNote => 'Lines nobody takes are shared by all.';
+
+  @override
+  String receiptOpenLines(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lines open',
+      one: '1 line open',
+      zero: 'All lines taken',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String receiptTakenBy(String names) {
+    return 'Taken by $names';
+  }
+
+  @override
+  String get receiptNotParticipant => 'You are not part of this receipt.';
 }

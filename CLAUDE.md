@@ -55,7 +55,7 @@ routerProvider           // Provider<GoRouter>
 ## Routes (`app/routes.dart`)
 ```
 /onboarding   /login   /register
-/trips (start, tab Reisen)   /trip/:groupId   /trip/:groupId/day/:index   /trip/:groupId/costs   /trip/:groupId/journal   /trip/:groupId/recap
+/trips (start, tab Reisen)   /trip/:groupId   /trip/:groupId/day/:index   /trip/:groupId/costs   /trip/:groupId/costs/receipt(/:expenseId(/edit))   /trip/:groupId/journal   /trip/:groupId/recap
 /home (tab Entdecken, feed)  /discover (solo deck)   /collection/:theme   /place/:id
 /trip/:groupId/swipe (group deck)   /group → /trips   /group/join?groupId=&code=
 (old /swipe/:groupId, /group-matches/:groupId, /day-plan/… redirect to the trip)
@@ -86,6 +86,11 @@ Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so
                        (the trip's swipe deck, always open; matches are derived in
                        common/utils/group_swipes.dart and shown on the wishlist, not stored)
   /sessions/…          old swipe rounds: read/delete only, nothing writes them
+  /expenses/{id}       title, amountCents, paidBy, participants, createdBy; a scanned receipt adds
+                       items [{id, name, original?, amountCents, forAll}] ≤100 and tipCents
+                       (read by Gemini via Firebase AI Logic, App Check enforced; split in common/utils/expense_split.dart)
+  /claims/{uid}        items: map<expenseId, itemId[]> (receipt lines a member took; only they write it;
+                       lines for all, untaken lines and the tip are shared by all participants)
   /journal/{id}        authorUid, day 'yyyy-MM-dd', text ≤500, photos [{path,url,width,height}] ≤6
                        (photos in Storage trips/{groupId}/journal/{id}/{i}.jpg)
 /places/{placeId}      imageUrls: string[], types: string[]

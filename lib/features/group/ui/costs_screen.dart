@@ -15,6 +15,7 @@ import '../../../l10n/l10n.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../logic/trip_controller.dart';
 import '../widgets/expense_sheet.dart';
+import '../widgets/receipt_scan.dart';
 import '../widgets/sync_badge.dart';
 import '../widgets/trip_ui.dart';
 import 'trip_detail_screen.dart';
@@ -137,7 +138,10 @@ class _CostsBodyState extends ConsumerState<_CostsBody> {
           ref, id, i < 0 ? l10n.userFallbackName : l10n.memberFallback(i + 1));
     }
 
-    final balances = computeBalances(expenses, members: group.members);
+    final claims =
+        ref.watch(tripClaimsProvider(group.groupId)).value ?? const {};
+    final balances =
+        computeBalances(expenses, members: group.members, claims: claims);
     final transfers = simplifyDebts(balances);
     final mine = balances[uid] ?? 0;
     final total = expenses.fold(0, (sum, e) => sum + e.amountCents);
@@ -237,6 +241,19 @@ class _CostsBodyState extends ConsumerState<_CostsBody> {
             ],
           ),
         ),
+        const SizedBox(height: 12),
+        InsetGroup(
+          children: [
+            ListTile(
+              leading:
+                  Icon(Icons.document_scanner_outlined, color: scheme.primary),
+              title: Text(l10n.receiptScan),
+              subtitle: Text(l10n.receiptScanSubtitle),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => startReceiptScan(context, ref, group.groupId),
+            ),
+          ],
+        ),
         const SizedBox(height: 16),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -269,6 +286,7 @@ class _CostsBodyState extends ConsumerState<_CostsBody> {
                 _ExpenseRow(
                   group: group,
                   expense: e,
+                  openLines: e.isReceipt ? openItems(e, claims).length : 0,
                   uid: uid,
                   tone: i % 3,
                   name: name,
@@ -351,6 +369,7 @@ class _ExpenseRow extends ConsumerWidget {
   const _ExpenseRow({
     required this.group,
     required this.expense,
+    required this.openLines,
     required this.uid,
     required this.tone,
     required this.name,
@@ -359,6 +378,9 @@ class _ExpenseRow extends ConsumerWidget {
 
   final GroupModel group;
   final TripExpense expense;
+
+  /// Receipt lines nobody has taken yet.
+  final int openLines;
   final String uid;
   final int tone;
   final String Function(String uid) name;
@@ -374,13 +396,15 @@ class _ExpenseRow extends ConsumerWidget {
     final payer =
         expense.paidBy == uid ? l10n.tripYouPaid : name(expense.paidBy);
     final everyone = group.members.every(expense.participants.contains);
-    final split = everyone
-        ? l10n.tripSplitEqually
-        : expense.participants.length == 1
-            ? l10n.tripSplitOnlyFor(expense.participants.first == uid
-                ? l10n.tripYou
-                : name(expense.participants.first))
-            : l10n.tripSplitPeople(expense.participants.length);
+    final split = expense.isReceipt
+        ? l10n.receiptOpenLines(openLines)
+        : everyone
+            ? l10n.tripSplitEqually
+            : expense.participants.length == 1
+                ? l10n.tripSplitOnlyFor(expense.participants.first == uid
+                    ? l10n.tripYou
+                    : name(expense.participants.first))
+                : l10n.tripSplitPeople(expense.participants.length);
     final fill = [colors.sky, colors.peach, colors.mint][tone];
 
     final mine = expense.isEditableBy(uid);
@@ -389,10 +413,14 @@ class _ExpenseRow extends ConsumerWidget {
         : l10n.tripExpenseAddedBy(name(expense.createdBy));
 
     final row = InkWell(
-      // Only the creator may change an expense (the rules say the same).
-      onTap: mine
-          ? () => showExpenseSheet(context, group, uid, expense: expense)
-          : null,
+      // Everyone opens a receipt to take their lines; only the creator may
+      // change an expense (the rules say the same).
+      onTap: expense.isReceipt
+          ? () =>
+              context.push('/trip/${group.groupId}/costs/receipt/${expense.id}')
+          : mine
+              ? () => showExpenseSheet(context, group, uid, expense: expense)
+              : null,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
@@ -404,8 +432,12 @@ class _ExpenseRow extends ConsumerWidget {
                 color: fill,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(Icons.receipt_long_rounded,
-                  size: 20, color: scheme.onSurface),
+              child: Icon(
+                  expense.isReceipt
+                      ? Icons.document_scanner_outlined
+                      : Icons.receipt_long_rounded,
+                  size: 20,
+                  color: scheme.onSurface),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -437,7 +469,7 @@ class _ExpenseRow extends ConsumerWidget {
             const SizedBox(width: 8),
             Text(formatCents(expense.amountCents, locale),
                 style: text.titleMedium?.copyWith(fontSize: 16)),
-            if (mine) ...[
+            if (mine || expense.isReceipt) ...[
               const SizedBox(width: 4),
               Icon(Icons.chevron_right_rounded,
                   size: 20, color: scheme.onSurfaceVariant),
