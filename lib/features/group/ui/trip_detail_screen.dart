@@ -218,11 +218,21 @@ class _PlanBody extends ConsumerWidget {
               Positioned(
                 top: topPadding + 8,
                 right: 16,
-                child: GlassButton(
-                  icon: Icons.person_add_alt_1_rounded,
-                  tooltip: l10n.tripInviteFriends,
-                  label: l10n.tripInvite,
-                  onTap: () => copyTripInvite(context, group),
+                child: Row(
+                  children: [
+                    GlassButton(
+                      icon: Icons.person_add_alt_1_rounded,
+                      tooltip: l10n.tripInviteFriends,
+                      label: l10n.tripInvite,
+                      onTap: () => copyTripInvite(context, group),
+                    ),
+                    const SizedBox(width: 8),
+                    GlassButton(
+                      icon: Icons.more_horiz_rounded,
+                      tooltip: l10n.moreOptions,
+                      onTap: () => showTripActions(context, ref, group, uid),
+                    ),
+                  ],
                 ),
               ),
             ],

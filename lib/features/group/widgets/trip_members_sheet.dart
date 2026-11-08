@@ -32,7 +32,7 @@ Future<void> copyTripInvite(BuildContext context, GroupModel group) async {
   ));
 }
 
-/// Members of a trip with the invite code; leave or (owner) delete it.
+/// Members of a trip with the invite code.
 Future<void> showTripMembersSheet(
     BuildContext context, GroupModel group, String userId) {
   return showModalBottomSheet<void>(
@@ -58,7 +58,6 @@ class _MembersSheet extends ConsumerWidget {
     final l10n = context.l10n;
     final text = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
-    final isOwner = group.ownerUid == userId;
     final showInvite = group.invite != null;
 
     return DraggableScrollableSheet(
@@ -84,8 +83,8 @@ class _MembersSheet extends ConsumerWidget {
                             style: text.labelSmall
                                 ?.copyWith(color: scheme.onSurfaceVariant)),
                         Text(group.invite!.code,
-                            style: text.headlineSmall
-                                ?.copyWith(letterSpacing: 4)),
+                            style:
+                                text.headlineSmall?.copyWith(letterSpacing: 4)),
                       ],
                     ),
                   ),
@@ -114,65 +113,95 @@ class _MembersSheet extends ConsumerWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 24),
-          InsetGroup(
-            children: [
-              ListTile(
-                leading: Icon(Icons.logout_rounded, color: scheme.error),
-                title: Text(l10n.tripLeave,
-                    style: TextStyle(color: scheme.error)),
-                onTap: () => _leave(context, ref),
-              ),
-              if (isOwner)
-                ListTile(
-                  leading:
-                      Icon(Icons.delete_outline_rounded, color: scheme.error),
-                  title: Text(l10n.tripDelete,
-                      style: TextStyle(color: scheme.error)),
-                  onTap: () => _delete(context, ref),
-                ),
-            ],
-          ),
         ],
       ),
     );
   }
+}
 
-  Future<void> _leave(BuildContext context, WidgetRef ref) async {
-    final l10n = context.l10n;
-    final ok = await _confirm(
-        context, l10n.leaveGroupTitle, l10n.leaveGroupBody, l10n.leave);
-    if (!ok || !context.mounted) return;
-    final router = GoRouter.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    await ref
-        .read(groupControllerProvider.notifier)
-        .leaveGroup(group.groupId, userId);
-    messenger.showSnackBar(SnackBar(content: Text(l10n.leftGroup)));
-    router.go('/trips');
+enum _TripAction { leave, delete }
+
+/// The "⋯" menu of a trip: leave it or, for its owner, delete it.
+Future<void> showTripActions(BuildContext context, WidgetRef ref,
+    GroupModel group, String userId) async {
+  final l10n = context.l10n;
+  final scheme = Theme.of(context).colorScheme;
+  final choice = await showModalBottomSheet<_TripAction>(
+    context: context,
+    useSafeArea: true,
+    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (sheetContext) => Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      child: InsetGroup(
+        children: [
+          ListTile(
+            leading: Icon(Icons.logout_rounded, color: scheme.error),
+            title: Text(l10n.tripLeave, style: TextStyle(color: scheme.error)),
+            onTap: () => Navigator.pop(sheetContext, _TripAction.leave),
+          ),
+          if (group.ownerUid == userId)
+            ListTile(
+              leading: Icon(Icons.delete_outline_rounded, color: scheme.error),
+              title:
+                  Text(l10n.tripDelete, style: TextStyle(color: scheme.error)),
+              onTap: () => Navigator.pop(sheetContext, _TripAction.delete),
+            ),
+        ],
+      ),
+    ),
+  );
+  if (!context.mounted) return;
+  switch (choice) {
+    case _TripAction.leave:
+      await leaveTrip(context, ref, group, userId);
+    case _TripAction.delete:
+      await deleteTrip(context, ref, group);
+    case null:
+      break;
   }
+}
 
-  Future<void> _delete(BuildContext context, WidgetRef ref) async {
-    final l10n = context.l10n;
-    final ok = await _confirm(
-      context,
-      l10n.deleteGroupTitle,
-      l10n.deleteGroupBody(group.groupName ?? l10n.unnamedGroup),
-      l10n.delete,
-    );
-    if (!ok || !context.mounted) return;
-    final router = GoRouter.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    try {
-      await ref.read(groupRepositoryProvider).deleteGroup(group.groupId);
-      ref.read(selectedGroupIdProvider.notifier).updateState(null);
-      router.go('/trips');
-    } catch (e) {
-      messenger.showSnackBar(SnackBar(
-        content:
-            Text(userMessage(e, fallback: l10n.errorDeleteGroup, l10n: l10n)),
-      ));
-    }
+/// Asks, then removes the user from the trip and goes to the trip list.
+Future<void> leaveTrip(BuildContext context, WidgetRef ref, GroupModel group,
+    String userId) async {
+  final l10n = context.l10n;
+  final ok = await _confirm(
+      context, l10n.leaveGroupTitle, l10n.leaveGroupBody, l10n.leave);
+  if (!ok || !context.mounted) return;
+  final router = GoRouter.of(context);
+  final messenger = ScaffoldMessenger.of(context);
+  await ref
+      .read(groupControllerProvider.notifier)
+      .leaveGroup(group.groupId, userId);
+  messenger.showSnackBar(SnackBar(content: Text(l10n.leftGroup)));
+  router.go('/trips');
+}
+
+/// Asks, then deletes the trip for everyone (owner only).
+Future<void> deleteTrip(
+    BuildContext context, WidgetRef ref, GroupModel group) async {
+  final l10n = context.l10n;
+  final ok = await _confirm(
+    context,
+    l10n.deleteGroupTitle,
+    l10n.deleteGroupBody(group.groupName ?? l10n.unnamedGroup),
+    l10n.delete,
+  );
+  if (!ok || !context.mounted) return;
+  final router = GoRouter.of(context);
+  final messenger = ScaffoldMessenger.of(context);
+  try {
+    await ref.read(groupRepositoryProvider).deleteGroup(group.groupId);
+    ref.read(selectedGroupIdProvider.notifier).updateState(null);
+    router.go('/trips');
+  } catch (e) {
+    messenger.showSnackBar(SnackBar(
+      content:
+          Text(userMessage(e, fallback: l10n.errorDeleteGroup, l10n: l10n)),
+    ));
   }
 }
 
