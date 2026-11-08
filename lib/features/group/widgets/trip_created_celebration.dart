@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../common/widgets/suitcase_view.dart';
-import '../../../core/constants/colors.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/constants/typography.dart';
 import '../../../l10n/l10n.dart';
 
-/// Full-screen "Bags packed!" moment after a new trip: things drop into the
-/// open suitcase, the lid shuts, it spins once and gets the city sticker.
+/// Full-screen "Bags packed!" moment after a new trip: the suitcase rolls
+/// in, rocks to a stop, pulls out its handle with a click, a light sweeps
+/// over the grooves and the city sticker is slapped on.
 Future<void> showTripCreatedCelebration(
   BuildContext context, {
   required String cityName,
@@ -51,36 +51,35 @@ class _TripCreatedState extends State<_TripCreated>
     with SingleTickerProviderStateMixin {
   late final _c = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 2600),
+    duration: const Duration(milliseconds: 2800),
   );
 
-  static const _openLid = -1.95;
-
-  // Timeline (fractions of the whole): pop in, items drop, lid shuts,
-  // spin, sticker.
-  late final _pop = CurvedAnimation(
-      parent: _c, curve: const Interval(0, 0.12, curve: Curves.easeOutBack));
-  late final _close = CurvedAnimation(
-      parent: _c, curve: const Interval(0.46, 0.58, curve: Curves.easeInCubic));
-  late final _spin = CurvedAnimation(
-      parent: _c,
-      curve: const Interval(0.6, 0.86, curve: Curves.easeInOutCubic));
+  // Timeline (fractions of the whole): roll in, rock to a stop, handle
+  // out, light sweep, sticker.
+  late final _roll = CurvedAnimation(
+      parent: _c, curve: const Interval(0, 0.32, curve: Curves.easeOutCubic));
+  late final _rock =
+      CurvedAnimation(parent: _c, curve: const Interval(0.32, 0.48));
+  late final _handle = CurvedAnimation(
+      parent: _c, curve: const Interval(0.48, 0.62, curve: Curves.easeOutBack));
+  late final _shine = CurvedAnimation(
+      parent: _c, curve: const Interval(0.62, 0.82, curve: Curves.easeInOut));
   late final _sticker = CurvedAnimation(
-      parent: _c, curve: const Interval(0.88, 1, curve: Curves.easeOutBack));
+      parent: _c, curve: const Interval(0.84, 0.96, curve: Curves.easeOutBack));
   late final _text = CurvedAnimation(
-      parent: _c, curve: const Interval(0.62, 0.8, curve: Curves.easeOut));
+      parent: _c, curve: const Interval(0.55, 0.75, curve: Curves.easeOut));
 
-  bool _shut = false, _stuck = false;
+  bool _clicked = false, _stuck = false;
 
   @override
   void initState() {
     super.initState();
     _c.addListener(() {
-      if (!_shut && _c.value >= 0.58) {
-        _shut = true;
+      if (!_clicked && _c.value >= 0.6) {
+        _clicked = true;
         HapticFeedback.lightImpact();
       }
-      if (!_stuck && _c.value >= 0.94) {
+      if (!_stuck && _c.value >= 0.9) {
         _stuck = true;
         HapticFeedback.mediumImpact();
       }
@@ -124,15 +123,21 @@ class _TripCreatedState extends State<_TripCreated>
               const Spacer(),
               AnimatedBuilder(
                 animation: _c,
-                builder: (context, _) => _Art(
-                  pop: _pop.value,
-                  progress: _c.value,
-                  lidAngle: _openLid * (1 - _close.value),
-                  spin: _spin.value,
-                  sticker: sticker,
-                  stickerScale:
-                      _c.value < 0.88 ? 0 : 2.4 - 1.4 * _sticker.value,
-                ),
+                builder: (context, _) {
+                  final c = _c.value;
+                  final r = _rock.value;
+                  return _Art(
+                    roll: _roll.value,
+                    // Leans back while pulled in, then rocks on its wheels.
+                    tilt: c < 0.32
+                        ? -0.07 * _roll.value
+                        : -0.07 * math.cos(r * math.pi * 3) * (1 - r),
+                    handleOut: _handle.value,
+                    shine: c > 0.62 && c < 0.82 ? _shine.value : null,
+                    sticker: sticker,
+                    stickerScale: c < 0.84 ? 0 : 2.4 - 1.4 * _sticker.value,
+                  );
+                },
               ),
               const SizedBox(height: AppSizes.space32),
               FadeTransition(
@@ -174,90 +179,69 @@ class _TripCreatedState extends State<_TripCreated>
   }
 }
 
-/// The suitcase with the items dropping in and its shadow.
+/// The suitcase rolling in, with its shadow.
 class _Art extends StatelessWidget {
   const _Art({
-    required this.pop,
-    required this.progress,
-    required this.lidAngle,
-    required this.spin,
+    required this.roll,
+    required this.tilt,
+    required this.handleOut,
+    required this.shine,
     required this.sticker,
     required this.stickerScale,
   });
 
-  final double pop, progress, lidAngle, spin, stickerScale;
+  /// 0 = off screen on the left, 1 = in place.
+  final double roll;
+  final double tilt, handleOut, stickerScale;
+  final double? shine;
   final SuitcaseSticker sticker;
 
   static const double _size = 220;
 
-  // Items: icon, colour, x offset, start of its drop (fraction).
-  static const _items = [
-    (Icons.checkroom_rounded, BrandColors.coral, -34.0, 0.10),
-    (Icons.photo_camera_rounded, BrandColors.amber, 24.0, 0.18),
-    (Icons.wb_sunny_rounded, BrandColors.sky, -8.0, 0.26),
-    (Icons.map_rounded, Color(0xFF8FE3BF), 36.0, 0.34),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    // The suitcase's opening (grid y 45) sits at this height in the box.
-    const opening = _size * 0.45;
-    return SizedBox(
-      width: _size,
-      height: _size + 20,
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.topCenter,
-        children: [
-          // Shadow, narrower while the suitcase is side-on.
-          Positioned(
-            top: _size * 0.9,
-            child: Container(
-              width: _size *
-                  0.62 *
-                  (0.35 + 0.65 * math.cos(spin * 2 * math.pi).abs()),
-              height: 14,
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-          ),
-          // Items drop behind the shell, so they vanish into it.
-          for (final (icon, color, dx, start) in _items)
-            if (progress > start && progress < start + 0.2)
-              Positioned(
-                left: _size / 2 + dx - 18,
-                top: -60 +
-                    (opening + 30 + 60) *
-                        Curves.easeIn.transform(
-                            ((progress - start) / 0.2).clamp(0.0, 1.0)),
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  decoration:
-                      BoxDecoration(color: color, shape: BoxShape.circle),
-                  child: Icon(icon, size: 20, color: BrandColors.navy),
-                ),
-              ),
-          Transform(
-            alignment: Alignment.center,
-            transform: Matrix4.identity()
-              ..setEntry(3, 2, 0.0016)
-              ..rotateY(spin * 2 * math.pi)
-              ..scaleByDouble(0.6 + 0.4 * pop, 0.6 + 0.4 * pop, 1, 1),
-            child: SizedBox.square(
-              dimension: _size,
-              child: CustomPaint(
-                painter: SuitcasePainter(
-                  lidAngle: lidAngle,
-                  stickers: stickerScale > 0 ? [sticker] : const [],
-                  lastStickerScale: stickerScale,
+    final width = MediaQuery.sizeOf(context).width;
+    final dx = -(width / 2 + _size / 2) * (1 - roll);
+    // Wheel radius on screen: 3.6 grid units of the 220 px box.
+    const wheelRadius = _size * 0.036;
+    return Transform.translate(
+      offset: Offset(dx, 0),
+      child: SizedBox(
+        width: _size,
+        height: _size + 12,
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.topCenter,
+          children: [
+            Positioned(
+              top: _size * 0.945,
+              child: Container(
+                width: _size * 0.5,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(20),
                 ),
               ),
             ),
-          ),
-        ],
+            Transform.rotate(
+              angle: tilt,
+              alignment: const Alignment(0, 0.9),
+              child: SizedBox.square(
+                dimension: _size,
+                child: CustomPaint(
+                  painter: SuitcasePainter(
+                    handleOut: handleOut,
+                    wheelTurn: -dx / wheelRadius,
+                    shine: shine,
+                    stickers: stickerScale > 0 ? [sticker] : const [],
+                    lastStickerScale: stickerScale,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

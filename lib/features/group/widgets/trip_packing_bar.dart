@@ -13,7 +13,7 @@ import 'trip_members_sheet.dart';
 import 'trip_ui.dart';
 
 /// "Suitcase 50 % packed": how far the trip's planning is, with the next
-/// step to tap. The lid closes as the trip gets packed. Uses only data the
+/// step to tap. The handle pulls out as the trip gets packed. Uses only data the
 /// trip screen already loads.
 class TripPackingBar extends ConsumerWidget {
   const TripPackingBar({
@@ -79,7 +79,7 @@ class TripPackingBar extends ConsumerWidget {
                     duration: const Duration(milliseconds: 600),
                     curve: Curves.easeOutBack,
                     builder: (_, p, __) => CustomPaint(
-                      painter: SuitcasePainter(lidAngle: -0.9 * (1 - p)),
+                      painter: SuitcasePainter(handleOut: p),
                     ),
                   ),
                 ),
