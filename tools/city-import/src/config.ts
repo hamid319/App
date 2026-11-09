@@ -11,8 +11,11 @@ export const DEFAULTS = Object.freeze({
   /** Commons files smaller than this are skipped (blurry on a phone). */
   minLongEdge: 800,
   minShortEdge: 500,
-  /** Thumbnail width requested from Commons and the stored WebP size. */
+  /** Thumbnail width requested from Commons (one of its standard sizes). */
   outputLongEdge: 1280,
+  /** Long edge and quality of the stored WebP: sharp on a phone, ~40 % smaller than 1280/80. */
+  storedLongEdge: 1080,
+  webpQuality: 75,
   maxImageBytes: 8 * 1024 * 1024,
   descriptionMaxChars: 420,
 });
