@@ -60,50 +60,49 @@ class AppPalette {
   /// Pastel chip fills, picked by category; text on them is always [ink].
   final Color mint, peach, sky;
 
-  // Apple HIG grouped look: grey page, white inset groups, one tint
-  // (TripFam navy; sky in dark mode, where navy would vanish).
-  // Secondary text is a little darker than iOS's own grey so it passes
-  // WCAG AA on both the page and the cards.
+  // Grouped look on warm sand: cream cards on a sand page, one tint
+  // (TripFam navy; sky in dark mode, where navy would vanish). Greys are
+  // warm too, and secondary text passes WCAG AA on the page and the cards.
   static const light = AppPalette(
     brightness: Brightness.light,
-    bg: Color(0xFFF2F2F7),
-    surface: Color(0xFFFFFFFF),
-    surface2: Color(0xFFE5E5EA),
-    ink: Color(0xFF000000),
-    ink2: Color(0xFF6E6E73),
-    ink3: Color(0xFFAEAEB2),
-    line: Color(0xFFD1D1D6),
-    edge: Color(0xFFD1D1D6),
+    bg: Color(0xFFF8F3EC),
+    surface: Color(0xFFFFFDF9),
+    surface2: Color(0xFFEFE6DA),
+    ink: Color(0xFF1E1A16),
+    ink2: Color(0xFF736759),
+    ink3: Color(0xFFB3A897),
+    line: Color(0xFFE3D8CA),
+    edge: Color(0xFFD9CCBC),
     primary: BrandColors.navy,
-    primarySoft: Color(0xFFE3E8FA),
+    primarySoft: Color(0xFFF6E3D6),
     like: BrandColors.coral,
-    nope: Color(0xFF1C1C1E),
+    nope: Color(0xFF1E1A16),
     gold: BrandColors.amber,
     danger: Color(0xFFD70015),
-    mint: Color(0xFFD1FAE5),
-    peach: Color(0xFFFFEDD5),
-    sky: Color(0xFFDBEAFE),
+    mint: Color(0xFFDDF3E4),
+    peach: Color(0xFFFCE4D2),
+    sky: Color(0xFFDCE6F7),
   );
 
   static const dark = AppPalette(
     brightness: Brightness.dark,
-    bg: Color(0xFF000000),
-    surface: Color(0xFF1C1C1E),
-    surface2: Color(0xFF2C2C2E),
-    ink: Color(0xFFFFFFFF),
-    ink2: Color(0xFF98989F),
-    ink3: Color(0xFF636366),
-    line: Color(0xFF38383A),
-    edge: Color(0xFF38383A),
+    bg: Color(0xFF14110F),
+    surface: Color(0xFF221D19),
+    surface2: Color(0xFF2F2823),
+    ink: Color(0xFFFBF5EE),
+    ink2: Color(0xFFA39787),
+    ink3: Color(0xFF6B6157),
+    line: Color(0xFF3A322B),
+    edge: Color(0xFF3A322B),
     primary: BrandColors.sky,
-    primarySoft: Color(0xFF1E2A4F),
+    primarySoft: Color(0xFF2A2C45),
     like: Color(0xFFFF8A78),
-    nope: Color(0xFFFFFFFF),
-    gold: Color(0xFFFFD60A),
+    nope: Color(0xFFFBF5EE),
+    gold: Color(0xFFFFD166),
     danger: Color(0xFFFF6961),
-    mint: Color(0xFF0F2E22),
-    peach: Color(0xFF3D2420),
-    sky: Color(0xFF0F2440),
+    mint: Color(0xFF15302A),
+    peach: Color(0xFF3D2620),
+    sky: Color(0xFF1A2640),
   );
 }
 

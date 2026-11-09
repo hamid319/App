@@ -285,7 +285,7 @@ class SuitcaseView extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: BrandColors.sky.withValues(alpha: 0.45),
+          color: Theme.of(context).colorScheme.primaryContainer,
         ),
         padding: EdgeInsets.all(size * 0.08),
         child: CustomPaint(

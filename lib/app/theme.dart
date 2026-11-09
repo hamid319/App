@@ -142,7 +142,8 @@ class AppTheme {
         actionsIconTheme: IconThemeData(color: p.primary),
       ),
       actionIconTheme: ActionIconThemeData(
-        backButtonIconBuilder: (_) => const Icon(Icons.arrow_back_ios_new_rounded),
+        backButtonIconBuilder: (_) =>
+            const Icon(Icons.arrow_back_ios_new_rounded),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -225,7 +226,8 @@ class AppTheme {
         shape: const CircleBorder(),
         side: BorderSide(color: p.ink3, width: 1.5),
         fillColor: WidgetStateProperty.resolveWith(
-          (s) => s.contains(WidgetState.selected) ? p.primary : Colors.transparent,
+          (s) =>
+              s.contains(WidgetState.selected) ? p.primary : Colors.transparent,
         ),
         checkColor: WidgetStatePropertyAll(onPrimary),
       ),
@@ -277,7 +279,8 @@ class AppTheme {
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: p.surface.withValues(alpha: 0.94),
         surfaceTintColor: Colors.transparent,
-        indicatorColor: p.primary.withValues(alpha: light ? 0.10 : 0.18),
+        indicatorColor:
+            light ? p.primarySoft : p.primary.withValues(alpha: 0.18),
         indicatorShape: const StadiumBorder(),
         elevation: 0,
         height: 64,
@@ -309,7 +312,7 @@ class AppTheme {
       dividerTheme: DividerThemeData(color: p.line, space: 0.5, thickness: 0.5),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: light ? const Color(0xFF1C1C1E) : p.surface2,
+        backgroundColor: light ? const Color(0xFF2A241F) : p.surface2,
         contentTextStyle: textTheme.bodyMedium?.copyWith(color: Colors.white),
         actionTextColor: light ? BrandColors.sky : p.primary,
         shape: RoundedRectangleBorder(

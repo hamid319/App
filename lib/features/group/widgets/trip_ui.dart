@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/theme.dart';
 import '../../../common/models/group_model.dart';
 import '../../../common/utils/trip_dates.dart';
 import '../../../common/widgets/member_avatar.dart';
@@ -395,9 +396,10 @@ class TripCover extends ConsumerWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
+          // Navy into coral, like a sky at dusk.
           colors: [
-            scheme.primary.withValues(alpha: 0.55),
-            scheme.primary.withValues(alpha: 0.20),
+            scheme.primary.withValues(alpha: 0.85),
+            context.swipeColors.like.withValues(alpha: 0.75),
           ],
         ),
       ),
