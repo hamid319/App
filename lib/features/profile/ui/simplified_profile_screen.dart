@@ -12,7 +12,6 @@ import '../../../l10n/l10n.dart';
 import '../../../app/theme.dart';
 import '../../../common/widgets/skeleton.dart';
 import '../../../common/widgets/member_avatar.dart';
-import '../../../common/widgets/ticket.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/constants/colors.dart';
 import '../../group/logic/group_controller.dart';
@@ -39,7 +38,8 @@ class SimplifiedProfileScreen extends ConsumerWidget {
       body: authState.when(
         loading: () => const SkeletonList(count: 3, thumbnail: false),
         error: (e, st) => ErrorView(
-          message: userMessage(e, fallback: context.l10n.errorLoadProfile, l10n: context.l10n),
+          message: userMessage(e,
+              fallback: context.l10n.errorLoadProfile, l10n: context.l10n),
           onRetry: () => ref.refresh(authControllerProvider),
         ),
         data: (user) {
@@ -55,9 +55,11 @@ class SimplifiedProfileScreen extends ConsumerWidget {
           final profileState = ref.watch(profileControllerProvider);
 
           return profileState.when(
-            loading: () => _buildProfileContent(context, ref, user, isLoading: true),
+            loading: () =>
+                _buildProfileContent(context, ref, user, isLoading: true),
             error: (e, st) => ErrorView(
-              message: userMessage(e, fallback: context.l10n.errorLoadProfile, l10n: context.l10n),
+              message: userMessage(e,
+                  fallback: context.l10n.errorLoadProfile, l10n: context.l10n),
               onRetry: () => ref.refresh(profileControllerProvider),
             ),
             data: (profileUser) {
@@ -70,7 +72,8 @@ class SimplifiedProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildProfileContent(BuildContext context, WidgetRef ref, user, {bool isLoading = false}) {
+  Widget _buildProfileContent(BuildContext context, WidgetRef ref, user,
+      {bool isLoading = false}) {
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     final l10n = context.l10n;
@@ -84,7 +87,7 @@ class SimplifiedProfileScreen extends ConsumerWidget {
 
     final email = (user.email as String?)?.trim() ?? '';
     final edge = context.swipeColors.edge;
-    const avatarSize = 76.0;
+    const avatarSize = 64.0;
     final Widget avatar = user.photoUrl != null
         ? ClipOval(
             child: CachedNetworkImage(
@@ -99,6 +102,9 @@ class SimplifiedProfileScreen extends ConsumerWidget {
           )
         : MemberAvatar(id: user.uid, name: name, size: avatarSize);
 
+    final suitcase = ref.watch(suitcaseProgressProvider);
+    final stamps = ref.watch(passportStampsProvider).value?.length ?? 0;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(
         AppSizes.screenEdge,
@@ -109,131 +115,137 @@ class SimplifiedProfileScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Passport-style ticket: who you are above the perforation, what
-          // you collected below it.
-          Ticket(
-            raised: true,
-            notchFromBottom: _stubHeight,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(AppSizes.space16 + 4),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: scheme.surface,
-                          border: Border.all(color: edge, width: AppSizes.edge),
-                        ),
-                        child: avatar,
-                      ),
-                      const SizedBox(width: AppSizes.space16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              name,
-                              style: text.headlineSmall,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            if (email.isNotEmpty) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                email,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: text.bodySmall
-                                    ?.copyWith(color: scheme.onSurfaceVariant),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: _stubHeight,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _Stat(
-                          icon: Icons.favorite_rounded,
-                          value: favorites,
-                          label: l10n.navFavorites,
-                          onTap: () => context.go('/favorites'),
-                        ),
-                      ),
-                      Container(
-                        width: 1,
-                        height: _stubHeight - 28,
-                        color: scheme.outlineVariant,
-                      ),
-                      Expanded(
-                        child: _Stat(
-                          icon: Icons.luggage_rounded,
-                          value: groups,
-                          label: l10n.navTrips,
-                          onTap: () => context.go('/trips'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSizes.space16),
-          OutlinedButton.icon(
-            onPressed: () => _showEditProfileDialog(context, ref, user),
-            icon: const Icon(Icons.edit_outlined),
-            label: Text(l10n.editProfile),
-          ),
-          const SizedBox(height: AppSizes.groupGap),
+          // The game first: the suitcase grows with every trip.
           const SuitcaseCard(),
-          const SizedBox(height: AppSizes.space16),
-          const _PassportRow(),
-          const SizedBox(height: AppSizes.space16),
-          // Favorites moved here from their own tab.
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-            child: Material(
-              color: scheme.surface,
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: Icon(Icons.favorite_rounded, color: scheme.primary),
-                    title: Text(l10n.navFavorites),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('$favorites',
-                            style: text.bodyLarge
-                                ?.copyWith(color: scheme.onSurfaceVariant)),
-                        const Icon(Icons.chevron_right_rounded),
-                      ],
-                    ),
-                    onTap: () => context.push('/favorites'),
+          const SizedBox(height: AppSizes.space24),
+          // The collections as a wallet: full cards stacked so only their
+          // tops show, the travel ID in front (like Apple Wallet).
+          Stack(
+            children: [
+              for (final (i, card) in [
+                _WalletCard(
+                  color: BrandColors.navy,
+                  onColor: Colors.white,
+                  icon: Icons.public_rounded,
+                  title: l10n.passportTitle,
+                  value: l10n.passportStampCount(stamps),
+                  onTap: () => context.push('/passport'),
+                ),
+                _WalletCard(
+                  color: BrandColors.amber,
+                  onColor: BrandColors.navy,
+                  icon: Icons.favorite_rounded,
+                  title: l10n.navFavorites,
+                  value: '$favorites',
+                  onTap: () => context.push('/favorites'),
+                ),
+                _WalletCard(
+                  color: BrandColors.coral,
+                  onColor: Colors.white,
+                  icon: Icons.map_rounded,
+                  title: l10n.profileMapTab,
+                  onTap: () => context.push('/favorites-map'),
+                ),
+              ].indexed)
+                Positioned(
+                  top: i * _walletPeek,
+                  left: 0,
+                  right: 0,
+                  height: _walletCardHeight,
+                  child: card,
+                ),
+              Padding(
+                padding: const EdgeInsets.only(top: 3 * _walletPeek),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: scheme.surface,
+                    borderRadius: BorderRadius.circular(_walletRadius),
+                    border: Border.all(color: edge, width: AppSizes.edge),
+                    boxShadow: _walletShadow,
                   ),
-                  Divider(
-                      height: 0.5,
-                      thickness: 0.5,
-                      indent: 56,
-                      color: scheme.outlineVariant),
-                  ListTile(
-                    leading: Icon(Icons.map_outlined, color: scheme.primary),
-                    title: Text(l10n.profileFavoritesMap),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () => context.push('/favorites-map'),
+                  padding: const EdgeInsets.fromLTRB(16, 10, 8, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 26,
+                            height: 26,
+                            decoration: BoxDecoration(
+                              color: BrandColors.navy,
+                              borderRadius: BorderRadius.circular(7),
+                            ),
+                            child: const Icon(Icons.flight_rounded,
+                                size: 16, color: BrandColors.amber),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(l10n.profileIdTitle,
+                                style: text.titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.w600)),
+                          ),
+                          IconButton(
+                            tooltip: l10n.editProfile,
+                            icon: Icon(Icons.edit_outlined,
+                                color: scheme.primary),
+                            onPressed: () =>
+                                _showEditProfileDialog(context, ref, user),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          avatar,
+                          const SizedBox(width: AppSizes.space16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  name,
+                                  style: text.headlineSmall,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (email.isNotEmpty)
+                                  Text(
+                                    email,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: text.bodySmall?.copyWith(
+                                        color: scheme.onSurfaceVariant),
+                                  ),
+                                const SizedBox(height: AppSizes.space12),
+                                Row(
+                                  children: [
+                                    _IdField(
+                                      label: l10n.navTrips,
+                                      value: groups,
+                                      onTap: () => context.go('/trips'),
+                                    ),
+                                    _IdField(
+                                      label: l10n.passportDataCities,
+                                      value: suitcase?.cities ?? 0,
+                                    ),
+                                    _IdField(
+                                      label: l10n.passportDataCountries,
+                                      value: suitcase?.countries ?? 0,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),
@@ -263,7 +275,9 @@ class SimplifiedProfileScreen extends ConsumerWidget {
           ElevatedButton(
             onPressed: () async {
               try {
-                await ref.read(profileControllerProvider.notifier).updateProfile(
+                await ref
+                    .read(profileControllerProvider.notifier)
+                    .updateProfile(
                   user.uid,
                   {'displayName': nameController.text.trim()},
                 );
@@ -276,7 +290,11 @@ class SimplifiedProfileScreen extends ConsumerWidget {
               } catch (e) {
                 if (dialogContext.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(userMessage(e, fallback: context.l10n.errorUpdateProfile, l10n: context.l10n)), backgroundColor: Theme.of(context).colorScheme.error),
+                    SnackBar(
+                        content: Text(userMessage(e,
+                            fallback: context.l10n.errorUpdateProfile,
+                            l10n: context.l10n)),
+                        backgroundColor: Theme.of(context).colorScheme.error),
                   );
                 }
               }
@@ -291,85 +309,108 @@ class SimplifiedProfileScreen extends ConsumerWidget {
   }
 }
 
-/// Height of the stats stub under the passport's perforation.
-const double _stubHeight = 76;
+/// Profile wallet geometry: how much of each card shows above the next,
+/// the full card height and the corner radius.
+const double _walletPeek = 60;
+const double _walletCardHeight = 200;
+const double _walletRadius = 18;
 
-class _Stat extends StatelessWidget {
-  const _Stat({
+/// The soft shadow a card casts upward onto the card behind it.
+const _walletShadow = [
+  BoxShadow(color: Color(0x2E000000), blurRadius: 10, offset: Offset(0, -3)),
+];
+
+/// One collection card in the wallet; only its top band shows.
+class _WalletCard extends StatelessWidget {
+  const _WalletCard({
+    required this.color,
+    required this.onColor,
     required this.icon,
-    required this.value,
-    required this.label,
+    required this.title,
     required this.onTap,
+    this.value,
   });
 
+  final Color color;
+  final Color onColor;
   final IconData icon;
-  final int value;
-  final String label;
+  final String title;
+  final String? value;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
-    return InkWell(
-      onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 18, color: scheme.onSurface),
-              const SizedBox(width: AppSizes.space4),
-              Text('$value', style: text.titleLarge),
-            ],
-          ),
-          Text(
-            label.toUpperCase(),
-            style: text.labelSmall?.copyWith(
-              color: scheme.onSurfaceVariant,
-              letterSpacing: 1.1,
-              fontWeight: FontWeight.w800,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(_walletRadius),
+        boxShadow: _walletShadow,
+      ),
+      child: Material(
+        color: color,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_walletRadius),
+          side: BorderSide(
+              color: Colors.white.withValues(alpha: 0.18), width: 0.5),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              height: _walletPeek,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                child: Row(
+                  children: [
+                    Icon(icon, color: onColor, size: 22),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(title,
+                          style: text.titleMedium?.copyWith(
+                              color: onColor, fontWeight: FontWeight.w700)),
+                    ),
+                    if (value != null)
+                      Text(value!,
+                          style: text.labelLarge?.copyWith(color: onColor)),
+                    Icon(Icons.chevron_right_rounded,
+                        color: onColor.withValues(alpha: 0.7)),
+                  ],
+                ),
+              ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
-/// Entry to the passport: a small navy booklet and the stamp count.
-class _PassportRow extends ConsumerWidget {
-  const _PassportRow();
+/// A labelled number on the travel ID.
+class _IdField extends StatelessWidget {
+  const _IdField({required this.label, required this.value, this.onTap});
+
+  final String label;
+  final int value;
+  final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final count = ref.watch(passportStampsProvider).value?.length ?? 0;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-      child: Material(
-        color: scheme.surface,
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.space16, vertical: AppSizes.space4),
-          leading: Container(
-            width: 36,
-            height: 48,
-            decoration: const BoxDecoration(
-              color: BrandColors.navy,
-              borderRadius: BorderRadius.horizontal(
-                left: Radius.circular(3),
-                right: Radius.circular(7),
-              ),
-            ),
-            child: const Icon(Icons.public_rounded,
-                color: Color(0xFFE8C46A), size: 20),
-          ),
-          title: Text(context.l10n.passportTitle),
-          subtitle: Text(context.l10n.passportStampCount(count)),
-          trailing: const Icon(Icons.chevron_right_rounded),
-          onTap: () => context.push('/passport'),
+    final text = Theme.of(context).textTheme;
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label,
+                style:
+                    text.labelSmall?.copyWith(color: scheme.onSurfaceVariant)),
+            Text('$value', style: text.titleLarge),
+          ],
         ),
       ),
     );

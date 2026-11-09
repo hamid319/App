@@ -2939,13 +2939,13 @@ abstract class AppLocalizations {
   /// No description provided for @tripsEmptyTitle.
   ///
   /// In en, this message translates to:
-  /// **'No trips yet'**
+  /// **'Where to next?'**
   String get tripsEmptyTitle;
 
   /// No description provided for @tripsEmptyBody.
   ///
   /// In en, this message translates to:
-  /// **'Plan a trip with friends: collect ideas, vote, plan the days and split the costs.'**
+  /// **'Plan together, swipe ideas and split the costs.'**
   String get tripsEmptyBody;
 
   /// No description provided for @tripNewTitle.
@@ -5203,6 +5203,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Shampoo & shower gel'**
   String get packingItemShampoo;
+
+  /// No description provided for @tripsPlanTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan a trip'**
+  String get tripsPlanTrip;
+
+  /// No description provided for @tripsJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get tripsJoin;
+
+  /// No description provided for @tripsDestinations.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular destinations'**
+  String get tripsDestinations;
+
+  /// No description provided for @tripsHowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How you plan together'**
+  String get tripsHowTitle;
+
+  /// No description provided for @tripsHowSwipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe places'**
+  String get tripsHowSwipe;
+
+  /// No description provided for @tripsHowSwipeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone votes, matches land on the wishlist.'**
+  String get tripsHowSwipeBody;
+
+  /// No description provided for @tripsHowDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan the days'**
+  String get tripsHowDays;
+
+  /// No description provided for @tripsHowDaysBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day as a route on the map.'**
+  String get tripsHowDaysBody;
+
+  /// No description provided for @tripsHowCosts.
+  ///
+  /// In en, this message translates to:
+  /// **'Split costs'**
+  String get tripsHowCosts;
+
+  /// No description provided for @tripsHowCostsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan receipts and split them fairly.'**
+  String get tripsHowCostsBody;
+
+  /// No description provided for @suitcaseNextLevelAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Level {level} at {miles}'**
+  String suitcaseNextLevelAt(int level, int miles);
+
+  /// No description provided for @suitcaseStillNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'{missing} to go'**
+  String suitcaseStillNeeded(String missing);
+
+  /// No description provided for @suitcaseChipCity.
+  ///
+  /// In en, this message translates to:
+  /// **'New city'**
+  String get suitcaseChipCity;
+
+  /// No description provided for @suitcaseChipCheckIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Check-in'**
+  String get suitcaseChipCheckIn;
+
+  /// No description provided for @suitcaseChipPacked.
+  ///
+  /// In en, this message translates to:
+  /// **'Packed'**
+  String get suitcaseChipPacked;
+
+  /// No description provided for @profileMapTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get profileMapTab;
+
+  /// No description provided for @profileIdTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'TripFam travel ID'**
+  String get profileIdTitle;
 }
 
 class _AppLocalizationsDelegate

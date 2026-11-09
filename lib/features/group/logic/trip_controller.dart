@@ -156,6 +156,21 @@ final tripCityPlacesProvider =
   }
 });
 
+/// Cover of a curated city for the destination cards: its best-known place
+/// with a photo, from at most three reads (cached by the repository).
+final cityCoverProvider =
+    FutureProvider.family<PlaceModel?, String>((ref, cityId) async {
+  try {
+    final places = await ref
+        .read(placesRepositoryProvider)
+        .loadCityPlaces(cityId, limit: 3);
+    return places.where((p) => p.imageUrls.isNotEmpty).firstOrNull ??
+        places.firstOrNull;
+  } catch (_) {
+    return null;
+  }
+});
+
 /// [tripCityPlacesProvider] key of a trip, '' without a location.
 String tripCityKey(GroupModel group) => group.location == null
     ? ''

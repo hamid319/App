@@ -691,8 +691,8 @@
   "tripsTitle": "Trips",
   "tripsPlanned": "Planned trips",
   "tripsPast": "Past trips",
-  "tripsEmptyTitle": "No trips yet",
-  "tripsEmptyBody": "Plan a trip with friends: collect ideas, vote, plan the days and split the costs.",
+  "tripsEmptyTitle": "Where to next?",
+  "tripsEmptyBody": "Plan together, swipe ideas and split the costs.",
   "tripNewTitle": "Plan a new trip",
   "tripJoinByCode": "Join with a code",
   "tripCreateButton": "Create trip",
@@ -1473,5 +1473,33 @@
   "packingItemPowerStrip": "Power strip",
   "packingItemCardGame": "Card game",
   "packingItemHairDryer": "Hair dryer",
-  "packingItemShampoo": "Shampoo & shower gel"
+  "packingItemShampoo": "Shampoo & shower gel",
+  "tripsPlanTrip": "Plan a trip",
+  "tripsJoin": "Join",
+  "tripsDestinations": "Popular destinations",
+  "tripsHowTitle": "How you plan together",
+  "tripsHowSwipe": "Swipe places",
+  "tripsHowSwipeBody": "Everyone votes, matches land on the wishlist.",
+  "tripsHowDays": "Plan the days",
+  "tripsHowDaysBody": "Every day as a route on the map.",
+  "tripsHowCosts": "Split costs",
+  "tripsHowCostsBody": "Scan receipts and split them fairly.",
+  "suitcaseNextLevelAt": "Level {level} at {miles}",
+  "@suitcaseNextLevelAt": {
+    "placeholders": {
+      "level": {"type": "int"},
+      "miles": {"type": "int"}
+    }
+  },
+  "suitcaseStillNeeded": "{missing} to go",
+  "@suitcaseStillNeeded": {
+    "placeholders": {
+      "missing": {"type": "String"}
+    }
+  },
+  "suitcaseChipCity": "New city",
+  "suitcaseChipCheckIn": "Check-in",
+  "suitcaseChipPacked": "Packed",
+  "profileMapTab": "Map",
+  "profileIdTitle": "TripFam travel ID"
 }

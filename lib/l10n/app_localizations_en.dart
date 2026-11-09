@@ -1583,11 +1583,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tripsPast => 'Past trips';
 
   @override
-  String get tripsEmptyTitle => 'No trips yet';
+  String get tripsEmptyTitle => 'Where to next?';
 
   @override
   String get tripsEmptyBody =>
-      'Plan a trip with friends: collect ideas, vote, plan the days and split the costs.';
+      'Plan together, swipe ideas and split the costs.';
 
   @override
   String get tripNewTitle => 'Plan a new trip';
@@ -3022,4 +3022,60 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get packingItemShampoo => 'Shampoo & shower gel';
+
+  @override
+  String get tripsPlanTrip => 'Plan a trip';
+
+  @override
+  String get tripsJoin => 'Join';
+
+  @override
+  String get tripsDestinations => 'Popular destinations';
+
+  @override
+  String get tripsHowTitle => 'How you plan together';
+
+  @override
+  String get tripsHowSwipe => 'Swipe places';
+
+  @override
+  String get tripsHowSwipeBody =>
+      'Everyone votes, matches land on the wishlist.';
+
+  @override
+  String get tripsHowDays => 'Plan the days';
+
+  @override
+  String get tripsHowDaysBody => 'Every day as a route on the map.';
+
+  @override
+  String get tripsHowCosts => 'Split costs';
+
+  @override
+  String get tripsHowCostsBody => 'Scan receipts and split them fairly.';
+
+  @override
+  String suitcaseNextLevelAt(int level, int miles) {
+    return 'Level $level at $miles';
+  }
+
+  @override
+  String suitcaseStillNeeded(String missing) {
+    return '$missing to go';
+  }
+
+  @override
+  String get suitcaseChipCity => 'New city';
+
+  @override
+  String get suitcaseChipCheckIn => 'Check-in';
+
+  @override
+  String get suitcaseChipPacked => 'Packed';
+
+  @override
+  String get profileMapTab => 'Map';
+
+  @override
+  String get profileIdTitle => 'TripFam travel ID';
 }

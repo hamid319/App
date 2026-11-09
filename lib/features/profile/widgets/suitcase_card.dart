@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../common/utils/suitcase_progress.dart';
+import '../../../common/widgets/suitcase_3d.dart';
 import '../../../common/widgets/suitcase_view.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../l10n/l10n.dart';
@@ -29,8 +30,9 @@ String _goalCount(AppLocalizations l10n, SuitcaseGoal goal, int n) =>
       SuitcaseGoal.countries => l10n.suitcaseCountries(n),
     };
 
-/// The user's suitcase in the profile: stickers, level, miles to the next
-/// level and the next extra. Tap explains how it grows.
+/// The suitcase stage at the top of the profile: level, the suitcase with
+/// its city stickers, the next extra still locked, miles to the next level
+/// and how to earn more. Tap explains how it grows.
 class SuitcaseCard extends ConsumerWidget {
   const SuitcaseCard({super.key});
 
@@ -41,70 +43,104 @@ class SuitcaseCard extends ConsumerWidget {
     final l10n = context.l10n;
     final text = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
+    final on = scheme.onPrimaryContainer;
     final next = p.nextExtra;
     final nextAt = p.nextLevelAt;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+      borderRadius: BorderRadius.circular(24),
       child: Material(
-        color: scheme.surface,
+        color: scheme.primaryContainer,
         child: InkWell(
           onTap: () => _showHow(context, p),
           child: Padding(
             padding: const EdgeInsets.all(AppSizes.space16),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SuitcaseView(
-                  size: 104,
-                  stickers: [
-                    for (final s in p.stickers) SuitcaseSticker.fromStamp(s)
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: scheme.primary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        l10n.suitcaseLevel(p.level + 1),
+                        style: text.labelLarge
+                            ?.copyWith(color: scheme.onPrimary, fontSize: 13),
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(suitcaseLevelName(l10n, p.level),
+                        style: text.titleMedium?.copyWith(color: on)),
                   ],
-                  extras: p.extras,
-                  semanticLabel: l10n.suitcaseTitle,
                 ),
-                const SizedBox(width: AppSizes.space16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                SizedBox(
+                  height: 196,
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
-                      Text(
-                        l10n.suitcaseLevel(p.level + 1).toUpperCase(),
-                        style: text.labelSmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                          letterSpacing: 1.1,
-                          fontWeight: FontWeight.w800,
-                        ),
+                      Suitcase3D(
+                        size: 188,
+                        stickers: [
+                          for (final s in p.stickers)
+                            SuitcaseSticker.fromStamp(s)
+                        ],
+                        extras: p.extras,
+                        semanticLabel: l10n.suitcaseTitle,
                       ),
-                      Text(suitcaseLevelName(l10n, p.level),
-                          style: text.titleLarge),
-                      const SizedBox(height: AppSizes.space8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: p.levelProgress,
-                          minHeight: 8,
-                          backgroundColor: scheme.surfaceContainerHighest,
-                        ),
-                      ),
-                      const SizedBox(height: AppSizes.space4),
-                      Text(
-                        nextAt == null
-                            ? l10n.suitcaseMilesTotal(p.miles)
-                            : l10n.suitcaseMiles(p.miles, nextAt),
-                        style: text.bodySmall
-                            ?.copyWith(color: scheme.onSurfaceVariant),
-                      ),
-                      const SizedBox(height: AppSizes.space8),
-                      Text(
-                        next == null
-                            ? l10n.suitcaseAllExtras
-                            : l10n.suitcaseNextExtra(
-                                _extraName(l10n, next.extra),
+                      if (next != null)
+                        Positioned(
+                          right: 0,
+                          top: 16,
+                          child: _LockedExtra(
+                            name: _extraName(l10n, next.extra),
+                            missing: l10n.suitcaseStillNeeded(
                                 _goalCount(l10n, next.goal, next.missing)),
-                        style: text.bodySmall,
-                      ),
+                          ),
+                        ),
                     ],
                   ),
+                ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(5),
+                  child: LinearProgressIndicator(
+                    value: p.levelProgress,
+                    minHeight: 10,
+                    color: scheme.primary,
+                    backgroundColor: on.withValues(alpha: 0.12),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Text(l10n.suitcaseMilesTotal(p.miles),
+                        style: text.labelLarge?.copyWith(color: on)),
+                    const Spacer(),
+                    Text(
+                      nextAt == null
+                          ? l10n.suitcaseAllExtras
+                          : l10n.suitcaseNextLevelAt(p.level + 2, nextAt),
+                      style: text.bodySmall
+                          ?.copyWith(color: on.withValues(alpha: 0.75)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSizes.space12),
+                Row(
+                  children: [
+                    for (final (miles, label) in [
+                      (milesPerCity, l10n.suitcaseChipCity),
+                      (milesPerCheckIn, l10n.suitcaseChipCheckIn),
+                      (milesPerPackedTrip, l10n.suitcaseChipPacked),
+                    ]) ...[
+                      if (miles != milesPerCity) const SizedBox(width: 8),
+                      Expanded(child: _EarnChip(miles: miles, label: label)),
+                    ],
+                  ],
                 ),
               ],
             ),
@@ -191,6 +227,73 @@ class SuitcaseCard extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// The next extra, still locked, hanging beside the suitcase.
+class _LockedExtra extends StatelessWidget {
+  const _LockedExtra({required this.name, required this.missing});
+
+  final String name;
+  final String missing;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    return Container(
+      width: 96,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: scheme.primary.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.lock_outline_rounded, size: 18, color: scheme.primary),
+          const SizedBox(height: 2),
+          Text(name,
+              textAlign: TextAlign.center,
+              style: text.labelSmall?.copyWith(fontWeight: FontWeight.w600)),
+          Text(missing,
+              textAlign: TextAlign.center,
+              style: text.labelSmall
+                  ?.copyWith(fontSize: 11, color: scheme.onSurfaceVariant)),
+        ],
+      ),
+    );
+  }
+}
+
+/// "+30 New city": one way to earn miles.
+class _EarnChip extends StatelessWidget {
+  const _EarnChip({required this.miles, required this.label});
+
+  final int miles;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Text('+$miles',
+              style: text.titleMedium?.copyWith(color: scheme.primary)),
+          Text(label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: text.labelSmall?.copyWith(color: scheme.onSurfaceVariant)),
+        ],
       ),
     );
   }

@@ -15,8 +15,9 @@ import 'trip_created_celebration.dart';
 import 'trip_ui.dart';
 
 /// Sheet to plan a new trip: name, city and optional dates (also from a
-/// calendar event). Returns the new trip's group id, or null.
-Future<String?> showCreateTripSheet(BuildContext context) {
+/// calendar event), optionally with [city] already picked. Returns the new
+/// trip's group id, or null.
+Future<String?> showCreateTripSheet(BuildContext context, {PopularCity? city}) {
   return showModalBottomSheet<String>(
     context: context,
     isScrollControlled: true,
@@ -25,12 +26,14 @@ Future<String?> showCreateTripSheet(BuildContext context) {
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (_) => const _CreateTripSheet(),
+    builder: (_) => _CreateTripSheet(city: city),
   );
 }
 
 class _CreateTripSheet extends ConsumerStatefulWidget {
-  const _CreateTripSheet();
+  const _CreateTripSheet({this.city});
+
+  final PopularCity? city;
 
   @override
   ConsumerState<_CreateTripSheet> createState() => _CreateTripSheetState();
@@ -38,7 +41,7 @@ class _CreateTripSheet extends ConsumerStatefulWidget {
 
 class _CreateTripSheetState extends ConsumerState<_CreateTripSheet> {
   final _name = TextEditingController();
-  PopularCity? _city;
+  late PopularCity? _city = widget.city;
   DateTimeRange? _dates;
   bool _busy = false;
 

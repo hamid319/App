@@ -6,9 +6,14 @@ import 'package:intl/intl.dart';
 import '../../../common/models/group_model.dart';
 import '../../../common/utils/trip_days.dart';
 import '../../../common/widgets/error_view.dart';
+import '../../../common/widgets/place_photo.dart';
 import '../../../common/widgets/skeleton.dart';
+import '../../../common/widgets/suitcase_view.dart';
+import '../../../core/constants/colors.dart';
+import '../../../core/constants/popular_cities.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
+import '../../../app/theme.dart';
 import '../logic/group_controller.dart';
 import '../logic/trip_controller.dart';
 import '../widgets/join_trip_dialog.dart';
@@ -66,10 +71,24 @@ class TripsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 20),
                   if (groups.isEmpty)
-                    _EmptyTrips(
+                    _EmptyHero(
                       onCreate: () => _create(context),
                       onJoin: () => _join(context, ref),
                     ),
+                  // Nothing coming up: inspiration for the next trip.
+                  if (hero == null) ...[
+                    const SizedBox(height: 24),
+                    TripSectionHeader(l10n.tripsDestinations),
+                    const SizedBox(height: 8),
+                    _Destinations(
+                        onPick: (city) => _create(context, city: city)),
+                  ],
+                  if (groups.isEmpty) ...[
+                    const SizedBox(height: 24),
+                    TripSectionHeader(l10n.tripsHowTitle),
+                    const SizedBox(height: 8),
+                    const _HowItWorks(),
+                  ],
                   if (hero != null) _HeroTripCard(group: hero),
                   if (planned.isNotEmpty) ...[
                     const SizedBox(height: 20),
@@ -142,8 +161,8 @@ class TripsScreen extends ConsumerWidget {
     if (choice == 1 && context.mounted) await _join(context, ref);
   }
 
-  Future<void> _create(BuildContext context) async {
-    final id = await showCreateTripSheet(context);
+  Future<void> _create(BuildContext context, {PopularCity? city}) async {
+    final id = await showCreateTripSheet(context, city: city);
     // The sheet already celebrated the new trip.
     if (id != null && context.mounted) context.push('/trip/$id');
   }
@@ -378,8 +397,9 @@ class _TripRow extends StatelessWidget {
   }
 }
 
-class _EmptyTrips extends StatelessWidget {
-  const _EmptyTrips({required this.onCreate, required this.onJoin});
+/// Start of the tab while there is no trip: where to next, plan or join.
+class _EmptyHero extends StatelessWidget {
+  const _EmptyHero({required this.onCreate, required this.onJoin});
 
   final VoidCallback onCreate;
   final VoidCallback onJoin;
@@ -388,31 +408,272 @@ class _EmptyTrips extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final text = Theme.of(context).textTheme;
+    // Brand colours on purpose: the card looks the same in light and dark.
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(22),
+      child: ColoredBox(
+        color: BrandColors.navy,
+        child: Stack(
+          children: [
+            Positioned(
+              right: -36,
+              top: -36,
+              child: Container(
+                width: 170,
+                height: 170,
+                decoration: const BoxDecoration(
+                  color: BrandColors.coral,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+            const Positioned(
+              right: 14,
+              top: 14,
+              width: 104,
+              height: 104,
+              child: ExcludeSemantics(
+                child: CustomPaint(painter: SuitcasePainter()),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 120),
+                    child: Text(
+                      l10n.tripsEmptyTitle,
+                      style: text.headlineSmall?.copyWith(color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 110),
+                    child: Text(
+                      l10n.tripsEmptyBody,
+                      style: text.bodyMedium?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.8)),
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: onCreate,
+                          icon: const Icon(Icons.add_rounded),
+                          label: Text(l10n.tripsPlanTrip),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: BrandColors.navy,
+                            minimumSize: const Size(0, 48),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      TextButton(
+                        onPressed: onJoin,
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.white.withValues(alpha: 0.14),
+                          minimumSize: const Size(0, 48),
+                          padding: const EdgeInsets.symmetric(horizontal: 18),
+                        ),
+                        child: Text(l10n.tripsJoin),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Curated cities to start a trip to; a tap opens "new trip" with the
+/// city picked. Covers cost at most three reads per city.
+class _Destinations extends StatelessWidget {
+  const _Destinations({required this.onPick});
+
+  final ValueChanged<PopularCity> onPick;
+
+  static const _ids = [
+    'pt_lisbon',
+    'es_barcelona',
+    'it_rome',
+    'fr_paris',
+    'nl_amsterdam',
+    'cz_prague',
+    'dk_copenhagen',
+    'gr_athens',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final cities = [
+      for (final id in _ids) ...popularCities.where((c) => c.id == id),
+    ];
+    return SizedBox(
+      height: 176,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
+        itemCount: cities.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        itemBuilder: (_, i) =>
+            _DestinationCard(city: cities[i], onTap: () => onPick(cities[i])),
+      ),
+    );
+  }
+}
+
+class _DestinationCard extends ConsumerWidget {
+  const _DestinationCard({required this.city, required this.onTap});
+
+  final PopularCity city;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cover = ref.watch(cityCoverProvider(city.id)).value;
+    final name = city.nameFor(Localizations.localeOf(context).languageCode);
+    final flag = String.fromCharCodes(
+        city.countryCode.toUpperCase().codeUnits.map((c) => c + 127397));
+    return Semantics(
+      button: true,
+      label: name,
+      child: SizedBox(
+        width: 136,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (cover != null)
+                PlacePhoto(place: cover)
+              else
+                ColoredBox(color: context.swipeColors.peach),
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment(0, -0.1),
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, PhotoColors.scrimBottom],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 12,
+                right: 12,
+                bottom: 12,
+                child: ExcludeSemantics(
+                  child: Text(
+                    '$flag  $name',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ),
+              ),
+              Material(
+                type: MaterialType.transparency,
+                child: InkWell(onTap: onTap),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The three steps of planning together, for people new to TripFam.
+class _HowItWorks extends StatelessWidget {
+  const _HowItWorks();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.swipeColors;
+    return InsetGroup(
+      separatorIndent: 14 + 40 + 12,
+      children: [
+        _Step(
+          icon: Icons.style_rounded,
+          tint: colors.peach,
+          title: l10n.tripsHowSwipe,
+          body: l10n.tripsHowSwipeBody,
+        ),
+        _Step(
+          icon: Icons.map_rounded,
+          tint: colors.sky,
+          title: l10n.tripsHowDays,
+          body: l10n.tripsHowDaysBody,
+        ),
+        _Step(
+          icon: Icons.receipt_long_rounded,
+          tint: colors.mint,
+          title: l10n.tripsHowCosts,
+          body: l10n.tripsHowCostsBody,
+        ),
+      ],
+    );
+  }
+}
+
+class _Step extends StatelessWidget {
+  const _Step({
+    required this.icon,
+    required this.tint,
+    required this.title,
+    required this.body,
+  });
+
+  final IconData icon;
+  final Color tint;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
-    return TripCard(
-      radius: 22,
-      padding: const EdgeInsets.fromLTRB(20, 28, 20, 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Row(
         children: [
-          Icon(Icons.luggage_rounded, size: 44, color: scheme.primary),
-          const SizedBox(height: 16),
-          Text(l10n.tripsEmptyTitle,
-              textAlign: TextAlign.center, style: text.headlineSmall),
-          const SizedBox(height: 6),
-          Text(
-            l10n.tripsEmptyBody,
-            textAlign: TextAlign.center,
-            style: text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: tint,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, size: 22, color: scheme.onSurface),
           ),
-          const SizedBox(height: 20),
-          FloatingPrimaryButton(
-            label: l10n.tripNewTitle,
-            icon: Icons.add_rounded,
-            onPressed: onCreate,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: text.titleMedium),
+                const SizedBox(height: 2),
+                Text(
+                  body,
+                  style: text.bodyMedium
+                      ?.copyWith(fontSize: 14, color: scheme.onSurfaceVariant),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
-          TextButton(onPressed: onJoin, child: Text(l10n.tripJoinByCode)),
         ],
       ),
     );

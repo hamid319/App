@@ -1613,11 +1613,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get tripsPast => 'Vergangene Reisen';
 
   @override
-  String get tripsEmptyTitle => 'Noch keine Reise';
+  String get tripsEmptyTitle => 'Wohin geht\'s als Nächstes?';
 
   @override
   String get tripsEmptyBody =>
-      'Plant eine Reise mit Freunden: Ideen sammeln, abstimmen, Tage planen und Kosten teilen.';
+      'Plant zusammen, swipt Ideen und teilt die Kosten.';
 
   @override
   String get tripNewTitle => 'Neue Reise planen';
@@ -3057,4 +3057,60 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get packingItemShampoo => 'Shampoo & Duschgel';
+
+  @override
+  String get tripsPlanTrip => 'Reise planen';
+
+  @override
+  String get tripsJoin => 'Beitreten';
+
+  @override
+  String get tripsDestinations => 'Beliebte Ziele';
+
+  @override
+  String get tripsHowTitle => 'So plant ihr zusammen';
+
+  @override
+  String get tripsHowSwipe => 'Orte swipen';
+
+  @override
+  String get tripsHowSwipeBody =>
+      'Alle stimmen ab, Matches landen auf der Wunschliste.';
+
+  @override
+  String get tripsHowDays => 'Tage planen';
+
+  @override
+  String get tripsHowDaysBody => 'Jeder Tag als Route auf der Karte.';
+
+  @override
+  String get tripsHowCosts => 'Kosten teilen';
+
+  @override
+  String get tripsHowCostsBody => 'Kassenzettel scannen und fair aufteilen.';
+
+  @override
+  String suitcaseNextLevelAt(int level, int miles) {
+    return 'Stufe $level bei $miles';
+  }
+
+  @override
+  String suitcaseStillNeeded(String missing) {
+    return 'noch $missing';
+  }
+
+  @override
+  String get suitcaseChipCity => 'Neue Stadt';
+
+  @override
+  String get suitcaseChipCheckIn => 'Check-in';
+
+  @override
+  String get suitcaseChipPacked => 'Gepackt';
+
+  @override
+  String get profileMapTab => 'Karte';
+
+  @override
+  String get profileIdTitle => 'TripFam Reiseausweis';
 }
