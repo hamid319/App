@@ -2687,11 +2687,11 @@ class AppLocalizationsDe extends AppLocalizations {
       'Dein Tipp konnte nicht gesendet werden. Bitte versuch es noch einmal.';
 
   @override
-  String get tripCreatedTitle => 'Koffer gepackt!';
+  String get tripCreatedTitle => 'Die Reise steht!';
 
   @override
   String tripCreatedBody(String city) {
-    return 'Deine Reise nach $city steht. Jetzt noch deine Leute einladen.';
+    return '$city ist dein nächstes Ziel. Lade jetzt deine Leute ein und plant gemeinsam.';
   }
 
   @override

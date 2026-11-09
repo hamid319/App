@@ -1315,8 +1315,8 @@
   "cityTipSubmit": "Send tip",
   "cityTipThanks": "Thanks! We'll take a look at your tip.",
   "cityTipSaveError": "Your tip could not be sent. Please try again.",
-  "tripCreatedTitle": "Bags packed!",
-  "tripCreatedBody": "Your trip to {city} is set. Now invite your people.",
+  "tripCreatedTitle": "Your trip is on!",
+  "tripCreatedBody": "{city} is your next stop. Invite your people and plan it together.",
   "@tripCreatedBody": {
     "placeholders": {"city": {"type": "String"}}
   },

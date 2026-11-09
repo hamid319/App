@@ -24,11 +24,11 @@ void main() {
     for (var i = 0; i < 30; i++) {
       await tester.pump(const Duration(milliseconds: 100));
     }
-    expect(find.text('Koffer gepackt!'), findsOneWidget);
+    expect(find.text('Die Reise steht!'), findsOneWidget);
     expect(find.textContaining('Berlin'), findsOneWidget);
 
     await tester.tap(find.text('Zur Reise'));
     await tester.pumpAndSettle();
-    expect(find.text('Koffer gepackt!'), findsNothing);
+    expect(find.text('Die Reise steht!'), findsNothing);
   });
 }

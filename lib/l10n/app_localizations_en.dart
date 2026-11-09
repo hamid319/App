@@ -2652,11 +2652,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your tip could not be sent. Please try again.';
 
   @override
-  String get tripCreatedTitle => 'Bags packed!';
+  String get tripCreatedTitle => 'Your trip is on!';
 
   @override
   String tripCreatedBody(String city) {
-    return 'Your trip to $city is set. Now invite your people.';
+    return '$city is your next stop. Invite your people and plan it together.';
   }
 
   @override

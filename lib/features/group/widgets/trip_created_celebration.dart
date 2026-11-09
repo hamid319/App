@@ -8,7 +8,7 @@ import '../../../core/constants/sizes.dart';
 import '../../../core/constants/typography.dart';
 import '../../../l10n/l10n.dart';
 
-/// Full-screen "Bags packed!" moment after a new trip: the suitcase rolls
+/// Full-screen "Your trip is on!" moment after a new trip: the suitcase rolls
 /// in, rocks to a stop, pulls out its handle with a click, a light sweeps
 /// over the grooves and the city sticker is slapped on.
 Future<void> showTripCreatedCelebration(

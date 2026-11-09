@@ -4577,13 +4577,13 @@ abstract class AppLocalizations {
   /// No description provided for @tripCreatedTitle.
   ///
   /// In en, this message translates to:
-  /// **'Bags packed!'**
+  /// **'Your trip is on!'**
   String get tripCreatedTitle;
 
   /// No description provided for @tripCreatedBody.
   ///
   /// In en, this message translates to:
-  /// **'Your trip to {city} is set. Now invite your people.'**
+  /// **'{city} is your next stop. Invite your people and plan it together.'**
   String tripCreatedBody(String city);
 
   /// No description provided for @tripCreatedOpen.
