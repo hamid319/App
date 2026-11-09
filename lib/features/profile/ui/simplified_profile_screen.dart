@@ -116,11 +116,143 @@ class SimplifiedProfileScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // The game first: the suitcase grows with every trip.
-          const SuitcaseCard(),
+          // The travel ID first; the suitcase game sits in front of the wallet.
+          Container(
+            decoration: BoxDecoration(
+              color: scheme.surface,
+              borderRadius: BorderRadius.circular(_walletRadius),
+              border: Border.all(color: edge, width: AppSizes.edge),
+            ),
+            padding: const EdgeInsets.fromLTRB(16, 10, 8, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 26,
+                      height: 26,
+                      decoration: BoxDecoration(
+                        color: BrandColors.navy,
+                        borderRadius: BorderRadius.circular(7),
+                      ),
+                      child: const Icon(Icons.flight_rounded,
+                          size: 16, color: BrandColors.amber),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(l10n.profileIdTitle,
+                              style: text.titleSmall
+                                  ?.copyWith(fontWeight: FontWeight.w600)),
+                          Text(
+                            l10n.profileIdNumber(
+                                passportNumber(user.uid as String)),
+                            style: text.labelSmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                              fontFamily: 'Courier',
+                              fontFamilyFallback: const ['Menlo'],
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: l10n.editProfile,
+                      icon: Icon(Icons.edit_outlined, color: scheme.primary),
+                      onPressed: () =>
+                          _showEditProfileDialog(context, ref, user),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    avatar,
+                    const SizedBox(width: AppSizes.space16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            style: text.headlineSmall,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (email.isNotEmpty)
+                            Text(
+                              email,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: text.bodySmall
+                                  ?.copyWith(color: scheme.onSurfaceVariant),
+                            ),
+                          const SizedBox(height: AppSizes.space12),
+                          Row(
+                            children: [
+                              _IdField(
+                                label: l10n.navTrips,
+                                value: groups,
+                                onTap: () => context.go('/trips'),
+                              ),
+                              _IdField(
+                                label: l10n.passportDataCities,
+                                value: suitcase?.cities ?? 0,
+                              ),
+                              _IdField(
+                                label: l10n.passportDataCountries,
+                                value: suitcase?.countries ?? 0,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSizes.space16),
+                // Machine-readable zone, as at the foot of a passport.
+                Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+                  decoration: BoxDecoration(
+                    color: scheme.onSurface.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      () {
+                        final (l1, l2) = passportMrz(
+                          name: name,
+                          uid: user.uid as String,
+                          issued: user.createdAt as DateTime? ?? DateTime.now(),
+                        );
+                        return '$l1\n$l2';
+                      }(),
+                      style: TextStyle(
+                        fontFamily: 'Courier',
+                        fontFamilyFallback: const ['Menlo'],
+                        fontSize: 13,
+                        height: 1.35,
+                        letterSpacing: 1,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: AppSizes.space24),
           // The collections as a wallet: full cards stacked so only their
-          // tops show, the travel ID in front (like Apple Wallet).
+          // tops show, the suitcase in front (like Apple Wallet).
           Stack(
             children: [
               for (final (i, card) in [
@@ -157,108 +289,12 @@ class SimplifiedProfileScreen extends ConsumerWidget {
                 ),
               Padding(
                 padding: const EdgeInsets.only(top: 3 * _walletPeek),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: scheme.surface,
-                    borderRadius: BorderRadius.circular(_walletRadius),
-                    border: Border.all(color: edge, width: AppSizes.edge),
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(24)),
                     boxShadow: _walletShadow,
                   ),
-                  padding: const EdgeInsets.fromLTRB(16, 10, 8, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 26,
-                            height: 26,
-                            decoration: BoxDecoration(
-                              color: BrandColors.navy,
-                              borderRadius: BorderRadius.circular(7),
-                            ),
-                            child: const Icon(Icons.flight_rounded,
-                                size: 16, color: BrandColors.amber),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(l10n.profileIdTitle,
-                                    style: text.titleSmall?.copyWith(
-                                        fontWeight: FontWeight.w600)),
-                                Text(
-                                  l10n.profileIdNumber(
-                                      passportNumber(user.uid as String)),
-                                  style: text.labelSmall?.copyWith(
-                                    color: scheme.onSurfaceVariant,
-                                    fontFamily: 'Courier',
-                                    fontFamilyFallback: const ['Menlo'],
-                                    letterSpacing: 1.5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          IconButton(
-                            tooltip: l10n.editProfile,
-                            icon: Icon(Icons.edit_outlined,
-                                color: scheme.primary),
-                            onPressed: () =>
-                                _showEditProfileDialog(context, ref, user),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          avatar,
-                          const SizedBox(width: AppSizes.space16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  name,
-                                  style: text.headlineSmall,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if (email.isNotEmpty)
-                                  Text(
-                                    email,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: text.bodySmall?.copyWith(
-                                        color: scheme.onSurfaceVariant),
-                                  ),
-                                const SizedBox(height: AppSizes.space12),
-                                Row(
-                                  children: [
-                                    _IdField(
-                                      label: l10n.navTrips,
-                                      value: groups,
-                                      onTap: () => context.go('/trips'),
-                                    ),
-                                    _IdField(
-                                      label: l10n.passportDataCities,
-                                      value: suitcase?.cities ?? 0,
-                                    ),
-                                    _IdField(
-                                      label: l10n.passportDataCountries,
-                                      value: suitcase?.countries ?? 0,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                  child: SuitcaseCard(),
                 ),
               ),
             ],
@@ -327,7 +363,7 @@ class SimplifiedProfileScreen extends ConsumerWidget {
 
 /// Profile wallet geometry: how much of each card shows above the next,
 /// the full card height and the corner radius.
-const double _walletPeek = 60;
+const double _walletPeek = 54;
 const double _walletCardHeight = 200;
 const double _walletRadius = 18;
 

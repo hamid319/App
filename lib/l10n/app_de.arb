@@ -863,9 +863,6 @@
   "tripsHowCostsBody": "Kassenzettel scannen und fair aufteilen.",
   "suitcaseNextLevelAt": "Stufe {level} bei {miles}",
   "suitcaseStillNeeded": "noch {missing}",
-  "suitcaseChipCity": "Neue Stadt",
-  "suitcaseChipCheckIn": "Check-in",
-  "suitcaseChipPacked": "Gepackt",
   "profileMapTab": "Karte",
   "profileIdTitle": "TripFam Reiseausweis",
   "profileIdNumber": "Nr. {number}"

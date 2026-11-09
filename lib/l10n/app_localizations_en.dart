@@ -3065,15 +3065,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get suitcaseChipCity => 'New city';
-
-  @override
-  String get suitcaseChipCheckIn => 'Check-in';
-
-  @override
-  String get suitcaseChipPacked => 'Packed';
-
-  @override
   String get profileMapTab => 'Map';
 
   @override

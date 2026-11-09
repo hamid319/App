@@ -1497,9 +1497,6 @@
       "missing": {"type": "String"}
     }
   },
-  "suitcaseChipCity": "New city",
-  "suitcaseChipCheckIn": "Check-in",
-  "suitcaseChipPacked": "Packed",
   "profileMapTab": "Map",
   "profileIdTitle": "TripFam travel ID",
   "profileIdNumber": "No. {number}",

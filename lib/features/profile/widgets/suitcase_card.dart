@@ -79,12 +79,12 @@ class SuitcaseCard extends ConsumerWidget {
                   ],
                 ),
                 SizedBox(
-                  height: 196,
+                  height: 128,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
                       Suitcase3D(
-                        size: 188,
+                        size: 124,
                         stickers: [
                           for (final s in p.stickers)
                             SuitcaseSticker.fromStamp(s)
@@ -127,19 +127,6 @@ class SuitcaseCard extends ConsumerWidget {
                       style: text.bodySmall
                           ?.copyWith(color: on.withValues(alpha: 0.75)),
                     ),
-                  ],
-                ),
-                const SizedBox(height: AppSizes.space12),
-                Row(
-                  children: [
-                    for (final (miles, label) in [
-                      (milesPerCity, l10n.suitcaseChipCity),
-                      (milesPerCheckIn, l10n.suitcaseChipCheckIn),
-                      (milesPerPackedTrip, l10n.suitcaseChipPacked),
-                    ]) ...[
-                      if (miles != milesPerCity) const SizedBox(width: 8),
-                      Expanded(child: _EarnChip(miles: miles, label: label)),
-                    ],
                   ],
                 ),
               ],
@@ -262,37 +249,6 @@ class _LockedExtra extends StatelessWidget {
               textAlign: TextAlign.center,
               style: text.labelSmall
                   ?.copyWith(fontSize: 11, color: scheme.onSurfaceVariant)),
-        ],
-      ),
-    );
-  }
-}
-
-/// "+30 New city": one way to earn miles.
-class _EarnChip extends StatelessWidget {
-  const _EarnChip({required this.miles, required this.label});
-
-  final int miles;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final text = Theme.of(context).textTheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Text('+$miles',
-              style: text.titleMedium?.copyWith(color: scheme.primary)),
-          Text(label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: text.labelSmall?.copyWith(color: scheme.onSurfaceVariant)),
         ],
       ),
     );

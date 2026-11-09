@@ -5276,24 +5276,6 @@ abstract class AppLocalizations {
   /// **'{missing} to go'**
   String suitcaseStillNeeded(String missing);
 
-  /// No description provided for @suitcaseChipCity.
-  ///
-  /// In en, this message translates to:
-  /// **'New city'**
-  String get suitcaseChipCity;
-
-  /// No description provided for @suitcaseChipCheckIn.
-  ///
-  /// In en, this message translates to:
-  /// **'Check-in'**
-  String get suitcaseChipCheckIn;
-
-  /// No description provided for @suitcaseChipPacked.
-  ///
-  /// In en, this message translates to:
-  /// **'Packed'**
-  String get suitcaseChipPacked;
-
   /// No description provided for @profileMapTab.
   ///
   /// In en, this message translates to:
