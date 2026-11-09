@@ -867,5 +867,6 @@
   "suitcaseChipCheckIn": "Check-in",
   "suitcaseChipPacked": "Gepackt",
   "profileMapTab": "Karte",
-  "profileIdTitle": "TripFam Reiseausweis"
+  "profileIdTitle": "TripFam Reiseausweis",
+  "profileIdNumber": "Nr. {number}"
 }

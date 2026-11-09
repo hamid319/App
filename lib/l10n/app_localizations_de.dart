@@ -3113,4 +3113,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get profileIdTitle => 'TripFam Reiseausweis';
+
+  @override
+  String profileIdNumber(String number) {
+    return 'Nr. $number';
+  }
 }

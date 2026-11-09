@@ -1501,5 +1501,10 @@
   "suitcaseChipCheckIn": "Check-in",
   "suitcaseChipPacked": "Packed",
   "profileMapTab": "Map",
-  "profileIdTitle": "TripFam travel ID"
+  "profileIdTitle": "TripFam travel ID",
+  "profileIdNumber": "No. {number}",
+  "@profileIdNumber": {
+    "description": "Document number on the profile travel ID.",
+    "placeholders": {"number": {"type": "String"}}
+  }
 }

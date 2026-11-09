@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../common/models/place_model.dart';
 import '../../../common/widgets/places_map.dart';
 import '../../../common/widgets/ticket.dart';
+import '../../../common/widgets/wallet_app_bar.dart';
+import '../../../core/constants/colors.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../core/services/maps_availability.dart';
@@ -50,9 +52,15 @@ class FavoritesMapScreen extends ConsumerWidget {
         );
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.favoritesMapTitle)),
+      appBar: WalletAppBar(
+        color: BrandColors.coral,
+        onColor: Colors.white,
+        icon: Icons.map_rounded,
+        title: l10n.favoritesMapTitle,
+      ),
       body: switch (configured) {
-        AsyncData(value: false) => message(l10n.mapsNotConfigured, Icons.map_outlined),
+        AsyncData(value: false) =>
+          message(l10n.mapsNotConfigured, Icons.map_outlined),
         AsyncData() => places.when(
             data: (list) => list.isEmpty
                 ? message(l10n.favoritesMapEmpty, Icons.place_outlined)

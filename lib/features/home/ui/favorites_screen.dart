@@ -6,6 +6,8 @@ import '../../../common/models/place_model.dart';
 import '../../../common/utils/place_type_labels.dart';
 import '../../../common/widgets/skeleton.dart';
 import '../../../common/widgets/ticket.dart';
+import '../../../common/widgets/wallet_app_bar.dart';
+import '../../../core/constants/colors.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
@@ -44,8 +46,11 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
     final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.navFavorites),
+      appBar: WalletAppBar(
+        color: BrandColors.amber,
+        onColor: BrandColors.navy,
+        icon: Icons.favorite_rounded,
+        title: l10n.navFavorites,
         actions: [
           if (ids.isNotEmpty)
             IconButton(
@@ -225,9 +230,8 @@ class _Grid extends ConsumerWidget {
             itemBuilder: (context, i) => _Tile(
               place: shown[i],
               subtitle: category(shown[i]),
-              tone: _tones[
-                  (categories.indexOf(category(shown[i]) ?? '') + 1) %
-                      _tones.length],
+              tone: _tones[(categories.indexOf(category(shown[i]) ?? '') + 1) %
+                  _tones.length],
             ),
           ),
         ),
@@ -296,7 +300,7 @@ class _FilterChip extends StatelessWidget {
           onSelected: (_) => onTap(),
           labelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
                 fontWeight: FontWeight.w700,
-                color: selected ? scheme.onInverseSurface : scheme.onSurface,
+                color: selected ? scheme.primary : scheme.onSurface,
               ),
         ),
       ),

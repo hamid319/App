@@ -3078,4 +3078,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileIdTitle => 'TripFam travel ID';
+
+  @override
+  String profileIdNumber(String number) {
+    return 'No. $number';
+  }
 }

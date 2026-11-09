@@ -12,13 +12,7 @@
   final given = parts.length > 1 ? parts.sublist(0, parts.length - 1) : [];
   final line1 = _pad('P<TFM$surname<<${given.join('<')}', 44);
 
-  final number = _pad(
-          uid
-              .toUpperCase()
-              .replaceAll(RegExp('[^A-Z0-9]'), '')
-              .padRight(9, '0'),
-          9)
-      .substring(0, 9);
+  final number = passportNumber(uid);
   // Valid for ten years from the account's creation, like a real passport.
   final expiry = DateTime(issued.year + 10, issued.month, issued.day);
   final expiryText = _yymmdd(expiry);
@@ -30,6 +24,13 @@
   final line2 = '${_pad(body, 43)}$last';
   return (line1, line2);
 }
+
+/// The 9-character document number derived from the account, shown on
+/// the passport and the profile's travel ID.
+String passportNumber(String uid) => _pad(
+        uid.toUpperCase().replaceAll(RegExp('[^A-Z0-9]'), '').padRight(9, '0'),
+        9)
+    .substring(0, 9);
 
 /// ICAO 9303 check digit: weights 7, 3, 1; letters A=10 … Z=35, '<' = 0.
 int checkDigit(String s) {

@@ -13,6 +13,7 @@ import '../../../common/utils/passport_stamps.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../../common/widgets/member_avatar.dart';
 import '../../../common/widgets/tripfam_mark.dart';
+import '../../../common/widgets/wallet_app_bar.dart';
 import '../../../common/widgets/widget_capture.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/errors/user_message.dart';
@@ -204,8 +205,11 @@ class _PassportScreenState extends ConsumerState<PassportScreen>
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.passportTitle),
+      appBar: WalletAppBar(
+        color: BrandColors.navy,
+        onColor: Colors.white,
+        icon: Icons.public_rounded,
+        title: l10n.passportTitle,
         actions: [
           if (list != null)
             IconButton(

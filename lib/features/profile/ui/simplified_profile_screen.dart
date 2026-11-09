@@ -6,6 +6,7 @@ import '../logic/profile_controller.dart';
 import '../logic/passport_controller.dart';
 import '../widgets/suitcase_card.dart';
 import '../../auth/logic/auth_controller.dart';
+import '../../../common/utils/passport_mrz.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
@@ -181,9 +182,24 @@ class SimplifiedProfileScreen extends ConsumerWidget {
                           ),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(l10n.profileIdTitle,
-                                style: text.titleSmall
-                                    ?.copyWith(fontWeight: FontWeight.w600)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(l10n.profileIdTitle,
+                                    style: text.titleSmall?.copyWith(
+                                        fontWeight: FontWeight.w600)),
+                                Text(
+                                  l10n.profileIdNumber(
+                                      passportNumber(user.uid as String)),
+                                  style: text.labelSmall?.copyWith(
+                                    color: scheme.onSurfaceVariant,
+                                    fontFamily: 'Courier',
+                                    fontFamilyFallback: const ['Menlo'],
+                                    letterSpacing: 1.5,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           IconButton(
                             tooltip: l10n.editProfile,

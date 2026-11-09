@@ -10,6 +10,7 @@ import '../features/home/ui/home_screen.dart';
 import '../features/home/ui/favorites_map_screen.dart';
 import '../features/auth/ui/forgot_password_screen.dart';
 import '../features/home/ui/favorites_screen.dart';
+import 'sheet_page.dart';
 import '../features/places/ui/place_detail_screen.dart';
 import '../features/group/data/receipt_scan_repository.dart';
 import '../features/group/ui/costs_screen.dart';
@@ -93,10 +94,26 @@ GoRouter createRouter(Ref ref) {
       // the bottom bar is the page's own action bar.
       GoRoute(
         path: '/favorites-map',
-        builder: (ctx, state) => const AccountGate(
-          reason: GateReason.favorites,
-          icon: Icons.map_outlined,
-          child: FavoritesMapScreen(),
+        pageBuilder: (ctx, state) => SheetPage(
+          key: state.pageKey,
+          enableDrag: false,
+          child: const AccountGate(
+            reason: GateReason.favorites,
+            icon: Icons.map_outlined,
+            child: FavoritesMapScreen(),
+          ),
+        ),
+      ),
+      // Opened from the profile's wallet card as a sheet over the profile.
+      GoRoute(
+        path: '/favorites',
+        pageBuilder: (ctx, state) => SheetPage(
+          key: state.pageKey,
+          child: const AccountGate(
+            reason: GateReason.favorites,
+            icon: Icons.favorite,
+            child: FavoritesScreen(),
+          ),
         ),
       ),
       // The solo swipe deck, full screen with a back button; opened from
@@ -223,13 +240,16 @@ GoRouter createRouter(Ref ref) {
           ),
         ],
       ),
-      // Full screen: the booklet needs the room of the bottom navigation.
+      // A tall sheet over the screen it was opened from.
       GoRoute(
         path: '/passport',
-        builder: (ctx, state) => const AccountGate(
-          reason: GateReason.profile,
-          icon: Icons.menu_book_rounded,
-          child: PassportScreen(),
+        pageBuilder: (ctx, state) => SheetPage(
+          key: state.pageKey,
+          child: const AccountGate(
+            reason: GateReason.profile,
+            icon: Icons.menu_book_rounded,
+            child: PassportScreen(),
+          ),
         ),
       ),
       // All main routes wrapped in ShellRoute for persistent bottom nav
@@ -286,11 +306,13 @@ GoRouter createRouter(Ref ref) {
           // Results and day plans of the old swipe rounds live on the trip.
           GoRoute(
             path: '/day-plan/:groupId/:sessionId',
-            redirect: (ctx, state) => '/trip/${state.pathParameters['groupId']}',
+            redirect: (ctx, state) =>
+                '/trip/${state.pathParameters['groupId']}',
           ),
           GoRoute(
             path: '/group-matches/:groupId',
-            redirect: (ctx, state) => '/trip/${state.pathParameters['groupId']}',
+            redirect: (ctx, state) =>
+                '/trip/${state.pathParameters['groupId']}',
           ),
           GoRoute(
             path: '/profile',
@@ -313,14 +335,6 @@ GoRouter createRouter(Ref ref) {
             // Open to guests: language and other app settings must be
             // reachable without an account. Account-only parts hide inside.
             builder: (ctx, state) => const SettingsScreen(),
-          ),
-          GoRoute(
-            path: '/favorites',
-            builder: (ctx, state) => const AccountGate(
-              reason: GateReason.favorites,
-              icon: Icons.favorite,
-              child: FavoritesScreen(),
-            ),
           ),
         ],
       ),

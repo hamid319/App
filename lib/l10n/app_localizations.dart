@@ -5305,6 +5305,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'TripFam travel ID'**
   String get profileIdTitle;
+
+  /// Document number on the profile travel ID.
+  ///
+  /// In en, this message translates to:
+  /// **'No. {number}'**
+  String profileIdNumber(String number);
 }
 
 class _AppLocalizationsDelegate
