@@ -161,7 +161,7 @@ HomeFeed buildHomeFeed({
 
 /// /places needs a signed-in (guest) session; wait briefly for it so the
 /// first load right after app start does not fail on the rules.
-Future<void> _awaitSession(Ref ref) async {
+Future<void> awaitPlacesSession(Ref ref) async {
   final auth = ref.read(authServiceProvider);
   if (auth.currentUser != null) return;
   try {
@@ -178,7 +178,7 @@ Future<void> _awaitSession(Ref ref) async {
 /// with one read.
 final citySightsProvider =
     FutureProvider.family<List<PlaceModel>, String>((ref, cityId) async {
-  await _awaitSession(ref);
+  await awaitPlacesSession(ref);
   final places =
       await ref.read(placesRepositoryProvider).loadCityPlaces(cityId);
   return rankByPopularity(places.where((p) => !p.isVenue));
@@ -188,7 +188,7 @@ final citySightsProvider =
 /// fails, so the feed shows its placeholder instead of an error.
 final cityVenuesProvider =
     FutureProvider.family<List<PlaceModel>, String>((ref, cityId) async {
-  await _awaitSession(ref);
+  await awaitPlacesSession(ref);
   try {
     return await ref.read(placesRepositoryProvider).loadCityVenues(cityId);
   } catch (e) {
@@ -209,7 +209,7 @@ final nearbyPlacesProvider =
     lat = position.latitude;
     lng = position.longitude;
   } catch (_) {}
-  await _awaitSession(ref);
+  await awaitPlacesSession(ref);
   final places = await ref.read(placesRepositoryProvider).loadPlacesAround(
         lat: lat,
         lng: lng,

@@ -2,8 +2,9 @@
 // Both behind small interfaces so publish can be tested with fakes.
 
 import { HeadObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import type { Firestore } from "firebase-admin/firestore";
+import { FieldPath, type Firestore } from "firebase-admin/firestore";
 import type { CityDoc, PlaceDoc } from "./model.js";
+import type { SearchDoc } from "./search.js";
 import type { TileDoc } from "./tiles.js";
 
 export interface StoredObjectInfo {
@@ -27,6 +28,8 @@ export interface DataStore {
   writeCity(city: CityDoc): Promise<void>;
   /** Replaces the city's place tiles: writes [tiles], deletes the city's other tiles. */
   replaceTiles(cityId: string, tiles: TileDoc[]): Promise<void>;
+  /** Replaces the city's search index: writes [parts], deletes its other parts. */
+  replaceSearch(cityId: string, parts: SearchDoc[]): Promise<void>;
   writeRun(id: string, run: Record<string, unknown>): Promise<void>;
 }
 
@@ -148,6 +151,34 @@ export class FirestoreDataStore implements DataStore {
       const batch = this.db.batch();
       for (const id of stale.slice(i, i + 400)) batch.delete(this.db.collection("placeTiles").doc(id));
       await batch.commit();
+    }
+  }
+
+  async replaceSearch(cityId: string, parts: SearchDoc[]): Promise<void> {
+    const keep = new Set(parts.map((p) => p.id));
+    const old = await this.db.collection("placeSearch").where("cityId", "==", cityId).select().get();
+    // Parts are up to ~700 KB each; one per commit stays under 10 MiB.
+    for (const part of parts) await this.db.collection("placeSearch").doc(part.id).set(part);
+    for (const doc of old.docs) if (!keep.has(doc.id)) await doc.ref.delete();
+  }
+
+  /** Fields the search index needs, for every curated place of a city. */
+  async placesForSearch(cityId: string): Promise<Array<Pick<PlaceDoc, "id" | "name" | "names" | "kind" | "types" | "popularity" | "status">>> {
+    // Paged: one query over a big city's ~13k places can hit the deadline.
+    const out: PlaceDoc[] = [];
+    let last: string | undefined;
+    for (;;) {
+      let query = this.db
+        .collection("places")
+        .where("cityId", "==", cityId)
+        .orderBy(FieldPath.documentId())
+        .select("name", "names", "kind", "types", "popularity", "status")
+        .limit(1000);
+      if (last) query = query.startAfter(last);
+      const snapshot = await query.get();
+      out.push(...snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as PlaceDoc));
+      if (snapshot.size < 1000) return out;
+      last = snapshot.docs[snapshot.docs.length - 1].id;
     }
   }
 

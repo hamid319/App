@@ -1503,5 +1503,14 @@
   "@profileIdNumber": {
     "description": "Document number on the profile travel ID.",
     "placeholders": {"number": {"type": "String"}}
-  }
+  },
+  "placeSearchTooltip": "Search places",
+  "placeSearchHint": "Search places",
+  "placeSearchHintCity": "Search in {city}",
+  "@placeSearchHintCity": {"placeholders": {"city": {"type": "String"}}},
+  "placeSearchPrompt": "Find sights, restaurants and cafés in {city} by name.",
+  "@placeSearchPrompt": {"placeholders": {"city": {"type": "String"}}},
+  "placeSearchEmpty": "Nothing found for “{query}”.",
+  "@placeSearchEmpty": {"placeholders": {"query": {"type": "String"}}},
+  "placeSearchNoCity": "Pick a city on Discover to search its places."
 }

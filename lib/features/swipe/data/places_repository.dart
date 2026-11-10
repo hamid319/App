@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../../../common/models/place_model.dart';
+import '../../../common/models/place_search_entry.dart';
 import '../../../common/models/swipe_result_model.dart';
 import '../../../common/models/group_model.dart';
 import '../../../common/utils/geo_utils.dart';
@@ -212,6 +213,40 @@ class PlacesRepository {
         await loadPlacesAround(lat: lat, lng: lng, radiusKm: radiusKm);
     if (tags == null) return places;
     return places.where((p) => tags.every((t) => p.types.contains(t))).toList();
+  }
+
+  /// Search indexes per city, kept for the app session (they change only
+  /// with an import).
+  final Map<String, Future<List<PlaceSearchEntry>>> _searchCache = {};
+
+  /// Every active place of a city by name, best-known first: 1-3 reads of
+  /// placeSearch/{cityId}_{part}. Empty when the city has no index yet.
+  Future<List<PlaceSearchEntry>> loadSearchIndex(String cityId) {
+    final cached = _searchCache[cityId];
+    if (cached != null) return cached;
+    final future = _querySearchIndex(cityId);
+    _searchCache[cityId] = future;
+    // A failed load is not kept, so the next call tries again.
+    future.catchError((Object _) {
+      if (identical(_searchCache[cityId], future)) _searchCache.remove(cityId);
+      return const <PlaceSearchEntry>[];
+    });
+    return future;
+  }
+
+  Future<List<PlaceSearchEntry>> _querySearchIndex(String cityId) async {
+    final col = _db.collection('placeSearch');
+    final first = await col.doc('${cityId}_0').get();
+    final data = first.data();
+    if (data == null) return const [];
+    final parts = (data['parts'] as num?)?.toInt() ?? 1;
+    final rest = await Future.wait(
+        [for (var i = 1; i < parts; i++) col.doc('${cityId}_$i').get()]);
+    return List.unmodifiable([
+      for (final doc in [first, ...rest])
+        for (final e in (doc.data()?['entries'] as List? ?? const []))
+          PlaceSearchEntry.fromJson(Map<String, dynamic>.from(e as Map)),
+    ]);
   }
 
   Future<PlaceModel?> getPlaceById(String id) async {

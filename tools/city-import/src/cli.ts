@@ -24,6 +24,7 @@ import { fetchCityPlaces, fetchCityVenues } from "./osm.js";
 import type { OvertureRow } from "./overture.js";
 import { selectPhotos } from "./picks.js";
 import { publishCity, toPlaceDoc } from "./publish.js";
+import { buildSearchDocs } from "./search.js";
 import { buildTiles } from "./tiles.js";
 import { renderReport } from "./report.js";
 import { readPicks, startReview } from "./review.js";
@@ -199,6 +200,20 @@ async function publish(cities: CityConfig[], dryRun: boolean) {
   console.log(`Import run ${runId} done.`);
 }
 
+/** Writes the search index from the places already in Firestore (no photo work). */
+async function searchIndex(cities: Array<{ id: string }>) {
+  const { initializeApp, applicationDefault } = await import("firebase-admin/app");
+  const { getFirestore } = await import("firebase-admin/firestore");
+  const app = initializeApp({ credential: applicationDefault(), projectId: FIREBASE_PROJECT_ID });
+  const data = new FirestoreDataStore(getFirestore(app));
+  const now = new Date().toISOString();
+  for (const city of cities) {
+    const parts = buildSearchDocs(city.id, await data.placesForSearch(city.id), `search-${now}`, now);
+    await data.replaceSearch(city.id, parts);
+    console.log(`${city.id}: ${parts.reduce((n, p) => n + p.entries.length, 0)} places in ${parts.length} search parts`);
+  }
+}
+
 async function main() {
   const { command, cityIds, dryRun, port } = args();
   const cities = selectedCities(cityIds);
@@ -206,7 +221,8 @@ async function main() {
   else if (command === "report") report(cities);
   else if (command === "review") await review(cities, port);
   else if (command === "publish") await publish(cities, dryRun);
-  else throw new Error("Usage: cli.ts collect|report|review|publish [--city id,id] [--dry-run] [--port 4173]");
+  else if (command === "search-index") await searchIndex(cities);
+  else throw new Error("Usage: cli.ts collect|report|review|publish|search-index [--city id,id] [--dry-run] [--port 4173]");
 }
 
 main().catch((error) => {

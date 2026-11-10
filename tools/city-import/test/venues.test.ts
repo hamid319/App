@@ -260,6 +260,7 @@ class FakePhotos implements PhotoStore {
 
 class FakeData implements DataStore {
   tiles: TileDoc[] = [];
+  async replaceSearch() {}
   async replaceTiles(_cityId: string, tiles: TileDoc[]) {
     this.tiles = tiles;
   }

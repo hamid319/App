@@ -131,7 +131,7 @@ const S = {
   osm:      { x: 130, y: 150, n: "OpenStreetMap", t: "freie Weltkarte", what: "Die freie Weltkarte, gepflegt von Freiwilligen. Daher kommen Sehenswürdigkeiten, Cafés, Bars, Adressen und Öffnungszeiten.", where: "Im Internet, wir laden es nur beim Import.", cost: ["free", "gratis"], code: "tools/city-import", note: "Muss in der App genannt werden (ODbL-Lizenz)." },
   wikidata: { x: 130, y: 260, n: "Wikidata & Wikimedia", t: "Fakten + Fotos", what: "Namen in vielen Sprachen, Beschreibungen, Wikipedia-Links und freie Fotos mit Urheberangabe.", where: "Im Internet, nur beim Import.", cost: ["free", "gratis"], code: "tools/city-import" },
   overture: { x: 130, y: 370, n: "Overture Maps", t: "Restaurant-Daten", what: "Offener Datensatz (u. a. von Meta, Microsoft, Foursquare) mit vielen Restaurants und Bars, die in OpenStreetMap fehlen.", where: "Öffentlicher Cloud-Speicher, nur beim Import.", cost: ["free", "gratis"], code: "tools/city-import/scripts/overture.sh" },
-  importer: { x: 130, y: 500, n: "Import-Tool", t: "city-import", what: "Ein kleines Programm auf deinem Mac. Es sammelt die Daten, filtert Schrott raus, rechnet die Beliebtheit aus und baut die Kacheln für „in der Nähe“.", where: "Nur auf deinem Mac, läuft nur wenn wir es starten.", cost: ["free", "gratis"], code: "tools/city-import" },
+  importer: { x: 130, y: 500, n: "Import-Tool", t: "city-import", what: "Ein kleines Programm auf deinem Mac. Es sammelt die Daten, filtert Schrott raus, rechnet die Beliebtheit aus und baut die Kacheln für „in der Nähe“ und den Suchindex pro Stadt.", where: "Nur auf deinem Mac, läuft nur wenn wir es starten.", cost: ["free", "gratis"], code: "tools/city-import" },
   review:   { x: 130, y: 620, n: "Deine Freigabe", t: "du entscheidest", what: "Nichts wird veröffentlicht, ohne dass du Ja sagst. Hier prüfst du Städte und später auch Geheimtipps.", where: "Bei dir.", cost: ["free", "gratis"], code: "tools/city-import (review)" },
   ui:       { x: 418, y: 150, n: "Bildschirme", t: "Flutter UI", what: "Alles, was du siehst und antippst: Startseite, Swipe-Stapel, Reise, Kosten, Stempelheft.", where: "Auf dem Handy.", cost: ["free", "gratis"], code: "lib/features/*/ui" },
   logic:    { x: 418, y: 260, n: "Logik", t: "Riverpod", what: "Entscheidet, was passiert. Zum Beispiel ob ein Ort ein Match ist, welche Orte in deiner Nähe zählen oder ob der Geheimtipp-Banner gerade dran ist.", where: "Auf dem Handy.", cost: ["free", "gratis"], code: "lib/features/*/logic" },
@@ -176,6 +176,13 @@ const LINES = [
     ["local", "Die Kacheln bleiben im Zwischenspeicher, beim nächsten Öffnen kostet es nichts."],
     ["r2", "Die Fotos kommen von Cloudflare R2, Abrufen ist gratis."],
     ["ui", "Du siehst die Orte, sortiert nach Beliebtheit und Nähe."] ] },
+  { id: "search", c: "--l-near", n: "Ort suchen", steps: [
+    ["ui", "Du tippst auf Entdecken die Lupe und gibst einen Namen ein."],
+    ["logic", "Die App nimmt die gewählte Stadt, oder die Stadt in deiner Nähe."],
+    ["repo", "Der Datenzugriff holt den Suchindex dieser Stadt: alle Orte nur mit Name und Art."],
+    ["firestore", "1 bis 3 Lesevorgänge pro Stadt statt tausender Orte, danach sucht das Handy selbst."],
+    ["logic", "Bei jedem Buchstaben filtert die App den Index, Treffer am Wortanfang zuerst."],
+    ["ui", "Du tippst einen Treffer an und landest auf der Ortsseite."] ] },
   { id: "swipe", c: "--l-swipe", n: "Gemeinsam swipen", steps: [
     ["ui", "Du wischst einen Ort nach rechts."],
     ["repo", "Deine Stimme wird verschickt."],

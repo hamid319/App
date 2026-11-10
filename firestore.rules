@@ -164,6 +164,12 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && resource.data.uid == request.auth.uid;
     }
 
+    // Search index per city (tools/city-import/src/search.ts): get only.
+    match /placeSearch/{partId} {
+      allow get: if isAuthenticated();
+      allow list, write: if false;
+    }
+
     // Compact per-area place lists (tools/city-import src/tiles.ts),
     // read around the user's position; written only by the import.
     match /placeTiles/{tileId} {

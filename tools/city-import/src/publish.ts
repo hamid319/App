@@ -4,6 +4,7 @@ import type { ProcessedImage } from "./images.js";
 import type { CityCollection, CityDoc, PlaceDoc, PlaceDraft, StoredPhoto } from "./model.js";
 import { selectPhotos, type PhotoPicks } from "./picks.js";
 import type { DataStore, PhotoStore } from "./stores.js";
+import { buildSearchDocs } from "./search.js";
 import { buildTiles } from "./tiles.js";
 
 export interface PublishDeps {
@@ -136,6 +137,8 @@ export async function publishCity(
   const tiles = buildTiles(cityId, docs, importRunId, now);
   await deps.data.replaceTiles(cityId, tiles);
   result.tiles = tiles.length;
+  // Every active place by name, for the app's search (src/search.ts).
+  await deps.data.replaceSearch(cityId, buildSearchDocs(cityId, docs, importRunId, now));
 
   const city: CityDoc = {
     id: cityId,

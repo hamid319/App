@@ -5293,6 +5293,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No. {number}'**
   String profileIdNumber(String number);
+
+  /// No description provided for @placeSearchTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Search places'**
+  String get placeSearchTooltip;
+
+  /// No description provided for @placeSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search places'**
+  String get placeSearchHint;
+
+  /// No description provided for @placeSearchHintCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Search in {city}'**
+  String placeSearchHintCity(String city);
+
+  /// No description provided for @placeSearchPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Find sights, restaurants and cafés in {city} by name.'**
+  String placeSearchPrompt(String city);
+
+  /// No description provided for @placeSearchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found for “{query}”.'**
+  String placeSearchEmpty(String query);
+
+  /// No description provided for @placeSearchNoCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a city on Discover to search its places.'**
+  String get placeSearchNoCity;
 }
 
 class _AppLocalizationsDelegate

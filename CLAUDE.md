@@ -56,7 +56,7 @@ routerProvider           // Provider<GoRouter>
 ```
 /onboarding   /login   /register
 /trips (start, tab Reisen)   /trip/:groupId   /trip/:groupId/day/:index   /trip/:groupId/costs   /trip/:groupId/costs/receipt(/:expenseId(/edit))   /trip/:groupId/journal   /trip/:groupId/recap   /trip/:groupId/packing
-/home (tab Entdecken, feed)  /discover (solo deck)   /collection/:theme   /place/:id
+/home (tab Entdecken, feed)  /discover (solo deck)  /search (place search in the Discover city)   /collection/:theme   /place/:id
 /trip/:groupId/swipe (group deck)   /group → /trips   /group/join?groupId=&code=
 (old /swipe/:groupId, /group-matches/:groupId, /day-plan/… redirect to the trip)
 /profile   /passport   /settings   /favorites   /favorites-map
@@ -107,6 +107,8 @@ Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so
     /reports/{uid}     createdAt (write-only for clients)
 /placeTiles/{cityId}_{geohash5}  places: [compact PlaceModel json] (best 80 sights + 150 venues per ~5 km cell;
                        written by the import, get only; the app reads the 9 tiles around the user in "near me")
+/placeSearch/{cityId}_{part}  parts, entries [{i id, n name, d nameDe?, k s|v, t type?}] (every active place
+                       of a city, best first, ≤700 KB per part; written by the import, get only; searched on the device)
 /cities/{cityId}       curated cities (read-only for clients); cityId = PopularCity id
                        prompts: [{kind, text: {en, de}}]   (prompt tiles; kinds in PlacePromptKind)
                        photos: [{publicUrl, creator, licenseName, licenseUrl, commonsFilePageUrl}]  (Wikidata pipeline)

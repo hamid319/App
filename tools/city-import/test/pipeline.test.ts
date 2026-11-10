@@ -1,3 +1,4 @@
+import type { SearchDoc } from "../src/search.js";
 import type { TileDoc } from "../src/tiles.js";
 import { describe, expect, it } from "vitest";
 import { collectCity, type CollectSources } from "../src/collect.js";
@@ -169,6 +170,10 @@ class FakePhotos implements PhotoStore {
 
 class FakeData implements DataStore {
   tiles: TileDoc[] = [];
+  search: SearchDoc[] = [];
+  async replaceSearch(_cityId: string, parts: SearchDoc[]) {
+    this.search = parts;
+  }
   async replaceTiles(_cityId: string, tiles: TileDoc[]) {
     this.tiles = tiles;
   }
@@ -205,6 +210,7 @@ describe("publishCity", () => {
 
     const first = await publishCity(collection, new Set(), "run1", deps(photos, data));
     expect(first).toMatchObject({ published: 3, hidden: 0, photosUploaded: 6, photosReused: 0 });
+    expect(data.search.flatMap((p) => p.entries.map((e) => e.i)).sort()).toEqual([...data.places.keys()].sort());
     const doc = data.places.get("wd_Q1")!;
     expect(doc).toMatchObject({
       source: "wikidata",

@@ -3074,4 +3074,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String profileIdNumber(String number) {
     return 'No. $number';
   }
+
+  @override
+  String get placeSearchTooltip => 'Search places';
+
+  @override
+  String get placeSearchHint => 'Search places';
+
+  @override
+  String placeSearchHintCity(String city) {
+    return 'Search in $city';
+  }
+
+  @override
+  String placeSearchPrompt(String city) {
+    return 'Find sights, restaurants and cafés in $city by name.';
+  }
+
+  @override
+  String placeSearchEmpty(String query) {
+    return 'Nothing found for “$query”.';
+  }
+
+  @override
+  String get placeSearchNoCity =>
+      'Pick a city on Discover to search its places.';
 }

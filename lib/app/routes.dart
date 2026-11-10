@@ -7,6 +7,7 @@ import '../features/auth/ui/register_screen.dart';
 import '../features/home/ui/collection_screen.dart';
 import '../features/home/ui/discover_screen.dart';
 import '../features/home/ui/home_screen.dart';
+import '../features/home/ui/place_search_screen.dart';
 import '../features/home/ui/favorites_map_screen.dart';
 import '../features/auth/ui/forgot_password_screen.dart';
 import '../features/home/ui/favorites_screen.dart';
@@ -121,6 +122,11 @@ GoRouter createRouter(Ref ref) {
       GoRoute(
         path: '/discover',
         builder: (ctx, state) => const DiscoverScreen(),
+      ),
+      // Place search in the Discover city; opened from the home app bar.
+      GoRoute(
+        path: '/search',
+        builder: (ctx, state) => const PlaceSearchScreen(),
       ),
       GoRoute(
         path: '/place/:id',

@@ -865,5 +865,11 @@
   "suitcaseStillNeeded": "noch {missing}",
   "profileMapTab": "Karte",
   "profileIdTitle": "TripFam Reiseausweis",
-  "profileIdNumber": "Nr. {number}"
+  "profileIdNumber": "Nr. {number}",
+  "placeSearchTooltip": "Orte suchen",
+  "placeSearchHint": "Orte suchen",
+  "placeSearchHintCity": "In {city} suchen",
+  "placeSearchPrompt": "Finde Sehenswürdigkeiten, Restaurants und Cafés in {city} nach Namen.",
+  "placeSearchEmpty": "Nichts gefunden für „{query}“.",
+  "placeSearchNoCity": "Wähle auf Entdecken eine Stadt, um dort zu suchen."
 }

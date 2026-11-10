@@ -45,9 +45,14 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Wordmark(),
-        actions: const [
-          DiscoverLocationChip(),
-          SizedBox(width: AppSizes.space12),
+        actions: [
+          IconButton(
+            tooltip: context.l10n.placeSearchTooltip,
+            icon: const Icon(Icons.search),
+            onPressed: () => context.push('/search'),
+          ),
+          const DiscoverLocationChip(),
+          const SizedBox(width: AppSizes.space12),
         ],
       ),
       body: feed.when(
