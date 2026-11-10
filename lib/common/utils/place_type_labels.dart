@@ -26,6 +26,8 @@ String placeTypeLabel(AppLocalizations l10n, String type) => switch (type) {
     'cultural_landmark' => l10n.tagCulturalLandmark,
     'landmark' => l10n.tagLandmark,
     'history' => l10n.tagHistory,
+    // The import uses 'church' for every place of worship (also mosques,
+    // temples, synagogues), so the label stays neutral.
     'church' => l10n.tagChurch,
     'park' => l10n.tagPark,
     'garden' => l10n.tagGarden,

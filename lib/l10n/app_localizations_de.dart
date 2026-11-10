@@ -867,7 +867,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get tagHistory => 'Geschichte';
 
   @override
-  String get tagChurch => 'Kirche';
+  String get tagChurch => 'Gotteshaus';
 
   @override
   String get tagPark => 'Park';

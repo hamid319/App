@@ -1649,7 +1649,7 @@ abstract class AppLocalizations {
   /// No description provided for @tagChurch.
   ///
   /// In en, this message translates to:
-  /// **'Church'**
+  /// **'Place of worship'**
   String get tagChurch;
 
   /// No description provided for @tagPark.
