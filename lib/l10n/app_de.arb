@@ -871,6 +871,7 @@
   "placeSearchHintCity": "In {city} suchen",
   "placeSearchPrompt": "Finde Sehenswürdigkeiten, Restaurants und Cafés in {city} nach Namen.",
   "placeSearchEmpty": "Nichts gefunden für „{query}“.",
+  "placeSearchTop": "Top in {city}",
   "placeSearchNoCity": "Wähle auf Entdecken eine Stadt, um dort zu suchen.",
   "quickSearch": "Suchen",
   "placeSearchAddTooltip": "Auf die Wunschliste",

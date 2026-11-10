@@ -5324,6 +5324,12 @@ abstract class AppLocalizations {
   /// **'Nothing found for “{query}”.'**
   String placeSearchEmpty(String query);
 
+  /// No description provided for @placeSearchTop.
+  ///
+  /// In en, this message translates to:
+  /// **'Top in {city}'**
+  String placeSearchTop(String city);
+
   /// No description provided for @placeSearchNoCity.
   ///
   /// In en, this message translates to:

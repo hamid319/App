@@ -91,10 +91,33 @@ class _Results extends ConsumerWidget {
         text: userMessage(e, fallback: l10n.errorLoadPlaces, l10n: l10n),
       ),
       data: (entries) {
+        Widget tile(PlaceSearchEntry e) => _ResultTile(
+              entry: e,
+              groupId: groupId,
+              inTrip: inTrip?.contains(e.id) ?? false,
+            );
         if (query.trim().isEmpty) {
-          return _Message(
-            icon: Icons.search,
-            text: l10n.placeSearchPrompt(city.nameFor(lang)),
+          // The index is sorted best-known first: suggest the top sights.
+          final top = entries.where((e) => !e.isVenue).take(5).toList();
+          if (top.isEmpty) {
+            return _Message(
+              icon: Icons.search,
+              text: l10n.placeSearchPrompt(city.nameFor(lang)),
+            );
+          }
+          return ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(AppSizes.screenEdge,
+                    AppSizes.space16, AppSizes.screenEdge, AppSizes.space8),
+                child: Text(
+                  l10n.placeSearchTop(city.nameFor(lang)),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              for (final e in top) tile(e),
+            ],
           );
         }
         final hits = searchPlaces(entries, query);
@@ -107,11 +130,7 @@ class _Results extends ConsumerWidget {
         return ListView.builder(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           itemCount: hits.length,
-          itemBuilder: (context, i) => _ResultTile(
-            entry: hits[i],
-            groupId: groupId,
-            inTrip: inTrip?.contains(hits[i].id) ?? false,
-          ),
+          itemBuilder: (context, i) => tile(hits[i]),
         );
       },
     );

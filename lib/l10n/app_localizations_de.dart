@@ -3132,6 +3132,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String placeSearchTop(String city) {
+    return 'Top in $city';
+  }
+
+  @override
   String get placeSearchNoCity =>
       'Wähle auf Entdecken eine Stadt, um dort zu suchen.';
 

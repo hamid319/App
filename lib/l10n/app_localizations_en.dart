@@ -3097,6 +3097,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String placeSearchTop(String city) {
+    return 'Top in $city';
+  }
+
+  @override
   String get placeSearchNoCity =>
       'Pick a city on Discover to search its places.';
 
