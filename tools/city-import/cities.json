@@ -18,10 +18,10 @@
   {"id": "us_los_angeles", "catalogId": "los-angeles", "nameEn": "Los Angeles", "nameDe": "Los Angeles", "countryCode": "US", "lat": 34.0522, "lng": -118.2437, "radiusKm": 45},
   {"id": "pt_lisbon", "catalogId": "lisbon", "nameEn": "Lisbon", "nameDe": "Lissabon", "countryCode": "PT", "lat": 38.7223, "lng": -9.1393, "radiusKm": 25},
   {"id": "de_berlin", "catalogId": "berlin", "nameEn": "Berlin", "nameDe": "Berlin", "countryCode": "DE", "lat": 52.52, "lng": 13.405, "radiusKm": 25, "venueRadiusKm": 25, "venueMax": 20000, "extraSights": true},
-  {"id": "de_munich", "catalogId": "munich", "nameEn": "Munich", "nameDe": "München", "countryCode": "DE", "lat": 48.1351, "lng": 11.582, "radiusKm": 25},
+  {"id": "de_munich", "catalogId": "munich", "nameEn": "Munich", "nameDe": "München", "countryCode": "DE", "lat": 48.1351, "lng": 11.582, "radiusKm": 25, "venueRadiusKm": 25, "venueMax": 20000, "extraSights": true},
   {"id": "dk_copenhagen", "catalogId": "copenhagen", "nameEn": "Copenhagen", "nameDe": "Kopenhagen", "countryCode": "DK", "lat": 55.6761, "lng": 12.5683, "radiusKm": 25},
   {"id": "us_san_francisco", "catalogId": "san-francisco", "nameEn": "San Francisco", "nameDe": "San Francisco", "countryCode": "US", "lat": 37.7749, "lng": -122.4194, "radiusKm": 25},
   {"id": "ch_zurich", "catalogId": "zurich", "nameEn": "Zurich", "nameDe": "Zürich", "countryCode": "CH", "lat": 47.3769, "lng": 8.5417, "radiusKm": 25},
-  {"id": "de_hamburg", "catalogId": "hamburg", "nameEn": "Hamburg", "nameDe": "Hamburg", "countryCode": "DE", "lat": 53.5511, "lng": 9.9937, "radiusKm": 25},
+  {"id": "de_hamburg", "catalogId": "hamburg", "nameEn": "Hamburg", "nameDe": "Hamburg", "countryCode": "DE", "lat": 53.5511, "lng": 9.9937, "radiusKm": 25, "venueRadiusKm": 25, "venueMax": 20000, "extraSights": true},
   {"id": "de_cologne", "catalogId": "cologne", "nameEn": "Cologne", "nameDe": "Köln", "countryCode": "DE", "lat": 50.9375, "lng": 6.9603, "radiusKm": 25}
 ]
