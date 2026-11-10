@@ -25,6 +25,27 @@ final searchCityProvider = FutureProvider<PopularCity?>((ref) async {
   }
 });
 
+/// The city of trip [groupId] (from the user's trips); null when the trip
+/// has no curated city.
+final tripSearchCityProvider =
+    FutureProvider.family<PopularCity?, String>((ref, groupId) async {
+  final trips = await ref.watch(myTripsProvider.future);
+  final location =
+      trips.where((t) => t.groupId == groupId).firstOrNull?.location;
+  return location == null
+      ? null
+      : PopularCity.byId(PlacesRepository.curatedCityId(location));
+});
+
+/// Place ids already on trip [groupId]'s wishlist: one listener on the
+/// ideas, not one query per search result.
+final tripPlaceIdsProvider = StreamProvider.autoDispose
+    .family<Set<String>, String>((ref, groupId) =>
+        ref.watch(tripRepositoryProvider).streamIdeas(groupId).map((ideas) => {
+              for (final i in ideas)
+                if (i.placeId != null) i.placeId!
+            }));
+
 /// A city's search index, loaded once per app session.
 final placeSearchIndexProvider =
     FutureProvider.family<List<PlaceSearchEntry>, String>((ref, cityId) async {

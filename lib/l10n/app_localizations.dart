@@ -5329,6 +5329,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pick a city on Discover to search its places.'**
   String get placeSearchNoCity;
+
+  /// No description provided for @quickSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get quickSearch;
+
+  /// No description provided for @placeSearchAddTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to wishlist'**
+  String get placeSearchAddTooltip;
+
+  /// No description provided for @placeSearchInTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Already on the wishlist'**
+  String get placeSearchInTrip;
+
+  /// No description provided for @placeSearchAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{place} is on the wishlist'**
+  String placeSearchAdded(String place);
 }
 
 class _AppLocalizationsDelegate

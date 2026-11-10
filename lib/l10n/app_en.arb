@@ -1512,5 +1512,10 @@
   "@placeSearchPrompt": {"placeholders": {"city": {"type": "String"}}},
   "placeSearchEmpty": "Nothing found for “{query}”.",
   "@placeSearchEmpty": {"placeholders": {"query": {"type": "String"}}},
-  "placeSearchNoCity": "Pick a city on Discover to search its places."
+  "placeSearchNoCity": "Pick a city on Discover to search its places.",
+  "quickSearch": "Search",
+  "placeSearchAddTooltip": "Add to wishlist",
+  "placeSearchInTrip": "Already on the wishlist",
+  "placeSearchAdded": "{place} is on the wishlist",
+  "@placeSearchAdded": {"placeholders": {"place": {"type": "String"}}}
 }

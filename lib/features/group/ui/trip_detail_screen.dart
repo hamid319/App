@@ -732,7 +732,7 @@ class _IdeaRow extends ConsumerWidget {
 }
 
 /// Shortcuts under the segments, so they stay in reach however long the
-/// wishlist gets: group swipe, day plan, phrasebook and members.
+/// wishlist gets: group swipe, search, day plan, phrasebook and members.
 class _QuickActions extends ConsumerWidget {
   const _QuickActions({required this.group, required this.uid});
 
@@ -760,6 +760,12 @@ class _QuickActions extends ConsumerWidget {
           label: l10n.quickSwipe,
           badge: left,
           onTap: () => context.push('/trip/$id/swipe'),
+        ),
+        // Add a place the group already settled on, without swiping.
+        _QuickAction(
+          icon: Icons.search_rounded,
+          label: l10n.quickSearch,
+          onTap: () => context.push('/trip/$id/search'),
         ),
         if (plan != null && !plan.isEmpty)
           _QuickAction(

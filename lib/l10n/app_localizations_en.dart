@@ -3099,4 +3099,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get placeSearchNoCity =>
       'Pick a city on Discover to search its places.';
+
+  @override
+  String get quickSearch => 'Search';
+
+  @override
+  String get placeSearchAddTooltip => 'Add to wishlist';
+
+  @override
+  String get placeSearchInTrip => 'Already on the wishlist';
+
+  @override
+  String placeSearchAdded(String place) {
+    return '$place is on the wishlist';
+  }
 }

@@ -3134,4 +3134,18 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get placeSearchNoCity =>
       'Wähle auf Entdecken eine Stadt, um dort zu suchen.';
+
+  @override
+  String get quickSearch => 'Suchen';
+
+  @override
+  String get placeSearchAddTooltip => 'Auf die Wunschliste';
+
+  @override
+  String get placeSearchInTrip => 'Schon auf der Wunschliste';
+
+  @override
+  String placeSearchAdded(String place) {
+    return '$place ist auf der Wunschliste';
+  }
 }

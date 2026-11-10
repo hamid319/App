@@ -153,6 +153,12 @@ GoRouter createRouter(Ref ref) {
               ),
             ),
           ),
+          // Search the trip's city and add places to its wishlist.
+          GoRoute(
+            path: 'search',
+            builder: (ctx, state) => PlaceSearchScreen(
+                groupId: state.pathParameters['groupId']!),
+          ),
           GoRoute(
             path: 'swipe',
             builder: (ctx, state) => AccountGate(

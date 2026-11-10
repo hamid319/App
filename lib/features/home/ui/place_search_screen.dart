@@ -8,12 +8,17 @@ import '../../../core/constants/popular_cities.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
+import '../../../main_providers.dart';
 import '../logic/place_search_controller.dart';
 
 /// Search for a place by name in the city chosen on Discover (or the city
 /// near the user). Searches the city's index on the device as you type.
+/// With [groupId] it searches the trip's city and each result gets a
+/// button that puts it on the trip's wishlist.
 class PlaceSearchScreen extends ConsumerStatefulWidget {
-  const PlaceSearchScreen({super.key});
+  const PlaceSearchScreen({super.key, this.groupId});
+
+  final String? groupId;
 
   @override
   ConsumerState<PlaceSearchScreen> createState() => _PlaceSearchScreenState();
@@ -26,7 +31,10 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final lang = Localizations.localeOf(context).languageCode;
-    final city = ref.watch(searchCityProvider);
+    final groupId = widget.groupId;
+    final city = groupId == null
+        ? ref.watch(searchCityProvider)
+        : ref.watch(tripSearchCityProvider(groupId));
     final cityName = city.value?.nameFor(lang);
 
     return Scaffold(
@@ -55,23 +63,27 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen> {
         ),
         data: (city) => city == null
             ? _Message(icon: Icons.location_city, text: l10n.placeSearchNoCity)
-            : _Results(city: city, query: _query),
+            : _Results(city: city, query: _query, groupId: groupId),
       ),
     );
   }
 }
 
 class _Results extends ConsumerWidget {
-  const _Results({required this.city, required this.query});
+  const _Results({required this.city, required this.query, this.groupId});
 
   final PopularCity city;
   final String query;
+  final String? groupId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final lang = Localizations.localeOf(context).languageCode;
     final index = ref.watch(placeSearchIndexProvider(city.id));
+    final inTrip = groupId == null
+        ? null
+        : ref.watch(tripPlaceIdsProvider(groupId!)).value ?? const <String>{};
     return index.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => _Message(
@@ -95,20 +107,51 @@ class _Results extends ConsumerWidget {
         return ListView.builder(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           itemCount: hits.length,
-          itemBuilder: (context, i) => _ResultTile(entry: hits[i]),
+          itemBuilder: (context, i) => _ResultTile(
+            entry: hits[i],
+            groupId: groupId,
+            inTrip: inTrip?.contains(hits[i].id) ?? false,
+          ),
         );
       },
     );
   }
 }
 
-class _ResultTile extends StatelessWidget {
-  const _ResultTile({required this.entry});
+class _ResultTile extends ConsumerWidget {
+  const _ResultTile({required this.entry, this.groupId, this.inTrip = false});
 
   final PlaceSearchEntry entry;
 
+  /// Trip mode: the trailing button adds the place to this trip.
+  final String? groupId;
+  final bool inTrip;
+
+  void _add(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final errorColor = Theme.of(context).colorScheme.error;
+    final uid = ref.read(currentAccountProvider).value?.uid;
+    if (uid == null) return;
+    final title = entry.nameFor(Localizations.localeOf(context).languageCode);
+    // Not awaited: Firestore shows the idea at once (also offline).
+    ref
+        .read(tripRepositoryProvider)
+        .addPlaceIdea(groupId!, placeId: entry.id, title: title, uid: uid)
+        .catchError((Object e) {
+      messenger.showSnackBar(SnackBar(
+        content: Text(userMessage(e, fallback: l10n.errorGeneric, l10n: l10n)),
+        backgroundColor: errorColor,
+      ));
+      return (id: '', added: false);
+    });
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(l10n.placeSearchAdded(title))));
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final lang = Localizations.localeOf(context).languageCode;
     final scheme = Theme.of(context).colorScheme;
@@ -126,6 +169,18 @@ class _ResultTile extends StatelessWidget {
       ),
       title: Text(entry.nameFor(lang)),
       subtitle: type == null ? null : Text(placeTypeLabel(l10n, type)),
+      trailing: groupId == null
+          ? null
+          : inTrip
+              ? Tooltip(
+                  message: l10n.placeSearchInTrip,
+                  child: Icon(Icons.check_circle, color: scheme.primary),
+                )
+              : IconButton.filledTonal(
+                  tooltip: l10n.placeSearchAddTooltip,
+                  icon: const Icon(Icons.add),
+                  onPressed: () => _add(context, ref),
+                ),
       onTap: () => context.push('/place/${entry.id}'),
     );
   }
