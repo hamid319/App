@@ -254,5 +254,21 @@ void main() {
       final data = (await db.collection('users').doc('guest-uid').get()).data()!;
       expect(data['favorites'], ['place-1']);
     });
+
+    test('only name, photo and PayPal handle reach the public profile',
+        () async {
+      final repo = ProfileRepository(_FakeFirestoreService(db));
+      await db.collection('users').doc('u1').set({'uid': 'u1', 'email': 'a@b.c'});
+
+      await repo.updateUserProfile(
+          'u1', {'displayName': 'Ana', 'favorites': <String>[]});
+      await repo.upsertUserProfile('u1', {'paypalHandle': 'ana', 'email': 'x'});
+
+      final public = (await db.collection('publicProfiles').doc('u1').get()).data();
+      expect(public, {'displayName': 'Ana', 'paypalHandle': 'ana'});
+      final read = await repo.getPublicProfile('u1');
+      expect(read.displayName, 'Ana');
+      expect(read.email, isEmpty);
+    });
   });
 }

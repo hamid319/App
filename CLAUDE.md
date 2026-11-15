@@ -79,6 +79,8 @@ Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so
                        checkIns: map<cityKey, Timestamp> (passport GPS check-ins; no check-in = pale stamp)
   /packing/{groupId}   items [{id, category, key?|name?, qty?, done}] ≤150, complete (own packing list, private;
                        complete feeds suitcase miles and the evening-before reminder)
+/publicProfiles/{uid}  displayName?, photoUrl?, paypalHandle? (what trip members see of each other; get only,
+                       owner writes; /users itself is readable only by its owner)
 /pushTokens/{token}    uid, lang, updatedAt (one per device; written by the app, read only by the
                        push Cloud Functions in functions/push.js: match, member joined, expense, journal)
 /inviteCodes/{code}    groupId, createdAt, title, cityName, ownerName (get only, no list; written by the owner)

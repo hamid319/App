@@ -176,10 +176,10 @@ String tripCityKey(GroupModel group) => group.location == null
     ? ''
     : PlacesRepository.curatedCityId(group.location!);
 
-/// A member's profile, for their PayPal handle.
+/// A member's public profile, for their PayPal handle.
 final memberProfileProvider =
     FutureProvider.autoDispose.family<UserModel, String>((ref, uid) {
-  return ref.watch(profileRepositoryProvider).getUserProfile(uid);
+  return ref.watch(profileRepositoryProvider).getPublicProfile(uid);
 });
 
 /// Number of open polls of a trip, for the trips list.

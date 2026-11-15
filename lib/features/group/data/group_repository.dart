@@ -206,13 +206,4 @@ class GroupRepository {
     }
   }
 
-  Future<void> syncFavorites(
-      String groupId, List<String> sharedFavorites) async {
-    final data = {'sharedFavorites': sharedFavorites};
-    if (_usesInjectedFirestore) {
-      await _db.collection('groups').doc(groupId).update(data);
-    } else {
-      await _firestoreService.updateDocument('groups', groupId, data);
-    }
-  }
 }

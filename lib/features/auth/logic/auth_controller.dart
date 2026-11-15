@@ -83,11 +83,18 @@ class AuthController extends AsyncNotifier<UserModel?> {
       }
     }
     final userModel = await _profileRepo.getUserProfile(firebaseUser.uid);
-    return userModel.copyWith(
+    final hydrated = userModel.copyWith(
       email: firebaseUser.email ?? userModel.email,
       displayName: firebaseUser.displayName ?? userModel.displayName,
       isAnonymous: firebaseUser.isAnonymous,
     );
+    if (!firebaseUser.isAnonymous) {
+      // Fills publicProfiles for accounts made before it existed, so trip
+      // members see this name. One small write per start, not awaited.
+      _profileRepo.syncPublicProfile(hydrated).catchError(
+          (Object e) => debugPrint('Public profile sync failed: $e'));
+    }
+    return hydrated;
   }
 
   /// Signs into an existing account. When called as a guest, the guest
