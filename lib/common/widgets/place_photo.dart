@@ -7,7 +7,6 @@ import '../../app/theme.dart';
 import '../../core/constants/colors.dart';
 import '../../core/constants/sizes.dart';
 import '../../core/services/image_cache.dart';
-import '../utils/place_photo_url_builder.dart';
 import '../models/place_model.dart';
 import 'skeleton.dart';
 import 'ticket.dart';
@@ -26,7 +25,7 @@ class PlacePhoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final urls = resolvePlacePhotoUrls(place);
+    final urls = place.imageUrls;
     final venueIcon = venueTypeIcon(place.types);
     final Widget fallback = place.isVenue || venueIcon != null
         ? _VenueIllustration(
@@ -51,7 +50,7 @@ class PlacePhoto extends StatelessWidget {
 /// Downloads a place's first photo into the disk cache without showing it,
 /// so a card further down a deck is ready when it comes up. Best effort.
 void prefetchPlacePhoto(PlaceModel place) {
-  final urls = resolvePlacePhotoUrls(place);
+  final urls = place.imageUrls;
   if (urls.isEmpty) return;
   imageCacheManager.getSingleFile(urls.first).then<void>((_) {},
       onError: (Object e) => debugPrint('Prefetch failed: $e'));

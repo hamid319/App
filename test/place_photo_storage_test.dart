@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:swipetrip/common/models/place_model.dart';
-import 'package:swipetrip/common/utils/place_photo_url_builder.dart';
 
 void main() {
   test('cache serialization stores photo names without media credentials', () {
@@ -32,19 +31,5 @@ void main() {
 
     expect(place.imageUrls, <String>['https://example.test/legacy.jpg']);
     expect(place.toJson().containsKey('imageUrls'), isFalse);
-  });
-
-  test('runtime helper builds encoded photo media URLs', () {
-    const builder = PlacePhotoUrlBuilder(apiKey: 'runtime-value');
-
-    final url = builder.build(
-      'places/place id/photos/photo/value',
-      maxWidthPx: 640,
-    );
-
-    expect(
-      url,
-      'https://places.googleapis.com/v1/places/place%20id/photos/photo/value/media?maxWidthPx=640&key=runtime-value',
-    );
   });
 }
