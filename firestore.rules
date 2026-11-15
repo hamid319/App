@@ -296,13 +296,6 @@ service cloud.firestore {
       allow update: if isAuthenticated() && (
         // Owner can update anything (name, dates, location, invite, ...)
         isOwner(resource.data) ||
-        // A member may refresh the shared-favourites projection.
-        (
-          isMember(resource.data) &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            'sharedFavorites'
-          ])
-        ) ||
         // Joining: only the caller may be appended, and only themselves,
         // only with the group's invite code (sent as joinCode). Any time:
         // the swipe deck stays open, so there is no round to wait for.

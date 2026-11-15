@@ -100,6 +100,8 @@ describe('groups', () => {
       { members: ['alice', 'bob', 'carol'], joinCode: 'WRONG' })));
   test('a member cannot rename the trip', () =>
     assertFails(updateDoc(doc(db('bob'), 'groups/g1'), { title: 'Mine' })));
+  test('a member cannot write sharedFavorites (no longer used)', () =>
+    assertFails(updateDoc(doc(db('bob'), 'groups/g1'), { sharedFavorites: ['p1'] })));
   test('a member may leave', () =>
     assertSucceeds(updateDoc(doc(db('bob'), 'groups/g1'), { members: ['alice'] })));
   test('a member cannot remove someone else', () =>
