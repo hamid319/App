@@ -8,12 +8,15 @@ import 'ticket.dart';
 /// "Where to?" sheet: optional "Current location", a search field and the
 /// popular destinations. Returns the chosen city, or null for the current
 /// location; returns without calling [onSelected] when dismissed.
+/// [clearLabel] with [onClear] adds a row that removes the current choice.
 Future<void> showCityPicker(
   BuildContext context, {
   required ValueChanged<PopularCity?> onSelected,
   String? selectedId,
   bool offerCurrentLocation = true,
   String? title,
+  String? clearLabel,
+  VoidCallback? onClear,
 }) {
   return showModalBottomSheet<void>(
     context: context,
@@ -24,6 +27,8 @@ Future<void> showCityPicker(
       selectedId: selectedId,
       offerCurrentLocation: offerCurrentLocation,
       title: title,
+      clearLabel: clearLabel,
+      onClear: onClear,
     ),
   );
 }
@@ -34,12 +39,16 @@ class _CityPicker extends StatefulWidget {
     required this.selectedId,
     required this.offerCurrentLocation,
     this.title,
+    this.clearLabel,
+    this.onClear,
   });
 
   final ValueChanged<PopularCity?> onSelected;
   final String? selectedId;
   final bool offerCurrentLocation;
   final String? title;
+  final String? clearLabel;
+  final VoidCallback? onClear;
 
   @override
   State<_CityPicker> createState() => _CityPickerState();
@@ -109,6 +118,28 @@ class _CityPickerState extends State<_CityPicker> {
             child: ListView(
               controller: scroll,
               children: [
+                if (widget.onClear != null &&
+                    widget.clearLabel != null &&
+                    q.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSizes.screenEdge,
+                      0,
+                      AppSizes.screenEdge,
+                      AppSizes.space12,
+                    ),
+                    child: Ticket(
+                      child: ListTile(
+                        leading: Icon(Icons.close_rounded, color: scheme.error),
+                        title: Text(widget.clearLabel!,
+                            style: TextStyle(color: scheme.error)),
+                        onTap: () {
+                          widget.onClear!();
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                  ),
                 if (widget.offerCurrentLocation && q.isEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(

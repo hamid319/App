@@ -54,8 +54,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get pushSettingTitle => 'Benachrichtigungen';
 
   @override
-  String get pushSettingSubtitle =>
-      'Matches, neue Mitglieder, Kosten und Tagebuch';
+  String get pushSettingSubtitle => 'Matches, Mitglieder, Kosten, Tagebuch';
 
   @override
   String checkInReminderTitle(String city) {
@@ -751,10 +750,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsTitle => 'Einstellungen';
 
   @override
-  String get settingsAppSection => 'App';
+  String get settingsAppSection => 'Allgemein';
 
   @override
   String get settingsAccountSection => 'Konto';
+
+  @override
+  String get settingsLegalSection => 'Rechtliches';
 
   @override
   String get privacy => 'Datenschutz';
@@ -1053,8 +1055,8 @@ class AppLocalizationsDe extends AppLocalizations {
     String _temp1 = intl.Intl.pluralLogic(
       groups,
       locale: localeName,
-      other: '$groups Gruppen',
-      one: '1 Gruppe',
+      other: '$groups Reisen',
+      one: '1 Reise',
     );
     return '$_temp0 · $_temp1';
   }

@@ -179,7 +179,7 @@ abstract class AppLocalizations {
   /// No description provided for @pushSettingSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Matches, new members, costs and journal'**
+  /// **'Matches, members, costs, journal'**
   String get pushSettingSubtitle;
 
   /// No description provided for @checkInReminderTitle.
@@ -1433,7 +1433,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsAppSection.
   ///
   /// In en, this message translates to:
-  /// **'App'**
+  /// **'General'**
   String get settingsAppSection;
 
   /// No description provided for @settingsAccountSection.
@@ -1441,6 +1441,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Account'**
   String get settingsAccountSection;
+
+  /// No description provided for @settingsLegalSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal'**
+  String get settingsLegalSection;
 
   /// No description provided for @privacy.
   ///
@@ -1979,7 +1985,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileStats.
   ///
   /// In en, this message translates to:
-  /// **'{favorites, plural, =1{1 favorite} other{{favorites} favorites}} · {groups, plural, =1{1 group} other{{groups} groups}}'**
+  /// **'{favorites, plural, =1{1 favorite} other{{favorites} favorites}} · {groups, plural, =1{1 trip} other{{groups} trips}}'**
   String profileStats(int favorites, int groups);
 
   /// No description provided for @guestName.
