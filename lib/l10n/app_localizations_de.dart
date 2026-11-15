@@ -3183,4 +3183,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String placeSearchAdded(String place) {
     return '$place ist auf der Wunschliste';
   }
+
+  @override
+  String get tripNextTrip => 'Nächste Reise';
+
+  @override
+  String get tripDatesOpen => 'Datum offen';
+
+  @override
+  String get tripStepDone => 'Erledigt';
 }

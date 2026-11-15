@@ -70,19 +70,19 @@ class AppPalette {
   /// `DarkTabPage`), so nothing ever reads dark on dark.
   final bool darkTabs;
 
-  // Grouped look on warm sand: cream cards on a sand page, one tint
-  // (TripFam navy; sky in dark mode, where navy would vanish). Greys are
-  // warm too, and secondary text passes WCAG AA on the page and the cards.
+  // Clean look: white page and white cards told apart by hairlines, one
+  // tint (TripFam navy; sky in dark mode, where navy would vanish). Greys
+  // stay warm, and secondary text passes WCAG AA on white.
   static const light = AppPalette(
     brightness: Brightness.light,
-    bg: Color(0xFFF8F3EC),
-    surface: Color(0xFFFFFDF9),
-    surface2: Color(0xFFEFE6DA),
+    bg: Color(0xFFFFFFFF),
+    surface: Color(0xFFFFFFFF),
+    surface2: Color(0xFFF5F1EB),
     ink: Color(0xFF1E1A16),
-    ink2: Color(0xFF736759),
+    ink2: Color(0xFF6B6259),
     ink3: Color(0xFFB3A897),
-    line: Color(0xFFE3D8CA),
-    edge: Color(0xFFD9CCBC),
+    line: Color(0xFFEDE8E0),
+    edge: Color(0xFFE3DDD4),
     primary: BrandColors.navy,
     primarySoft: Color(0xFFF6E3D6),
     like: BrandColors.coral,
@@ -92,21 +92,21 @@ class AppPalette {
     mint: Color(0xFFDDF3E4),
     peach: Color(0xFFFCE4D2),
     sky: Color(0xFFDCE6F7),
-    sheet: Color(0xFFF8F3EC),
+    sheet: Color(0xFFFFFFFF),
     darkTabs: false,
   );
 
   // Dark mode = the light colours plus dark main tab pages (see [darkTabs]).
   static const dark = AppPalette(
     brightness: Brightness.light,
-    bg: Color(0xFFF8F3EC),
-    surface: Color(0xFFFFFDF9),
-    surface2: Color(0xFFEFE6DA),
+    bg: Color(0xFFFFFFFF),
+    surface: Color(0xFFFFFFFF),
+    surface2: Color(0xFFF5F1EB),
     ink: Color(0xFF1E1A16),
-    ink2: Color(0xFF736759),
+    ink2: Color(0xFF6B6259),
     ink3: Color(0xFFB3A897),
-    line: Color(0xFFE3D8CA),
-    edge: Color(0xFFD9CCBC),
+    line: Color(0xFFEDE8E0),
+    edge: Color(0xFFE3DDD4),
     primary: BrandColors.navy,
     primarySoft: Color(0xFFF6E3D6),
     like: BrandColors.coral,
@@ -116,14 +116,31 @@ class AppPalette {
     mint: Color(0xFFDDF3E4),
     peach: Color(0xFFFCE4D2),
     sky: Color(0xFFDCE6F7),
-    sheet: Color(0xFFF8F3EC),
+    sheet: Color(0xFFFFFFFF),
     darkTabs: true,
   );
 
   /// The dark page behind the main tabs in dark mode, and what sits on it.
-  static const tabPage = Color(0xFF1E1B18);
+  static const tabPage = Color(0xFF141312);
   static const onTabPage = Color(0xFFFBF5EE);
   static const onTabPage2 = Color(0xFFB0A494);
+
+  /// Icon tiles and hairlines straight on the dark tab page.
+  static const tabFill = Color(0xFF23211F);
+  static const tabLine = Color(0xFF2A2725);
+}
+
+/// Fill and text of the small status labels ("dates open", "done"), for a
+/// light surface and for the dark tab page.
+enum TagTone {
+  open(Color(0xFFFFF1EC), Color(0xFFA63A26), Color(0xFF3A1F19),
+      Color(0xFFFFA596)),
+  done(Color(0xFFE9F6EE), Color(0xFF1F6B43), Color(0xFF17301F),
+      Color(0xFF86DBA8));
+
+  const TagTone(this.fill, this.ink, this.darkFill, this.darkInk);
+
+  final Color fill, ink, darkFill, darkInk;
 }
 
 /// TripFam brand colours: the logo, wordmark, app icon and splash use these

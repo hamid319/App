@@ -3148,4 +3148,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String placeSearchAdded(String place) {
     return '$place is on the wishlist';
   }
+
+  @override
+  String get tripNextTrip => 'Next trip';
+
+  @override
+  String get tripDatesOpen => 'Dates open';
+
+  @override
+  String get tripStepDone => 'Done';
 }

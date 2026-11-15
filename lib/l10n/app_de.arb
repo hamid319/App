@@ -886,5 +886,8 @@
   "quickSearch": "Suchen",
   "placeSearchAddTooltip": "Auf die Wunschliste",
   "placeSearchInTrip": "Schon auf der Wunschliste",
-  "placeSearchAdded": "{place} ist auf der Wunschliste"
+  "placeSearchAdded": "{place} ist auf der Wunschliste",
+  "tripNextTrip": "Nächste Reise",
+  "tripDatesOpen": "Datum offen",
+  "tripStepDone": "Erledigt"
 }

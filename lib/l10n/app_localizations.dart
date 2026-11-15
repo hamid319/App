@@ -5419,6 +5419,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{place} is on the wishlist'**
   String placeSearchAdded(String place);
+
+  /// No description provided for @tripNextTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Next trip'**
+  String get tripNextTrip;
+
+  /// No description provided for @tripDatesOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Dates open'**
+  String get tripDatesOpen;
+
+  /// No description provided for @tripStepDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get tripStepDone;
 }
 
 class _AppLocalizationsDelegate

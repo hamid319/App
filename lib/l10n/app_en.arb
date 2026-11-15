@@ -1529,5 +1529,8 @@
   "placeSearchAddTooltip": "Add to wishlist",
   "placeSearchInTrip": "Already on the wishlist",
   "placeSearchAdded": "{place} is on the wishlist",
-  "@placeSearchAdded": {"placeholders": {"place": {"type": "String"}}}
+  "@placeSearchAdded": {"placeholders": {"place": {"type": "String"}}},
+  "tripNextTrip": "Next trip",
+  "tripDatesOpen": "Dates open",
+  "tripStepDone": "Done"
 }

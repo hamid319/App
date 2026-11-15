@@ -95,6 +95,17 @@ extension SwipeColorsContext on BuildContext {
       ? AppPalette.onTabPage2
       : Theme.of(this).colorScheme.onSurfaceVariant;
 
+  /// Whether this is a main tab page in dark mode (dark page behind it).
+  bool get isDarkTabPage => _onDarkTab;
+
+  /// Subtle fill (icon tiles) and hairlines straight on the page.
+  Color get pageFill => _onDarkTab
+      ? AppPalette.tabFill
+      : Theme.of(this).colorScheme.surfaceContainerHighest;
+  Color get pageLine => _onDarkTab
+      ? AppPalette.tabLine
+      : Theme.of(this).colorScheme.outlineVariant;
+
   /// Links and icons straight on the page.
   Color get pageTint =>
       _onDarkTab ? BrandColors.sky : Theme.of(this).colorScheme.primary;
@@ -356,8 +367,8 @@ class AppTheme {
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: p.surface.withValues(alpha: 0.94),
         surfaceTintColor: Colors.transparent,
-        indicatorColor:
-            light ? p.primarySoft : p.primary.withValues(alpha: 0.18),
+        // No pill: the selected tab is told by its tint and weight.
+        indicatorColor: Colors.transparent,
         indicatorShape: const StadiumBorder(),
         elevation: 0,
         height: 64,
