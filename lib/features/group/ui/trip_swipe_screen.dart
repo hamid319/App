@@ -223,6 +223,7 @@ class _TripSwipeScreenState extends ConsumerState<TripSwipeScreen> {
       body = SwipeDeck(
         place: current,
         nextPlace: deck.length > 1 ? deck[1] : null,
+        later: deck.skip(2).take(2).toList(),
         onLike: () => _vote(current, SwipeVote.like, uid),
         onSkip: () => _vote(current, SwipeVote.nope, uid),
         onSuperLike: () => _vote(current, SwipeVote.superLike, uid),

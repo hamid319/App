@@ -1,4 +1,6 @@
 // main.dart
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,7 +32,9 @@ Future<void> bootstrapApp({
           options: DefaultFirebaseOptions.currentPlatform,
         );
         _configureFirestoreCache();
-        await _activateAppCheck();
+        // Not awaited: only the receipt scan needs App Check, so the first
+        // frame does not wait for it.
+        unawaited(_activateAppCheck());
       })();
   (runApplication ?? runApp)(const ProviderScope(child: SwipeTripApp()));
 }

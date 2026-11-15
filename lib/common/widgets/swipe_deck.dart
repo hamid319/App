@@ -23,6 +23,7 @@ class SwipeDeck extends StatefulWidget {
     required this.onSkip,
     required this.onDetail,
     this.nextPlace,
+    this.later = const [],
     this.onUndo,
     this.canUndo = false,
     this.onSuperLike,
@@ -30,6 +31,10 @@ class SwipeDeck extends StatefulWidget {
 
   final PlaceModel place;
   final PlaceModel? nextPlace;
+
+  /// The cards after [nextPlace]; their photos are downloaded ahead so fast
+  /// swiping does not reach a card still loading.
+  final List<PlaceModel> later;
   final VoidCallback onLike;
   final VoidCallback onSkip;
   final VoidCallback onDetail;
@@ -74,6 +79,7 @@ class _SwipeDeckState extends State<SwipeDeck>
   void initState() {
     super.initState();
     _anim = AnimationController(vsync: this);
+    widget.later.forEach(prefetchPlacePhoto);
   }
 
   @override
@@ -84,6 +90,7 @@ class _SwipeDeckState extends State<SwipeDeck>
       _drag = Offset.zero;
       _animating = false;
       _pastThreshold = false;
+      widget.later.forEach(prefetchPlacePhoto);
     }
   }
 

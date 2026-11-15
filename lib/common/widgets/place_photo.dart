@@ -48,6 +48,15 @@ class PlacePhoto extends StatelessWidget {
   }
 }
 
+/// Downloads a place's first photo into the disk cache without showing it,
+/// so a card further down a deck is ready when it comes up. Best effort.
+void prefetchPlacePhoto(PlaceModel place) {
+  final urls = resolvePlacePhotoUrls(place);
+  if (urls.isEmpty) return;
+  imageCacheManager.getSingleFile(urls.first).then<void>((_) {},
+      onError: (Object e) => debugPrint('Prefetch failed: $e'));
+}
+
 /// Width in pixels to decode a photo at so it still covers [box]
 /// (BoxFit.cover), or null when the box is unbounded. Decoding a 1080 px
 /// photo for a 56 px thumbnail costs time and image-cache memory.

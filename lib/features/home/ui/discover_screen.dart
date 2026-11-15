@@ -81,6 +81,7 @@ class _SwipeContent extends ConsumerWidget {
         return SwipeDeck(
           place: current,
           nextPlace: ctrl.nextPlaceInDeck,
+          later: ctrl.placesAfterNext,
           canUndo: ctrl.canUndo,
           onUndo: ctrl.undo,
           onSkip: ctrl.skip,

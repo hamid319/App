@@ -171,6 +171,12 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     return data[next];
   }
 
+  /// The two cards after [nextPlaceInDeck], for downloading photos ahead.
+  List<PlaceModel> get placesAfterNext {
+    final data = state.value ?? const <PlaceModel>[];
+    return data.skip(_currentIndex + 2).take(2).toList();
+  }
+
   bool get canUndo => _undoStack.isNotEmpty;
 
   PlaceModel? get currentPlace {
