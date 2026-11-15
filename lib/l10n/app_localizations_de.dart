@@ -3067,6 +3067,34 @@ class AppLocalizationsDe extends AppLocalizations {
   String get tripsJoin => 'Beitreten';
 
   @override
+  String get tripNextSteps => 'Nächste Schritte';
+
+  @override
+  String get tripStepDates => 'Reisedaten festlegen';
+
+  @override
+  String get tripStepDatesBody => 'Für Countdown und Tagespläne';
+
+  @override
+  String get tripStepInviteBody => 'Zusammen planen und swipen';
+
+  @override
+  String get tripStepSwipe => 'Orte swipen';
+
+  @override
+  String get tripStepSwipeBody => 'Matches landen auf der Wunschliste';
+
+  @override
+  String get tripStepPacking => 'Packliste starten';
+
+  @override
+  String get tripStepPackingBody => 'Deine eigene Liste, nur du siehst sie';
+
+  @override
+  String get errorSaveDates =>
+      'Die Reisedaten konnten nicht gespeichert werden.';
+
+  @override
   String get tripsDestinations => 'Beliebte Ziele';
 
   @override

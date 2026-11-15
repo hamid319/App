@@ -144,6 +144,10 @@ class GroupController extends AsyncNotifier<GroupModel?> {
     }
   }
 
+  /// Throws on failure; the caller shows the error.
+  Future<void> setTripDates(String groupId, DateTime start, DateTime end) =>
+      _repo.updateTripDates(groupId, start, end);
+
   Future<void> leaveGroup(String groupId, String userId) async {
     state = const AsyncLoading();
     try {
