@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -166,12 +168,12 @@ class TripsScreen extends ConsumerWidget {
   Future<void> _create(BuildContext context, {PopularCity? city}) async {
     final id = await showCreateTripSheet(context, city: city);
     // The sheet already celebrated the new trip.
-    if (id != null && context.mounted) context.push('/trip/$id');
+    if (id != null && context.mounted) unawaited(context.push('/trip/$id'));
   }
 
   Future<void> _join(BuildContext context, WidgetRef ref) async {
     final id = await showJoinTripDialog(context, ref);
-    if (id != null && context.mounted) context.push('/trip/$id');
+    if (id != null && context.mounted) unawaited(context.push('/trip/$id'));
   }
 }
 

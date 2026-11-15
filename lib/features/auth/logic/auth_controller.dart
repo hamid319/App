@@ -29,7 +29,7 @@ class AuthController extends AsyncNotifier<UserModel?> {
 
     _authSubscription = _authRepo.authStateChanges().listen((firebaseUser) async {
       // Delay state update to avoid modifying provider during widget build
-      Future.microtask(() async {
+      unawaited(Future.microtask(() async {
         if (firebaseUser != null) {
           final current = state.value;
           if (current != null &&
@@ -41,7 +41,7 @@ class AuthController extends AsyncNotifier<UserModel?> {
         } else {
           state = const AsyncData(null);
         }
-      });
+      }));
     });
 
     final currentUser = _authRepo.firebaseUser;
@@ -91,8 +91,8 @@ class AuthController extends AsyncNotifier<UserModel?> {
     if (!firebaseUser.isAnonymous) {
       // Fills publicProfiles for accounts made before it existed, so trip
       // members see this name. One small write per start, not awaited.
-      _profileRepo.syncPublicProfile(hydrated).catchError(
-          (Object e) => debugPrint('Public profile sync failed: $e'));
+      unawaited(_profileRepo.syncPublicProfile(hydrated).catchError(
+          (Object e) => debugPrint('Public profile sync failed: $e')));
     }
     return hydrated;
   }

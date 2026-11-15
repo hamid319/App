@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../../../app/theme.dart';
 import 'package:flutter/services.dart';
@@ -108,7 +110,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
     setState(() => _building = true);
     try {
       await ref.read(tripActionsProvider.notifier).buildPlan(group, ideas);
-      if (mounted) context.push('/trip/${group.groupId}/day/0');
+      if (mounted) unawaited(context.push('/trip/${group.groupId}/day/0'));
     } catch (e) {
       if (mounted) {
         showTripSnack(context,
@@ -899,7 +901,7 @@ class _CheckInRowState extends ConsumerState<_CheckInRow> {
       final km =
           await ref.read(tripActionsProvider.notifier).checkIn(widget.group);
       if (!mounted) return;
-      HapticFeedback.mediumImpact();
+      unawaited(HapticFeedback.mediumImpact());
       showTripSnack(context,
           km == null ? l10n.checkInDone(city) : l10n.checkInTooFar(km, city));
     } catch (_) {

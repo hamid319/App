@@ -92,6 +92,8 @@ class TripRepository {
   Stream<SyncStatus> _syncStatus(List<Stream<SnapshotMetadata>> sources) {
     final subs = <StreamSubscription<SnapshotMetadata>>[];
     final latest = <int, ({bool fromCache, bool pendingWrites})>{};
+    // Closed by its listener's cancel; the stream is handed to the caller.
+    // ignore: close_sinks
     late final StreamController<SyncStatus> controller;
     controller = StreamController<SyncStatus>(
       onListen: () {

@@ -32,6 +32,7 @@ class _FakeAuthService implements AuthService {
   _FakeAuthService({this.anonymousError});
 
   final FirebaseAuthException? anonymousError;
+  // ignore: close_sinks
   final _changes = StreamController<User?>.broadcast();
   User? _user;
   int linkCalls = 0;
