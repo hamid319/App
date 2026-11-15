@@ -84,6 +84,9 @@ class _PlacesMapState extends State<PlacesMap> {
     // Our pins are the content; Mapbox's own POI labels only compete.
     await map.setStyleImportConfigProperty(
         'basemap', 'showPointOfInterestLabels', false);
+    // Seen from straight above, 3D buildings look like flat footprints but
+    // cost tile data and GPU time; flat ones load and draw faster.
+    await map.setStyleImportConfigProperty('basemap', 'show3dObjects', false);
     _route = await map.annotations.createPolylineAnnotationManager();
     _pins = await map.annotations.createPointAnnotationManager();
     _tapSubscription = _pins!.tapEvents(onTap: (annotation) {
