@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/app.dart';
 import 'core/config/app_config.dart';
@@ -32,6 +33,7 @@ Future<void> bootstrapApp({
           options: DefaultFirebaseOptions.currentPlatform,
         );
         _configureFirestoreCache();
+        _configureCrashlytics();
         // Not awaited: only the receipt scan needs App Check, so the first
         // frame does not wait for it.
         unawaited(_activateAppCheck());
@@ -46,6 +48,18 @@ void _configureFirestoreCache() {
     persistenceEnabled: true,
     cacheSizeBytes: AppConfig.firestoreCacheBytes,
   );
+}
+
+/// Uncaught errors (Flutter framework and async) go to Crashlytics as
+/// fatal reports. Debug builds send nothing, so testing adds no noise.
+void _configureCrashlytics() {
+  final crashlytics = FirebaseCrashlytics.instance;
+  unawaited(crashlytics.setCrashlyticsCollectionEnabled(!kDebugMode));
+  FlutterError.onError = crashlytics.recordFlutterFatalError;
+  WidgetsBinding.instance.platformDispatcher.onError = (error, stack) {
+    crashlytics.recordError(error, stack, fatal: true);
+    return true;
+  };
 }
 
 /// App Check guards the receipt scan (Firebase AI Logic enforces it).
