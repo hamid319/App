@@ -264,18 +264,14 @@ class PlacesRepository {
   Future<List<PlaceModel>> loadPlacesByIds(List<String> ids) async {
     if (ids.isEmpty) return [];
 
-    final places = <PlaceModel>[];
-    final seen = <String>{};
-    for (final id in ids) {
-      if (id.isEmpty || !seen.add(id)) continue;
-
-      final place = await getPlaceById(id);
-      if (place != null) {
-        places.add(place);
-      }
-    }
-
-    return places;
+    // All reads at once, in the order of [ids]: one after another took a
+    // round trip per favorite.
+    final unique = {
+      for (final id in ids)
+        if (id.isNotEmpty) id
+    };
+    final places = await Future.wait(unique.map(getPlaceById));
+    return places.nonNulls.toList();
   }
 
   Future<void> recordSwipe({

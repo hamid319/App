@@ -6,7 +6,6 @@ import '../../../core/services/preferences_service.dart';
 import '../data/places_repository.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../profile/data/profile_repository.dart';
-import '../../group/logic/group_controller.dart';
 import '../../../main_providers.dart';
 import '../../../core/config/app_config.dart';
 import '../../../common/models/interest.dart';
@@ -171,6 +170,12 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     return data[next];
   }
 
+  /// The two cards after [nextPlaceInDeck], for downloading photos ahead.
+  List<PlaceModel> get placesAfterNext {
+    final data = state.value ?? const <PlaceModel>[];
+    return data.skip(_currentIndex + 2).take(2).toList();
+  }
+
   bool get canUndo => _undoStack.isNotEmpty;
 
   PlaceModel? get currentPlace {
@@ -202,7 +207,6 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
       Future<void> save() async {
         try {
           await _profileRepo.addFavorite(userId, place.id);
-          await _syncFavoritesWithGroup(userId);
         } catch (e) {
           debugPrint('Saving favorite ${place.id} failed: $e');
         }
@@ -284,7 +288,6 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
       await _placesRepo.deleteSwipe(userId: userId, placeId: step.place.id);
       if (step.liked) {
         await _profileRepo.removeFavorite(userId, step.place.id);
-        await _syncFavoritesWithGroup(userId);
       }
     } catch (e) {
       // The card is back locally; a failed revert only means the server
@@ -326,7 +329,6 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
       final userId = authState.value!.uid;
       try {
         await _profileRepo.addFavorite(userId, placeId);
-        await _syncFavoritesWithGroup(userId);
       } catch (e) {
         // Continue even on error
       }
@@ -346,7 +348,6 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
       final userId = authState.value!.uid;
       try {
         await _profileRepo.removeFavorite(userId, placeId);
-        await _syncFavoritesWithGroup(userId);
       } catch (e) {
         // Continue even on error
       }
@@ -369,46 +370,5 @@ class SwipeController extends AsyncNotifier<List<PlaceModel>> {
     }
 
     ref.invalidateSelf();
-  }
-
-  Future<void> _syncFavoritesWithGroup(String userId) async {
-    try {
-      final groupController = ref.read(groupControllerProvider.notifier);
-      final groupState = ref.read(groupControllerProvider);
-
-      if (groupState.value != null) {
-        final group = groupState.value!;
-        if (group.members.contains(userId)) {
-          final mutualFavorites = await _findMutualFavorites(group.members);
-          await groupController.syncFavorites(group.groupId, mutualFavorites);
-        }
-      }
-    } catch (e) {
-      // Handle error silently
-    }
-  }
-
-  Future<List<String>> _findMutualFavorites(List<String> memberIds) async {
-    if (memberIds.isEmpty) return [];
-
-    final List<Set<String>> memberFavoriteSets = [];
-
-    for (final memberId in memberIds) {
-      try {
-        final userProfile = await _profileRepo.getUserProfile(memberId);
-        memberFavoriteSets.add(userProfile.favorites.toSet());
-      } catch (e) {
-        memberFavoriteSets.add({});
-      }
-    }
-
-    if (memberFavoriteSets.isEmpty) return [];
-
-    Set<String> intersection = memberFavoriteSets.first;
-    for (final favorites in memberFavoriteSets.skip(1)) {
-      intersection = intersection.intersection(favorites);
-    }
-
-    return intersection.toList();
   }
 }

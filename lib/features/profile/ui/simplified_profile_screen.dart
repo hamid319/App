@@ -17,6 +17,7 @@ import '../../../core/constants/sizes.dart';
 import '../../../core/constants/colors.dart';
 import '../../group/logic/group_controller.dart';
 import '../../swipe/logic/swipe_controller.dart';
+import '../../../core/services/image_cache.dart';
 
 class SimplifiedProfileScreen extends ConsumerWidget {
   const SimplifiedProfileScreen({super.key});
@@ -93,6 +94,7 @@ class SimplifiedProfileScreen extends ConsumerWidget {
         ? ClipOval(
             child: CachedNetworkImage(
               imageUrl: user.photoUrl!,
+              cacheManager: imageCacheManager,
               width: avatarSize,
               height: avatarSize,
               fit: BoxFit.cover,

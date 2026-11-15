@@ -1,9 +1,12 @@
+import 'dart:math' as math;
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/theme.dart';
 import '../../core/constants/colors.dart';
 import '../../core/constants/sizes.dart';
+import '../../core/services/image_cache.dart';
 import '../utils/place_photo_url_builder.dart';
 import '../models/place_model.dart';
 import 'skeleton.dart';
@@ -31,14 +34,38 @@ class PlacePhoto extends StatelessWidget {
             tone: _venueTone(place.types))
         : const _PhotoFallback();
     if (urls.isEmpty) return fallback;
-    return CachedNetworkImage(
-      imageUrl: urls.first,
-      fit: BoxFit.cover,
-      fadeInDuration: const Duration(milliseconds: 180),
-      placeholder: (_, __) => const SkeletonImage(),
-      errorWidget: (_, __, ___) => fallback,
+    return LayoutBuilder(
+      builder: (context, box) => CachedNetworkImage(
+        imageUrl: urls.first,
+        cacheManager: imageCacheManager,
+        memCacheWidth: coverCacheWidth(context, box),
+        fit: BoxFit.cover,
+        fadeInDuration: const Duration(milliseconds: 180),
+        placeholder: (_, __) => const SkeletonImage(),
+        errorWidget: (_, __, ___) => fallback,
+      ),
     );
   }
+}
+
+/// Downloads a place's first photo into the disk cache without showing it,
+/// so a card further down a deck is ready when it comes up. Best effort.
+void prefetchPlacePhoto(PlaceModel place) {
+  final urls = resolvePlacePhotoUrls(place);
+  if (urls.isEmpty) return;
+  imageCacheManager.getSingleFile(urls.first).then<void>((_) {},
+      onError: (Object e) => debugPrint('Prefetch failed: $e'));
+}
+
+/// Width in pixels to decode a photo at so it still covers [box]
+/// (BoxFit.cover), or null when the box is unbounded. Decoding a 1080 px
+/// photo for a 56 px thumbnail costs time and image-cache memory.
+/// shortcut: assumes photos at most 16:9 wide (wider ones get slightly soft
+/// in tall boxes); store the aspect ratio with the photo if that shows.
+int? coverCacheWidth(BuildContext context, BoxConstraints box) {
+  if (!box.hasBoundedWidth || !box.hasBoundedHeight) return null;
+  final logical = math.max(box.maxWidth, box.maxHeight * 16 / 9);
+  return (logical * MediaQuery.devicePixelRatioOf(context)).ceil();
 }
 
 class _PhotoFallback extends StatelessWidget {

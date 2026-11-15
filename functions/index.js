@@ -1,6 +1,8 @@
 'use strict';
 
-const admin = require('firebase-admin');
+const { initializeApp } = require('firebase-admin/app');
+const { getFirestore } = require('firebase-admin/firestore');
+const { getMessaging } = require('firebase-admin/messaging');
 const { setGlobalOptions } = require('firebase-functions/v2');
 const {
   onDocumentCreated,
@@ -10,11 +12,12 @@ const {
 
 const push = require('./push');
 
-admin.initializeApp();
+initializeApp();
 // Caps a runaway trigger loop's bill; pushes need no more.
 setGlobalOptions({ maxInstances: 5 });
 
-const db = () => admin.firestore();
+// firebase-admin 14 has no namespaced firestore()/messaging() any more.
+const db = () => getFirestore();
 
 // ---------------------------------------------------------------------------
 // Push notifications for trip events. Firestore triggers must run in the
@@ -36,7 +39,7 @@ exports.pushOnMemberJoined = onDocumentUpdated(
     const { groupId } = event.params;
     for (const uid of joined) {
       const name = await push.displayName(db(), uid);
-      await push.sendToUsers(db(), admin.messaging(),
+      await push.sendToUsers(db(), getMessaging(),
         before.filter((u) => (group.members ?? []).includes(u)),
         (t) => ({
           title: t.joinTitle(push.tripTitle(group)),
@@ -55,7 +58,7 @@ exports.pushOnExpenseAdded = onDocumentCreated(
     const group = await tripMembers(groupId);
     if (!group) return;
     const name = await push.displayName(db(), expense.createdBy);
-    await push.sendToUsers(db(), admin.messaging(),
+    await push.sendToUsers(db(), getMessaging(),
       (group.members ?? []).filter((u) => u !== expense.createdBy),
       (t, lang) => ({
         title: t.expenseTitle(push.tripTitle(group)),
@@ -74,7 +77,7 @@ exports.pushOnJournalEntry = onDocumentCreated(
     const group = await tripMembers(groupId);
     if (!group) return;
     const name = await push.displayName(db(), entry.authorUid);
-    await push.sendToUsers(db(), admin.messaging(),
+    await push.sendToUsers(db(), getMessaging(),
       (group.members ?? []).filter((u) => u !== entry.authorUid),
       (t) => ({
         title: t.journalTitle(push.tripTitle(group)),
@@ -105,7 +108,7 @@ exports.pushOnSwipeMatch = onDocumentWritten(
     const matches = push.newMatches({ uid, before, after, others, members });
     for (const placeId of matches.slice(0, 3)) {
       const place = await db().collection('places').doc(placeId).get();
-      await push.sendToUsers(db(), admin.messaging(),
+      await push.sendToUsers(db(), getMessaging(),
         members.filter((u) => u !== uid),
         (t, lang) => ({
           title: t.matchTitle(),

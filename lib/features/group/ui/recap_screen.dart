@@ -17,6 +17,7 @@ import '../logic/trip_controller.dart';
 import '../widgets/journal_photos.dart';
 import '../widgets/recap_share_card.dart';
 import '../widgets/trip_ui.dart';
+import '../../../core/services/image_cache.dart';
 
 /// Looking back on a trip: numbers, a photo collage, the planned places
 /// on a map, and a picture of it all to share.
@@ -87,7 +88,10 @@ class _RecapBodyState extends ConsumerState<_RecapBody> {
       // The capture must not catch empty placeholders.
       await Future.wait([
         for (final p in shown)
-          precacheImage(CachedNetworkImageProvider(p.url), context),
+          precacheImage(
+              CachedNetworkImageProvider(p.url,
+                  cacheManager: imageCacheManager),
+              context),
       ]);
       if (!mounted) return;
       final png = await captureWidget(

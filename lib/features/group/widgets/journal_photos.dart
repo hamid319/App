@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../common/models/journal_entry.dart';
+import '../../../common/widgets/place_photo.dart';
+import '../../../core/services/image_cache.dart';
 import '../../../l10n/l10n.dart';
 
 /// One journal photo, cropped to fill its box.
@@ -14,13 +16,19 @@ class JournalImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fill = Theme.of(context).colorScheme.surfaceContainerHigh;
-    return CachedNetworkImage(
-      imageUrl: photo.url,
-      fit: fit,
-      placeholder: (_, __) => ColoredBox(color: fill),
-      errorWidget: (_, __, ___) => ColoredBox(
-        color: fill,
-        child: const Center(child: Icon(Icons.broken_image_outlined)),
+    return LayoutBuilder(
+      builder: (context, box) => CachedNetworkImage(
+        imageUrl: photo.url,
+        cacheManager: imageCacheManager,
+        // Full size when the whole photo is shown (contain), e.g. zoomed.
+        memCacheWidth:
+            fit == BoxFit.cover ? coverCacheWidth(context, box) : null,
+        fit: fit,
+        placeholder: (_, __) => ColoredBox(color: fill),
+        errorWidget: (_, __, ___) => ColoredBox(
+          color: fill,
+          child: const Center(child: Icon(Icons.broken_image_outlined)),
+        ),
       ),
     );
   }

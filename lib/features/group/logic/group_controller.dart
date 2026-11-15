@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../common/models/group_model.dart';
 import '../../../features/auth/logic/auth_controller.dart';
-import '../../../features/profile/data/profile_repository.dart';
 import '../data/group_repository.dart';
 import '../../../main_providers.dart';
 
@@ -21,17 +20,20 @@ final selectedGroupIdProvider =
     NotifierProvider<SelectedGroupIdNotifier, String?>(
         SelectedGroupIdNotifier.new);
 
-final userGroupsProvider = StreamProvider<List<GroupModel>>((ref) {
-  final user = ref.watch(authControllerProvider).value;
-  if (user == null) return Stream.value([]);
-  return ref.watch(groupRepositoryProvider).streamUserGroups(user.uid);
-});
+/// The signed-in user's trips. The same provider as [myTripsProvider]: it
+/// keys on the Firebase uid, so the query starts without waiting for the
+/// profile read in [authControllerProvider], and there is one listener.
+final userGroupsProvider = myTripsProvider;
 
 /// Display name for a group member, or null when the profile has none.
 final groupMemberNameProvider =
     FutureProvider.family<String?, String>((ref, uid) async {
-  final profile =
-      await ref.watch(profileRepositoryProvider).getUserProfile(uid);
+  // Your own name comes from your session: no read, and it is there even
+  // before the first public profile write has landed.
+  final me = ref.watch(authControllerProvider).value;
+  final profile = me != null && me.uid == uid
+      ? me
+      : await ref.watch(profileRepositoryProvider).getPublicProfile(uid);
   final name = profile.displayName?.trim();
   return (name == null || name.isEmpty) ? null : name;
 });
@@ -40,12 +42,7 @@ final groupControllerProvider =
     AsyncNotifierProvider<GroupController, GroupModel?>(GroupController.new);
 
 class GroupController extends AsyncNotifier<GroupModel?> {
-  String? _lastMembersSignature;
-  List<String>? _lastSharedFavorites;
-
   GroupRepository get _repo => ref.read(groupRepositoryProvider);
-  ProfileRepository get _profileRepo =>
-      ProfileRepository(ref.read(firestoreServiceProvider));
 
   @override
   Future<GroupModel?> build() async {
@@ -63,29 +60,7 @@ class GroupController extends AsyncNotifier<GroupModel?> {
     final List<GroupModel> userGroups = userGroupsAsync.asData?.value ??
         await ref.watch(userGroupsProvider.future);
 
-    try {
-      final group = userGroups.firstWhere((g) => g.groupId == selectedId);
-
-      final resolvedGroup = group;
-      final membersSignature = _buildMembersSignature(
-        resolvedGroup.groupId,
-        resolvedGroup.members,
-      );
-      if (_lastMembersSignature != membersSignature ||
-          _lastSharedFavorites == null) {
-        _lastSharedFavorites = await calculateGroupMatches(resolvedGroup);
-        _lastMembersSignature = membersSignature;
-      }
-      return resolvedGroup.copyWith(
-          sharedFavorites: _lastSharedFavorites ?? const []);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  String _buildMembersSignature(String groupId, List<String> members) {
-    final sortedMembers = List<String>.from(members)..sort();
-    return '$groupId:${sortedMembers.join('|')}';
+    return userGroups.where((g) => g.groupId == selectedId).firstOrNull;
   }
 
   bool get isAdmin {
@@ -164,51 +139,6 @@ class GroupController extends AsyncNotifier<GroupModel?> {
     try {
       await _repo.joinGroup(groupId, userId);
       ref.read(selectedGroupIdProvider.notifier).updateState(groupId);
-    } catch (e, st) {
-      state = AsyncError(e, st);
-    }
-  }
-
-  Future<List<String>> calculateGroupMatches(GroupModel group) async {
-    if (group.members.isEmpty) return [];
-
-    final List<Future<List<String>>> futures = group.members.map((uid) async {
-      try {
-        return await _profileRepo.getUserFavorites(uid);
-      } catch (_) {
-        return const <String>[];
-      }
-    }).toList();
-
-    final List<List<String>> memberFavorites = await Future.wait(futures);
-
-    if (memberFavorites.isEmpty) return [];
-
-    Set<String> intersection = memberFavorites.first.toSet();
-    for (final favorites in memberFavorites.skip(1)) {
-      intersection = intersection.intersection(favorites.toSet());
-    }
-
-    return intersection.toList();
-  }
-
-  Future<void> refreshGroupMatches() async {
-    final currentGroup = state.value;
-    if (currentGroup == null) return;
-
-    try {
-      final updatedMatches = await calculateGroupMatches(currentGroup);
-      await _repo.syncFavorites(currentGroup.groupId, updatedMatches);
-      // We don't need to manually update state, the snapshot will trigger a rebuild!
-    } catch (e, st) {
-      state = AsyncError(e, st);
-    }
-  }
-
-  Future<void> syncFavorites(
-      String groupId, List<String> sharedFavorites) async {
-    try {
-      await _repo.syncFavorites(groupId, sharedFavorites);
     } catch (e, st) {
       state = AsyncError(e, st);
     }

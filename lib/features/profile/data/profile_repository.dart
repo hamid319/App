@@ -23,6 +23,50 @@ class ProfileRepository {
 
   Future<void> createUserProfile(UserModel user) async {
     await _firestoreService.setDocument('users', user.uid, user.toJson());
+    await syncPublicProfile(user);
+  }
+
+  /// Fields other trip members may see. They live in
+  /// `publicProfiles/{uid}`; `users/{uid}` (email, favorites, push token)
+  /// is readable only by its owner.
+  static const publicFields = {'displayName', 'photoUrl', 'paypalHandle'};
+
+  /// Name, photo and PayPal handle of another user, for trip screens. The
+  /// other fields of the returned model are empty.
+  Future<UserModel> getPublicProfile(String uid) async {
+    try {
+      final doc = await _firestoreService.getDocument('publicProfiles', uid);
+      final data = doc.data() ?? const {};
+      return UserModel(
+        uid: uid,
+        email: '',
+        displayName: data['displayName'] as String?,
+        photoUrl: data['photoUrl'] as String?,
+        paypalHandle: data['paypalHandle'] as String?,
+      );
+    } catch (e) {
+      debugPrint('Reading public profile $uid failed: $e');
+      return UserModel(uid: uid, email: '');
+    }
+  }
+
+  /// Writes the public fields of [user] (also fills the public profile of
+  /// accounts made before it existed).
+  Future<void> syncPublicProfile(UserModel user) => _mirrorPublic(user.uid, {
+        'displayName': user.displayName,
+        'photoUrl': user.photoUrl,
+        'paypalHandle': user.paypalHandle,
+      });
+
+  /// Copies the public fields in [data], if any, to `publicProfiles/{uid}`.
+  Future<void> _mirrorPublic(String uid, Map<String, dynamic> data) async {
+    final public = {
+      for (final e in data.entries)
+        if (publicFields.contains(e.key)) e.key: e.value,
+    };
+    if (public.isEmpty) return;
+    await _firestoreService.setDocument('publicProfiles', uid, public,
+        merge: true);
   }
 
   /// Creates the profile only if it is missing, so a returning guest keeps
@@ -47,10 +91,12 @@ class ProfileRepository {
       {...data, 'uid': uid},
       merge: true,
     );
+    await _mirrorPublic(uid, data);
   }
 
   Future<void> updateUserProfile(String uid, Map<String, dynamic> data) async {
     await _firestoreService.updateDocument('users', uid, data);
+    await _mirrorPublic(uid, data);
   }
 
   // Favorites are changed one ID at a time on the server. Writing the whole

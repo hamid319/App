@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -81,12 +83,13 @@ class _SwipeContent extends ConsumerWidget {
         return SwipeDeck(
           place: current,
           nextPlace: ctrl.nextPlaceInDeck,
+          later: ctrl.placesAfterNext,
           canUndo: ctrl.canUndo,
           onUndo: ctrl.undo,
           onSkip: ctrl.skip,
           onDetail: () => context.push('/place/${current.id}'),
           onLike: () async {
-            ctrl.like();
+            unawaited(ctrl.like());
             final messenger = ScaffoldMessenger.of(context);
             final router = GoRouter.of(context);
             final l10n = context.l10n;

@@ -23,6 +23,7 @@ import '../../../main_providers.dart';
 import '../logic/passport_controller.dart';
 import '../logic/profile_controller.dart';
 import '../widgets/passport_stamp_view.dart';
+import '../../../core/services/image_cache.dart';
 
 const _stampsPerPage = 4;
 const _paper = Color(0xFFF7F3E8);
@@ -161,7 +162,9 @@ class _PassportScreenState extends ConsumerState<PassportScreen>
       final photo = user?.photoUrl;
       // The capture must not catch an empty photo box.
       if (at == 0 && photo != null) {
-        await precacheImage(CachedNetworkImageProvider(photo), context);
+        await precacheImage(
+            CachedNetworkImageProvider(photo, cacheManager: imageCacheManager),
+            context);
       }
       if (!mounted) return;
       final png = await captureWidget(
@@ -939,6 +942,7 @@ class _DataPage extends StatelessWidget {
     final photo = user?.photoUrl != null
         ? CachedNetworkImage(
             imageUrl: user!.photoUrl!,
+            cacheManager: imageCacheManager,
             fit: BoxFit.cover,
             errorWidget: (_, __, ___) => avatar,
           )

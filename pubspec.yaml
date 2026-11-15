@@ -1,5 +1,5 @@
 name: swipetrip
-description: SwipeTrip - swipe to discover places, together.
+description: TripFam - plan trips together, swipe places, share costs.
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -38,6 +38,8 @@ dependencies:
   flutter_tts: ^4.2.5
   firebase_ai: ^3.6.0
   firebase_app_check: ^0.4.1+2
+  flutter_cache_manager: ^3.4.1
+  firebase_crashlytics: ^5.0.5
 
 dev_dependencies:
   flutter_test:

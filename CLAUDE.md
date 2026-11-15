@@ -79,6 +79,8 @@ Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so
                        checkIns: map<cityKey, Timestamp> (passport GPS check-ins; no check-in = pale stamp)
   /packing/{groupId}   items [{id, category, key?|name?, qty?, done}] ≤150, complete (own packing list, private;
                        complete feeds suitcase miles and the evening-before reminder)
+/publicProfiles/{uid}  displayName?, photoUrl?, paypalHandle? (what trip members see of each other; get only,
+                       owner writes; /users itself is readable only by its owner)
 /pushTokens/{token}    uid, lang, updatedAt (one per device; written by the app, read only by the
                        push Cloud Functions in functions/push.js: match, member joined, expense, journal)
 /inviteCodes/{code}    groupId, createdAt, title, cityName, ownerName (get only, no list; written by the owner)
@@ -164,6 +166,10 @@ Not started or open:
   Refer to them by name only.
 - **The owner deploys** (`firebase deploy …`). After rule or index changes,
   tell him the exact command.
+- **Rules tests:** `cd tools/rules-test && npm test` runs `firestore.rules` in the
+  emulator (needs Java 21: `brew install openjdk@21`, put its `bin` on PATH).
+  Add a test with every rule change. CI (`.github/workflows/ci.yml`) runs
+  them with Flutter analyze/test, functions and city-import tests.
 - iOS: run `pod install` with `LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8`.
 - **Place data:** OpenStreetMap, Wikidata, Wikipedia, Wikimedia Commons via
   `tools/city-import` (Node 22, `npm run check`; collect → report → review →

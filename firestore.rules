@@ -109,11 +109,28 @@ service cloud.firestore {
       return isOwner(group) && group.members.size() == 1;
     }
 
+    // What trip members see of each other: name, photo, PayPal handle.
+    // Get only (no listing); only the owner writes, with these fields only.
+    match /publicProfiles/{userId} {
+      allow get: if isAuthenticated();
+      allow create, update: if isAuthenticated()
+                            && request.auth.uid == userId
+                            && request.resource.data.keys().hasOnly(['displayName', 'photoUrl', 'paypalHandle'])
+                            && optionalString(request.resource.data, 'displayName', 100)
+                            && optionalString(request.resource.data, 'photoUrl', 2048)
+                            && optionalString(request.resource.data, 'paypalHandle', 64);
+      allow delete: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // A missing or null field, or a string of at most [max] characters.
+    function optionalString(data, field, max) {
+      return !(field in data) || data[field] == null
+          || (data[field] is string && data[field].size() <= max);
+    }
+
     match /users/{userId} {
-      // Read stays open to authenticated users because the group flow resolves
-      // member profiles. Tighten to self-only once member names come from a
-      // dedicated publicProfiles collection.
-      allow read: if isAuthenticated();
+      // Private: email, favorites, push token. Others see publicProfiles.
+      allow read: if isAuthenticated() && request.auth.uid == userId;
       allow create: if isAuthenticated() && request.auth.uid == userId;
       // uid must never be repointed at another account.
       allow update: if isAuthenticated()
@@ -279,13 +296,6 @@ service cloud.firestore {
       allow update: if isAuthenticated() && (
         // Owner can update anything (name, dates, location, invite, ...)
         isOwner(resource.data) ||
-        // A member may refresh the shared-favourites projection.
-        (
-          isMember(resource.data) &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            'sharedFavorites'
-          ])
-        ) ||
         // Joining: only the caller may be appended, and only themselves,
         // only with the group's invite code (sent as joinCode). Any time:
         // the swipe deck stays open, so there is no round to wait for.

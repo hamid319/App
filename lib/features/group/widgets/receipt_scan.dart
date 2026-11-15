@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -52,7 +54,7 @@ Future<void> startReceiptScan(
 
   final language = Localizations.localeOf(context).languageCode;
   final navigator = Navigator.of(context, rootNavigator: true);
-  showDialog<void>(
+  unawaited(showDialog<void>(
     context: context,
     barrierDismissible: false,
     builder: (_) => PopScope(
@@ -67,14 +69,14 @@ Future<void> startReceiptScan(
         ),
       ),
     ),
-  );
+  ));
   try {
     final receipt = await ref
         .read(tripActionsProvider.notifier)
         .scanReceipt(photo, language);
     navigator.pop();
     if (context.mounted) {
-      context.push('/trip/$groupId/costs/receipt', extra: receipt);
+      unawaited(context.push('/trip/$groupId/costs/receipt', extra: receipt));
     }
   } catch (e) {
     navigator.pop();

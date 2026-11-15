@@ -202,13 +202,14 @@ class AccountDeletionRepository {
     }
   }
 
-  /// The user document and its subcollections (hidden-gem tips, packing
-  /// lists).
+  /// The user document, its subcollections (hidden-gem tips, packing
+  /// lists) and the public profile.
   Future<void> deleteUserDocument(String uid) async {
     final user = _db.collection('users').doc(uid);
     await _deleteDocs(await user.collection('cityTips').get());
     await _deleteDocs(await user.collection('packing').get());
     await user.delete();
+    await _db.collection('publicProfiles').doc(uid).delete();
   }
 
   Future<void> _deleteDocs(QuerySnapshot<Map<String, dynamic>> snapshot) async {

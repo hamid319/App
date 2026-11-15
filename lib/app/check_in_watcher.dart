@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -62,7 +64,7 @@ class _CheckInWatcherState extends ConsumerState<CheckInWatcher> {
         final done =
             await ref.read(tripActionsProvider.notifier).autoCheckIn(due);
         if (done.isNotEmpty && mounted) {
-          HapticFeedback.mediumImpact();
+          unawaited(HapticFeedback.mediumImpact());
           ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(
               content: Text(
                   context.l10n.checkInDone(done.first.location!.cityName))));

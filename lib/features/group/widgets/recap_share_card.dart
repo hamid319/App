@@ -5,6 +5,7 @@ import '../../../app/theme.dart';
 import '../../../common/models/journal_entry.dart';
 import '../../../common/widgets/wordmark.dart';
 import '../../../core/constants/colors.dart';
+import '../../../core/services/image_cache.dart';
 
 /// Size of the shared recap image (Instagram portrait).
 const recapCardSize = Size(1080, 1350);
@@ -37,7 +38,8 @@ class RecapShareCard extends StatelessWidget {
             // A plain Image: CachedNetworkImage fades in, which a capture
             // right after precaching would catch half way.
             child: Image(
-              image: CachedNetworkImageProvider(p.url),
+              image: CachedNetworkImageProvider(p.url,
+                  cacheManager: imageCacheManager),
               fit: BoxFit.cover,
               width: double.infinity,
               height: double.infinity,

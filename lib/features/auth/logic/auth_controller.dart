@@ -29,7 +29,7 @@ class AuthController extends AsyncNotifier<UserModel?> {
 
     _authSubscription = _authRepo.authStateChanges().listen((firebaseUser) async {
       // Delay state update to avoid modifying provider during widget build
-      Future.microtask(() async {
+      unawaited(Future.microtask(() async {
         if (firebaseUser != null) {
           final current = state.value;
           if (current != null &&
@@ -41,7 +41,7 @@ class AuthController extends AsyncNotifier<UserModel?> {
         } else {
           state = const AsyncData(null);
         }
-      });
+      }));
     });
 
     final currentUser = _authRepo.firebaseUser;
@@ -83,11 +83,18 @@ class AuthController extends AsyncNotifier<UserModel?> {
       }
     }
     final userModel = await _profileRepo.getUserProfile(firebaseUser.uid);
-    return userModel.copyWith(
+    final hydrated = userModel.copyWith(
       email: firebaseUser.email ?? userModel.email,
       displayName: firebaseUser.displayName ?? userModel.displayName,
       isAnonymous: firebaseUser.isAnonymous,
     );
+    if (!firebaseUser.isAnonymous) {
+      // Fills publicProfiles for accounts made before it existed, so trip
+      // members see this name. One small write per start, not awaited.
+      unawaited(_profileRepo.syncPublicProfile(hydrated).catchError(
+          (Object e) => debugPrint('Public profile sync failed: $e')));
+    }
+    return hydrated;
   }
 
   /// Signs into an existing account. When called as a guest, the guest

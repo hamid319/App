@@ -41,6 +41,13 @@ class _PlacesMapState extends State<PlacesMap> {
   Cancelable? _tapSubscription;
   final Map<String, PlaceModel> _byAnnotation = {};
 
+  /// Set once: a new viewport on rebuild would start a camera transition
+  /// racing [_fitCamera]. Without places yet it shows the whole world.
+  late final _viewport = CameraViewportState(
+    center: Point(coordinates: _center(widget.places)),
+    zoom: switch (widget.places.length) { 0 => 1, 1 => 15, _ => 12 },
+  );
+
   @override
   void didUpdateWidget(PlacesMap old) {
     super.didUpdateWidget(old);
@@ -77,6 +84,9 @@ class _PlacesMapState extends State<PlacesMap> {
     // Our pins are the content; Mapbox's own POI labels only compete.
     await map.setStyleImportConfigProperty(
         'basemap', 'showPointOfInterestLabels', false);
+    // Seen from straight above, 3D buildings look like flat footprints but
+    // cost tile data and GPU time; flat ones load and draw faster.
+    await map.setStyleImportConfigProperty('basemap', 'show3dObjects', false);
     _route = await map.annotations.createPolylineAnnotationManager();
     _pins = await map.annotations.createPointAnnotationManager();
     _tapSubscription = _pins!.tapEvents(onTap: (annotation) {
@@ -171,14 +181,10 @@ class _PlacesMapState extends State<PlacesMap> {
 
   @override
   Widget build(BuildContext context) {
-    final center = _center(widget.places);
     return MapWidget(
       key: const ValueKey('places-map'),
       styleUri: MapboxStyles.STANDARD,
-      viewport: CameraViewportState(
-        center: Point(coordinates: center),
-        zoom: widget.places.length > 1 ? 12 : 15,
-      ),
+      viewport: _viewport,
       onMapCreated: _onMapCreated,
       onStyleLoadedListener: _onStyleLoaded,
     );
