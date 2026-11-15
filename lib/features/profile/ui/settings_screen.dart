@@ -20,8 +20,8 @@ import '../../group/logic/group_controller.dart';
 import '../logic/profile_controller.dart';
 import '../../swipe/logic/swipe_controller.dart';
 
-/// Open to everyone. The "App" section (language, privacy, security) works
-/// for guests too; the "Account" section depends on having a real account.
+/// Open to everyone. The "General" and "Legal" sections work for guests
+/// too; the "Account" section depends on having a real account.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -71,19 +71,15 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: Text(homeCity?.nameFor(
                         Localizations.localeOf(context).languageCode) ??
                     l10n.homeCityNotSet),
-                trailing: homeCity == null
-                    ? const Icon(Icons.chevron_right_rounded)
-                    : IconButton(
-                        tooltip: l10n.homeCityClear,
-                        icon: const Icon(Icons.close_rounded),
-                        onPressed: () =>
-                            ref.read(homeCityProvider.notifier).setCity(null),
-                      ),
+                trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => showCityPicker(
                   context,
                   offerCurrentLocation: false,
                   selectedId: homeCity?.id,
                   title: l10n.homeCityPickerTitle,
+                  clearLabel: homeCity == null ? null : l10n.homeCityClear,
+                  onClear: () =>
+                      ref.read(homeCityProvider.notifier).setCity(null),
                   onSelected: (city) {
                     if (city != null) {
                       ref.read(homeCityProvider.notifier).setCity(city);
@@ -104,24 +100,33 @@ class SettingsScreen extends ConsumerWidget {
                           languageCode:
                               Localizations.localeOf(context).languageCode),
                 ),
+            ],
+          ),
+          const SizedBox(height: AppSizes.groupGap),
+          _SettingsGroup(
+            label: l10n.settingsLegalSection,
+            tiles: [
               ListTile(
                 leading: const Icon(Icons.privacy_tip_outlined),
                 title: Text(l10n.privacy),
                 subtitle: Text(l10n.privacySubtitle),
+                trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => _showDataPrivacy(context),
               ),
               ListTile(
                 leading: const Icon(Icons.security_outlined),
                 title: Text(l10n.security),
                 subtitle: Text(l10n.securitySubtitle),
+                trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => _showSecurity(context),
               ),
               ListTile(
                 leading: const Icon(Icons.article_outlined),
                 title: Text(l10n.licenses),
+                trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => showLicensePage(
                   context: context,
-                  applicationName: 'SwipeTrip',
+                  applicationName: 'TripFam',
                 ),
               ),
             ],
@@ -520,7 +525,11 @@ class _SettingsGroup extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SectionLabel(label, onPage: true),
+        // Inset to line up with the text inside the cards below.
+        Padding(
+          padding: const EdgeInsets.only(left: AppSizes.space16),
+          child: SectionLabel(label, onPage: true),
+        ),
         Ticket(
           child: Column(
             children: [

@@ -14,7 +14,7 @@
   "dayPlanReplanTitle": "Plan again?",
   "dayPlanReplanBody": "The plan is made again from the wishlist. Your changes to the days are replaced.",
   "pushSettingTitle": "Notifications",
-  "pushSettingSubtitle": "Matches, new members, costs and journal",
+  "pushSettingSubtitle": "Matches, members, costs, journal",
   "checkInReminderTitle": "Arrived in {city}?",
   "@checkInReminderTitle": {"placeholders": {"city": {"type": "String"}}},
   "checkInReminderBody": "Open TripFam and get your stamp.",
@@ -294,8 +294,9 @@
   "profileUpdated": "Profile updated!",
   "userFallbackName": "User",
   "settingsTitle": "Settings",
-  "settingsAppSection": "App",
+  "settingsAppSection": "General",
   "settingsAccountSection": "Account",
+  "settingsLegalSection": "Legal",
   "privacy": "Privacy",
   "privacySubtitle": "How your data is used",
   "security": "Security",
@@ -416,7 +417,7 @@
       }
     }
   },
-  "profileStats": "{favorites, plural, =1{1 favorite} other{{favorites} favorites}} · {groups, plural, =1{1 group} other{{groups} groups}}",
+  "profileStats": "{favorites, plural, =1{1 favorite} other{{favorites} favorites}} · {groups, plural, =1{1 trip} other{{groups} trips}}",
   "guestName": "Guest",
   "guestSubtitle": "Not signed in",
   "@profileStats": {
