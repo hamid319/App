@@ -166,6 +166,10 @@ Not started or open:
   Refer to them by name only.
 - **The owner deploys** (`firebase deploy …`). After rule or index changes,
   tell him the exact command.
+- **Rules tests:** `cd tools/rules-test && npm test` runs `firestore.rules` in the
+  emulator (needs Java 21: `brew install openjdk@21`, put its `bin` on PATH).
+  Add a test with every rule change. CI (`.github/workflows/ci.yml`) runs
+  them with Flutter analyze/test, functions and city-import tests.
 - iOS: run `pod install` with `LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8`.
 - **Place data:** OpenStreetMap, Wikidata, Wikipedia, Wikimedia Commons via
   `tools/city-import` (Node 22, `npm run check`; collect → report → review →
