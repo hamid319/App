@@ -307,6 +307,7 @@ class SimplifiedProfileScreen extends ConsumerWidget {
   }
 
   void _showEditProfileDialog(BuildContext context, WidgetRef ref, user) {
+    // No dispose(): the dialog still builds with it during its close animation.
     final nameController = TextEditingController(text: user.displayName ?? '');
 
     showDialog(
@@ -357,9 +358,7 @@ class SimplifiedProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
-    ).then((_) {
-      nameController.dispose();
-    });
+    );
   }
 }
 

@@ -202,6 +202,7 @@ class SettingsScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final uid = ref.read(authControllerProvider).value?.uid;
     if (uid == null) return;
+    // No dispose(): the dialog still builds with it during its close animation.
     final controller = TextEditingController(
         text: ref.read(profileControllerProvider).value?.paypalHandle ?? '');
     final value = await showDialog<String>(
@@ -238,7 +239,6 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
-    controller.dispose();
     if (value == null) return;
     final handle = value.trim().replaceFirst(
         RegExp(r'^(https?://)?(www\.)?paypal\.me/'), '');
@@ -468,6 +468,7 @@ class _DeleteAccountTile extends ConsumerWidget {
   Future<String?> _askPassword(BuildContext context) async {
     final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
+    // No dispose(): the dialog still builds with it during its close animation.
     final controller = TextEditingController();
     final password = await showDialog<String>(
       context: context,
@@ -508,7 +509,6 @@ class _DeleteAccountTile extends ConsumerWidget {
         ],
       ),
     );
-    controller.dispose();
     return password;
   }
 }
