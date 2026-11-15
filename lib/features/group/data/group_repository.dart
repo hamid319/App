@@ -161,6 +161,13 @@ class GroupRepository {
     }
   }
 
+  /// Only the owner may change the dates (rules).
+  Future<void> updateTripDates(String groupId, DateTime start, DateTime end) =>
+      _db.collection('groups').doc(groupId).update({
+        'tripStart': Timestamp.fromDate(start),
+        'tripEnd': Timestamp.fromDate(end),
+      });
+
   /// Removes [userId] from the group inside a transaction, so a concurrent
   /// join is not lost. When the owner leaves, ownership passes to the
   /// longest-standing remaining member; otherwise nobody could start or end
@@ -205,5 +212,4 @@ class GroupRepository {
       await _firestoreService.deleteDocument('groups', groupId);
     }
   }
-
 }

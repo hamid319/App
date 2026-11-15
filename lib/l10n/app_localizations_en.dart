@@ -3033,6 +3033,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tripsJoin => 'Join';
 
   @override
+  String get tripNextSteps => 'Next steps';
+
+  @override
+  String get tripStepDates => 'Set the dates';
+
+  @override
+  String get tripStepDatesBody => 'For the countdown and day plans';
+
+  @override
+  String get tripStepInviteBody => 'Plan and swipe together';
+
+  @override
+  String get tripStepSwipe => 'Swipe places';
+
+  @override
+  String get tripStepSwipeBody => 'Matches land on the wishlist';
+
+  @override
+  String get tripStepPacking => 'Start your packing list';
+
+  @override
+  String get tripStepPackingBody => 'Your own list, only you see it';
+
+  @override
+  String get errorSaveDates => 'The dates could not be saved.';
+
+  @override
   String get tripsDestinations => 'Popular destinations';
 
   @override

@@ -21,6 +21,7 @@ import '../logic/trip_controller.dart';
 import '../widgets/join_trip_dialog.dart';
 import '../widgets/sync_badge.dart';
 import '../widgets/trip_create_sheet.dart';
+import '../widgets/trip_next_steps.dart';
 import '../widgets/trip_ui.dart';
 
 /// "Trips" tab: the next trip as a large card, other planned trips and
@@ -52,6 +53,12 @@ class TripsScreen extends ConsumerWidget {
             final split = splitTrips(groups, DateTime.now());
             final hero = split.upcoming.isEmpty ? null : split.upcoming.first;
             final planned = split.upcoming.skip(1).toList();
+            final destinations = [
+              const SizedBox(height: 24),
+              TripSectionHeader(l10n.tripsDestinations),
+              const SizedBox(height: 8),
+              _Destinations(onPick: (city) => _create(context, city: city)),
+            ];
             return RefreshIndicator(
               onRefresh: () async => ref.invalidate(userGroupsProvider),
               child: ListView(
@@ -79,21 +86,19 @@ class TripsScreen extends ConsumerWidget {
                       onCreate: () => _create(context),
                       onJoin: () => _join(context, ref),
                     ),
-                  // Nothing coming up: inspiration for the next trip.
-                  if (hero == null) ...[
+                  if (hero != null) _HeroTripCard(group: hero),
+                  if (hero != null && !_started(hero)) ...[
                     const SizedBox(height: 24),
-                    TripSectionHeader(l10n.tripsDestinations),
-                    const SizedBox(height: 8),
-                    _Destinations(
-                        onPick: (city) => _create(context, city: city)),
+                    TripNextSteps(group: hero),
                   ],
+                  // Nothing coming up: inspiration for the next trip.
+                  if (hero == null) ...destinations,
                   if (groups.isEmpty) ...[
                     const SizedBox(height: 24),
                     TripSectionHeader(l10n.tripsHowTitle),
                     const SizedBox(height: 8),
                     const _HowItWorks(),
                   ],
-                  if (hero != null) _HeroTripCard(group: hero),
                   if (planned.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     TripSectionHeader(l10n.tripsPlanned),
@@ -118,6 +123,8 @@ class TripsScreen extends ConsumerWidget {
                       ],
                     ),
                   ],
+                  // Only one trip planned: ideas for another one below it.
+                  if (hero != null && planned.isEmpty) ...destinations,
                 ],
               ),
             );
@@ -226,6 +233,12 @@ class _AddButton extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Whether the trip has begun (next steps no longer matter then).
+bool _started(GroupModel group) {
+  final start = group.tripStart;
+  return start != null && daysUntil(start, DateTime.now()) <= 0;
 }
 
 /// Countdown on the hero photo: "in 3 days", "today", "on the road".

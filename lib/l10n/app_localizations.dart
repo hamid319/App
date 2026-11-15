@@ -5222,6 +5222,60 @@ abstract class AppLocalizations {
   /// **'Join'**
   String get tripsJoin;
 
+  /// No description provided for @tripNextSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Next steps'**
+  String get tripNextSteps;
+
+  /// No description provided for @tripStepDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the dates'**
+  String get tripStepDates;
+
+  /// No description provided for @tripStepDatesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'For the countdown and day plans'**
+  String get tripStepDatesBody;
+
+  /// No description provided for @tripStepInviteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan and swipe together'**
+  String get tripStepInviteBody;
+
+  /// No description provided for @tripStepSwipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe places'**
+  String get tripStepSwipe;
+
+  /// No description provided for @tripStepSwipeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches land on the wishlist'**
+  String get tripStepSwipeBody;
+
+  /// No description provided for @tripStepPacking.
+  ///
+  /// In en, this message translates to:
+  /// **'Start your packing list'**
+  String get tripStepPacking;
+
+  /// No description provided for @tripStepPackingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your own list, only you see it'**
+  String get tripStepPackingBody;
+
+  /// No description provided for @errorSaveDates.
+  ///
+  /// In en, this message translates to:
+  /// **'The dates could not be saved.'**
+  String get errorSaveDates;
+
   /// No description provided for @tripsDestinations.
   ///
   /// In en, this message translates to:
