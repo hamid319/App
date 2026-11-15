@@ -38,6 +38,7 @@ dependencies:
   flutter_tts: ^4.2.5
   firebase_ai: ^3.6.0
   firebase_app_check: ^0.4.1+2
+  flutter_cache_manager: ^3.4.1
 
 dev_dependencies:
   flutter_test:

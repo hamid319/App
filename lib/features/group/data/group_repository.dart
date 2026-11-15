@@ -161,15 +161,6 @@ class GroupRepository {
     }
   }
 
-  Stream<List<GroupModel>> streamUserGroups(String userId) {
-    return _db
-        .collection('groups')
-        .where('members', arrayContains: userId)
-        .snapshots()
-        .map((snap) =>
-            snap.docs.map((doc) => GroupModel.fromJson(doc.data())).toList());
-  }
-
   /// Removes [userId] from the group inside a transaction, so a concurrent
   /// join is not lost. When the owner leaves, ownership passes to the
   /// longest-standing remaining member; otherwise nobody could start or end

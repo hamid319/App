@@ -385,12 +385,9 @@ class TripCover extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final places =
-        ref.watch(tripCityPlacesProvider(tripCityKey(group))).value ?? const [];
-    final withPhoto = places.where((p) => p.imageUrls.isNotEmpty);
-    final cover = withPhoto.isNotEmpty
-        ? withPhoto.first
-        : (places.isNotEmpty ? places.first : null);
+    // Three reads (cityCoverProvider) instead of the city's 60 places.
+    final key = tripCityKey(group);
+    final cover = key.isEmpty ? null : ref.watch(cityCoverProvider(key)).value;
     if (cover != null) return PlacePhoto(place: cover);
     final scheme = Theme.of(context).colorScheme;
     return DecoratedBox(

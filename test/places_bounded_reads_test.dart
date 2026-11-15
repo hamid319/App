@@ -181,4 +181,14 @@ void main() {
       expect(await repo.loadCityPlaces('de_berlin'), isEmpty);
     });
   });
+
+  test('loadPlacesByIds keeps the order, skips duplicates and missing ids',
+      () async {
+    final db = FakeFirebaseFirestore();
+    await _addPlace(db, 'a', cityId: 'de_berlin');
+    await _addPlace(db, 'b', cityId: 'de_berlin');
+    final places = await PlacesRepository(firestore: db)
+        .loadPlacesByIds(['b', '', 'missing', 'a', 'b']);
+    expect(places.map((p) => p.id), ['b', 'a']);
+  });
 }

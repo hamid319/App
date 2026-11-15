@@ -61,16 +61,26 @@ class FavoritesMapScreen extends ConsumerWidget {
       body: switch (configured) {
         AsyncData(value: false) =>
           message(l10n.mapsNotConfigured, Icons.map_outlined),
-        AsyncData() => places.when(
-            data: (list) => list.isEmpty
-                ? message(l10n.favoritesMapEmpty, Icons.place_outlined)
-                : _FavoritesMap(places: list),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => message(
-              userMessage(e, fallback: l10n.errorLoadFavorites, l10n: l10n),
-              Icons.cloud_off_rounded,
-            ),
-          ),
+        // The map starts right away; the pins follow once the places are
+        // read, with a thin bar on top meanwhile.
+        AsyncData() => switch (places) {
+            AsyncError(:final error) => message(
+                userMessage(error,
+                    fallback: l10n.errorLoadFavorites, l10n: l10n),
+                Icons.cloud_off_rounded,
+              ),
+            AsyncData(value: final list) when list.isEmpty =>
+              message(l10n.favoritesMapEmpty, Icons.place_outlined),
+            _ => Stack(fit: StackFit.expand, children: [
+                _FavoritesMap(places: places.value ?? const []),
+                if (places.isLoading)
+                  const Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: LinearProgressIndicator()),
+              ]),
+          },
         _ => const Center(child: CircularProgressIndicator()),
       },
     );

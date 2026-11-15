@@ -21,11 +21,10 @@ final selectedGroupIdProvider =
     NotifierProvider<SelectedGroupIdNotifier, String?>(
         SelectedGroupIdNotifier.new);
 
-final userGroupsProvider = StreamProvider<List<GroupModel>>((ref) {
-  final user = ref.watch(authControllerProvider).value;
-  if (user == null) return Stream.value([]);
-  return ref.watch(groupRepositoryProvider).streamUserGroups(user.uid);
-});
+/// The signed-in user's trips. The same provider as [myTripsProvider]: it
+/// keys on the Firebase uid, so the query starts without waiting for the
+/// profile read in [authControllerProvider], and there is one listener.
+final userGroupsProvider = myTripsProvider;
 
 /// Display name for a group member, or null when the profile has none.
 final groupMemberNameProvider =
