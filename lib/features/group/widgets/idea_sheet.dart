@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../app/theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../common/models/group_model.dart';
@@ -15,7 +16,7 @@ Future<void> showIdeaSheet(BuildContext context, GroupModel group) {
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+    backgroundColor: context.swipeColors.sheet,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -72,8 +73,8 @@ class _IdeaSheetState extends ConsumerState<_IdeaSheet> {
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
       child: ConstrainedBox(
-        constraints: BoxConstraints(
-            maxHeight: MediaQuery.sizeOf(context).height * 0.85),
+        constraints:
+            BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.85),
         child: ListView(
           shrinkWrap: true,
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -104,7 +105,8 @@ class _IdeaSheetState extends ConsumerState<_IdeaSheet> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Text(
-                  l10n.tripIdeaSuggestions(widget.group.location?.cityName ?? ''),
+                  l10n.tripIdeaSuggestions(
+                      widget.group.location?.cityName ?? ''),
                   style:
                       text.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
                 ),

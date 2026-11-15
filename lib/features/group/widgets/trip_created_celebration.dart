@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import '../../../app/theme.dart';
 import 'package:flutter/services.dart';
 
 import '../../../common/widgets/suitcase_view.dart';
@@ -114,7 +115,7 @@ class _TripCreatedState extends State<_TripCreated>
     );
 
     return Material(
-      color: theme.scaffoldBackgroundColor,
+      color: context.swipeColors.sheet,
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSizes.space24),

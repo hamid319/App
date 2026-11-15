@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'check_in_watcher.dart';
 import 'push_watcher.dart';
@@ -22,8 +23,12 @@ class SwipeTripApp extends ConsumerWidget {
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
       routerConfig: router,
-      builder: (context, child) =>
-          CheckInWatcher(child: PushWatcher(child: child!)),
+      // The app's pages are cream in both modes: dark status bar icons,
+      // except where a page (DarkTabPage, photo headers) sets light ones.
+      builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark,
+        child: CheckInWatcher(child: PushWatcher(child: child!)),
+      ),
       locale: locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

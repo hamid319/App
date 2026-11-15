@@ -520,7 +520,7 @@ class _SettingsGroup extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SectionLabel(label),
+        SectionLabel(label, onPage: true),
         Ticket(
           child: Column(
             children: [

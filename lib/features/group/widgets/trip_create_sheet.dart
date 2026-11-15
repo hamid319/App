@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../app/theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../common/models/group_model.dart';
@@ -22,7 +23,7 @@ Future<String?> showCreateTripSheet(BuildContext context, {PopularCity? city}) {
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+    backgroundColor: context.swipeColors.sheet,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),

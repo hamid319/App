@@ -96,12 +96,14 @@ class TripSectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    final scheme = Theme.of(context).colorScheme;
+    // Sits on the page, not on a card.
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Row(
         children: [
-          Expanded(child: Text(title, style: text.titleLarge)),
+          Expanded(
+              child: Text(title,
+                  style: text.titleLarge?.copyWith(color: context.onBg))),
           if (action != null)
             InkWell(
               borderRadius: BorderRadius.circular(8),
@@ -110,7 +112,7 @@ class TripSectionHeader extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                 child: Text(
                   action!,
-                  style: text.labelLarge?.copyWith(color: scheme.primary),
+                  style: text.labelLarge?.copyWith(color: context.pageTint),
                 ),
               ),
             ),

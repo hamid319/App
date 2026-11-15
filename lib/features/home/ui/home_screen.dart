@@ -140,7 +140,10 @@ class _Headline extends ConsumerWidget {
       ),
       child: Text(
         text,
-        style: Theme.of(context).textTheme.displaySmall,
+        style: Theme.of(context)
+            .textTheme
+            .displaySmall
+            ?.copyWith(color: context.onBg),
       ),
     );
   }
@@ -285,11 +288,13 @@ class _Section extends StatelessWidget {
             ),
             child: SectionLabel(
               title,
+              onPage: true,
               trailing: onAll == null
                   ? null
                   : TextButton(
                       onPressed: onAll,
                       style: TextButton.styleFrom(
+                        foregroundColor: context.pageTint,
                         visualDensity: VisualDensity.compact,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../app/theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -23,7 +24,7 @@ Future<void> showAddToTripSheet(BuildContext context, PlaceModel place) {
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+    backgroundColor: context.swipeColors.sheet,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -145,7 +146,9 @@ class _TripGroup extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 14 + 40 + 12),
                   child: Divider(
-                      height: 0.5, thickness: 0.5, color: scheme.outlineVariant),
+                      height: 0.5,
+                      thickness: 0.5,
+                      color: scheme.outlineVariant),
                 ),
               _TripRow(place: place, uid: uid, trip: trip),
             ],
@@ -191,8 +194,8 @@ class _TripRow extends ConsumerWidget {
                 placeId: place.id, title: title, uid: uid)
             .catchError((Object e) {
           messenger.showSnackBar(SnackBar(
-            content: Text(
-                userMessage(e, fallback: l10n.errorGeneric, l10n: l10n)),
+            content:
+                Text(userMessage(e, fallback: l10n.errorGeneric, l10n: l10n)),
             backgroundColor: errorColor,
           ));
           return (id: '', added: false);
@@ -252,11 +255,10 @@ class _TripRow extends ConsumerWidget {
             isAdded
                 ? Semantics(
                     label: l10n.addToTripAdded,
-                    child: Icon(Icons.check_circle_rounded,
-                        color: scheme.primary),
+                    child:
+                        Icon(Icons.check_circle_rounded, color: scheme.primary),
                   )
-                : Icon(Icons.add_circle_outline_rounded,
-                    color: scheme.primary),
+                : Icon(Icons.add_circle_outline_rounded, color: scheme.primary),
           ],
         ),
       ),

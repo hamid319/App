@@ -636,7 +636,7 @@ class _ActionBar extends StatelessWidget {
     final l10n = context.l10n;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: context.swipeColors.sheet,
         border: Border(top: BorderSide(color: scheme.outlineVariant)),
       ),
       child: SafeArea(

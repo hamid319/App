@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../app/theme.dart';
 import '../../core/constants/colors.dart';
 import '../../core/constants/typography.dart';
 import 'tripfam_mark.dart';
@@ -15,8 +16,8 @@ class Wordmark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final style = AppTypography.display(size: size, color: scheme.onSurface);
+    // The logo sits on the page (see SwipeColors.onBg).
+    final style = AppTypography.display(size: size, color: context.onBg);
     return Semantics(
       label: 'TripFam',
       header: true,
@@ -33,7 +34,7 @@ class Wordmark extends StatelessWidget {
                 children: [
                   TextSpan(
                     text: 'trip',
-                    style: TextStyle(color: scheme.primary),
+                    style: TextStyle(color: context.pageTint),
                   ),
                   const TextSpan(
                     text: 'fam',

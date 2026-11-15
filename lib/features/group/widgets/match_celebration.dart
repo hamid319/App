@@ -77,7 +77,7 @@ class _MatchCelebration extends StatelessWidget {
     return Material(
       // Opaque paper: the results list loads behind it and must not show
       // through.
-      color: theme.scaffoldBackgroundColor,
+      color: context.swipeColors.sheet,
       child: Stack(
         children: [
           if (!reduceMotion) const Positioned.fill(child: _Confetti()),
@@ -97,7 +97,8 @@ class _MatchCelebration extends StatelessWidget {
                   const SizedBox(height: AppSizes.space12),
                   Text(
                     l10n.matchBody(
-                      place.nameFor(Localizations.localeOf(context).languageCode),
+                      place.nameFor(
+                          Localizations.localeOf(context).languageCode),
                     ),
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyLarge
@@ -145,7 +146,7 @@ class _MatchArt extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ring = Theme.of(context).scaffoldBackgroundColor;
+    final ring = context.swipeColors.sheet;
     final edge = context.swipeColors.edge;
     final shown = participants.take(3).toList();
     const spots = [
@@ -275,8 +276,8 @@ class _ConfettiPainter extends CustomPainter {
       if (t == 0) continue;
       final y = -20 + t * p.speed * (size.height + 40);
       final x = (p.x + p.drift * t) * size.width;
-      paint.color = colors[p.colorIndex % colors.length]
-          .withValues(alpha: 1 - t * 0.6);
+      paint.color =
+          colors[p.colorIndex % colors.length].withValues(alpha: 1 - t * 0.6);
       canvas
         ..save()
         ..translate(x, y)

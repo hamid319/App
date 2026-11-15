@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../core/constants/colors.dart';
 import '../core/constants/sizes.dart';
 import '../core/constants/typography.dart';
@@ -16,6 +17,8 @@ class SwipeColors extends ThemeExtension<SwipeColors> {
     required this.mint,
     required this.peach,
     required this.sky,
+    required this.sheet,
+    required this.darkTabs,
   });
 
   final Color like;
@@ -28,6 +31,13 @@ class SwipeColors extends ThemeExtension<SwipeColors> {
   /// Pastel chip fills; text on them uses `colorScheme.onSurface`.
   final Color mint, peach, sky;
 
+  /// Sheets and page-like panels. Unlike `scaffoldBackgroundColor` it is
+  /// never dark, also when a sheet opens from a [DarkTabPage].
+  final Color sheet;
+
+  /// See [AppPalette.darkTabs].
+  final bool darkTabs;
+
   @override
   SwipeColors copyWith({
     Color? like,
@@ -37,6 +47,8 @@ class SwipeColors extends ThemeExtension<SwipeColors> {
     Color? mint,
     Color? peach,
     Color? sky,
+    Color? sheet,
+    bool? darkTabs,
   }) =>
       SwipeColors(
         like: like ?? this.like,
@@ -46,6 +58,8 @@ class SwipeColors extends ThemeExtension<SwipeColors> {
         mint: mint ?? this.mint,
         peach: peach ?? this.peach,
         sky: sky ?? this.sky,
+        sheet: sheet ?? this.sheet,
+        darkTabs: darkTabs ?? this.darkTabs,
       );
 
   @override
@@ -59,12 +73,72 @@ class SwipeColors extends ThemeExtension<SwipeColors> {
       mint: Color.lerp(mint, other.mint, t)!,
       peach: Color.lerp(peach, other.peach, t)!,
       sky: Color.lerp(sky, other.sky, t)!,
+      sheet: Color.lerp(sheet, other.sheet, t)!,
+      darkTabs: t < 0.5 ? darkTabs : other.darkTabs,
     );
   }
 }
 
 extension SwipeColorsContext on BuildContext {
   SwipeColors get swipeColors => Theme.of(this).extension<SwipeColors>()!;
+
+  bool get _onDarkTab =>
+      (Theme.of(this).extension<SwipeColors>()?.darkTabs ?? false) &&
+      dependOnInheritedWidgetOfExactType<_DarkTabMarker>() != null;
+
+  /// Text straight on the page (titles, section headers), not on a card.
+  Color get onBg =>
+      _onDarkTab ? AppPalette.onTabPage : Theme.of(this).colorScheme.onSurface;
+
+  /// Secondary text straight on the page.
+  Color get onBg2 => _onDarkTab
+      ? AppPalette.onTabPage2
+      : Theme.of(this).colorScheme.onSurfaceVariant;
+
+  /// Links and icons straight on the page.
+  Color get pageTint =>
+      _onDarkTab ? BrandColors.sky : Theme.of(this).colorScheme.primary;
+}
+
+/// A main tab page (trips, discover, profile, settings). In dark mode its
+/// page goes dark behind the cream cards; text on the page then reads
+/// [SwipeColorsContext.onBg]. Sheets opened from it stay cream: they take
+/// `swipeColors.sheet`, and the marker below is not passed on to them.
+class DarkTabPage extends StatelessWidget {
+  const DarkTabPage({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    if (!context.swipeColors.darkTabs) return child;
+    return Theme(
+      data: theme.copyWith(
+        scaffoldBackgroundColor: AppPalette.tabPage,
+        appBarTheme: theme.appBarTheme.copyWith(
+          backgroundColor: AppPalette.tabPage,
+          foregroundColor: AppPalette.onTabPage,
+          titleTextStyle: theme.appBarTheme.titleTextStyle
+              ?.copyWith(color: AppPalette.onTabPage),
+          iconTheme: const IconThemeData(color: BrandColors.sky),
+          actionsIconTheme: const IconThemeData(color: BrandColors.sky),
+          systemOverlayStyle: SystemUiOverlayStyle.light,
+        ),
+      ),
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: _DarkTabMarker(child: child),
+      ),
+    );
+  }
+}
+
+class _DarkTabMarker extends InheritedWidget {
+  const _DarkTabMarker({required super.child});
+
+  @override
+  bool updateShouldNotify(_DarkTabMarker oldWidget) => false;
 }
 
 class AppTheme {
@@ -78,7 +152,10 @@ class AppTheme {
   /// buttons are grey fills, selected states use the tint or ink.
   static ThemeData _build(AppPalette p) {
     final light = p.brightness == Brightness.light;
-    final onPrimary = light ? Colors.white : Colors.black;
+    final onPrimary =
+        ThemeData.estimateBrightnessForColor(p.primary) == Brightness.dark
+            ? Colors.white
+            : Colors.black;
     final scheme = ColorScheme(
       brightness: p.brightness,
       primary: p.primary,
@@ -101,8 +178,8 @@ class AppTheme {
       surface: p.surface,
       onSurface: p.ink,
       onSurfaceVariant: p.ink2,
-      surfaceContainerLowest: p.bg,
-      surfaceContainerLow: p.bg,
+      surfaceContainerLowest: p.sheet,
+      surfaceContainerLow: p.sheet,
       surfaceContainer: p.surface,
       surfaceContainerHigh: p.surface2,
       surfaceContainerHighest: p.surface2,
@@ -312,15 +389,15 @@ class AppTheme {
       dividerTheme: DividerThemeData(color: p.line, space: 0.5, thickness: 0.5),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: light ? const Color(0xFF2A241F) : p.surface2,
+        backgroundColor: const Color(0xFF2A241F),
         contentTextStyle: textTheme.bodyMedium?.copyWith(color: Colors.white),
-        actionTextColor: light ? BrandColors.sky : p.primary,
+        actionTextColor: BrandColors.sky,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
         ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: p.bg,
+        backgroundColor: p.sheet,
         surfaceTintColor: Colors.transparent,
         showDragHandle: true,
         dragHandleColor: p.ink3,
@@ -355,6 +432,8 @@ class AppTheme {
           mint: p.mint,
           peach: p.peach,
           sky: p.sky,
+          sheet: p.sheet,
+          darkTabs: p.darkTabs,
         ),
       ],
     );

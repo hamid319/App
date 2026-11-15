@@ -1,3 +1,4 @@
+import 'theme.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -156,8 +157,8 @@ GoRouter createRouter(Ref ref) {
           // Search the trip's city and add places to its wishlist.
           GoRoute(
             path: 'search',
-            builder: (ctx, state) => PlaceSearchScreen(
-                groupId: state.pathParameters['groupId']!),
+            builder: (ctx, state) =>
+                PlaceSearchScreen(groupId: state.pathParameters['groupId']!),
           ),
           GoRoute(
             path: 'swipe',
@@ -270,11 +271,11 @@ GoRouter createRouter(Ref ref) {
         routes: [
           GoRoute(
             path: '/',
-            builder: (ctx, state) => const HomeScreen(),
+            builder: (ctx, state) => const DarkTabPage(child: HomeScreen()),
           ),
           GoRoute(
             path: '/home',
-            builder: (ctx, state) => const HomeScreen(),
+            builder: (ctx, state) => const DarkTabPage(child: HomeScreen()),
           ),
           // "All" of a home row: must-sees | tonight | hidden-gems.
           GoRoute(
@@ -293,8 +294,10 @@ GoRouter createRouter(Ref ref) {
             builder: (ctx, state) => AccountGate(
               reason: GateReason.groups,
               icon: Icons.luggage_rounded,
-              child: TripsScreen(
-                openCreate: state.uri.queryParameters['create'] == '1',
+              child: DarkTabPage(
+                child: TripsScreen(
+                  openCreate: state.uri.queryParameters['create'] == '1',
+                ),
               ),
             ),
           ),
@@ -339,14 +342,14 @@ GoRouter createRouter(Ref ref) {
                   onPressed: () => ctx.push('/settings'),
                 ),
               ],
-              child: const SimplifiedProfileScreen(),
+              child: const DarkTabPage(child: SimplifiedProfileScreen()),
             ),
           ),
           GoRoute(
             path: '/settings',
             // Open to guests: language and other app settings must be
             // reachable without an account. Account-only parts hide inside.
-            builder: (ctx, state) => const SettingsScreen(),
+            builder: (ctx, state) => const DarkTabPage(child: SettingsScreen()),
           ),
         ],
       ),

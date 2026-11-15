@@ -23,6 +23,8 @@ class AppPalette {
     required this.mint,
     required this.peach,
     required this.sky,
+    required this.sheet,
+    required this.darkTabs,
   });
 
   final Brightness brightness;
@@ -60,6 +62,14 @@ class AppPalette {
   /// Pastel chip fills, picked by category; text on them is always [ink].
   final Color mint, peach, sky;
 
+  /// Bottom sheet and page-like panel background.
+  final Color sheet;
+
+  /// Dark mode (owner's choice): everything stays cream as in light mode,
+  /// only the main tab pages get a dark page behind their cards (see
+  /// `DarkTabPage`), so nothing ever reads dark on dark.
+  final bool darkTabs;
+
   // Grouped look on warm sand: cream cards on a sand page, one tint
   // (TripFam navy; sky in dark mode, where navy would vanish). Greys are
   // warm too, and secondary text passes WCAG AA on the page and the cards.
@@ -82,28 +92,38 @@ class AppPalette {
     mint: Color(0xFFDDF3E4),
     peach: Color(0xFFFCE4D2),
     sky: Color(0xFFDCE6F7),
+    sheet: Color(0xFFF8F3EC),
+    darkTabs: false,
   );
 
+  // Dark mode = the light colours plus dark main tab pages (see [darkTabs]).
   static const dark = AppPalette(
-    brightness: Brightness.dark,
-    bg: Color(0xFF14110F),
-    surface: Color(0xFF221D19),
-    surface2: Color(0xFF2F2823),
-    ink: Color(0xFFFBF5EE),
-    ink2: Color(0xFFA39787),
-    ink3: Color(0xFF6B6157),
-    line: Color(0xFF3A322B),
-    edge: Color(0xFF3A322B),
-    primary: BrandColors.sky,
-    primarySoft: Color(0xFF2A2C45),
-    like: Color(0xFFFF8A78),
-    nope: Color(0xFFFBF5EE),
-    gold: Color(0xFFFFD166),
-    danger: Color(0xFFFF6961),
-    mint: Color(0xFF15302A),
-    peach: Color(0xFF3D2620),
-    sky: Color(0xFF1A2640),
+    brightness: Brightness.light,
+    bg: Color(0xFFF8F3EC),
+    surface: Color(0xFFFFFDF9),
+    surface2: Color(0xFFEFE6DA),
+    ink: Color(0xFF1E1A16),
+    ink2: Color(0xFF736759),
+    ink3: Color(0xFFB3A897),
+    line: Color(0xFFE3D8CA),
+    edge: Color(0xFFD9CCBC),
+    primary: BrandColors.navy,
+    primarySoft: Color(0xFFF6E3D6),
+    like: BrandColors.coral,
+    nope: Color(0xFF1E1A16),
+    gold: BrandColors.amber,
+    danger: Color(0xFFD70015),
+    mint: Color(0xFFDDF3E4),
+    peach: Color(0xFFFCE4D2),
+    sky: Color(0xFFDCE6F7),
+    sheet: Color(0xFFF8F3EC),
+    darkTabs: true,
   );
+
+  /// The dark page behind the main tabs in dark mode, and what sits on it.
+  static const tabPage = Color(0xFF1E1B18);
+  static const onTabPage = Color(0xFFFBF5EE);
+  static const onTabPage2 = Color(0xFFB0A494);
 }
 
 /// TripFam brand colours: the logo, wordmark, app icon and splash use these

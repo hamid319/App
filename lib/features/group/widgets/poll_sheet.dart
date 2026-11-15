@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../app/theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../common/models/trip_poll.dart';
@@ -12,7 +13,7 @@ Future<void> showPollSheet(BuildContext context, String groupId) {
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+    backgroundColor: context.swipeColors.sheet,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),

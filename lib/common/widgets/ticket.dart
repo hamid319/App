@@ -38,8 +38,10 @@ class TicketBorder extends ShapeBorder {
     final y = _notchY(rect);
     if (y == null) return body;
     final notches = Path()
-      ..addOval(Rect.fromCircle(center: Offset(rect.left, y), radius: notchRadius))
-      ..addOval(Rect.fromCircle(center: Offset(rect.right, y), radius: notchRadius));
+      ..addOval(
+          Rect.fromCircle(center: Offset(rect.left, y), radius: notchRadius))
+      ..addOval(
+          Rect.fromCircle(center: Offset(rect.right, y), radius: notchRadius));
     return Path.combine(PathOperation.difference, body, notches);
   }
 
@@ -105,7 +107,8 @@ class TicketBorder extends ShapeBorder {
 
 /// Soft iOS card shadow under raised cards and floating buttons. [edge]
 /// is kept for older call sites; the shadow is always a light black blur.
-List<BoxShadow> printShadow(Color edge, {double offset = AppSizes.printShadow}) =>
+List<BoxShadow> printShadow(Color edge,
+        {double offset = AppSizes.printShadow}) =>
     [
       BoxShadow(
         color: const Color(0x14000000),
@@ -196,9 +199,10 @@ class Stamp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fontSize = size * 0.55;
-    final onFill = ThemeData.estimateBrightnessForColor(color) == Brightness.dark
-        ? Colors.white
-        : Colors.black;
+    final onFill =
+        ThemeData.estimateBrightnessForColor(color) == Brightness.dark
+            ? Colors.white
+            : Colors.black;
     return Transform.rotate(
       angle: angle * 0.5,
       child: Container(
@@ -257,9 +261,7 @@ class InkActionButton extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: fill ?? scheme.surface,
-            border: fill == null
-                ? Border.all(color: edge, width: 0.5)
-                : null,
+            border: fill == null ? Border.all(color: edge, width: 0.5) : null,
             boxShadow: enabled ? printShadow(edge, offset: 4) : null,
           ),
           child: Material(
@@ -341,15 +343,22 @@ class TagChip extends StatelessWidget {
 
 /// Small capitals label above a section ("MITGLIEDER", "ROUTE").
 class SectionLabel extends StatelessWidget {
-  const SectionLabel(this.text, {super.key, this.trailing});
+  const SectionLabel(this.text,
+      {super.key, this.trailing, this.onPage = false});
 
   final String text;
   final Widget? trailing;
 
+  /// Straight on the page rather than on a card or sheet (see
+  /// `SwipeColors.onBg`).
+  final bool onPage;
+
   @override
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          color: onPage
+              ? context.onBg2
+              : Theme.of(context).colorScheme.onSurfaceVariant,
           letterSpacing: 0.2,
           fontWeight: FontWeight.w500,
         );
@@ -394,7 +403,6 @@ class IconBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: fill,
         shape: BoxShape.circle,
-
       ),
       child: Icon(
         icon,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../app/theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -243,7 +244,7 @@ class _PlanBody extends ConsumerWidget {
           offset: const Offset(0, -24),
           child: Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
+              color: context.swipeColors.sheet,
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(24)),
             ),

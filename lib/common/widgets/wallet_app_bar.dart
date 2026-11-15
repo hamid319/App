@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../app/theme.dart';
+
 /// App bar for the pages behind the profile's wallet cards. The page itself
 /// stays in the app's neutral look; only a small badge in the card's colour
 /// ties it to the card (like the travel ID's badge). The pages open as
@@ -49,7 +51,10 @@ class WalletAppBar extends AppBar {
                   child: Text(
                     title,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall
+                        ?.copyWith(color: context.onBg),
                   ),
                 ),
               ],

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import '../../../app/theme.dart';
 import 'package:flutter/services.dart';
 
 import '../../../common/utils/suitcase_progress.dart';
@@ -99,7 +100,7 @@ class _PackingDoneState extends State<_PackingDone>
     const size = 200.0;
 
     return Material(
-      color: theme.scaffoldBackgroundColor,
+      color: context.swipeColors.sheet,
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSizes.space24),

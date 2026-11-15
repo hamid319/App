@@ -59,7 +59,9 @@ class TripsScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Expanded(
-                        child: Text(l10n.tripsTitle, style: text.displaySmall),
+                        child: Text(l10n.tripsTitle,
+                            style: text.displaySmall
+                                ?.copyWith(color: context.onBg)),
                       ),
                       if (openCreate) _OnFirstFrame(() => _create(context)),
                       const Padding(
@@ -128,7 +130,7 @@ class TripsScreen extends ConsumerWidget {
     final choice = await showModalBottomSheet<int>(
       context: context,
       useSafeArea: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: context.swipeColors.sheet,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
