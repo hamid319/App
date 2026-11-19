@@ -133,7 +133,7 @@ export function renderReviewPage(
     return allDrafts(c).filter((p) => picks[p.id]?.length || excluded.has(p.id)).length;
   };
   const nav = collections.map((c) =>
-    `<a href="/?city=${esc(c.city.id)}"${c === current ? ' class="on"' : ""}>${esc(c.city.nameDe)} <span>${reviewed(c)}/${allDrafts(c).length}</span></a>`,
+    `<a href="/?city=${esc(c.city.id)}"${c === current ? ' class="on"' : ""}>${esc(c.city.nameEn)} <span>${reviewed(c)}/${allDrafts(c).length}</span></a>`,
   ).join("");
   const excluded = new Set(exclusions[current.city.id] ?? []);
   const card = (p: PlaceDraft) => {
@@ -145,24 +145,42 @@ export function renderReviewPage(
     }).join("");
     const state = excluded.has(p.id) ? "excluded" : picks[p.id]?.length ? "picked" : "auto";
     return `<article class="card ${state}" data-id="${esc(p.id)}" data-selected="${selected.join(",")}">
-<div class="head"><div><div class="name">${p.rank}. ${esc(p.names.de ?? p.names.en ?? p.catalogName)}</div>
-<div class="muted">${esc(p.category)}${p.cuisine ? ` · ${esc(p.cuisine)}` : ""} · ${p.photos.length} Fotos · <a href="${p.wikidataId ? `https://www.wikidata.org/wiki/${esc(p.wikidataId)}` : esc(p.osm?.url ?? "#")}" target="_blank" rel="noopener">Quelle</a> · <code>${esc(p.id)}</code></div></div>
+<div class="head"><div><div class="name">${p.rank}. ${esc(p.names.en ?? p.names.de ?? p.catalogName)}</div>
+<div class="muted">${esc(p.category)}${p.cuisine ? ` · ${esc(p.cuisine)}` : ""} · ${p.photos.length} photos · <a href="${p.wikidataId ? `https://www.wikidata.org/wiki/${esc(p.wikidataId)}` : esc(p.osm?.url ?? "#")}" target="_blank" rel="noopener">Source</a> · <code>${esc(p.id)}</code></div></div>
 <span class="state"></span></div>
 <div class="thumbs">${thumbs}</div>
-<div class="actions"><button data-act="ok">✓ Passt so</button><button data-act="reset">Zurücksetzen</button><button data-act="exclude">Ausschließen</button></div>
+<div class="actions"><button data-act="ok">✓ Looks good</button><button data-act="reset">Reset</button><button data-act="exclude">Exclude</button></div>
 </article>`;
   };
   const venues = current.venues ?? [];
-  const cards = `<h2>Sehenswürdigkeiten</h2>${current.places.map(card).join("")}
-<h2>Lokale (Heute Abend)</h2>${venues.length
-    ? `<p class="muted">Ohne Foto zeigt die App einen Platzhalter. Ausgeschlossene Lokale werden beim nächsten collect durch die nächstbesten ersetzt.</p>${venues.map(card).join("")}`
-    : '<p class="muted">Keine Lokale gesammelt.</p>'}`;
+  // One tab per category (catalog category for sights, type for venues), largest first.
+  const groups = (list: PlaceDraft[], kind: string) => {
+    const byCategory = new Map<string, PlaceDraft[]>();
+    for (const p of list) {
+      if (!byCategory.has(p.category)) byCategory.set(p.category, []);
+      byCategory.get(p.category)!.push(p);
+    }
+    return [...byCategory].sort((a, b) => b[1].length - a[1].length)
+      .map(([category, places]) => ({ key: `${kind}:${category}`, category, places }));
+  };
+  const sightGroups = groups(current.places, "sight");
+  const venueGroups = groups(venues, "venue");
+  const tab = (g: { key: string; category: string; places: PlaceDraft[] }) =>
+    `<button data-tab="${esc(g.key)}">${esc(g.category)} <span>${g.places.length}</span></button>`;
+  const tabs = `<nav class="tabs"><button data-tab="" class="on">All <span>${current.places.length + venues.length}</span></button>
+<b>Sights</b>${sightGroups.map(tab).join("")}${venueGroups.length ? `<b>Venues</b>${venueGroups.map(tab).join("")}` : ""}</nav>`;
+  const section = (g: { key: string; category: string; places: PlaceDraft[] }) =>
+    `<section data-cat="${esc(g.key)}"><h3>${esc(g.category)} <span class="muted">${g.places.length}</span></h3>${g.places.map(card).join("")}</section>`;
+  const cards = `<div data-kind="sight"><h2>Sights</h2>${sightGroups.map(section).join("")}</div>
+<div data-kind="venue"><h2>Venues (Tonight)</h2>${venues.length
+    ? `<p class="muted">Without a photo the app shows a placeholder. Excluded venues are replaced by the next best ones on the next collect.</p>${venueGroups.map(section).join("")}`
+    : '<p class="muted">No venues collected.</p>'}</div>`;
   const skipped = current.skipped.length
-    ? `<details><summary>${current.skipped.length} Katalog-Einträge fehlen</summary><p class="muted">${
+    ? `<details><summary>${current.skipped.length} catalog entries missing</summary><p class="muted">${
       current.skipped.map((s) => `${s.rank}. ${esc(s.name)} (${esc(s.reason)})`).join(" · ")}</p></details>`
     : "";
-  return `<!doctype html><html lang="de"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Fotos prüfen · ${esc(current.city.nameDe)}</title>
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Review photos · ${esc(current.city.nameEn)}</title>
 <style>
 :root{--bg:#F6F7F9;--card:#fff;--ink:#15171C;--muted:#5B616E;--line:#E7E9EE;--accent:#FF5A36;--ok:#1E9E62;--bad:#D9344F}
 @media (prefers-color-scheme:dark){:root{--bg:#0E0F12;--card:#17191E;--ink:#F2F3F5;--muted:#A9AFBB;--line:#2A2E37}}
@@ -173,8 +191,8 @@ nav a.on{border-color:var(--accent)}nav a span{color:var(--muted)}a{color:var(--
 .card{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px;margin-top:14px}
 .card.picked{border-color:var(--ok)}.card.excluded{border-color:var(--bad);opacity:.5}
 .head{display:flex;justify-content:space-between;gap:8px}.name{font-weight:700}
-.state{font-size:12px;white-space:nowrap}.card.auto .state::after{content:"automatisch";color:var(--muted)}
-.card.picked .state::after{content:"✓ geprüft";color:var(--ok)}.card.excluded .state::after{content:"ausgeschlossen";color:var(--bad)}
+.state{font-size:12px;white-space:nowrap}.card.auto .state::after{content:"automatic";color:var(--muted)}
+.card.picked .state::after{content:"✓ reviewed";color:var(--ok)}.card.excluded .state::after{content:"excluded";color:var(--bad)}
 .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin:10px 0}
 .thumb{position:relative;padding:0;border:3px solid transparent;border-radius:10px;overflow:hidden;cursor:pointer;background:var(--line);aspect-ratio:3/4}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
@@ -182,23 +200,39 @@ nav a.on{border-color:var(--accent)}nav a span{color:var(--muted)}a{color:var(--
 .thumb b:empty{display:none}.thumb:has(b:not(:empty)){border-color:var(--accent)}
 .thumb[data-page]:first-child{}
 .actions{display:flex;gap:6px;flex-wrap:wrap}.actions button{padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.tabs{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:12px 0;position:sticky;top:0;z-index:1;background:var(--bg);padding:8px 0}
+.tabs b{font-size:12px;color:var(--muted);margin-left:8px}
+.tabs button{padding:4px 10px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--ink);font-size:13px;cursor:pointer}
+.tabs button.on{border-color:var(--accent)}.tabs button span{color:var(--muted)}
+h3{margin:24px 0 0;font-size:17px}[hidden]{display:none!important}
 </style></head><body>
-<header><h1>Fotos prüfen: ${esc(current.city.nameDe)}</h1>
-<p class="muted">Fotos anklicken in der gewünschten Reihenfolge (1 = Titelbild, höchstens ${DEFAULTS.photosPerPlace}). Wird sofort gespeichert. „Passt so“ übernimmt die automatische Auswahl.</p>
-<nav>${nav}</nav>${skipped}</header>
+<header><h1>Review photos: ${esc(current.city.nameEn)}</h1>
+<p class="muted">Click photos in the order you want them (1 = cover, at most ${DEFAULTS.photosPerPlace}). Saved immediately. “Looks good” keeps the automatic choice.</p>
+<nav>${nav}</nav>${skipped}${tabs}</header>
 <main>${cards}</main>
 <script>
 const cityId=${JSON.stringify(current.city.id)};const max=${DEFAULTS.photosPerPlace};
 async function save(card,body){
   const r=await fetch("/api/place",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({cityId,placeId:card.dataset.id,...body})});
-  if(!r.ok)alert("Speichern fehlgeschlagen: "+await r.text());
+  if(!r.ok)alert("Saving failed: "+await r.text());
 }
 function show(card,sel,state){
   card.dataset.selected=sel.join(",");card.className="card "+state;
   card.querySelectorAll(".thumb").forEach(t=>{const i=sel.indexOf(Number(t.dataset.page));t.querySelector("b").textContent=i>=0?i+1:"";});
 }
 const ids=card=>card.dataset.selected?card.dataset.selected.split(",").map(Number):[];
+// Category tabs; the tab is kept in the URL hash, so a reload stays on it.
+function showTab(key){
+  if(!document.querySelector('.tabs [data-tab="'+CSS.escape(key)+'"]'))key="";
+  document.querySelectorAll(".tabs [data-tab]").forEach(b=>b.classList.toggle("on",b.dataset.tab===key));
+  document.querySelectorAll("section[data-cat]").forEach(s=>s.hidden=key!==""&&s.dataset.cat!==key);
+  document.querySelectorAll("[data-kind]").forEach(k=>k.hidden=key!==""&&!key.startsWith(k.dataset.kind+":"));
+}
+showTab(decodeURIComponent(location.hash.slice(1)));
+addEventListener("hashchange",()=>showTab(decodeURIComponent(location.hash.slice(1))));
 document.addEventListener("click",async e=>{
+  const tab=e.target.closest("[data-tab]");
+  if(tab){history.replaceState(null,"",tab.dataset.tab?"#"+encodeURIComponent(tab.dataset.tab):location.pathname+location.search);showTab(tab.dataset.tab);scrollTo(0,0);return;}
   const card=e.target.closest(".card");if(!card)return;
   const thumb=e.target.closest(".thumb");const act=e.target.closest("[data-act]")?.dataset.act;
   if(thumb){

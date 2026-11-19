@@ -1,4 +1,44 @@
 {
   "_comment": "Places the team removed after reviewing the report: cityId -> list of place ids from the report (wd_Q123 or osm_way_456). Excluded places are never published and are hidden if they were published before.",
-  "places": {}
+  "places": {
+    "at_vienna": [
+      "wd_Q19259826",
+      "wd_Q1238558",
+      "wd_Q4884861"
+    ],
+    "ch_zurich": [
+      "wd_Q56297407",
+      "wd_Q2132496",
+      "wd_Q7513438"
+    ],
+    "cz_prague": [
+      "wd_Q1509185"
+    ],
+    "de_cologne": [
+      "wd_Q2718711"
+    ],
+    "es_barcelona": [
+      "wd_Q1138985"
+    ],
+    "es_madrid": [
+      "wd_Q568579"
+    ],
+    "fr_paris": [
+      "wd_Q143080"
+    ],
+    "pt_lisbon": [
+      "wd_Q1026664",
+      "wd_Q11780",
+      "wd_Q174700",
+      "wd_Q1817021"
+    ],
+    "tr_istanbul": [
+      "wd_Q6049801",
+      "wd_Q20474042"
+    ],
+    "us_new_york": [
+      "wd_Q10806",
+      "wd_Q1633867"
+    ]
+  }
 }

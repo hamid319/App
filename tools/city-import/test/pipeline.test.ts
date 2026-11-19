@@ -151,6 +151,28 @@ describe("collectCity", () => {
     expect(viewpoint.wikidataId).toBeUndefined();
     expect(viewpoint.photos.map((p) => p.fileTitle)).toEqual(["File:Mira.jpg", "File:Mira2.jpg"]);
   });
+
+  it("matches a catalog entry by its checked QID instead of its name", async () => {
+    const sources = fakeSources();
+    let searches = 0;
+    const search = sources.wikimedia.searchEntities;
+    sources.wikimedia.searchEntities = async (query) => ((searches += 1), search(query));
+    const withQid = (number: number, name: string, qid: string) => ({ ...seed(number, name, "Monument"), qid });
+    const collection = await collectCity(city, [
+      // Name of another place, but the QID is the Belém Tower's: the OSM element with Q1.
+      withQid(1, "Blurry Park", "Q1"),
+      // QID no OSM place carries: placed at its Wikidata coordinates.
+      withQid(2, "Torre de Belém", "Q7"),
+      // QID of a place outside the city (Q9 is in Rome).
+      withQid(3, "Pantheon", "Q9"),
+    ], sources);
+
+    expect(collection.places.map((p) => p.id)).toEqual(["wd_Q1", "wd_Q7"]);
+    expect(collection.places[0].osm?.id).toBe(11);
+    expect(collection.places[1].osm).toBeUndefined();
+    expect(collection.skipped).toEqual([{ rank: 3, name: "Pantheon", reason: "Wikidata item not in range" }]);
+    expect(searches).toBe(0);
+  });
 });
 
 class FakePhotos implements PhotoStore {
@@ -335,7 +357,7 @@ describe("renderReviewPage", () => {
     expect(html).toContain('class="card auto" data-id="wd_Q4"');
     expect(html).toContain('class="card excluded" data-id="osm_node_15"');
     expect(html).toMatch(new RegExp(`data-page="${second.pageId}"[^]*?<b>1</b>`));
-    expect(html).toContain("Lissabon <span>2/3</span>");
+    expect(html).toContain("Lisbon <span>2/3</span>");
   });
 });
 

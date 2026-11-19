@@ -3,7 +3,7 @@
 TripFam (formerly SwipeTrip; the Dart package is still `swipetrip`, the
 Firebase project `travelapp-31255`) is a group-trip app: plan together,
 swipe places, day plans on a map, split costs, journal with photos, and a
-passport with a stamp per city. Owner: Hamid (GitHub `hamid319/App`).
+passport with a stamp per city. Owner: Hamid (GitHub `hamid319/App`) & Ozan (Github @ozaneermis).
 
 ## Stack
 Flutter · Riverpod 3 · Firebase (Auth, Firestore, Storage, Hosting) · GoRouter 17 · Mapbox Maps · share_plus · audioplayers · flutter_local_notifications · firebase_messaging · flutter_dotenv
@@ -151,8 +151,6 @@ Not started or open:
 - Release: final bundle id, Apple Developer account, domain, trademark check
 
 ## House rules (read before changing anything)
-- Talk to the owner in **German, du-form, very short summaries**. Code
-  comments and commit messages in English.
 - **Line endings:** many Dart files use CRLF. Keep them (check with
   `file <path>`); never commit line-ending-only changes.
 - **`dart format` only the files you changed.** Running it on a folder
@@ -182,6 +180,11 @@ Not started or open:
 - Test with throwaway data, never with the owner's real account for
   destructive actions. Temporary demo data in code must be removed before
   committing.
+- **Developer tools language:** before building a view page, HTML report or
+  other visual for the team (e.g. `tools/city-import` review/report pages),
+  ask the developer whether they want it in English or German. Hamid usually
+  works in German, Ozan in English. This is separate from the app's own
+  user-facing text, which always goes through `context.l10n` in both languages.
 
 ## Open product decisions
 Listed in `POSSIBLE_ERRORS.md` section 10 (e.g. the group match rule).
@@ -196,8 +199,7 @@ Add any new dev shortcut there too.
 `docs/architecture-map.html` (open in a browser): every system as a station,
 every user journey (sign-up, new trip, invite, swipe, receipt scan, near-me,
 journal, city import, hidden-gem tip, day plan, login) as an animated line.
-Written in German for the owner and new team members. When you add a system
-or change a journey, update its `S` / `LINES` entries there too.
+When you add a system or change a journey, update its `S` / `LINES` entries there too.
 
 ## Review skills
 - `/flutter-review` — Dart code rules check

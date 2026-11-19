@@ -352,7 +352,7 @@ describe("collect and publish venues", () => {
     expect(report).toContain("Tasca do Chico");
     expect(report).toContain("kein Foto");
     const review = renderReviewPage([collection], collection, {}, {});
-    expect(review).toContain("Lokale (Heute Abend)");
+    expect(review).toContain("Venues (Tonight)");
     expect(review).toContain('data-id="osm_node_3"');
   });
 });

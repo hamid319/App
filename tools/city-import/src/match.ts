@@ -99,6 +99,16 @@ export function matchAttraction(catalogName: string, places: OsmPlace[], center:
   return best ? { place: best.place, score: best.score } : null;
 }
 
+/** OSM place tagged with this Wikidata item, the more prominent one if several are, or null. */
+export function findByQid(qid: string, places: OsmPlace[]): OsmPlace | null {
+  let best: OsmPlace | null = null;
+  for (const place of places) {
+    if (place.tags.wikidata !== qid) continue;
+    if (!best || prominence(place) > prominence(best)) best = place;
+  }
+  return best;
+}
+
 function prominence(place: OsmPlace): number {
   let value = 0;
   if (place.tags.wikidata) value += 2;
