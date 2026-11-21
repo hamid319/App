@@ -758,34 +758,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logoutConfirm => 'Do you really want to log out?';
 
   @override
-  String get privacyWhatWeStore => 'What we store';
-
-  @override
-  String get privacyItemEmail => '• Email address (for sign-in)';
-
-  @override
-  String get privacyItemProfile => '• Display name and profile picture';
-
-  @override
-  String get privacyItemActivity => '• Favorites, swipes and group memberships';
+  String get privacyWhatWeStore => 'What we process';
 
   @override
   String get privacyItemLocation =>
-      '• Your location, only while finding nearby places';
+      '• Location only with your permission, for places nearby and the stamp book check-in. We never store exact coordinates.';
 
   @override
   String get privacyWhereStored => 'Where it is stored';
 
   @override
   String get privacyWhereStoredBody =>
-      'Your data is stored with Google Firebase. Place information and photos come from Google Maps Platform. Members of your groups can see your display name.';
+      'Your data is stored with Google Firebase, the database in Frankfurt am Main. Maps come from Mapbox, place photos through Cloudflare. Place data comes from OpenStreetMap, Wikidata, Wikimedia Commons and Overture Maps. We don\'t sell data or use ad tracking.';
 
   @override
   String get privacyRights => 'Your rights';
 
   @override
   String get privacyRightsBody =>
-      'You can ask to see, correct or delete your data at any time.';
+      'You can request access, correction, deletion and restriction, and withdraw consent at any time. You can delete your account yourself under Settings → Delete account.';
+
+  @override
+  String get privacyItemAccount =>
+      '• Account: email address, display name, profile picture and, optionally, your PayPal.Me name. Trip members see your name, picture and PayPal.Me name, never your email.';
+
+  @override
+  String get privacyItemTrips =>
+      '• Trips: members, swipes, wishlist, day plans, costs, packing list and journal with photos, visible to the trip\'s members.';
+
+  @override
+  String get privacyItemReceipts =>
+      '• Receipt photos go to Google Gemini to be read. We store only the recognised items, not the photo.';
+
+  @override
+  String get privacyItemDiagnostics =>
+      '• Crash reports through Firebase Crashlytics (90 days) and a push token if you allow notifications.';
+
+  @override
+  String get privacyFullPolicy => 'Full privacy policy';
 
   @override
   String get securityHeader => 'How your account is protected';
