@@ -31,6 +31,7 @@ import '../features/group/ui/trip_swipe_screen.dart';
 import '../features/profile/ui/simplified_profile_screen.dart';
 import '../features/profile/ui/settings_screen.dart';
 import '../features/profile/ui/passport_screen.dart';
+import '../features/profile/ui/travel_map_screen.dart';
 import '../core/services/preferences_service.dart';
 import '../features/auth/logic/auth_controller.dart';
 import 'account_gate.dart';
@@ -262,6 +263,19 @@ GoRouter createRouter(Ref ref) {
             reason: GateReason.profile,
             icon: Icons.menu_book_rounded,
             child: PassportScreen(),
+          ),
+        ),
+      ),
+      // The world with the visited cities; a sheet over the profile.
+      GoRoute(
+        path: '/travel-map',
+        pageBuilder: (ctx, state) => SheetPage(
+          key: state.pageKey,
+          enableDrag: false,
+          child: const AccountGate(
+            reason: GateReason.profile,
+            icon: Icons.map_outlined,
+            child: TravelMapScreen(),
           ),
         ),
       ),

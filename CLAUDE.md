@@ -59,7 +59,7 @@ routerProvider           // Provider<GoRouter>
 /home (tab Entdecken, feed)  /discover (solo deck)  /search (place search in the Discover city)   /collection/:theme   /place/:id
 /trip/:groupId/swipe (group deck)   /group → /trips   /group/join?groupId=&code=
 (old /swipe/:groupId, /group-matches/:groupId, /day-plan/… redirect to the trip)
-/profile   /passport   /settings   /favorites   /favorites-map
+/profile   /passport   /travel-map (world map, visited cities in orange)   /settings   /favorites   /favorites-map
 /phrases?lang=|country=   /phrases/practice?lang=   (phrasebook, assets/phrases/phrases.json)
 ```
 - Always use `context.go()` or `context.push()`. Never `Navigator.push()`.

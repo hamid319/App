@@ -47,10 +47,16 @@ class SuitcaseCard extends ConsumerWidget {
     final next = p.nextExtra;
     final nextAt = p.nextLevelAt;
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(18)),
+      // In front, or the square Material would cover the rounded corners.
+      foregroundDecoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: scheme.outlineVariant),
+      ),
       child: Material(
-        color: scheme.primaryContainer,
+        color: scheme.surface,
         child: InkWell(
           onTap: () => _showHow(context, p),
           child: Padding(
@@ -79,12 +85,12 @@ class SuitcaseCard extends ConsumerWidget {
                   ],
                 ),
                 SizedBox(
-                  height: 128,
+                  height: 156,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
                       Suitcase3D(
-                        size: 124,
+                        size: 152,
                         stickers: [
                           for (final s in p.stickers)
                             SuitcaseSticker.fromStamp(s)
@@ -110,8 +116,6 @@ class SuitcaseCard extends ConsumerWidget {
                   child: LinearProgressIndicator(
                     value: p.levelProgress,
                     minHeight: 10,
-                    color: scheme.primary,
-                    backgroundColor: on.withValues(alpha: 0.12),
                   ),
                 ),
                 const SizedBox(height: 6),

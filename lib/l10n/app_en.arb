@@ -1508,6 +1508,7 @@
     }
   },
   "profileMapTab": "Map",
+  "travelMapEmpty": "Cities you have been to light up in orange here.",
   "profileIdTitle": "TripFam travel ID",
   "profileIdNumber": "No. {number}",
   "@profileIdNumber": {
@@ -1529,5 +1530,8 @@
   "placeSearchAddTooltip": "Add to wishlist",
   "placeSearchInTrip": "Already on the wishlist",
   "placeSearchAdded": "{place} is on the wishlist",
-  "@placeSearchAdded": {"placeholders": {"place": {"type": "String"}}}
+  "@placeSearchAdded": {"placeholders": {"place": {"type": "String"}}},
+  "tripNextTrip": "Next trip",
+  "tripDatesOpen": "Dates open",
+  "tripStepDone": "Done"
 }

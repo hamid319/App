@@ -9,6 +9,7 @@ import '../../../common/models/group_model.dart';
 import '../../../common/utils/trip_dates.dart';
 import '../../../common/widgets/member_avatar.dart';
 import '../../../common/widgets/place_photo.dart';
+import '../../../core/constants/colors.dart';
 import '../../../core/errors/user_message.dart';
 import '../logic/group_controller.dart';
 import '../../../l10n/l10n.dart';
@@ -33,8 +34,15 @@ class InsetGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
+    // The hairline tells the white group from the white page.
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(radius)),
+      // In front, or the square Material would cover the rounded corners.
+      foregroundDecoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: scheme.outlineVariant),
+      ),
       child: Material(
         color: scheme.surface,
         child: Column(
@@ -79,8 +87,38 @@ class TripCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: child,
+    );
+  }
+}
+
+/// Small status label in capitals: "DATES OPEN", "DONE".
+class TripTag extends StatelessWidget {
+  const TripTag(this.label, {super.key, this.tone = TagTone.open});
+
+  final String label;
+  final TagTone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = context.isDarkTabPage;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: dark ? tone.darkFill : tone.fill,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.4,
+          color: dark ? tone.darkInk : tone.ink,
+        ),
+      ),
     );
   }
 }
@@ -148,7 +186,7 @@ class FloatingPrimaryButton extends StatelessWidget {
         boxShadow: enabled
             ? [
                 BoxShadow(
-                  color: scheme.primary.withValues(alpha: 0.30),
+                  color: scheme.shadow.withValues(alpha: 0.14),
                   blurRadius: 18,
                   offset: const Offset(0, 6),
                 ),
@@ -165,7 +203,7 @@ class FloatingPrimaryButton extends StatelessWidget {
                   dimension: 22,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.4,
-                    color: scheme.onPrimary,
+                    color: scheme.onSurface,
                   ),
                 )
               : Row(
@@ -198,14 +236,36 @@ class BottomFloat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final page = Theme.of(context).scaffoldBackgroundColor;
     return Positioned(
-      left: 16,
-      right: 16,
+      left: 0,
+      right: 0,
       bottom: 0,
-      child: SafeArea(
-        top: false,
-        minimum: const EdgeInsets.only(bottom: 16),
-        child: button,
+      child: Stack(
+        fit: StackFit.passthrough,
+        children: [
+          // Content scrolling under the button fades into the page instead
+          // of showing through beside and below it.
+          Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [page.withValues(alpha: 0), page],
+                    stops: const [0, 0.45],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
+            top: false,
+            minimum: const EdgeInsets.fromLTRB(16, 28, 16, 16),
+            child: button,
+          ),
+        ],
       ),
     );
   }
@@ -388,9 +448,9 @@ class TripCover extends ConsumerWidget {
     // Three reads (cityCoverProvider) instead of the city's 60 places.
     final key = tripCityKey(group);
     final cover = key.isEmpty ? null : ref.watch(cityCoverProvider(key)).value;
-    if (cover != null) return PlacePhoto(place: cover);
     final scheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
+    // Also shown while the photo loads, so the cover is never a blank box.
+    final fallback = DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -407,6 +467,9 @@ class TripCover extends ConsumerWidget {
             size: 48, color: scheme.onPrimary.withValues(alpha: 0.9)),
       ),
     );
+    return cover == null
+        ? fallback
+        : PlacePhoto(place: cover, placeholder: fallback);
   }
 }
 

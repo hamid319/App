@@ -38,7 +38,12 @@ class AppTypography {
             height: 22 / 17,
             letterSpacing: -0.4,
           ),
-          bodyMedium: base.bodyMedium?.copyWith(fontSize: 15, height: 20 / 15),
+          // Material's default +0.25 tracking reads spaced-out in the system font.
+          bodyMedium: base.bodyMedium?.copyWith(
+            fontSize: 15,
+            height: 20 / 15,
+            letterSpacing: -0.2,
+          ),
           labelLarge: base.labelLarge?.copyWith(
             fontSize: 15,
             fontWeight: FontWeight.w600,

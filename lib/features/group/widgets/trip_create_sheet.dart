@@ -181,7 +181,9 @@ class _CreateTripSheetState extends ConsumerState<_CreateTripSheet> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (city != null) Text(city.nameFor(lang), style: muted),
-                      const Icon(Icons.chevron_right_rounded),
+                      Icon(Icons.chevron_right_rounded,
+                          color:
+                              Theme.of(context).colorScheme.onSurfaceVariant),
                     ],
                   ),
                   onTap: () => showCityPicker(
@@ -209,7 +211,9 @@ class _CreateTripSheetState extends ConsumerState<_CreateTripSheet> {
                           onPressed: () => setState(() => _dates = null),
                         ),
                       ] else
-                        const Icon(Icons.chevron_right_rounded),
+                        Icon(Icons.chevron_right_rounded,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant),
                     ],
                   ),
                   onTap: _pickDates,

@@ -3098,6 +3098,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileMapTab => 'Map';
 
   @override
+  String get travelMapEmpty =>
+      'Cities you have been to light up in orange here.';
+
+  @override
   String get profileIdTitle => 'TripFam travel ID';
 
   @override
@@ -3148,4 +3152,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String placeSearchAdded(String place) {
     return '$place is on the wishlist';
   }
+
+  @override
+  String get tripNextTrip => 'Next trip';
+
+  @override
+  String get tripDatesOpen => 'Dates open';
+
+  @override
+  String get tripStepDone => 'Done';
 }

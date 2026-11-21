@@ -874,6 +874,7 @@
   "suitcaseNextLevelAt": "Stufe {level} bei {miles}",
   "suitcaseStillNeeded": "noch {missing}",
   "profileMapTab": "Karte",
+  "travelMapEmpty": "Städte, in denen du warst, leuchten hier orange.",
   "profileIdTitle": "TripFam Reiseausweis",
   "profileIdNumber": "Nr. {number}",
   "placeSearchTooltip": "Orte suchen",
@@ -886,5 +887,8 @@
   "quickSearch": "Suchen",
   "placeSearchAddTooltip": "Auf die Wunschliste",
   "placeSearchInTrip": "Schon auf der Wunschliste",
-  "placeSearchAdded": "{place} ist auf der Wunschliste"
+  "placeSearchAdded": "{place} ist auf der Wunschliste",
+  "tripNextTrip": "Nächste Reise",
+  "tripDatesOpen": "Datum offen",
+  "tripStepDone": "Erledigt"
 }
