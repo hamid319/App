@@ -16,7 +16,10 @@ cities.json  (which cities to import, centre, radius)
 For each catalog entry, `collect`:
 
 1. finds the name on **OpenStreetMap** (one Overpass download per city,
-   matched locally by name, English/local names and alternative names);
+   matched locally by name, English/local names and alternative names).
+   An entry with a checked `"qid": "Q123"` is matched by that Wikidata item
+   instead (the OSM element tagged with it, else its Wikidata coordinates),
+   so a same-named building elsewhere cannot take its place;
 2. otherwise searches **Wikidata** for it near the city;
 3. takes **photos** from Wikimedia Commons: the main image, files tagged as
    showing the place, and the place's Commons category;

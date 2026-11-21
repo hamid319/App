@@ -40,6 +40,8 @@ export interface CatalogAttraction {
   description: string;
   /** German version of [description], for places without a German Wikipedia article. */
   descriptionDe?: string;
+  /** Wikidata item of the place, checked by hand. When set, collect matches by it, not by name. */
+  qid?: string;
 }
 
 export interface Coordinates {

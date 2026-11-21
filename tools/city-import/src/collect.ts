@@ -7,7 +7,7 @@
 import { DEFAULTS, VENUES } from "./config.js";
 import { normalizeLicense } from "./licenses.js";
 import { interestsFor, typesFor } from "./mapping.js";
-import { distanceKm, matchAttraction } from "./match.js";
+import { distanceKm, findByQid, matchAttraction } from "./match.js";
 import type {
   CatalogAttraction,
   CityCollection,
@@ -69,7 +69,15 @@ export async function collectCity(
   if (osmVenues) log(`${city.id}: ${osmVenues.length} OSM venues within ${venueRadiusKm} km`);
   const located: Located[] = [];
   const unmatched: CatalogAttraction[] = [];
+  const qidOnly: CatalogAttraction[] = [];
   for (const seed of seeds) {
+    // A checked QID wins over the name: no same-named building elsewhere.
+    if (isQid(seed.qid)) {
+      const place = findByQid(seed.qid, osmPlaces);
+      if (place) located.push({ seed, coordinates: place.coordinates, osm: place, qid: seed.qid });
+      else qidOnly.push(seed);
+      continue;
+    }
     const match = matchAttraction(seed.name, osmPlaces, center);
     if (!match) {
       unmatched.push(seed);
@@ -91,6 +99,14 @@ export async function collectCity(
     if (l.qid) continue;
     const hit = await findOnWikidata(l.seed.name, city.nameEn, l.coordinates, 1.5, sources.wikimedia);
     if (hit) l.qid = hit.id;
+  }
+
+  // Checked QID that no OSM place is tagged with: its Wikidata coordinates.
+  const where = qidOnly.length ? await sources.wikimedia.entityInfo(qidOnly.map((s) => s.qid!)) : new Map();
+  for (const seed of qidOnly) {
+    const coordinates = where.get(seed.qid!)?.coordinates;
+    if (coordinates && distanceKm(center, coordinates) <= radiusKm) located.push({ seed, qid: seed.qid, coordinates });
+    else skipped.push({ rank: seed.number, name: seed.name, reason: "Wikidata item not in range" });
   }
 
   // 2. Not on OSM under that name: Wikidata's search, nearest hit in range.
