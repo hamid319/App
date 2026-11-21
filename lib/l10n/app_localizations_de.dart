@@ -810,7 +810,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get privacyItemReceipts =>
-      '• Belegfotos gehen zum Auslesen an Google Gemini. Wir speichern nur die erkannten Positionen, nicht das Foto.';
+      '• Belegfotos werden direkt auf deinem Gerät ausgelesen und nicht hochgeladen. Wir speichern nur die erkannten Positionen.';
 
   @override
   String get privacyItemDiagnostics =>
@@ -2544,13 +2544,8 @@ class AppLocalizationsDe extends AppLocalizations {
       'Auf dem Foto wurde kein Beleg erkannt. Versuch es mit einem schärferen Foto vom ganzen Beleg.';
 
   @override
-  String receiptLimit(int count) {
-    return 'Du hast heute $count Belege gescannt. Versuch es morgen wieder.';
-  }
-
-  @override
   String get receiptScanError =>
-      'Der Beleg konnte nicht gelesen werden. Prüf deine Verbindung und versuch es noch einmal.';
+      'Der Beleg konnte nicht gelesen werden. Versuch es mit einem schärferen, geraden Foto vom ganzen Beleg.';
 
   @override
   String get receiptCheckTitle => 'Beleg prüfen';

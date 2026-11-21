@@ -62,10 +62,11 @@ void _configureCrashlytics() {
   };
 }
 
-/// App Check guards the receipt scan (Firebase AI Logic enforces it).
+/// App Check attests the app (Apple DeviceCheck, Play Integrity).
 /// Debug builds use the debug provider; its token is passed with
 /// --dart-define=APP_CHECK_DEBUG_TOKEN=... and registered in the console.
-/// A failure must not block the start: only the scan needs it.
+/// A failure must not block the start: nothing enforces App Check yet
+/// (POSSIBLE_ERRORS.md 2.6).
 Future<void> _activateAppCheck() async {
   const token = String.fromEnvironment('APP_CHECK_DEBUG_TOKEN');
   final debugToken = token.isEmpty ? null : token;

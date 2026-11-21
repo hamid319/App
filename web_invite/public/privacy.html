@@ -69,7 +69,7 @@
   <p><em>Legal basis:</em> consent, Art. 6(1)(a) GDPR and § 25(1) TDDDG (German Telecommunications Digital Services Data Protection Act).</p>
 
   <h3>3.6 Scanning receipts</h3>
-  <p>When you take or choose a photo of a receipt, the app sends it through Firebase AI Logic to Google's Gemini model. Gemini reads the items and amounts, and we store only that result in the expense. We do not store the photo itself. Google processes the photo as our processor and, under the terms of the paid Gemini API, does not use it to improve its own products. To prevent abuse, scans are limited per day. Please photograph only the receipt, not other people or documents.</p>
+  <p>When you take or choose a photo of a receipt, the app reads it directly on your device: on iPhone with Apple's text recognition (Vision), on Android with Google ML Kit. The photo is not uploaded and does not leave your device. We store only the recognised items and amounts in the expense, after you have checked them.
   <p><em>Legal basis:</em> Art. 6(1)(b) GDPR (you actively use the feature).</p>
 
   <h3>3.7 Camera, photos and calendar</h3>
@@ -110,7 +110,7 @@
   <h2>4. Recipients and processors</h2>
   <p>We work with the following service providers. They process data on our behalf under a data processing agreement (Art. 28 GDPR):</p>
   <ul>
-    <li><strong>Google Ireland Limited</strong>, Gordon House, Barrow Street, Dublin 4, Ireland, with Google LLC (USA): Firebase Authentication, Cloud Firestore (located in Frankfurt am Main), Cloud Storage, Cloud Functions (Frankfurt am Main), Cloud Messaging, Crashlytics, App Check, Hosting and Firebase AI Logic with Gemini.</li>
+    <li><strong>Google Ireland Limited</strong>, Gordon House, Barrow Street, Dublin 4, Ireland, with Google LLC (USA): Firebase Authentication, Cloud Firestore (located in Frankfurt am Main), Cloud Storage, Cloud Functions (Frankfurt am Main), Cloud Messaging, Crashlytics, App Check and Hosting.</li>
     <li><strong>Mapbox Inc.</strong>, USA: maps.</li>
     <li><strong>Cloudflare, Inc.</strong>, USA: storing and delivering place photos.</li>
   </ul>
