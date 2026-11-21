@@ -69,7 +69,7 @@
   <p><em>Rechtsgrundlage:</em> Einwilligung, Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TDDDG.</p>
 
   <h3>3.6 Belege scannen</h3>
-  <p>Wenn du einen Kassenbon fotografierst oder auswählst, schickt die App das Foto über Firebase AI Logic an das KI-Modell Gemini von Google. Gemini liest Positionen und Beträge aus, und wir speichern nur dieses Ergebnis in der Ausgabe. Das Foto selbst speichern wir nicht. Google verarbeitet das Foto als unser Auftragsverarbeiter und nutzt es nach den Bedingungen für die kostenpflichtige Gemini API nicht, um eigene Produkte zu verbessern. Um Missbrauch zu verhindern, ist der Scan auf eine Anzahl pro Tag begrenzt. Fotografiere bitte nur den Beleg und keine weiteren Personen oder Dokumente.</p>
+  <p>Wenn du einen Kassenbon fotografierst oder auswählst, liest die App ihn direkt auf deinem Gerät aus: auf dem iPhone mit der Texterkennung von Apple (Vision), auf Android mit Google ML Kit. Das Foto wird dafür nicht hochgeladen und verlässt dein Gerät nicht. Wir speichern nur die erkannten Positionen und Beträge in der Ausgabe, nachdem du sie geprüft hast.
   <p><em>Rechtsgrundlage:</em> Art. 6 Abs. 1 lit. b DSGVO (du nutzt die Funktion aktiv).</p>
 
   <h3>3.7 Kamera, Fotos und Kalender</h3>
@@ -110,7 +110,7 @@
   <h2>4. Empfänger und Auftragsverarbeiter</h2>
   <p>Wir arbeiten mit folgenden Dienstleistern zusammen. Sie verarbeiten Daten in unserem Auftrag auf Grundlage eines Vertrags zur Auftragsverarbeitung (Art. 28 DSGVO):</p>
   <ul>
-    <li><strong>Google Ireland Limited</strong>, Gordon House, Barrow Street, Dublin 4, Irland, mit der Google LLC (USA): Firebase Authentication, Cloud Firestore (Standort Frankfurt am Main), Cloud Storage, Cloud Functions (Frankfurt am Main), Cloud Messaging, Crashlytics, App Check, Hosting und Firebase AI Logic mit Gemini.</li>
+    <li><strong>Google Ireland Limited</strong>, Gordon House, Barrow Street, Dublin 4, Irland, mit der Google LLC (USA): Firebase Authentication, Cloud Firestore (Standort Frankfurt am Main), Cloud Storage, Cloud Functions (Frankfurt am Main), Cloud Messaging, Crashlytics, App Check und Hosting.</li>
     <li><strong>Mapbox Inc.</strong>, USA: Kartendarstellung.</li>
     <li><strong>Cloudflare, Inc.</strong>, USA: Speicherung und Auslieferung von Ortsfotos.</li>
   </ul>

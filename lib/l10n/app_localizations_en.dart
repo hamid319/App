@@ -788,7 +788,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyItemReceipts =>
-      '• Receipt photos go to Google Gemini to be read. We store only the recognised items, not the photo.';
+      '• Receipt photos are read on your device and never uploaded. We store only the recognised items.';
 
   @override
   String get privacyItemDiagnostics =>
@@ -2513,13 +2513,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'No receipt found in this photo. Try a sharper photo of the whole receipt.';
 
   @override
-  String receiptLimit(int count) {
-    return 'You scanned $count receipts today. Try again tomorrow.';
-  }
-
-  @override
   String get receiptScanError =>
-      'The receipt could not be read. Check your connection and try again.';
+      'The receipt could not be read. Try a sharper, straight photo of the whole receipt.';
 
   @override
   String get receiptCheckTitle => 'Check receipt';

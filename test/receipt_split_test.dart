@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:swipetrip/common/models/trip_expense.dart';
 import 'package:swipetrip/common/utils/expense_split.dart';
-import 'package:swipetrip/features/group/data/receipt_scan_repository.dart';
 
 const _items = [
   ReceiptItem(id: 'pizza', name: 'Pizza', amountCents: 1200),
@@ -97,26 +96,4 @@ void main() {
     expect(back.isReceipt, isTrue);
   });
 
-  test('scanned receipts parse amounts into hundredths', () {
-    final r = ScannedReceipt.fromJson({
-      'merchant': ' Ichiran ',
-      'currency': 'jpy',
-      'items': [
-        {'name': 'Ramen', 'original': 'ラーメン', 'amount': 980},
-        {'name': 'Egg', 'original': '', 'amount': 120.5},
-        {'name': 'Free water', 'amount': 0},
-      ],
-      'tax': 0,
-      'tip': null,
-      'total': 1100.5,
-    });
-    expect(r.merchant, 'Ichiran');
-    expect(r.currency, 'JPY');
-    expect(r.lines.map((l) => l.amount), [98000, 12050]);
-    expect(r.lines.first.original, 'ラーメン');
-    expect(r.lines.last.original, isNull);
-    expect(r.tip, 0);
-    expect(r.total, 110050);
-    expect(ScannedReceipt.fromJson({'currency': '€'}).currency, 'EUR');
-  });
 }

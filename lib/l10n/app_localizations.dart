@@ -1541,7 +1541,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyItemReceipts.
   ///
   /// In en, this message translates to:
-  /// **'• Receipt photos go to Google Gemini to be read. We store only the recognised items, not the photo.'**
+  /// **'• Receipt photos are read on your device and never uploaded. We store only the recognised items.'**
   String get privacyItemReceipts;
 
   /// No description provided for @privacyItemDiagnostics.
@@ -4346,16 +4346,10 @@ abstract class AppLocalizations {
   /// **'No receipt found in this photo. Try a sharper photo of the whole receipt.'**
   String get receiptNotReadable;
 
-  /// No description provided for @receiptLimit.
-  ///
-  /// In en, this message translates to:
-  /// **'You scanned {count} receipts today. Try again tomorrow.'**
-  String receiptLimit(int count);
-
   /// No description provided for @receiptScanError.
   ///
   /// In en, this message translates to:
-  /// **'The receipt could not be read. Check your connection and try again.'**
+  /// **'The receipt could not be read. Try a sharper, straight photo of the whole receipt.'**
   String get receiptScanError;
 
   /// No description provided for @receiptCheckTitle.
