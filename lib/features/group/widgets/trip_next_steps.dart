@@ -174,7 +174,7 @@ class _Step extends StatelessWidget {
             if (done)
               TripTag(context.l10n.tripStepDone, tone: tone)
             else
-              Icon(Icons.chevron_right_rounded, color: context.onBg),
+              Icon(Icons.chevron_right_rounded, color: context.onBg2),
           ],
         ),
       ),

@@ -162,7 +162,6 @@ class AppTheme {
   /// system font, one tint. Primary buttons are filled tint pills, secondary
   /// buttons are grey fills, selected states use the tint or ink.
   static ThemeData _build(AppPalette p) {
-    final light = p.brightness == Brightness.light;
     final onPrimary =
         ThemeData.estimateBrightnessForColor(p.primary) == Brightness.dark
             ? Colors.white
@@ -172,13 +171,13 @@ class AppTheme {
       primary: p.primary,
       onPrimary: onPrimary,
       primaryContainer: p.primarySoft,
-      onPrimaryContainer: light ? BrandColors.navy : p.ink,
+      onPrimaryContainer: p.ink,
       secondary: p.ink,
       onSecondary: p.bg,
       secondaryContainer: p.primarySoft,
-      onSecondaryContainer: light ? BrandColors.navy : p.ink,
+      onSecondaryContainer: p.ink,
       tertiary: p.gold,
-      onTertiary: const Color(0xFF1C1C1E),
+      onTertiary: p.ink,
       error: p.danger,
       onError: Colors.white,
       errorContainer: Color.alphaBlend(
@@ -201,6 +200,8 @@ class AppTheme {
       shadow: Colors.black,
     );
     final textTheme = AppTypography.textTheme(p.ink, p.ink2);
+    // Filled actions: warm orange with ink on it (white on it is too weak).
+    const accent = BrandColors.orange;
     const stadium = StadiumBorder();
     const buttonText = TextStyle(fontWeight: FontWeight.w600, fontSize: 17);
     OutlineInputBorder field(Color c, double w) => OutlineInputBorder(
@@ -238,8 +239,8 @@ class AppTheme {
           minimumSize: const Size(64, 54),
           shape: stadium,
           elevation: 0,
-          backgroundColor: p.primary,
-          foregroundColor: onPrimary,
+          backgroundColor: accent,
+          foregroundColor: p.ink,
           disabledBackgroundColor: p.surface2,
           disabledForegroundColor: p.ink3,
           textStyle: buttonText,
@@ -249,8 +250,8 @@ class AppTheme {
         style: FilledButton.styleFrom(
           minimumSize: const Size.fromHeight(54),
           shape: stadium,
-          backgroundColor: p.primary,
-          foregroundColor: onPrimary,
+          backgroundColor: accent,
+          foregroundColor: p.ink,
           textStyle: buttonText,
         ),
       ),
@@ -275,8 +276,8 @@ class AppTheme {
         style: IconButton.styleFrom(foregroundColor: p.primary),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: p.primary,
-        foregroundColor: onPrimary,
+        backgroundColor: accent,
+        foregroundColor: p.ink,
         elevation: 2,
         highlightElevation: 2,
         shape: const StadiumBorder(),
@@ -306,7 +307,7 @@ class AppTheme {
         checkmarkColor: p.primary,
         labelStyle: textTheme.labelLarge?.copyWith(color: p.ink),
         secondaryLabelStyle: textTheme.labelLarge?.copyWith(
-          color: light ? BrandColors.navy : p.ink,
+          color: p.ink,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       ),
@@ -343,12 +344,12 @@ class AppTheme {
         ),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: p.primary,
+        color: accent,
         linearTrackColor: p.surface2,
         circularTrackColor: Colors.transparent,
       ),
       sliderTheme: SliderThemeData(
-        activeTrackColor: p.primary,
+        activeTrackColor: accent,
         inactiveTrackColor: p.surface2,
         thumbColor: Colors.white,
         overlayColor: p.primary.withValues(alpha: 0.12),
@@ -400,7 +401,7 @@ class AppTheme {
       dividerTheme: DividerThemeData(color: p.line, space: 0.5, thickness: 0.5),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFF2A241F),
+        backgroundColor: p.ink,
         contentTextStyle: textTheme.bodyMedium?.copyWith(color: Colors.white),
         actionTextColor: BrandColors.sky,
         shape: RoundedRectangleBorder(

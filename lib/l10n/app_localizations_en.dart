@@ -3098,6 +3098,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileMapTab => 'Map';
 
   @override
+  String get travelMapEmpty =>
+      'Cities you have been to light up in orange here.';
+
+  @override
   String get profileIdTitle => 'TripFam travel ID';
 
   @override

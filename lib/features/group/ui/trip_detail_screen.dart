@@ -687,7 +687,7 @@ class _IdeaRow extends ConsumerWidget {
               label: l10n.tripLikeIdea,
               child: Material(
                 color: liked
-                    ? scheme.primary.withValues(alpha: 0.16)
+                    ? context.swipeColors.like.withValues(alpha: 0.12)
                     : scheme.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(14),
                 child: InkWell(
@@ -708,8 +708,10 @@ class _IdeaRow extends ConsumerWidget {
                               ? Icons.favorite_rounded
                               : Icons.favorite_border_rounded,
                           size: 16,
-                          color:
-                              liked ? scheme.primary : scheme.onSurfaceVariant,
+                          // A liked heart is red, as everywhere else.
+                          color: liked
+                              ? context.swipeColors.like
+                              : scheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -717,7 +719,7 @@ class _IdeaRow extends ConsumerWidget {
                           style: text.labelLarge?.copyWith(
                             fontSize: 14,
                             color: liked
-                                ? scheme.primary
+                                ? scheme.onSurface
                                 : scheme.onSurfaceVariant,
                           ),
                         ),
@@ -747,7 +749,7 @@ class _QuickActions extends ConsumerWidget {
     final l10n = context.l10n;
     final id = group.groupId;
     final plan = group.tripPlan;
-    final places = ref.watch(tripSwipePlacesProvider(id)).value;
+    final places = ref.watch(tripSwipeBadgePlacesProvider(id)).value;
     final mine = (ref.watch(tripSwipesProvider(id)).value ?? const [])
         .where((m) => m.uid == uid)
         .firstOrNull;
@@ -981,8 +983,7 @@ class _ActionRow extends StatelessWidget {
             ),
             if (trailing != null) ...[trailing!, const SizedBox(width: 6)],
             if (enabled)
-              Icon(Icons.chevron_right_rounded,
-                  color: scheme.onSurfaceVariant.withValues(alpha: 0.6)),
+              Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
           ],
         ),
       ),

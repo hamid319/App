@@ -874,6 +874,7 @@
   "suitcaseNextLevelAt": "Stufe {level} bei {miles}",
   "suitcaseStillNeeded": "noch {missing}",
   "profileMapTab": "Karte",
+  "travelMapEmpty": "Städte, in denen du warst, leuchten hier orange.",
   "profileIdTitle": "TripFam Reiseausweis",
   "profileIdNumber": "Nr. {number}",
   "placeSearchTooltip": "Orte suchen",

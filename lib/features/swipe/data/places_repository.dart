@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../common/models/place_model.dart';
 import '../../../common/models/place_search_entry.dart';
 import '../../../common/models/swipe_result_model.dart';
@@ -17,6 +20,14 @@ class PlacesRepository {
   /// How long a city's loaded places are reused. The home feed and the
   /// solo deck both need the same city on start; this makes it one query.
   static const cityCacheTtl = Duration(minutes: 10);
+
+  /// How long the device's copy of a city's places (Firestore's offline
+  /// cache) is used before the server is asked again. Places only change
+  /// with an import, so a start shows them at once and costs no reads.
+  static const cityDiskTtl = Duration(hours: 24);
+
+  /// Device copies from before this moment are not used (pull to refresh).
+  DateTime? _clearedAt;
 
   /// A curated city counts as "near" when its centre lies within the
   /// search radius plus this much: a city's places spread around its
@@ -46,7 +57,20 @@ class PlacesRepository {
         DateTime.now().difference(cached.at) < cityCacheTtl) {
       return cached.places;
     }
-    final future = _queryCityPlaces(cityId, limit);
+    // A longer list of this city already loaded (the feed's 150) answers
+    // a shorter one (a cover's 3) without a query.
+    if (!refresh) {
+      for (final e in _cityCache.entries) {
+        final [city, size] = e.key.split('|');
+        if (city == cityId &&
+            int.parse(size) > limit &&
+            DateTime.now().difference(e.value.at) < cityCacheTtl) {
+          return e.value.places
+              .then((all) => List.unmodifiable(all.take(limit)));
+        }
+      }
+    }
+    final future = _queryCityPlaces(cityId, limit, refresh: refresh);
     _cityCache[key] = (at: DateTime.now(), places: future);
     // A failed load is not kept, so the next call tries again.
     future.catchError((Object _) {
@@ -56,22 +80,57 @@ class PlacesRepository {
     return future;
   }
 
-  /// Forgets the cached city places and tiles (pull to refresh).
+  /// Forgets the cached city places and tiles (pull to refresh); the next
+  /// load asks the server.
   void clearCityCache() {
+    _clearedAt = DateTime.now();
     _cityCache.clear();
     _tileCache.clear();
   }
 
-  Future<List<PlaceModel>> _queryCityPlaces(String cityId, int limit) async {
-    final snapshot = await _db
+  Future<List<PlaceModel>> _queryCityPlaces(String cityId, int limit,
+      {bool refresh = false}) async {
+    final query = _db
         .collection('places')
         .where('cityId', isEqualTo: cityId)
         .where('status', isEqualTo: 'active')
         .orderBy('popularity', descending: true)
-        .limit(limit)
-        .get();
-    return List.unmodifiable(
-        snapshot.docs.map((d) => PlaceModel.fromJson(d.data())));
+        .limit(limit);
+    List<PlaceModel> parse(QuerySnapshot<Map<String, dynamic>> snap) =>
+        List.unmodifiable(snap.docs.map((d) => PlaceModel.fromJson(d.data())));
+
+    // When and how many places the server last gave for this query.
+    final stampKey = 'places.$cityId.$limit';
+    SharedPreferences? prefs;
+    try {
+      prefs = await SharedPreferences.getInstance();
+      final stamp = prefs.getStringList(stampKey);
+      if (!refresh && stamp != null && stamp.length == 2) {
+        final at = DateTime.fromMillisecondsSinceEpoch(int.parse(stamp[0]));
+        final count = int.parse(stamp[1]);
+        final cleared = _clearedAt;
+        if (count > 0 &&
+            DateTime.now().difference(at) < cityDiskTtl &&
+            (cleared == null || at.isAfter(cleared))) {
+          final cached =
+              await query.get(const GetOptions(source: Source.cache));
+          // Fewer than the server gave: the SDK has dropped some since.
+          if (cached.docs.length >= count) return parse(cached);
+        }
+      }
+    } catch (e) {
+      // No device copy (or no storage, as in tests): ask the server.
+      debugPrint('No device copy of $cityId places: $e');
+    }
+
+    final snapshot = await query.get();
+    if (snapshot.docs.isNotEmpty && !snapshot.metadata.isFromCache) {
+      unawaited(prefs?.setStringList(stampKey, [
+        '${DateTime.now().millisecondsSinceEpoch}',
+        '${snapshot.docs.length}',
+      ]).catchError((Object _) => false));
+    }
+    return parse(snapshot);
   }
 
   /// Id of the curated city nearest to a position, if one is within

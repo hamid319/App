@@ -47,7 +47,9 @@ class AppPalette {
   /// Hairline around controls that need one (text fields, outlined chips).
   final Color edge;
 
-  /// Tint: the one accent per screen (buttons, links, selection).
+  /// Tint of links, icons and selection: navy, readable as text on white.
+  /// Filled buttons and progress use [BrandColors.orange] instead (see the
+  /// theme); orange is too light to carry text on white.
   final Color primary, primarySoft;
 
   /// Swipe outcomes. Used for like/nope only, never as general accents.
@@ -70,9 +72,9 @@ class AppPalette {
   /// `DarkTabPage`), so nothing ever reads dark on dark.
   final bool darkTabs;
 
-  // Clean look: white page and white cards told apart by hairlines, one
-  // tint (TripFam navy; sky in dark mode, where navy would vanish). Greys
-  // stay warm, and secondary text passes WCAG AA on white.
+  // Clean look: white page and white cards told apart by hairlines, navy
+  // for text-like tints and orange for filled actions. Greys stay warm, and
+  // secondary text passes WCAG AA on white.
   static const light = AppPalette(
     brightness: Brightness.light,
     bg: Color(0xFFFFFFFF),
@@ -85,7 +87,7 @@ class AppPalette {
     edge: Color(0xFFE3DDD4),
     primary: BrandColors.navy,
     primarySoft: Color(0xFFF6E3D6),
-    like: BrandColors.coral,
+    like: BrandColors.heart,
     nope: Color(0xFF1E1A16),
     gold: BrandColors.amber,
     danger: Color(0xFFD70015),
@@ -109,7 +111,7 @@ class AppPalette {
     edge: Color(0xFFE3DDD4),
     primary: BrandColors.navy,
     primarySoft: Color(0xFFF6E3D6),
-    like: BrandColors.coral,
+    like: BrandColors.heart,
     nope: Color(0xFF1E1A16),
     gold: BrandColors.amber,
     danger: Color(0xFFD70015),
@@ -133,8 +135,12 @@ class AppPalette {
 /// Fill and text of the small status labels ("dates open", "done"), for a
 /// light surface and for the dark tab page.
 enum TagTone {
-  open(Color(0xFFFFF1EC), Color(0xFFA63A26), Color(0xFF3A1F19),
-      Color(0xFFFFA596)),
+  open(
+    Color(0xFFF5F1EB),
+    Color(0xFF6B6259),
+    Color(0xFF23211F),
+    Color(0xFFB0A494),
+  ),
   done(Color(0xFFE9F6EE), Color(0xFF1F6B43), Color(0xFF17301F),
       Color(0xFF86DBA8));
 
@@ -150,8 +156,19 @@ class BrandColors {
   /// Midnight navy: suitcase, "trip", the tint in light mode.
   static const navy = Color(0xFF1F2A6B);
 
+  /// The shaded and the lit side of navy: gradients on navy cards, the
+  /// suitcase's trim and grooves.
+  static const navyDeep = Color(0xFF141B4D);
+  static const navyLight = Color(0xFF2E3C8C);
+
   /// Coral: "fam", the heart sticker, likes and highlights.
   static const coral = Color(0xFFFF6F59);
+
+  /// Orange: filled buttons and progress, with ink text on it.
+  static const orange = Color(0xFFF58A3C);
+
+  /// Red: hearts and likes, as people know them from other apps.
+  static const heart = Color(0xFFE5484D);
 
   /// Sky: icon and splash ground, the tint in dark mode.
   static const sky = Color(0xFFA9C7FF);

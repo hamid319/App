@@ -28,7 +28,7 @@ import '../../../core/services/image_cache.dart';
 const _stampsPerPage = 4;
 const _paper = Color(0xFFF7F3E8);
 const _gold = Color(0xFFE8C46A);
-const _navyDark = Color(0xFF141C4D);
+const _navyDark = BrandColors.navyDeep;
 const _openDuration = Duration(milliseconds: 900);
 const _turnDuration = Duration(milliseconds: 550);
 const _ink = Color(0xFF8C8577);
@@ -943,6 +943,7 @@ class _DataPage extends StatelessWidget {
         ? CachedNetworkImage(
             imageUrl: user!.photoUrl!,
             cacheManager: imageCacheManager,
+            memCacheWidth: 400, // as in the profile, so both share one decode
             fit: BoxFit.cover,
             errorWidget: (_, __, ___) => avatar,
           )
@@ -1054,7 +1055,7 @@ class _PassportShareCard extends StatelessWidget {
           gradient: RadialGradient(
             center: Alignment(0, -0.05),
             radius: 0.8,
-            colors: [Color(0xFF2F3C8A), BrandColors.navy],
+            colors: [BrandColors.navyLight, BrandColors.navy],
           ),
         ),
         child: Column(

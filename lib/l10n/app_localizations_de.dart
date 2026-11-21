@@ -3133,6 +3133,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get profileMapTab => 'Karte';
 
   @override
+  String get travelMapEmpty =>
+      'Städte, in denen du warst, leuchten hier orange.';
+
+  @override
   String get profileIdTitle => 'TripFam Reiseausweis';
 
   @override

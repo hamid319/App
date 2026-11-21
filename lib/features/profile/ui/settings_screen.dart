@@ -55,14 +55,16 @@ class SettingsScreen extends ConsumerWidget {
                 leading: const Icon(Icons.language_rounded),
                 title: Text(l10n.languageTitle),
                 subtitle: Text(languageName(l10n, languageCode)),
-                trailing: const Icon(Icons.chevron_right_rounded),
+                trailing: Icon(Icons.chevron_right_rounded,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant),
                 onTap: () => showLanguagePicker(context, ref),
               ),
               ListTile(
                 leading: const Icon(Icons.dark_mode_outlined),
                 title: Text(l10n.appearanceTitle),
                 subtitle: Text(themeModeName(l10n, themeMode)),
-                trailing: const Icon(Icons.chevron_right_rounded),
+                trailing: Icon(Icons.chevron_right_rounded,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant),
                 onTap: () => showThemeModePicker(context, ref),
               ),
               ListTile(
@@ -71,7 +73,8 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: Text(homeCity?.nameFor(
                         Localizations.localeOf(context).languageCode) ??
                     l10n.homeCityNotSet),
-                trailing: const Icon(Icons.chevron_right_rounded),
+                trailing: Icon(Icons.chevron_right_rounded,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant),
                 onTap: () => showCityPicker(
                   context,
                   offerCurrentLocation: false,
@@ -110,20 +113,23 @@ class SettingsScreen extends ConsumerWidget {
                 leading: const Icon(Icons.privacy_tip_outlined),
                 title: Text(l10n.privacy),
                 subtitle: Text(l10n.privacySubtitle),
-                trailing: const Icon(Icons.chevron_right_rounded),
+                trailing: Icon(Icons.chevron_right_rounded,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant),
                 onTap: () => _showDataPrivacy(context),
               ),
               ListTile(
                 leading: const Icon(Icons.security_outlined),
                 title: Text(l10n.security),
                 subtitle: Text(l10n.securitySubtitle),
-                trailing: const Icon(Icons.chevron_right_rounded),
+                trailing: Icon(Icons.chevron_right_rounded,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant),
                 onTap: () => _showSecurity(context),
               ),
               ListTile(
                 leading: const Icon(Icons.article_outlined),
                 title: Text(l10n.licenses),
-                trailing: const Icon(Icons.chevron_right_rounded),
+                trailing: Icon(Icons.chevron_right_rounded,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant),
                 onTap: () => showLicensePage(
                   context: context,
                   applicationName: 'TripFam',
@@ -140,10 +146,15 @@ class SettingsScreen extends ConsumerWidget {
                       leading: const Icon(Icons.payments_outlined),
                       title: Text(l10n.paypalHandleTitle),
                       subtitle: Text(
-                        ref.watch(profileControllerProvider).value?.paypalHandle ??
+                        ref
+                                .watch(profileControllerProvider)
+                                .value
+                                ?.paypalHandle ??
                             l10n.paypalHandleNone,
                       ),
-                      trailing: const Icon(Icons.chevron_right_rounded),
+                      trailing: Icon(Icons.chevron_right_rounded,
+                          color:
+                              Theme.of(context).colorScheme.onSurfaceVariant),
                       onTap: () => _editPaypalHandle(context, ref),
                     ),
                     if (user.email.isNotEmpty)
@@ -151,7 +162,9 @@ class SettingsScreen extends ConsumerWidget {
                         leading: const Icon(Icons.lock_reset_rounded),
                         title: Text(l10n.resetPasswordSetting),
                         subtitle: Text(l10n.resetPasswordSettingSubtitle),
-                        trailing: const Icon(Icons.chevron_right_rounded),
+                        trailing: Icon(Icons.chevron_right_rounded,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant),
                         onTap: () => context.push(
                           Uri(
                             path: '/forgot-password',
@@ -180,13 +193,17 @@ class SettingsScreen extends ConsumerWidget {
                       leading: const Icon(Icons.person_add_alt_1_outlined),
                       title: Text(l10n.gateCreateAccount),
                       subtitle: Text(l10n.createAccountToManage),
-                      trailing: const Icon(Icons.chevron_right_rounded),
+                      trailing: Icon(Icons.chevron_right_rounded,
+                          color:
+                              Theme.of(context).colorScheme.onSurfaceVariant),
                       onTap: () => context.push('/register'),
                     ),
                     ListTile(
                       leading: const Icon(Icons.login_rounded),
                       title: Text(l10n.gateHaveAccount),
-                      trailing: const Icon(Icons.chevron_right_rounded),
+                      trailing: Icon(Icons.chevron_right_rounded,
+                          color:
+                              Theme.of(context).colorScheme.onSurfaceVariant),
                       onTap: () => context.push('/login'),
                     ),
                     const _DeleteAccountTile(),
@@ -240,8 +257,9 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
     if (value == null) return;
-    final handle = value.trim().replaceFirst(
-        RegExp(r'^(https?://)?(www\.)?paypal\.me/'), '');
+    final handle = value
+        .trim()
+        .replaceFirst(RegExp(r'^(https?://)?(www\.)?paypal\.me/'), '');
     await ref.read(profileControllerProvider.notifier).updateProfile(
       uid,
       {'paypalHandle': handle.isEmpty ? null : handle},
@@ -269,7 +287,8 @@ class SettingsScreen extends ConsumerWidget {
                 context.go('/home');
               }
             },
-            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+            style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error),
             child: Text(l10n.logout),
           ),
         ],
@@ -408,8 +427,7 @@ class _DeleteAccountTile extends ConsumerWidget {
         return;
       }
       if (outcome == AccountDeletionOutcome.deleted) {
-        messenger.showSnackBar(
-            SnackBar(content: Text(l10n.deleteAccountDone)));
+        messenger.showSnackBar(SnackBar(content: Text(l10n.deleteAccountDone)));
         router.go('/onboarding');
         return;
       }
@@ -572,50 +590,49 @@ class _ProfileCard extends ConsumerWidget {
       onTap: () => context.go('/profile'),
       padding: const EdgeInsets.all(AppSizes.space16),
       child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: context.swipeColors.edge,
+                width: AppSizes.edge,
+              ),
+            ),
+            child: hasAccount
+                ? MemberAvatar(id: user?.uid ?? '', name: name, size: 48)
+                : CircleAvatar(
+                    radius: 24,
+                    backgroundColor: scheme.surfaceContainerHighest,
+                    child: Icon(Icons.person_outline, color: scheme.onSurface),
+                  ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: context.swipeColors.edge,
-                      width: AppSizes.edge,
-                    ),
-                  ),
-                  child: hasAccount
-                      ? MemberAvatar(id: user?.uid ?? '', name: name, size: 48)
-                      : CircleAvatar(
-                          radius: 24,
-                          backgroundColor: scheme.surfaceContainerHighest,
-                          child: Icon(Icons.person_outline,
-                              color: scheme.onSurface),
-                        ),
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: text.titleMedium,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: text.titleMedium,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        hasAccount
-                            ? l10n.profileStats(favorites, groups)
-                            : l10n.guestSubtitle,
-                        style: text.bodyMedium
-                            ?.copyWith(color: scheme.onSurfaceVariant),
-                      ),
-                    ],
-                  ),
+                const SizedBox(height: 2),
+                Text(
+                  hasAccount
+                      ? l10n.profileStats(favorites, groups)
+                      : l10n.guestSubtitle,
+                  style:
+                      text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
                 ),
-                Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
               ],
             ),
+          ),
+          Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
+        ],
+      ),
     );
   }
 }

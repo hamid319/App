@@ -87,8 +87,8 @@ class SuitcasePainter extends CustomPainter {
     Color(0xFFC9B6FF), // lilac
   ];
 
-  static const _dark = Color(0xFF141B4D);
-  static const _groove = Color(0xFF2E3C8C);
+  static const _dark = BrandColors.navyDeep;
+  static const _groove = BrandColors.navyLight;
 
   @override
   void paint(Canvas canvas, Size size) {

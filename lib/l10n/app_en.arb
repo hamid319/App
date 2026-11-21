@@ -1508,6 +1508,7 @@
     }
   },
   "profileMapTab": "Map",
+  "travelMapEmpty": "Cities you have been to light up in orange here.",
   "profileIdTitle": "TripFam travel ID",
   "profileIdNumber": "No. {number}",
   "@profileIdNumber": {

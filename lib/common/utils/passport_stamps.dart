@@ -8,6 +8,8 @@ class PassportStamp {
     required this.countryCode,
     required this.date,
     this.checkedIn = false,
+    this.lat = 0,
+    this.lng = 0,
   });
 
   final String cityId;
@@ -20,6 +22,9 @@ class PassportStamp {
   /// The user checked in on site (GPS). Without it the stamp is only
   /// pencilled in.
   final bool checkedIn;
+
+  /// Where the city lies, for the travel map; 0/0 when unknown.
+  final double lat, lng;
 
   /// Stable across app starts (unlike String.hashCode), so a stamp keeps
   /// its shape, colour and tilt.
@@ -70,6 +75,8 @@ List<PassportStamp> passportStamps(List<GroupModel> trips, DateTime now,
         cityName: place.cityName,
         countryCode: place.countryCode,
         date: start,
+        lat: place.lat,
+        lng: place.lng,
       );
     }
   }
@@ -82,6 +89,8 @@ List<PassportStamp> passportStamps(List<GroupModel> trips, DateTime now,
           countryCode: s.countryCode,
           date: at,
           checkedIn: true,
+          lat: s.lat,
+          lng: s.lng,
         )
       else
         s,

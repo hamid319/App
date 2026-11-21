@@ -5342,6 +5342,12 @@ abstract class AppLocalizations {
   /// **'Map'**
   String get profileMapTab;
 
+  /// No description provided for @travelMapEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Cities you have been to light up in orange here.'**
+  String get travelMapEmpty;
+
   /// No description provided for @profileIdTitle.
   ///
   /// In en, this message translates to:

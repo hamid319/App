@@ -186,7 +186,7 @@ class FloatingPrimaryButton extends StatelessWidget {
         boxShadow: enabled
             ? [
                 BoxShadow(
-                  color: scheme.primary.withValues(alpha: 0.30),
+                  color: scheme.shadow.withValues(alpha: 0.14),
                   blurRadius: 18,
                   offset: const Offset(0, 6),
                 ),
@@ -203,7 +203,7 @@ class FloatingPrimaryButton extends StatelessWidget {
                   dimension: 22,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.4,
-                    color: scheme.onPrimary,
+                    color: scheme.onSurface,
                   ),
                 )
               : Row(
