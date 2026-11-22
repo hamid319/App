@@ -58,7 +58,7 @@ class AuthController extends AsyncNotifier<UserModel?> {
     try {
       final guest = await _authRepo.signInAsGuest();
       if (guest == null) return null;
-      return _hydrate(guest);
+      return await _hydrate(guest);
     } catch (e) {
       // operation-not-allowed / admin-restricted-operation mean the Anonymous
       // provider is off in the Firebase Console. Returning null sends the
