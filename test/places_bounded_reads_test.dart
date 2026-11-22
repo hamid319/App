@@ -191,4 +191,23 @@ void main() {
         .loadPlacesByIds(['b', '', 'missing', 'a', 'b']);
     expect(places.map((p) => p.id), ['b', 'a']);
   });
+
+  test('swipe history is read once and kept current by swipes', () async {
+    final db = FakeFirebaseFirestore();
+    final repo = PlacesRepository(firestore: db);
+    await repo.recordSwipe(userId: 'u', placeId: 'a', liked: true);
+
+    expect(await repo.getSwipedPlaceIds('u'), {'a'});
+    // A write the repository did not make (another device) is not re-read.
+    await db
+        .collection('swipeResults')
+        .doc('u_x')
+        .set({'userId': 'u', 'placeId': 'x'});
+    await repo.recordSwipe(userId: 'u', placeId: 'b', liked: false);
+    await repo.deleteSwipe(userId: 'u', placeId: 'a');
+    expect(await repo.getSwipedPlaceIds('u'), {'b'});
+
+    await repo.clearSwipedPlaces('u');
+    expect(await repo.getSwipedPlaceIds('u'), isEmpty);
+  });
 }

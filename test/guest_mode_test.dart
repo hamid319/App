@@ -13,7 +13,11 @@ import 'package:swipetrip/features/profile/data/profile_repository.dart';
 import 'package:swipetrip/main_providers.dart';
 
 class _FakeUser implements User {
-  _FakeUser({required this.uid, required this.isAnonymous, this.email});
+  _FakeUser(
+      {required this.uid,
+      required this.isAnonymous,
+      this.email,
+      this.displayName});
 
   @override
   final String uid;
@@ -22,14 +26,14 @@ class _FakeUser implements User {
   @override
   final String? email;
   @override
-  String? get displayName => null;
+  final String? displayName;
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class _FakeAuthService implements AuthService {
-  _FakeAuthService({this.anonymousError});
+  _FakeAuthService({this.anonymousError, User? user}) : _user = user;
 
   final FirebaseAuthException? anonymousError;
   // ignore: close_sinks
@@ -192,6 +196,26 @@ void main() {
       expect(doc.exists, isTrue);
       // The update rule requires uid == userId.
       expect(doc.data()!['uid'], 'guest-uid');
+    });
+
+    test('a rename in the profile wins over the sign-up name in Auth',
+        () async {
+      await db.collection('users').doc('u1').set({
+        'uid': 'u1',
+        'email': 'a@b.com',
+        'displayName': 'Maximilian',
+      });
+      final container = makeContainer(_FakeAuthService(
+        user: _FakeUser(
+            uid: 'u1',
+            isAnonymous: false,
+            email: 'a@b.com',
+            displayName: 'Max'),
+      ));
+
+      final user = await container.read(authControllerProvider.future);
+
+      expect(user!.displayName, 'Maximilian');
     });
 
     test('falls back to no session when Anonymous Auth is disabled', () async {

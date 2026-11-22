@@ -287,6 +287,7 @@ class PlacesRepository {
       liked: liked,
       timestamp: DateTime.now(),
     );
+    _swipedCache[userId]?.add(placeId);
     await _db.collection('swipeResults').doc(docId).set(swipeResult.toJson());
   }
 
@@ -295,27 +296,33 @@ class PlacesRepository {
     required String userId,
     required String placeId,
   }) async {
+    _swipedCache[userId]?.remove(placeId);
     await _db.collection('swipeResults').doc('${userId}_$placeId').delete();
   }
 
-  Future<List<SwipeResultModel>> getUserSwipes(String userId) async {
+  /// Swiped place ids per user, read once per app run: the solo deck
+  /// rebuilds on every filter change, and the history can hold hundreds of
+  /// documents. Kept current by [recordSwipe], [deleteSwipe] and
+  /// [clearSwipedPlaces]; swipes from another device show after a restart.
+  final Map<String, Set<String>> _swipedCache = {};
+
+  Future<Set<String>> getSwipedPlaceIds(String userId) async {
+    final cached = _swipedCache[userId];
+    if (cached != null) return {...cached};
     final query = await _db
         .collection('swipeResults')
         .where('userId', isEqualTo: userId)
-        .orderBy('timestamp', descending: true)
         .get();
-
-    return query.docs
-        .map((doc) => SwipeResultModel.fromJson(doc.data()))
-        .toList();
-  }
-
-  Future<Set<String>> getSwipedPlaceIds(String userId) async {
-    final swipes = await getUserSwipes(userId);
-    return swipes.map((s) => s.placeId).toSet();
+    final ids = {
+      for (final doc in query.docs)
+        if (doc.data()['placeId'] case final String id) id,
+    };
+    _swipedCache[userId] = ids;
+    return {...ids};
   }
 
   Future<void> clearSwipedPlaces(String userId) async {
+    _swipedCache.remove(userId);
     final query = await _db
         .collection('swipeResults')
         .where('userId', isEqualTo: userId)

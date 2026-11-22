@@ -44,7 +44,12 @@ class _PushWatcherState extends ConsumerState<PushWatcher> {
   Future<void> _sync() async {
     final account = ref.read(currentAccountProvider).value;
     final trips = ref.read(myTripsProvider).value ?? const [];
-    if (account == null || account.isGuest || trips.isEmpty) return;
+    if (account == null || account.isGuest) {
+      // Logout deleted the token; the next login must register again.
+      _registered = null;
+      return;
+    }
+    if (trips.isEmpty) return;
     final lang = Localizations.localeOf(context).languageCode;
     final key = '${account.uid}:$lang';
     if (_registered == key) return;

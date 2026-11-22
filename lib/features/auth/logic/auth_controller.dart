@@ -85,7 +85,8 @@ class AuthController extends AsyncNotifier<UserModel?> {
     final userModel = await _profileRepo.getUserProfile(firebaseUser.uid);
     final hydrated = userModel.copyWith(
       email: firebaseUser.email ?? userModel.email,
-      displayName: firebaseUser.displayName ?? userModel.displayName,
+      // The profile holds renames; the Auth name is only set at sign-up.
+      displayName: userModel.displayName ?? firebaseUser.displayName,
       isAnonymous: firebaseUser.isAnonymous,
     );
     if (!firebaseUser.isAnonymous) {
