@@ -191,7 +191,7 @@ abstract class AppLocalizations {
   /// No description provided for @checkInReminderBody.
   ///
   /// In en, this message translates to:
-  /// **'Open TripFam and get your stamp.'**
+  /// **'Open Out We Go and get your stamp.'**
   String get checkInReminderBody;
 
   /// No description provided for @checkInTitle.
@@ -1949,7 +1949,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding2Body.
   ///
   /// In en, this message translates to:
-  /// **'TripFam turns your favourite places into short walks on the map, day by day.'**
+  /// **'Out We Go turns your favourite places into short walks on the map, day by day.'**
   String get onboarding2Body;
 
   /// No description provided for @onboarding3Lead.
@@ -1967,7 +1967,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding3Body.
   ///
   /// In en, this message translates to:
-  /// **'Add who paid for what. TripFam shows who owes whom and how much.'**
+  /// **'Add who paid for what. Out We Go shows who owes whom and how much.'**
   String get onboarding3Body;
 
   /// No description provided for @onboardingGuest.
@@ -2315,7 +2315,7 @@ abstract class AppLocalizations {
   /// No description provided for @calendarPermissionDenied.
   ///
   /// In en, this message translates to:
-  /// **'TripFam has no access to your calendar. You can allow it in the iPhone or Android settings.'**
+  /// **'Out We Go has no access to your calendar. You can allow it in the iPhone or Android settings.'**
   String get calendarPermissionDenied;
 
   /// No description provided for @errorLoadCalendar.
@@ -3035,7 +3035,7 @@ abstract class AppLocalizations {
   /// No description provided for @tripInviteMessage.
   ///
   /// In en, this message translates to:
-  /// **'Join our trip \"{trip}\" on TripFam: {link}\n\nWith the app: open Trips, tap + and enter the code {code}.'**
+  /// **'Join our trip \"{trip}\" on Out We Go: {link}\n\nWith the app: open Trips, tap + and enter the code {code}.'**
   String tripInviteMessage(String trip, String code, String link);
 
   /// No description provided for @tripInviteCopied.
@@ -3929,7 +3929,7 @@ abstract class AppLocalizations {
   /// No description provided for @passportShareTagline.
   ///
   /// In en, this message translates to:
-  /// **'Plan trips together with TripFam'**
+  /// **'Plan trips together with Out We Go'**
   String get passportShareTagline;
 
   /// No description provided for @passportShareError.
@@ -4547,7 +4547,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityTipSheetHint.
   ///
   /// In en, this message translates to:
-  /// **'We check every tip before it shows up in TripFam.'**
+  /// **'We check every tip before it shows up in Out We Go.'**
   String get cityTipSheetHint;
 
   /// No description provided for @cityTipPlaceLabel.
@@ -5351,7 +5351,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileIdTitle.
   ///
   /// In en, this message translates to:
-  /// **'TripFam travel ID'**
+  /// **'Out We Go travel ID'**
   String get profileIdTitle;
 
   /// Document number on the profile travel ID.

@@ -10,7 +10,7 @@ import '../../../common/utils/trip_days.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../../common/widgets/place_photo.dart';
 import '../../../common/widgets/skeleton.dart';
-import '../../../common/widgets/suitcase_view.dart';
+import '../../../common/widgets/duck_moment.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/popular_cities.dart';
 import '../../../core/errors/user_message.dart';
@@ -434,28 +434,16 @@ class _EmptyHero extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(22),
       child: ColoredBox(
-        color: BrandColors.navy,
+        color: BrandColors.forest,
         child: Stack(
           children: [
-            Positioned(
-              right: -36,
-              top: -36,
-              child: Container(
-                width: 170,
-                height: 170,
-                decoration: const BoxDecoration(
-                  color: BrandColors.coral,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
             const Positioned(
-              right: 14,
-              top: 14,
-              width: 104,
-              height: 104,
-              child: ExcludeSemantics(
-                child: CustomPaint(painter: SuitcasePainter()),
+              right: 4,
+              top: 4,
+              child: DuckMoment(
+                mood: DuckMood.sleep,
+                size: 120,
+                onDark: true,
               ),
             ),
             Padding(
@@ -489,7 +477,7 @@ class _EmptyHero extends StatelessWidget {
                           label: Text(l10n.tripsPlanTrip),
                           style: FilledButton.styleFrom(
                             backgroundColor: Colors.white,
-                            foregroundColor: BrandColors.navy,
+                            foregroundColor: BrandColors.forest,
                             minimumSize: const Size(0, 48),
                           ),
                         ),
@@ -617,7 +605,7 @@ class _DestinationCard extends ConsumerWidget {
   }
 }
 
-/// The three steps of planning together, for people new to TripFam.
+/// The three steps of planning together, for people new to Out We Go.
 class _HowItWorks extends StatelessWidget {
   const _HowItWorks();
 

@@ -33,7 +33,7 @@ class TravelMapScreen extends ConsumerWidget {
     return Scaffold(
       appBar: WalletAppBar(
         color: BrandColors.orange,
-        onColor: BrandColors.navy,
+        onColor: BrandColors.forest,
         icon: Icons.map_rounded,
         title: l10n.profileMapTab,
       ),

@@ -62,7 +62,8 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get checkInReminderBody => 'Öffne TripFam und hol dir deinen Stempel.';
+  String get checkInReminderBody =>
+      'Öffne Out We Go und hol dir deinen Stempel.';
 
   @override
   String get checkInTitle => 'Stempel holen';
@@ -1024,7 +1025,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get onboarding2Body =>
-      'TripFam ordnet eure Lieblingsorte zu kurzen Wegen auf der Karte, Tag für Tag.';
+      'Out We Go ordnet eure Lieblingsorte zu kurzen Wegen auf der Karte, Tag für Tag.';
 
   @override
   String get onboarding3Lead => 'Kosten teilen,';
@@ -1034,7 +1035,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get onboarding3Body =>
-      'Tragt ein, wer was bezahlt hat. TripFam zeigt, wer wem wie viel schuldet.';
+      'Tragt ein, wer was bezahlt hat. Out We Go zeigt, wer wem wie viel schuldet.';
 
   @override
   String get onboardingGuest => 'Erst mal als Gast umsehen';
@@ -1238,7 +1239,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get calendarPermissionDenied =>
-      'TripFam hat keinen Zugriff auf deinen Kalender. Du kannst ihn in den Einstellungen deines iPhones oder Android-Geräts erlauben.';
+      'Out We Go hat keinen Zugriff auf deinen Kalender. Du kannst ihn in den Einstellungen deines iPhones oder Android-Geräts erlauben.';
 
   @override
   String get errorLoadCalendar => 'Dein Kalender konnte nicht geladen werden.';
@@ -1687,7 +1688,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String tripInviteMessage(String trip, String code, String link) {
-    return 'Komm mit auf unsere Reise „$trip“ in TripFam: $link\n\nMit der App: Reisen öffnen, auf + tippen und den Code $code eingeben.';
+    return 'Komm mit auf unsere Reise „$trip“ in Out We Go: $link\n\nMit der App: Reisen öffnen, auf + tippen und den Code $code eingeben.';
   }
 
   @override
@@ -2262,7 +2263,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get passportShareTagline => 'Reisen gemeinsam planen mit TripFam';
+  String get passportShareTagline => 'Reisen gemeinsam planen mit Out We Go';
 
   @override
   String get passportShareError => 'Das Bild konnte nicht erstellt werden.';
@@ -2670,7 +2671,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get cityTipSheetHint =>
-      'Wir prüfen jeden Tipp, bevor er in TripFam erscheint.';
+      'Wir prüfen jeden Tipp, bevor er in Out We Go erscheint.';
 
   @override
   String get cityTipPlaceLabel => 'Ort (Name oder Straße)';
@@ -3137,7 +3138,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Städte, in denen du warst, leuchten hier orange.';
 
   @override
-  String get profileIdTitle => 'TripFam Reiseausweis';
+  String get profileIdTitle => 'Out We Go Reiseausweis';
 
   @override
   String profileIdNumber(String number) {

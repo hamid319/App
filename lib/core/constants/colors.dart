@@ -47,7 +47,7 @@ class AppPalette {
   /// Hairline around controls that need one (text fields, outlined chips).
   final Color edge;
 
-  /// Tint of links, icons and selection: navy, readable as text on white.
+  /// Tint of links, icons and selection: forest green, readable as text on white.
   /// Filled buttons and progress use [BrandColors.orange] instead (see the
   /// theme); orange is too light to carry text on white.
   final Color primary, primarySoft;
@@ -72,21 +72,21 @@ class AppPalette {
   /// `DarkTabPage`), so nothing ever reads dark on dark.
   final bool darkTabs;
 
-  // Clean look: white page and white cards told apart by hairlines, navy
+  // Out We Go look: warm sand page and cream cards, forest green
   // for text-like tints and orange for filled actions. Greys stay warm, and
   // secondary text passes WCAG AA on white.
   static const light = AppPalette(
     brightness: Brightness.light,
-    bg: Color(0xFFFFFFFF),
-    surface: Color(0xFFFFFFFF),
+    bg: Color(0xFFF6F1EA),
+    surface: Color(0xFFFFFDF7),
     surface2: Color(0xFFF5F1EB),
-    ink: Color(0xFF1E1A16),
+    ink: Color(0xFF141414),
     ink2: Color(0xFF6B6259),
     ink3: Color(0xFFB3A897),
     line: Color(0xFFEDE8E0),
     edge: Color(0xFFE3DDD4),
-    primary: BrandColors.navy,
-    primarySoft: Color(0xFFF6E3D6),
+    primary: BrandColors.forest,
+    primarySoft: Color(0xFFDCEBE3),
     like: BrandColors.heart,
     nope: Color(0xFF1E1A16),
     gold: BrandColors.amber,
@@ -94,23 +94,23 @@ class AppPalette {
     mint: Color(0xFFDDF3E4),
     peach: Color(0xFFFCE4D2),
     sky: Color(0xFFDCE6F7),
-    sheet: Color(0xFFFFFFFF),
+    sheet: Color(0xFFFFFDF7),
     darkTabs: false,
   );
 
   // Dark mode = the light colours plus dark main tab pages (see [darkTabs]).
   static const dark = AppPalette(
     brightness: Brightness.light,
-    bg: Color(0xFFFFFFFF),
-    surface: Color(0xFFFFFFFF),
+    bg: Color(0xFFF6F1EA),
+    surface: Color(0xFFFFFDF7),
     surface2: Color(0xFFF5F1EB),
-    ink: Color(0xFF1E1A16),
+    ink: Color(0xFF141414),
     ink2: Color(0xFF6B6259),
     ink3: Color(0xFFB3A897),
     line: Color(0xFFEDE8E0),
     edge: Color(0xFFE3DDD4),
-    primary: BrandColors.navy,
-    primarySoft: Color(0xFFF6E3D6),
+    primary: BrandColors.forest,
+    primarySoft: Color(0xFFDCEBE3),
     like: BrandColors.heart,
     nope: Color(0xFF1E1A16),
     gold: BrandColors.amber,
@@ -118,7 +118,7 @@ class AppPalette {
     mint: Color(0xFFDDF3E4),
     peach: Color(0xFFFCE4D2),
     sky: Color(0xFFDCE6F7),
-    sheet: Color(0xFFFFFFFF),
+    sheet: Color(0xFFFFFDF7),
     darkTabs: true,
   );
 
@@ -149,31 +149,32 @@ enum TagTone {
   final Color fill, ink, darkFill, darkInk;
 }
 
-/// TripFam brand colours: the logo, wordmark, app icon and splash use these
+/// Out We Go brand colours: the logo, wordmark, app icon and splash use these
 /// directly; screens use the palette above (via the theme), which builds on
 /// them.
 class BrandColors {
-  /// Midnight navy: suitcase, "trip", the tint in light mode.
-  static const navy = Color(0xFF1F2A6B);
+  /// Forest green: the geese, "out" and "go", the tint in light mode.
+  static const forest = Color(0xFF0B5A45);
 
-  /// The shaded and the lit side of navy: gradients on navy cards, the
+  /// The shaded and the lit side of forest: gradients on green cards, the
   /// suitcase's trim and grooves.
-  static const navyDeep = Color(0xFF141B4D);
-  static const navyLight = Color(0xFF2E3C8C);
+  static const forestDeep = Color(0xFF084434);
+  static const forestLight = Color(0xFF14704F);
 
-  /// Coral: "fam", the heart sticker, likes and highlights.
-  static const coral = Color(0xFFFF6F59);
+  /// Mandarin: the dots in the wordmark, the lead goose, highlights.
+  static const coral = Color(0xFFFF5A1F);
 
-  /// Orange: filled buttons and progress, with ink text on it.
-  static const orange = Color(0xFFF58A3C);
+  /// Mandarin: filled buttons and progress, with ink text on it (white on it
+  /// only for large text).
+  static const orange = Color(0xFFFF5A1F);
 
   /// Red: hearts and likes, as people know them from other apps.
   static const heart = Color(0xFFE5484D);
 
-  /// Sky: icon and splash ground, the tint in dark mode.
-  static const sky = Color(0xFFA9C7FF);
+  /// Lime: icon and splash ground, the tint in dark mode.
+  static const lime = Color(0xFFE3EE6B);
 
-  /// Amber: the pin sticker, ratings.
+  /// Amber: ratings.
   static const amber = Color(0xFFFFC857);
 }
 

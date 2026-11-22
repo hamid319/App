@@ -1,5 +1,5 @@
 class AppConfig {
-  static const String appName = 'TripFam';
+  static const String appName = 'Out We Go';
 
   /// Web invite page (Firebase Hosting, web_invite/). Friends open
   /// `$inviteBaseUrl/<CODE>` and join without the app. Switch to the own

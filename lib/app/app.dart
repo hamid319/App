@@ -18,7 +18,7 @@ class SwipeTripApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeControllerProvider);
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      onGenerateTitle: (context) => 'TripFam',
+      onGenerateTitle: (context) => 'Out We Go',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,

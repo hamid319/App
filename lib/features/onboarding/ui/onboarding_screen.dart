@@ -4,13 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/locale_controller.dart';
 import '../../../app/theme.dart';
-import '../../../common/widgets/tripfam_mark.dart';
+import '../../../common/widgets/brand_mark.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../core/services/preferences_service.dart';
 import '../../../l10n/l10n.dart';
 
-/// Three pages, one per promise of TripFam: plan together, get a day plan,
+/// Three pages, one per promise of Out We Go: plan together, get a day plan,
 /// split costs. Each has a small drawn scene in the brand colours.
 const _pageCount = 3;
 
@@ -85,7 +85,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   padding: EdgeInsets.only(top: AppSizes.space8),
                   child: Row(
                     children: [
-                      TripFamMark(size: 40),
+                      BrandMark(size: 40),
                       Spacer(),
                       _LanguageChip(),
                     ],
@@ -324,11 +324,11 @@ class _PlanScene extends StatelessWidget {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: BrandColors.sky,
+                      color: BrandColors.lime,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(Icons.museum_rounded,
-                        color: BrandColors.navy),
+                        color: BrandColors.forest),
                   ),
                   const SizedBox(width: AppSizes.space12),
                   const Expanded(
@@ -419,7 +419,7 @@ class _StopDot extends StatelessWidget {
       height: 30,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: BrandColors.navy,
+        color: BrandColors.forest,
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white, width: 3),
       ),
@@ -452,7 +452,7 @@ class _RoutePainter extends CustomPainter {
         ..lineTo(size.width, size.height)
         ..lineTo(0, size.height)
         ..close(),
-      Paint()..color = BrandColors.sky,
+      Paint()..color = BrandColors.lime,
     );
     canvas.drawRRect(
       RRect.fromRectAndRadius(
@@ -509,7 +509,7 @@ class _CostScene extends StatelessWidget {
               ),
               Icon(Icons.arrow_forward_rounded, color: scheme.onSurfaceVariant),
               const SizedBox(width: AppSizes.space8),
-              person(BrandColors.navy),
+              person(BrandColors.forest),
             ],
           ),
         );

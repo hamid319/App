@@ -12,7 +12,7 @@ import '../../../common/utils/passport_mrz.dart';
 import '../../../common/utils/passport_stamps.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../../common/widgets/member_avatar.dart';
-import '../../../common/widgets/tripfam_mark.dart';
+import '../../../common/widgets/brand_mark.dart';
 import '../../../common/widgets/wallet_app_bar.dart';
 import '../../../common/widgets/widget_capture.dart';
 import '../../../core/constants/colors.dart';
@@ -28,7 +28,7 @@ import '../../../core/services/image_cache.dart';
 const _stampsPerPage = 4;
 const _paper = Color(0xFFF7F3E8);
 const _gold = Color(0xFFE8C46A);
-const _navyDark = BrandColors.navyDeep;
+const _navyDark = BrandColors.forestDeep;
 const _openDuration = Duration(milliseconds: 900);
 const _turnDuration = Duration(milliseconds: 550);
 const _ink = Color(0xFF8C8577);
@@ -128,7 +128,7 @@ class _PassportScreenState extends ConsumerState<PassportScreen>
   }
 
   /// Shares the open page (or the cover, while closed) as a story-sized
-  /// picture with the TripFam brand and the travel numbers.
+  /// picture with the Out We Go brand and the travel numbers.
   Future<void> _share(List<PassportStamp> stamps, UserModel? user) async {
     final l10n = context.l10n;
     final box = context.findRenderObject() as RenderBox?;
@@ -209,7 +209,7 @@ class _PassportScreenState extends ConsumerState<PassportScreen>
 
     return Scaffold(
       appBar: WalletAppBar(
-        color: BrandColors.navy,
+        color: BrandColors.forest,
         onColor: Colors.white,
         icon: Icons.public_rounded,
         title: l10n.passportTitle,
@@ -557,7 +557,7 @@ class _Cover extends StatelessWidget {
         ]);
     return DecoratedBox(
       decoration: const BoxDecoration(
-        color: BrandColors.navy,
+        color: BrandColors.forest,
         borderRadius: _pageRadius,
       ),
       child: Stack(fit: StackFit.expand, children: [
@@ -579,7 +579,7 @@ class _Cover extends StatelessWidget {
               const Spacer(),
               ClipRRect(
                 borderRadius: BorderRadius.circular(22),
-                child: const TripFamMark(size: 96),
+                child: const BrandMark(size: 96),
               ),
               const SizedBox(height: 24),
               if (name != null && name!.trim().isNotEmpty) ...[
@@ -1048,14 +1048,14 @@ class _PassportShareCard extends StatelessWidget {
   Widget build(BuildContext context) {
     const pageWidth = 820.0;
     return Material(
-      color: BrandColors.navy,
+      color: BrandColors.forest,
       child: DecoratedBox(
         // A soft light behind the page.
         decoration: const BoxDecoration(
           gradient: RadialGradient(
             center: Alignment(0, -0.05),
             radius: 0.8,
-            colors: [BrandColors.navyLight, BrandColors.navy],
+            colors: [BrandColors.forestLight, BrandColors.forest],
           ),
         ),
         child: Column(
@@ -1066,10 +1066,10 @@ class _PassportShareCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(24),
-                  child: const TripFamMark(size: 96),
+                  child: const BrandMark(size: 96),
                 ),
                 const SizedBox(width: 28),
-                const Text('TripFam',
+                const Text('Out We Go',
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 72,

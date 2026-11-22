@@ -126,9 +126,9 @@ class SimplifiedProfileScreen extends ConsumerWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  BrandColors.navyLight,
-                  BrandColors.navy,
-                  BrandColors.navyDeep
+                  BrandColors.forestLight,
+                  BrandColors.forest,
+                  BrandColors.forestDeep
                 ],
               ),
               borderRadius: BorderRadius.circular(_walletRadius),
@@ -163,7 +163,7 @@ class SimplifiedProfileScreen extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(7),
                             ),
                             child: const Icon(Icons.flight_rounded,
-                                size: 16, color: BrandColors.navy),
+                                size: 16, color: BrandColors.forest),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
@@ -301,7 +301,7 @@ class SimplifiedProfileScreen extends ConsumerWidget {
               for (final (i, card) in [
                 _WalletCard(
                   color: BrandColors.amber,
-                  onColor: BrandColors.navy,
+                  onColor: BrandColors.forest,
                   icon: Icons.public_rounded,
                   title: l10n.passportTitle,
                   value: l10n.passportStampCount(stamps),
@@ -317,7 +317,7 @@ class SimplifiedProfileScreen extends ConsumerWidget {
                 ),
                 _WalletCard(
                   color: BrandColors.orange,
-                  onColor: BrandColors.navy,
+                  onColor: BrandColors.forest,
                   icon: Icons.map_rounded,
                   title: l10n.profileMapTab,
                   onTap: () => context.push('/travel-map'),

@@ -17,7 +17,7 @@
   "pushSettingSubtitle": "Matches, members, costs, journal",
   "checkInReminderTitle": "Arrived in {city}?",
   "@checkInReminderTitle": {"placeholders": {"city": {"type": "String"}}},
-  "checkInReminderBody": "Open TripFam and get your stamp.",
+  "checkInReminderBody": "Open Out We Go and get your stamp.",
   "checkInTitle": "Get your stamp",
   "checkInSubtitle": "In {city}? Check in on site",
   "@checkInSubtitle": {"placeholders": {"city": {"type": "String"}}},
@@ -404,10 +404,10 @@
   "onboarding1Body": "Collect ideas, vote and see right away what everyone likes.",
   "onboarding2Lead": "Ideas become",
   "onboarding2Accent": "a day plan.",
-  "onboarding2Body": "TripFam turns your favourite places into short walks on the map, day by day.",
+  "onboarding2Body": "Out We Go turns your favourite places into short walks on the map, day by day.",
   "onboarding3Lead": "Split costs,",
   "onboarding3Accent": "no maths.",
-  "onboarding3Body": "Add who paid for what. TripFam shows who owes whom and how much.",
+  "onboarding3Body": "Add who paid for what. Out We Go shows who owes whom and how much.",
   "onboardingGuest": "Just look around as a guest",
   "filterAll": "All · {count}",
   "@filterAll": {
@@ -510,7 +510,7 @@
   "fromCalendar": "From calendar",
   "calendarPickTitle": "Pick a trip from your calendar",
   "calendarPickHint": "We use the event's title, place and dates for the group. Nothing else leaves your phone.",
-  "calendarPermissionDenied": "TripFam has no access to your calendar. You can allow it in the iPhone or Android settings.",
+  "calendarPermissionDenied": "Out We Go has no access to your calendar. You can allow it in the iPhone or Android settings.",
   "errorLoadCalendar": "Couldn't load your calendar.",
   "calendarNoEvents": "No upcoming events in your calendar.",
   "calendarCityNotFound": "We couldn't recognise the city. Please pick it.",
@@ -728,7 +728,7 @@
   "tripTabCosts": "Costs",
   "tripInvite": "Invite",
   "tripInviteFriends": "Invite friends",
-  "tripInviteMessage": "Join our trip \"{trip}\" on TripFam: {link}\n\nWith the app: open Trips, tap + and enter the code {code}.",
+  "tripInviteMessage": "Join our trip \"{trip}\" on Out We Go: {link}\n\nWith the app: open Trips, tap + and enter the code {code}.",
   "@tripInviteMessage": {
     "placeholders": {
       "trip": {
@@ -1126,7 +1126,7 @@
       "cities": {"type": "int"}
     }
   },
-  "passportShareTagline": "Plan trips together with TripFam",
+  "passportShareTagline": "Plan trips together with Out We Go",
   "passportShareError": "Couldn't create the image.",
   "passportPageTitle": "STAMPS",
   "superLike": "Super-like",
@@ -1310,7 +1310,7 @@
       "city": {"type": "String"}
     }
   },
-  "cityTipSheetHint": "We check every tip before it shows up in TripFam.",
+  "cityTipSheetHint": "We check every tip before it shows up in Out We Go.",
   "cityTipPlaceLabel": "Place (name or street)",
   "cityTipNoteLabel": "Why is it special? (optional)",
   "cityTipSubmit": "Send tip",
@@ -1509,7 +1509,7 @@
   },
   "profileMapTab": "Map",
   "travelMapEmpty": "Cities you have been to light up in orange here.",
-  "profileIdTitle": "TripFam travel ID",
+  "profileIdTitle": "Out We Go travel ID",
   "profileIdNumber": "No. {number}",
   "@profileIdNumber": {
     "description": "Document number on the profile travel ID.",

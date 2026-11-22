@@ -150,7 +150,7 @@ class _PackingDoneState extends State<_PackingDone>
                             child: Text(
                               l10n.packingDoneMiles(milesPerPackedTrip),
                               style: theme.textTheme.labelLarge?.copyWith(
-                                color: BrandColors.navy,
+                                color: BrandColors.forest,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),

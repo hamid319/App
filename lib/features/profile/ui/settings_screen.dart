@@ -132,7 +132,7 @@ class SettingsScreen extends ConsumerWidget {
                     color: Theme.of(context).colorScheme.onSurfaceVariant),
                 onTap: () => showLicensePage(
                   context: context,
-                  applicationName: 'TripFam',
+                  applicationName: 'Out We Go',
                 ),
               ),
             ],

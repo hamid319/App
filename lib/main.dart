@@ -84,12 +84,13 @@ Future<void> _activateAppCheck() async {
 }
 
 /// The bundled fonts are SIL OFL 1.1, which asks that the licence travels
-/// with the font. This lists both on Flutter's licence page.
+/// with the font. This lists them on Flutter's licence page.
 void _registerFontLicenses() {
   LicenseRegistry.addLicense(() async* {
     for (final (family, file) in const [
       ('Figtree', 'assets/fonts/Figtree-OFL.txt'),
       ('Bricolage Grotesque', 'assets/fonts/BricolageGrotesque-OFL.txt'),
+      ('Fredoka', 'assets/fonts/Fredoka-OFL.txt'),
     ]) {
       yield LicenseEntryWithLineBreaks([family], await rootBundle.loadString(file));
     }

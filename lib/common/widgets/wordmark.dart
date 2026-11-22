@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../app/theme.dart';
-import '../../core/constants/colors.dart';
 import '../../core/constants/typography.dart';
-import 'tripfam_mark.dart';
+import 'brand_mark.dart';
 
-/// TripFam logo: the suitcase mark followed by the "tripfam" logotype
-/// ("trip" in the tint, navy or sky in dark mode; "fam" in coral).
+/// Out We Go logo: the duck mark followed by the "Out We Go" logotype in the
+/// tint (forest, lime in dark mode).
 class Wordmark extends StatelessWidget {
   const Wordmark({super.key, this.size = 24, this.showMark = true});
 
@@ -19,30 +18,22 @@ class Wordmark extends StatelessWidget {
     // The logo sits on the page (see SwipeColors.onBg).
     final style = AppTypography.display(size: size, color: context.onBg);
     return Semantics(
-      label: 'TripFam',
+      label: 'Out We Go',
       header: true,
       child: ExcludeSemantics(
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (showMark) ...[
-              TripFamMark(size: size * 1.35),
+              BrandMark(size: size * 1.35),
               SizedBox(width: size * 0.35),
             ],
-            Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: 'trip',
-                    style: TextStyle(color: context.pageTint),
-                  ),
-                  const TextSpan(
-                    text: 'fam',
-                    style: TextStyle(color: BrandColors.coral),
-                  ),
-                ],
+            Text(
+              'Out We Go',
+              style: style.copyWith(
+                color: context.pageTint,
+                letterSpacing: 0,
               ),
-              style: style,
             ),
           ],
         ),

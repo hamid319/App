@@ -226,9 +226,9 @@ class _SuitcaseModelPainter extends CustomPainter {
   static const _pitch = 0.33;
   static const _focal = 230.0;
 
-  static const _navy = BrandColors.navy;
-  static const _dark = BrandColors.navyDeep;
-  static const _lite = BrandColors.navyLight;
+  static const _navy = BrandColors.forest;
+  static const _dark = BrandColors.forestDeep;
+  static const _lite = BrandColors.forestLight;
   static const _steel = Color(0xFFB4BCD9);
   static const _steelDark = Color(0xFF7C86B0);
 
@@ -728,7 +728,7 @@ class _SuitcaseModelPainter extends CustomPainter {
   static const _palette = [
     BrandColors.coral,
     BrandColors.amber,
-    BrandColors.sky,
+    BrandColors.lime,
     Color(0xFF8FE3BF),
     Color(0xFFFFFFFF),
     Color(0xFFC9B6FF),
@@ -748,7 +748,7 @@ class _SuitcaseModelPainter extends CustomPainter {
             fontSize: 5.8,
             fontWeight: FontWeight.w900,
             letterSpacing: 0.2,
-            color: BrandColors.navy.withValues(alpha: s.faded ? 0.5 : 1),
+            color: BrandColors.forest.withValues(alpha: s.faded ? 0.5 : 1),
           ),
         ),
         textDirection: TextDirection.ltr,

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../common/models/place_model.dart';
+import '../../../common/widgets/duck_moment.dart';
 import '../../../common/widgets/member_avatar.dart';
 import '../../../common/widgets/place_photo.dart';
 import '../../../common/widgets/ticket.dart';
@@ -190,6 +191,11 @@ class _MatchArt extends ConsumerWidget {
                 ),
               ),
             ),
+          const Positioned(
+            left: -34,
+            bottom: -30,
+            child: DuckMoment(mood: DuckMood.hop, size: 96),
+          ),
           Positioned(
             bottom: -22,
             child: Stamp(

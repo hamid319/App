@@ -108,7 +108,7 @@ extension SwipeColorsContext on BuildContext {
 
   /// Links and icons straight on the page.
   Color get pageTint =>
-      _onDarkTab ? BrandColors.sky : Theme.of(this).colorScheme.primary;
+      _onDarkTab ? BrandColors.lime : Theme.of(this).colorScheme.primary;
 }
 
 /// A main tab page (trips, discover, profile, settings). In dark mode its
@@ -132,8 +132,8 @@ class DarkTabPage extends StatelessWidget {
           foregroundColor: AppPalette.onTabPage,
           titleTextStyle: theme.appBarTheme.titleTextStyle
               ?.copyWith(color: AppPalette.onTabPage),
-          iconTheme: const IconThemeData(color: BrandColors.sky),
-          actionsIconTheme: const IconThemeData(color: BrandColors.sky),
+          iconTheme: const IconThemeData(color: BrandColors.lime),
+          actionsIconTheme: const IconThemeData(color: BrandColors.lime),
           systemOverlayStyle: SystemUiOverlayStyle.light,
         ),
       ),
@@ -403,7 +403,7 @@ class AppTheme {
         behavior: SnackBarBehavior.floating,
         backgroundColor: p.ink,
         contentTextStyle: textTheme.bodyMedium?.copyWith(color: Colors.white),
-        actionTextColor: BrandColors.sky,
+        actionTextColor: BrandColors.lime,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSizes.radiusMd),
         ),
