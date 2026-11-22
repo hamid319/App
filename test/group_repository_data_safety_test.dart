@@ -1,6 +1,7 @@
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:swipetrip/common/models/group_model.dart';
 import 'package:swipetrip/core/services/firestore_service.dart';
 import 'package:swipetrip/features/group/data/group_repository.dart';
 

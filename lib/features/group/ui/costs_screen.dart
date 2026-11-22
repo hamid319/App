@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../profile/logic/profile_controller.dart';
 import '../../../app/theme.dart';
 import '../../../common/models/group_model.dart';
 import '../../../common/models/trip_expense.dart';
@@ -341,7 +340,7 @@ class _PaypalButton extends ConsumerWidget {
       );
     }
 
-    final handle = ref.watch(profileControllerProvider).value?.paypalHandle;
+    final handle = ref.watch(myPaypalHandleProvider).asData?.value;
     final hasPaypal = paypalMeUri(handle, 1) != null;
     return OutlinedButton(
       onPressed: () async {

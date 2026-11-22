@@ -5,9 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../common/models/group_model.dart';
 import '../../../core/services/firestore_service.dart';
 
-/// Removes access immediately and reserves the ID while server cleanup runs.
-const tripTombstone = {'deleted': true, 'members': <String>[]};
-
 class GroupRepository {
   GroupRepository(
     this._firestoreService, {

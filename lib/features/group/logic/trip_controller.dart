@@ -175,6 +175,17 @@ String tripCityKey(GroupModel group) => group.location == null
     ? ''
     : PlacesRepository.curatedCityId(group.location!);
 
+/// The signed-in user's own PayPal handle, from their private profile.
+/// Read again each time the costs screen opens, so an edit in the settings
+/// shows up.
+final myPaypalHandleProvider = FutureProvider.autoDispose<String?>((ref) async {
+  final uid = ref.watch(authControllerProvider.select((s) => s.value?.uid));
+  if (uid == null) return null;
+  final profile =
+      await ref.watch(profileRepositoryProvider).getUserProfile(uid);
+  return profile.paypalHandle;
+});
+
 /// PayPal handle shared with current members of this trip.
 final tripPaymentHandleProvider = FutureProvider.autoDispose
     .family<String?, ({String groupId, String uid})>((ref, key) async {

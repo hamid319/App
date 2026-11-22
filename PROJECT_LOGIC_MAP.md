@@ -115,7 +115,7 @@ Matches are calculated from completed session votes. The MVP outcome is threshol
 - An invite lets a user add only their own UID. A member can remove only their own UID. The owner may remove members or transfer ownership to a member who stays.
 - Deleting a trip replaces it with a tombstone that removes access and reserves the ID. The `cleanupDeletedTrip` Cloud Function deletes descendant documents and journal files, then retires the invite. New trips use a separate ID format so the app's original IDs cannot be created again.
 - The journal loads media only from the entry's own files in the app's Storage bucket. The trips, polls, expenses and journal streams isolate malformed legacy documents.
-- Roll out the cleanup and payment Cloud Functions before the Firestore rules. Coordinate the app update because older builds cannot create or delete trips under the new rules. After the rules are live, run the public-profile backfill to remove old PayPal fields and restore public name and photo reads for those profiles.
+- Rollout order: (1) deploy the cleanup and payment Cloud Functions; (2) get every tester and owner onto an app build from this change, because builds from before it cannot create or delete trips under the new rules; (3) deploy the Firestore rules; (4) run the public-profile backfill to remove old PayPal fields and restore public name and photo reads for those profiles.
 
 ## Profile And Images
 

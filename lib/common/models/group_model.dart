@@ -3,6 +3,10 @@ import 'package:meta/meta.dart';
 
 import 'trip_plan.dart';
 
+/// What a deleted trip's document becomes: no access, ID still reserved
+/// while the cleanupDeletedTrip function removes its data.
+const tripTombstone = {'deleted': true, 'members': <String>[]};
+
 @immutable
 class GroupLocation {
   final String countryCode;

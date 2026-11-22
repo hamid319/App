@@ -3,7 +3,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../common/models/journal_entry.dart';
-import '../../group/data/group_repository.dart' show tripTombstone;
+import '../../../common/models/group_model.dart' show tripTombstone;
 
 /// Removes everything a user stored, before their Firebase Auth user is
 /// deleted (the security rules need the signed-in user for every step).
