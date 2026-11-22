@@ -343,11 +343,9 @@ class TripActions extends Notifier<void> {
     );
   }
 
-  /// Reads a receipt photo with Gemini; names in [appLanguage].
-  Future<ScannedReceipt> scanReceipt(XFile photo, String appLanguage) async =>
-      ref
-          .read(receiptScanRepositoryProvider)
-          .scan(await photo.readAsBytes(), appLanguage);
+  /// Reads a receipt photo on the device (no upload).
+  Future<ScannedReceipt> scanReceipt(XFile photo) =>
+      ref.read(receiptScanRepositoryProvider).scan(photo.path);
 
   /// Takes or gives back one line of a receipt.
   Future<void> setClaim(

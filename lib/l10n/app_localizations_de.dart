@@ -780,35 +780,44 @@ class AppLocalizationsDe extends AppLocalizations {
   String get logoutConfirm => 'Willst du dich wirklich abmelden?';
 
   @override
-  String get privacyWhatWeStore => 'Was wir speichern';
-
-  @override
-  String get privacyItemEmail => '• E-Mail-Adresse (für die Anmeldung)';
-
-  @override
-  String get privacyItemProfile => '• Anzeigename und Profilbild';
-
-  @override
-  String get privacyItemActivity =>
-      '• Favoriten, Swipes und Gruppenmitgliedschaften';
+  String get privacyWhatWeStore => 'Was wir verarbeiten';
 
   @override
   String get privacyItemLocation =>
-      '• Deinen Standort, nur während der Suche nach Orten in der Nähe';
+      '• Standort nur mit deiner Erlaubnis, für Orte in der Nähe und den Check-in im Stempelheft. Genaue Koordinaten speichern wir nicht.';
 
   @override
   String get privacyWhereStored => 'Wo die Daten liegen';
 
   @override
   String get privacyWhereStoredBody =>
-      'Deine Daten werden bei Google Firebase gespeichert. Ortsinformationen und Fotos stammen von der Google Maps Platform. Mitglieder deiner Gruppen sehen deinen Anzeigenamen.';
+      'Deine Daten liegen bei Google Firebase, die Datenbank in Frankfurt am Main. Karten kommen von Mapbox, Ortsfotos über Cloudflare. Ortsdaten stammen aus OpenStreetMap, Wikidata, Wikimedia Commons und Overture Maps. Wir verkaufen keine Daten und nutzen kein Werbe-Tracking.';
 
   @override
   String get privacyRights => 'Deine Rechte';
 
   @override
   String get privacyRightsBody =>
-      'Du kannst jederzeit verlangen, deine Daten einzusehen, zu berichtigen oder zu löschen.';
+      'Du kannst Auskunft, Berichtigung, Löschung und Einschränkung verlangen und Einwilligungen jederzeit widerrufen. Dein Konto löschst du selbst unter Einstellungen → Konto löschen.';
+
+  @override
+  String get privacyItemAccount =>
+      '• Konto: E-Mail-Adresse, Anzeigename, Profilbild und optional dein PayPal.Me-Name. Mitreisende sehen Name, Bild und PayPal.Me-Namen, nie deine E-Mail.';
+
+  @override
+  String get privacyItemTrips =>
+      '• Reisen: Mitglieder, Swipes, Wunschliste, Tagespläne, Kosten, Packliste und Tagebuch mit Fotos, sichtbar für die Mitglieder der Reise.';
+
+  @override
+  String get privacyItemReceipts =>
+      '• Belegfotos werden direkt auf deinem Gerät ausgelesen und nicht hochgeladen. Wir speichern nur die erkannten Positionen.';
+
+  @override
+  String get privacyItemDiagnostics =>
+      '• Absturzberichte über Firebase Crashlytics (90 Tage) und ein Push-Token, wenn du Benachrichtigungen erlaubst.';
+
+  @override
+  String get privacyFullPolicy => 'Vollständige Datenschutzerklärung';
 
   @override
   String get securityHeader => 'Wie dein Konto geschützt ist';
@@ -2535,13 +2544,8 @@ class AppLocalizationsDe extends AppLocalizations {
       'Auf dem Foto wurde kein Beleg erkannt. Versuch es mit einem schärferen Foto vom ganzen Beleg.';
 
   @override
-  String receiptLimit(int count) {
-    return 'Du hast heute $count Belege gescannt. Versuch es morgen wieder.';
-  }
-
-  @override
   String get receiptScanError =>
-      'Der Beleg konnte nicht gelesen werden. Prüf deine Verbindung und versuch es noch einmal.';
+      'Der Beleg konnte nicht gelesen werden. Versuch es mit einem schärferen, geraden Foto vom ganzen Beleg.';
 
   @override
   String get receiptCheckTitle => 'Beleg prüfen';

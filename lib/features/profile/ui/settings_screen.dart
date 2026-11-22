@@ -11,7 +11,9 @@ import '../../../app/theme_mode_picker.dart';
 import '../../../app/theme.dart';
 import '../../../common/widgets/city_picker.dart';
 import '../../../common/widgets/ticket.dart';
+import '../../../core/config/app_config.dart';
 import '../../../core/constants/sizes.dart';
+import '../../../core/services/link_launcher.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
 import '../logic/push_settings_controller.dart';
@@ -285,10 +287,15 @@ class SettingsScreen extends ConsumerWidget {
       children: [
         _bold(l10n.privacyWhatWeStore),
         const SizedBox(height: 8),
-        Text(l10n.privacyItemEmail),
-        Text(l10n.privacyItemProfile),
-        Text(l10n.privacyItemActivity),
+        Text(l10n.privacyItemAccount),
+        const SizedBox(height: 4),
+        Text(l10n.privacyItemTrips),
+        const SizedBox(height: 4),
         Text(l10n.privacyItemLocation),
+        const SizedBox(height: 4),
+        Text(l10n.privacyItemReceipts),
+        const SizedBox(height: 4),
+        Text(l10n.privacyItemDiagnostics),
         const SizedBox(height: 16),
         _bold(l10n.privacyWhereStored),
         const SizedBox(height: 8),
@@ -297,8 +304,34 @@ class SettingsScreen extends ConsumerWidget {
         _bold(l10n.privacyRights),
         const SizedBox(height: 8),
         Text(l10n.privacyRightsBody),
+        const SizedBox(height: 8),
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: TextButton.icon(
+            style: TextButton.styleFrom(padding: EdgeInsets.zero),
+            icon: const Icon(Icons.open_in_new_rounded, size: 18),
+            label: Text(l10n.privacyFullPolicy),
+            onPressed: () => _openPrivacyPolicy(context),
+          ),
+        ),
       ],
     );
+  }
+
+  /// The full policy on the web, in German or English to match the app.
+  Future<void> _openPrivacyPolicy(BuildContext context) async {
+    final l10n = context.l10n;
+    final german = Localizations.localeOf(context).languageCode == 'de';
+    try {
+      await LinkLauncher.open(german
+          ? AppConfig.privacyPolicyUrlDe
+          : AppConfig.privacyPolicyUrlEn);
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(userMessage(e, fallback: l10n.errorOpenLink, l10n: l10n)),
+      ));
+    }
   }
 
   void _showSecurity(BuildContext context) {

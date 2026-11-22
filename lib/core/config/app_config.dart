@@ -6,17 +6,17 @@ class AppConfig {
   /// domain once it is connected to Hosting.
   static const String inviteBaseUrl = 'https://travelapp-31255.web.app/join';
 
+  /// Full privacy policy, served by Firebase Hosting from web_invite/public
+  /// (datenschutz.html, privacy.html). Settings → Privacy links to it.
+  static const String privacyPolicyUrlDe =
+      'https://travelapp-31255.web.app/datenschutz';
+  static const String privacyPolicyUrlEn =
+      'https://travelapp-31255.web.app/privacy';
+
   /// Google Translate's photo mode (menus, labels); the phrasebook adds the
   /// target language as `tl`. On phones it can hand over to the app.
   static const String photoTranslateUrl =
       'https://translate.google.com/?sl=auto&op=images';
-
-  /// Gemini model that reads receipts (Firebase AI Logic, Gemini Developer
-  /// API). Flash is cheap: well under a cent per receipt.
-  static const String receiptScanModel = 'gemini-2.5-flash';
-
-  /// Receipt scans per user and day, so one account cannot run up costs.
-  static const int receiptScansPerDay = 15;
 
   /// Credit link for places from Overture Maps (place detail sources).
   static const String overtureAttributionUrl =

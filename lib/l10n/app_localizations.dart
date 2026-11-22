@@ -1493,31 +1493,13 @@ abstract class AppLocalizations {
   /// No description provided for @privacyWhatWeStore.
   ///
   /// In en, this message translates to:
-  /// **'What we store'**
+  /// **'What we process'**
   String get privacyWhatWeStore;
-
-  /// No description provided for @privacyItemEmail.
-  ///
-  /// In en, this message translates to:
-  /// **'• Email address (for sign-in)'**
-  String get privacyItemEmail;
-
-  /// No description provided for @privacyItemProfile.
-  ///
-  /// In en, this message translates to:
-  /// **'• Display name and profile picture'**
-  String get privacyItemProfile;
-
-  /// No description provided for @privacyItemActivity.
-  ///
-  /// In en, this message translates to:
-  /// **'• Favorites, swipes and group memberships'**
-  String get privacyItemActivity;
 
   /// No description provided for @privacyItemLocation.
   ///
   /// In en, this message translates to:
-  /// **'• Your location, only while finding nearby places'**
+  /// **'• Location only with your permission, for places nearby and the stamp book check-in. We never store exact coordinates.'**
   String get privacyItemLocation;
 
   /// No description provided for @privacyWhereStored.
@@ -1529,7 +1511,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyWhereStoredBody.
   ///
   /// In en, this message translates to:
-  /// **'Your data is stored with Google Firebase. Place information and photos come from Google Maps Platform. Members of your groups can see your display name.'**
+  /// **'Your data is stored with Google Firebase, the database in Frankfurt am Main. Maps come from Mapbox, place photos through Cloudflare. Place data comes from OpenStreetMap, Wikidata, Wikimedia Commons and Overture Maps. We don\'t sell data or use ad tracking.'**
   String get privacyWhereStoredBody;
 
   /// No description provided for @privacyRights.
@@ -1541,8 +1523,38 @@ abstract class AppLocalizations {
   /// No description provided for @privacyRightsBody.
   ///
   /// In en, this message translates to:
-  /// **'You can ask to see, correct or delete your data at any time.'**
+  /// **'You can request access, correction, deletion and restriction, and withdraw consent at any time. You can delete your account yourself under Settings → Delete account.'**
   String get privacyRightsBody;
+
+  /// No description provided for @privacyItemAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'• Account: email address, display name, profile picture and, optionally, your PayPal.Me name. Trip members see your name, picture and PayPal.Me name, never your email.'**
+  String get privacyItemAccount;
+
+  /// No description provided for @privacyItemTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'• Trips: members, swipes, wishlist, day plans, costs, packing list and journal with photos, visible to the trip\'s members.'**
+  String get privacyItemTrips;
+
+  /// No description provided for @privacyItemReceipts.
+  ///
+  /// In en, this message translates to:
+  /// **'• Receipt photos are read on your device and never uploaded. We store only the recognised items.'**
+  String get privacyItemReceipts;
+
+  /// No description provided for @privacyItemDiagnostics.
+  ///
+  /// In en, this message translates to:
+  /// **'• Crash reports through Firebase Crashlytics (90 days) and a push token if you allow notifications.'**
+  String get privacyItemDiagnostics;
+
+  /// No description provided for @privacyFullPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Full privacy policy'**
+  String get privacyFullPolicy;
 
   /// No description provided for @securityHeader.
   ///
@@ -4334,16 +4346,10 @@ abstract class AppLocalizations {
   /// **'No receipt found in this photo. Try a sharper photo of the whole receipt.'**
   String get receiptNotReadable;
 
-  /// No description provided for @receiptLimit.
-  ///
-  /// In en, this message translates to:
-  /// **'You scanned {count} receipts today. Try again tomorrow.'**
-  String receiptLimit(int count);
-
   /// No description provided for @receiptScanError.
   ///
   /// In en, this message translates to:
-  /// **'The receipt could not be read. Check your connection and try again.'**
+  /// **'The receipt could not be read. Try a sharper, straight photo of the whole receipt.'**
   String get receiptScanError;
 
   /// No description provided for @receiptCheckTitle.

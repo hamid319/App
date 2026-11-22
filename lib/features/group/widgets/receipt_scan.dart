@@ -5,14 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../core/config/app_config.dart';
 import '../../../l10n/l10n.dart';
 import '../data/receipt_scan_repository.dart';
 import '../logic/trip_controller.dart';
 import 'trip_ui.dart';
 
-/// Photo of a receipt (camera or library) → Gemini reads it → the review
-/// screen, where the payer checks the lines before saving.
+/// Photo of a receipt (camera or library) → read on the device → the
+/// review screen, where the payer checks the lines before saving.
 Future<void> startReceiptScan(
     BuildContext context, WidgetRef ref, String groupId) async {
   final l10n = context.l10n;
@@ -41,9 +40,10 @@ Future<void> startReceiptScan(
 
   final XFile? photo;
   try {
-    // Sharp enough for small print, small enough for a quick upload.
+    // Sharp enough for small print; the photo is read on the device and
+    // never uploaded.
     photo = await ImagePicker().pickImage(
-        source: source, maxWidth: 1600, maxHeight: 2400, imageQuality: 85);
+        source: source, maxWidth: 2400, maxHeight: 3600, imageQuality: 95);
   } catch (_) {
     if (context.mounted) {
       showTripSnack(context, l10n.journalPickError, error: true);
@@ -52,7 +52,6 @@ Future<void> startReceiptScan(
   }
   if (photo == null || !context.mounted) return;
 
-  final language = Localizations.localeOf(context).languageCode;
   final navigator = Navigator.of(context, rootNavigator: true);
   unawaited(showDialog<void>(
     context: context,
@@ -73,7 +72,7 @@ Future<void> startReceiptScan(
   try {
     final receipt = await ref
         .read(tripActionsProvider.notifier)
-        .scanReceipt(photo, language);
+        .scanReceipt(photo);
     navigator.pop();
     if (context.mounted) {
       unawaited(context.push('/trip/$groupId/costs/receipt', extra: receipt));
@@ -82,8 +81,6 @@ Future<void> startReceiptScan(
     navigator.pop();
     if (!context.mounted) return;
     final message = switch (e) {
-      ReceiptScanLimitException() =>
-        l10n.receiptLimit(AppConfig.receiptScansPerDay),
       ReceiptNotReadableException() => l10n.receiptNotReadable,
       _ => l10n.receiptScanError,
     };

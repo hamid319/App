@@ -92,7 +92,7 @@ Env.googlePlacesApiKey  // from .env via flutter_dotenv; .env is NOT bundled, so
   /sessions/…          old swipe rounds: read/delete only, nothing writes them
   /expenses/{id}       title, amountCents, paidBy, participants, createdBy; a scanned receipt adds
                        items [{id, name, original?, amountCents, forAll}] ≤100 and tipCents
-                       (read by Gemini via Firebase AI Logic, App Check enforced; split in common/utils/expense_split.dart)
+                       (read on the device: Apple Vision on iOS, ML Kit on Android, parsed in features/group/data/receipt_parser.dart; split in common/utils/expense_split.dart)
   /claims/{uid}        items: map<expenseId, itemId[]> (receipt lines a member took; only they write it;
                        lines for all, untaken lines and the tip are shared by all participants)
   /packingProgress/{uid}  done, total (only the member writes; the group sees percentages, not the list)

@@ -66,4 +66,6 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    // Receipt scan: on-device text recognition, model bundled (no download).
+    implementation("com.google.mlkit:text-recognition:16.0.1")
 }
