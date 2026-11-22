@@ -62,6 +62,10 @@ class GroupController extends AsyncNotifier<GroupModel?> {
     return userGroups.where((g) => g.groupId == selectedId).firstOrNull;
   }
 
+  /// Clears an error left by an earlier attempt. `AsyncLoading` keeps the
+  /// previous error, and the dialogs read `hasError` right after the call.
+  void _succeeded() => state = AsyncData(state.value);
+
   bool get isAdmin {
     final currentUser = ref.read(authControllerProvider).value;
     final group = state.value;
@@ -93,6 +97,7 @@ class GroupController extends AsyncNotifier<GroupModel?> {
         tripEnd: tripEnd,
       );
       await _repo.createGroup(group);
+      _succeeded();
       ref.read(selectedGroupIdProvider.notifier).updateState(group.groupId);
     } catch (e, st) {
       state = AsyncError(e, st);
@@ -106,6 +111,7 @@ class GroupController extends AsyncNotifier<GroupModel?> {
     state = const AsyncLoading();
     try {
       final groupId = await _repo.joinGroupByCodeOnly(code, currentUser.uid);
+      _succeeded();
       ref.read(selectedGroupIdProvider.notifier).updateState(groupId);
     } catch (e, st) {
       state = AsyncError(e, st);
@@ -119,6 +125,7 @@ class GroupController extends AsyncNotifier<GroupModel?> {
     state = const AsyncLoading();
     try {
       await _repo.joinGroupByInvite(groupId, code, currentUser.uid);
+      _succeeded();
       ref.read(selectedGroupIdProvider.notifier).updateState(groupId);
     } catch (e, st) {
       state = AsyncError(e, st);

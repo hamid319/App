@@ -194,9 +194,12 @@ Future<void> deleteTrip(
   if (!ok || !context.mounted) return;
   final router = GoRouter.of(context);
   final messenger = ScaffoldMessenger.of(context);
+  // Read before deleting: the trip screen closes as soon as the trip is
+  // gone, and ref may not be used after that.
+  final selected = ref.read(selectedGroupIdProvider.notifier);
   try {
     await ref.read(groupRepositoryProvider).deleteGroup(group.groupId);
-    ref.read(selectedGroupIdProvider.notifier).updateState(null);
+    selected.updateState(null);
     router.go('/trips');
   } catch (e) {
     messenger.showSnackBar(SnackBar(
