@@ -1,7 +1,12 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../common/models/group_model.dart';
 import '../../../core/services/firestore_service.dart';
+
+/// Removes access immediately and reserves the ID while server cleanup runs.
+const tripTombstone = {'deleted': true, 'members': <String>[]};
 
 class GroupRepository {
   GroupRepository(
@@ -29,32 +34,36 @@ class GroupRepository {
       throw Exception('Group must include at least one member');
     }
 
-    final normalizedGroup = GroupModel(
-      groupId: group.groupId,
-      groupName: group.groupName,
-      members: group.members,
-      sharedFavorites: group.sharedFavorites,
-      createdAt: group.createdAt ?? DateTime.now(),
-      ownerUid: group.ownerUid,
-      location: group.location,
-      invite: group.invite,
-      tripStart: group.tripStart,
-      tripEnd: group.tripEnd,
-    );
-
-    if (_usesInjectedFirestore) {
-      await _db
-          .collection('groups')
-          .doc(group.groupId)
-          .set(normalizedGroup.toJson());
-    } else {
-      await _firestoreService.setDocument(
-        'groups',
-        group.groupId,
-        normalizedGroup.toJson(),
+    final groupRef = _db.collection('groups').doc(group.groupId);
+    var code = group.invite?.code ?? _newInviteCode();
+    for (var attempt = 0; attempt < 5; attempt++) {
+      final inviteRef = _inviteDoc(code);
+      final savedGroup = group.copyWith(
+        createdAt: group.createdAt ?? DateTime.now(),
+        invite: GroupInvite(code: code, createdAt: DateTime.now()),
       );
+      final created = await _db.runTransaction((transaction) async {
+        try {
+          if ((await transaction.get(inviteRef)).exists) return false;
+        } on FirebaseException catch (e) {
+          // A legacy code whose trip is gone is still reserved.
+          if (e.code == 'permission-denied') return false;
+          rethrow;
+        }
+        transaction.set(groupRef, savedGroup.toJson());
+        transaction.set(inviteRef, _inviteData(savedGroup));
+        return true;
+      });
+      if (created) return;
+      code = _newInviteCode();
     }
-    await ensureInviteIndex(normalizedGroup);
+    throw StateError('Could not reserve an invite code');
+  }
+
+  String _newInviteCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final random = Random.secure();
+    return List.generate(6, (_) => chars[random.nextInt(chars.length)]).join();
   }
 
   /// Invite codes live in `inviteCodes/{code}` (`groupId`), so someone who
@@ -69,6 +78,10 @@ class GroupRepository {
   Future<void> ensureInviteIndex(GroupModel group, {String? ownerName}) async {
     final code = group.invite?.code ?? '';
     if (code.isEmpty) return;
+    await _inviteDoc(code).set(_inviteData(group, ownerName: ownerName));
+  }
+
+  Map<String, dynamic> _inviteData(GroupModel group, {String? ownerName}) {
     String? short(String? v, int max) {
       final t = v?.trim();
       if (t == null || t.isEmpty) return null;
@@ -78,13 +91,13 @@ class GroupRepository {
     final title = short(group.groupName, 80);
     final city = short(group.location?.cityName, 80);
     final owner = short(ownerName?.split(' ').first, 60);
-    await _inviteDoc(code).set({
+    return {
       'groupId': group.groupId,
       'createdAt': FieldValue.serverTimestamp(),
       if (title != null) 'title': title,
       if (city != null) 'cityName': city,
       if (owner != null) 'ownerName': owner,
-    });
+    };
   }
 
   Future<void> joinGroupByInvite(
@@ -189,27 +202,23 @@ class GroupRepository {
       if (!snap.exists || snap.data() == null) {
         throw Exception('Group not found');
       }
-      final group = GroupModel.fromJson(snap.data()!);
-      if (!group.members.contains(userId)) return;
+      final data = snap.data()!;
+      final members = List<String>.from(data['members'] as List);
+      if (!members.contains(userId)) return;
 
-      final remaining = group.members.where((m) => m != userId).toList();
-      if (remaining.isEmpty) {
-        transaction.delete(groupRef);
+      final remaining = members.where((m) => m != userId).toList();
+      final isOwner = data['ownerUid'] == userId;
+      if (remaining.isEmpty && isOwner) {
+        transaction.set(groupRef, tripTombstone);
         return;
       }
-
       transaction.update(groupRef, {
         'members': FieldValue.arrayRemove([userId]),
-        if (group.ownerUid == userId) 'ownerUid': remaining.first,
+        if (isOwner) 'ownerUid': remaining.first,
       });
     });
   }
 
-  Future<void> deleteGroup(String groupId) async {
-    if (_usesInjectedFirestore) {
-      await _db.collection('groups').doc(groupId).delete();
-    } else {
-      await _firestoreService.deleteDocument('groups', groupId);
-    }
-  }
+  Future<void> deleteGroup(String groupId) =>
+      _db.collection('groups').doc(groupId).set(tripTombstone);
 }

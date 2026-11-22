@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 import '../../../common/models/journal_entry.dart';
+import '../../../common/utils/decode_firestore_documents.dart';
+import '../../../firebase_options.dart';
 
 /// A picked photo ready for upload: JPEG bytes and pixel size.
 typedef JournalPhotoUpload = ({Uint8List bytes, int width, int height});
@@ -56,12 +58,18 @@ class FirebaseJournalPhotoStore implements JournalPhotoStore {
 /// The trip journal: `groups/{groupId}/journal`, photos in Storage under
 /// `trips/{groupId}/journal/{entryId}/{index}.jpg`.
 class JournalRepository {
-  JournalRepository({FirebaseFirestore? firestore, JournalPhotoStore? photos})
+  JournalRepository(
+      {FirebaseFirestore? firestore,
+      JournalPhotoStore? photos,
+      String? storageBucket})
       : _db = firestore ?? FirebaseFirestore.instance,
-        _photos = photos ?? FirebaseJournalPhotoStore();
+        _photos = photos ?? FirebaseJournalPhotoStore(),
+        _storageBucket =
+            storageBucket ?? DefaultFirebaseOptions.android.storageBucket!;
 
   final FirebaseFirestore _db;
   final JournalPhotoStore _photos;
+  final String _storageBucket;
 
   CollectionReference<Map<String, dynamic>> _journal(String groupId) =>
       _db.collection('groups').doc(groupId).collection('journal');
@@ -70,9 +78,11 @@ class JournalRepository {
   /// not in the query, so no composite index is needed.
   Stream<List<JournalEntry>> streamEntries(String groupId) =>
       _journal(groupId).snapshots().map((snap) {
-        final list = [
-          for (final d in snap.docs) JournalEntry.fromJson(d.id, d.data()),
-        ];
+        final list = decodeFirestoreDocuments(
+          snap.docs,
+          (d) => JournalEntry.fromJson(d.id, d.data(),
+              groupId: groupId, storageBucket: _storageBucket),
+        );
         final far = DateTime(9999);
         list.sort((a, b) {
           final byDay = a.day.compareTo(b.day);
@@ -112,17 +122,17 @@ class JournalRepository {
             path: path, url: url, width: p.width, height: p.height));
         onProgress?.call(i + 1, photos.length);
       }
+      await ref.set(JournalEntry(
+        id: ref.id,
+        authorUid: authorUid,
+        day: day,
+        text: trimmed,
+        photos: uploaded,
+      ).toJson());
     } catch (_) {
       await _deleteFiles(uploaded);
       rethrow;
     }
-    await ref.set(JournalEntry(
-      id: ref.id,
-      authorUid: authorUid,
-      day: day,
-      text: trimmed,
-      photos: uploaded,
-    ).toJson());
     return ref.id;
   }
 
@@ -144,7 +154,9 @@ class JournalRepository {
   /// Deletes the entry's photos, then the entry.
   Future<void> deleteEntry(String groupId, JournalEntry entry) async {
     for (final p in entry.photos) {
-      await _photos.delete(p.path);
+      if (JournalPhoto.isPathForEntry(p.path, groupId, entry.id)) {
+        await _photos.delete(p.path);
+      }
     }
     await _journal(groupId).doc(entry.id).delete();
   }

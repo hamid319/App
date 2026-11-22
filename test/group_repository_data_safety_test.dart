@@ -58,13 +58,17 @@ void main() {
       expect(group['ownerUid'], 'owner');
     });
 
-    test('last member leaving deletes the group', () async {
+    test('last member leaving retires the group ID', () async {
       await seedGroup(members: ['owner']);
 
       await repository.leaveGroup('group-1', 'owner');
 
-      expect(await readGroup(), isNull);
+      expect(await readGroup(), tripTombstone);
     });
   });
-
+  test('owner deletion replaces the group with a tombstone', () async {
+    await seedGroup(members: ['owner', 'user-2']);
+    await repository.deleteGroup('group-1');
+    expect(await readGroup(), tripTombstone);
+  });
 }

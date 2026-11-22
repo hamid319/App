@@ -7,14 +7,14 @@ const { publicFields } = require('./backfill-public-profiles');
 test('copies only the public fields', () => {
   assert.deepStrictEqual(
     publicFields({ displayName: 'Bob', email: 'bob@example.com', paypalHandle: 'bob1', favorites: ['x'] }),
-    { displayName: 'Bob', paypalHandle: 'bob1' },
+    { displayName: 'Bob' },
   );
 });
 
 test('skips values the rules would reject', () => {
   assert.deepStrictEqual(
     publicFields({ displayName: 'x'.repeat(101), photoUrl: 42, paypalHandle: 'ok' }),
-    { paypalHandle: 'ok' },
+    null,
   );
 });
 

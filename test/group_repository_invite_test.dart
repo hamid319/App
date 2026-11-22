@@ -82,4 +82,24 @@ void main() {
     final entry = await firestore.collection('inviteCodes').doc('XYZ789').get();
     expect(entry.data()?['groupId'], 'g2');
   });
+
+  test('a collision reserves a new code and keeps the existing invite',
+      () async {
+    await firestore.collection('inviteCodes').doc('ABC123').set({
+      'groupId': 'existing',
+    });
+    await repository.createGroup(const GroupModel(
+      groupId: 'g2',
+      members: ['owner'],
+      ownerUid: 'owner',
+      invite: GroupInvite(code: 'ABC123'),
+    ));
+    final group =
+        (await firestore.collection('groups').doc('g2').get()).data()!;
+    final code = (group['invite'] as Map)['code'] as String;
+    expect(code, isNot('ABC123'));
+    final invites = firestore.collection('inviteCodes');
+    expect((await invites.doc(code).get()).get('groupId'), 'g2');
+    expect((await invites.doc('ABC123').get()).get('groupId'), 'existing');
+  });
 }

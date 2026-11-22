@@ -94,36 +94,14 @@ void main() {
       expect(invite.containsKey('ownerName'), isFalse);
     });
 
-    test('the owner alone in a trip deletes it with its contents', () async {
+    test('the owner alone retires the trip for server cleanup', () async {
       await seedGroup('solo', members: [me], owner: me, code: 'SOLO11');
       await seedGroup('other', members: ['x'], owner: 'x', code: 'OTHER1');
-      final solo = db.collection('groups').doc('solo');
-      await solo.collection('ideas').doc('i1').set({'addedBy': 'gone'});
-      await solo.collection('polls').doc('p1').set({'createdBy': me});
-      await solo.collection('expenses').doc('e1').set({'createdBy': 'gone'});
-      final session = solo.collection('sessions').doc('s1');
-      await session.set({'status': 'completed'});
-      await session.collection('votes').doc('place-1').set({
-        'likedBy': [me],
-      });
-      await session.collection('userSwipes').doc(me).set({
-        'swipedPlaceIds': ['place-1'],
-      });
 
       await repo.leaveAllTrips(me);
 
-      expect(await groupDoc('solo'), isNull);
-      for (final name in ['ideas', 'polls', 'expenses', 'sessions']) {
-        expect(await count('groups/solo/$name'), 0, reason: name);
-      }
-      expect(await count('groups/solo/sessions/s1/votes'), 0);
-      expect(await count('groups/solo/sessions/s1/userSwipes'), 0);
-      expect((await db.collection('inviteCodes').doc('SOLO11').get()).exists,
-          isFalse);
-      // Trips the user is not in are untouched.
-      expect(await groupDoc('other'), isNotNull);
-      expect((await db.collection('inviteCodes').doc('OTHER1').get()).exists,
-          isTrue);
+      expect(await groupDoc('solo'), {'deleted': true, 'members': []});
+      expect((await groupDoc('other'))?['ownerUid'], 'x');
     });
 
     test('leaving a shared trip deletes only my journal entries and photos',
@@ -140,19 +118,21 @@ void main() {
       expect((await groupDoc('g3'))!['members'], ['owner']);
     });
 
-    test('deleting a solo trip deletes all its journal photos', () async {
-      await seedGroup('solo', members: [me], owner: me);
-      await journal('solo', 'mine', me);
-      await journal('solo', 'leftBehind', 'gone');
+    test('account cleanup ignores paths outside the journal entry', () async {
+      await seedGroup('g', members: ['owner', me], owner: 'owner');
+      await db.doc('groups/g/journal/mine').set({
+        'authorUid': me,
+        'photos': [
+          {'path': 'trips/g/journal/mine/0.jpg'},
+          {'path': 'trips/g/journal/other/0.jpg'},
+          {'path': 'profile_images/unrelated.jpg'},
+        ],
+      });
 
       await repo.leaveAllTrips(me);
 
-      expect(await count('groups/solo/journal'), 0);
-      expect(deletedFiles, unorderedEquals([
-        'trips/solo/journal/mine/0.jpg',
-        'trips/solo/journal/leftBehind/0.jpg',
-      ]));
-      expect(await groupDoc('solo'), isNull);
+      expect(await count('groups/g/journal'), 0);
+      expect(deletedFiles, ['trips/g/journal/mine/0.jpg']);
     });
 
     test('a plain member just leaves', () async {

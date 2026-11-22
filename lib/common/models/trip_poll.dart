@@ -8,10 +8,12 @@ class PollOption {
 
   const PollOption({required this.id, required this.label});
 
-  factory PollOption.fromJson(Map<String, dynamic> json) => PollOption(
-        id: json['id'] as String? ?? '',
-        label: json['label'] as String? ?? '',
-      );
+  factory PollOption.fromJson(Object? json) {
+    if (json is! Map || json['id'] is! String || json['label'] is! String) {
+      throw const FormatException('Invalid poll option');
+    }
+    return PollOption(id: json['id'] as String, label: json['label'] as String);
+  }
 
   Map<String, dynamic> toJson() => {'id': id, 'label': label};
 }
@@ -64,7 +66,7 @@ class TripPoll {
         question: json['question'] as String? ?? '',
         options: [
           for (final o in json['options'] as List? ?? const [])
-            if (o is Map) PollOption.fromJson(Map<String, dynamic>.from(o)),
+            PollOption.fromJson(o),
         ],
         votes: {
           for (final e in (json['votes'] as Map? ?? const {}).entries)

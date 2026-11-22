@@ -16,6 +16,7 @@ import {
   setDoc,
   Timestamp,
   updateDoc,
+  writeBatch,
 } from 'firebase/firestore';
 
 let env;
@@ -40,6 +41,15 @@ const expense = (by, extra = {}) => ({
   createdAt: Timestamp.now(),
   ...extra,
 });
+const newGroupId = 'trip~AbCd1234AbCd1234AbCd';
+function createTrip(database, id, code, members) {
+  const batch = writeBatch(database);
+  batch.set(doc(database, 'groups', id), {
+    groupId: id, ownerUid: members[0], members, invite: { code },
+  });
+  batch.set(doc(database, 'inviteCodes', code), { groupId: id });
+  return batch.commit();
+}
 
 before(async () => {
   env = await initializeTestEnvironment({
@@ -73,7 +83,19 @@ describe('users and public profiles', () => {
     assertFails(getDocs(collection(db('alice'), 'publicProfiles'))));
   test('owner writes own public profile', () =>
     assertSucceeds(setDoc(doc(db('alice'), 'publicProfiles/alice'),
-      { displayName: 'Alice', photoUrl: null, paypalHandle: 'alice1' })));
+      { displayName: 'Alice', photoUrl: null })));
+  test('legacy PayPal handles stay private until removed', async () => {
+    await env.withSecurityRulesDisabled((ctx) =>
+      setDoc(doc(ctx.firestore(), 'publicProfiles/bob'),
+        { displayName: 'Bob', paypalHandle: 'bob1' }));
+    await assertFails(getDoc(doc(db('carol'), 'publicProfiles/bob')));
+    await assertFails(getDoc(doc(db('alice'), 'publicProfiles/bob')));
+    await assertFails(setDoc(doc(db('bob'), 'publicProfiles/bob'),
+      { displayName: 'Bob', paypalHandle: 'bob2' }));
+    await assertSucceeds(setDoc(doc(db('bob'), 'publicProfiles/bob'),
+      { displayName: 'Bob' }));
+    await assertSucceeds(getDoc(doc(db('carol'), 'publicProfiles/bob')));
+  });
   test("nobody writes someone else's public profile", () =>
     assertFails(setDoc(doc(db('alice'), 'publicProfiles/bob'), { displayName: 'X' })));
   test('email cannot go into a public profile', () =>
@@ -87,10 +109,8 @@ describe('groups', () => {
   test('strangers cannot read the trip', () =>
     assertFails(getDoc(doc(db('carol'), 'groups/g1'))));
   test('a new trip may only contain its creator', async () => {
-    await assertSucceeds(setDoc(doc(db('carol'), 'groups/g2'),
-      { ownerUid: 'carol', members: ['carol'], invite: { code: 'X' } }));
-    await assertFails(setDoc(doc(db('carol'), 'groups/g3'),
-      { ownerUid: 'carol', members: ['carol', 'bob'], invite: { code: 'X' } }));
+    await assertFails(createTrip(db('carol'), newGroupId, 'UNIQUE', ['carol', 'bob']));
+    await assertSucceeds(createTrip(db('carol'), newGroupId, 'UNIQUE', ['carol']));
   });
   test('joining works with the invite code', () =>
     assertSucceeds(updateDoc(doc(db('carol'), 'groups/g1'),
@@ -106,12 +126,95 @@ describe('groups', () => {
     assertSucceeds(updateDoc(doc(db('bob'), 'groups/g1'), { members: ['alice'] })));
   test('a member cannot remove someone else', () =>
     assertFails(updateDoc(doc(db('bob'), 'groups/g1'), { members: ['bob'] })));
-  test('only the owner deletes the trip', async () => {
+  test('leaving preserves every other member', () =>
+    assertFails(updateDoc(doc(db('bob'), 'groups/g1'), { members: [] })));
+  test('only the user joining may be added', async () => {
+    await assertFails(updateDoc(doc(db('bob'), 'groups/g1'),
+      { members: ['alice', 'bob', 'carol'], joinCode: 'JOIN42' }));
+    await assertFails(updateDoc(doc(db('bob'), 'groups/g1'),
+      { members: ['alice', 'bob', 'bob'], joinCode: 'JOIN42' }));
+    await assertFails(updateDoc(doc(db('alice'), 'groups/g1'),
+      { members: ['alice', 'bob', 'carol'] }));
+    await assertSucceeds(updateDoc(doc(db('alice'), 'groups/g1'),
+      { members: ['bob'], ownerUid: 'bob' }));
+  });
+  test('only the owner retires a trip and neither ID nor data can be reclaimed', async () => {
+    const retired = { deleted: true, members: [] };
     await assertFails(deleteDoc(doc(db('bob'), 'groups/g1')));
-    await assertSucceeds(deleteDoc(doc(db('alice'), 'groups/g1')));
+    await assertFails(deleteDoc(doc(db('alice'), 'groups/g1')));
+    await assertFails(setDoc(doc(db('bob'), 'groups/g1'), retired));
+    await assertSucceeds(setDoc(doc(db('alice'), 'groups/g1'), retired));
+    await assertFails(getDoc(doc(db('carol'), 'groups/g1/expenses/e1')));
+    await assertFails(getDoc(doc(db('carol'), 'inviteCodes/JOIN42')));
+    await assertFails(createTrip(db('carol'), 'g1', 'JOIN42', ['carol']));
+    await assertSucceeds(createTrip(db('alice'), newGroupId, 'FRESH1', ['alice']));
+    await assertSucceeds(setDoc(doc(db('alice'), 'groups', newGroupId), retired));
+    await assertFails(createTrip(db('carol'), newGroupId, 'FRESH2', ['carol']));
+  });
+  test('legacy orphan IDs stay reserved without a parent document', async () => {
+    const orphan = 'dEaD1234aBcD1234aBcD';
+    await env.withSecurityRulesDisabled((ctx) =>
+      setDoc(doc(ctx.firestore(), 'groups', orphan, 'expenses', 'e'), expense('bob')));
+    await assertFails(createTrip(db('carol'), orphan, 'FRESH1', ['carol']));
+    await assertFails(getDoc(doc(db('carol'), 'groups', orphan, 'expenses', 'e')));
+  });
+  test('an existing invite stays with its trip', async () => {
+    await assertFails(createTrip(db('carol'), newGroupId, 'JOIN42', ['carol']));
+    await assertSucceeds(createTrip(db('carol'), newGroupId, 'FRESH1', ['carol']));
+    await assertFails(setDoc(doc(db('carol'), 'inviteCodes/JOIN42'),
+      { groupId: newGroupId }));
+    await assertSucceeds(updateDoc(doc(db('alice'), 'inviteCodes/JOIN42'),
+      { title: 'Updated title' }));
+  });
+  test('members and owners may only store well-shaped day plans', async () => {
+    for (const uid of ['bob', 'alice']) {
+      const ref = doc(db(uid), 'groups/g1');
+      await assertFails(updateDoc(ref, {
+        tripPlan: { days: [{ placeIds: 'invalid' }], updatedAt: serverTimestamp() },
+      }));
+      await assertSucceeds(updateDoc(ref, {
+        tripPlan: {
+          days: Array.from({ length: 14 }, () => ({ placeIds: ['p1'] })),
+          updatedAt: serverTimestamp(),
+        },
+      }));
+    }
   });
   test('invite codes cannot be listed', () =>
     assertFails(getDocs(collection(db('carol'), 'inviteCodes'))));
+});
+
+describe('journal, polls and private swipe history', () => {
+  test('journal photos must load from their own entry in the app bucket', async () => {
+    const ref = doc(db('bob'), 'groups/g1/journal/j1');
+    const photos = Array.from({ length: 6 }, (_, i) => {
+      const path = `trips/g1/journal/j1/${i}.jpg`;
+      return { path, width: 400, height: 300,
+        url: 'https://firebasestorage.googleapis.com/v0/b/travelapp-31255.firebasestorage.app/o/'
+          + encodeURIComponent(path) + '?alt=media&token=fake' };
+    });
+    const entry = {
+      authorUid: 'bob', day: '2026-11-20', text: '',
+      createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+    };
+    await assertFails(setDoc(ref, { ...entry, photos: [{ ...photos[0], url: 'https://example.test/p.jpg' }] }));
+    await assertFails(setDoc(ref, { ...entry, photos: [{ ...photos[0], path: 'trips/g1/journal/j2/0.jpg' }] }));
+    await assertSucceeds(setDoc(ref, { ...entry, photos }));
+  });
+  test('poll options require string IDs and labels', async () => {
+    const ref = doc(db('bob'), 'groups/g1/polls/p1');
+    const poll = { question: 'Where?', createdBy: 'bob', votes: {}, closed: false,
+      createdAt: serverTimestamp() };
+    await assertFails(setDoc(ref, { ...poll, options: [{ id: 'a', label: 42 }, { id: 'b', label: 'Park' }] }));
+    await assertSucceeds(setDoc(ref, { ...poll, options: [{ id: 'a', label: 'Market' }, { id: 'b', label: 'Park' }] }));
+  });
+  test('solo swipe history stays with its original author', async () => {
+    const path = 'swipeResults/bob_p1';
+    await assertSucceeds(setDoc(doc(db('bob'), path), { userId: 'bob', liked: true }));
+    await assertFails(updateDoc(doc(db('carol'), path), { userId: 'carol' }));
+    await assertFails(getDoc(doc(db('carol'), path)));
+    await assertSucceeds(updateDoc(doc(db('bob'), path), { liked: false }));
+  });
 });
 
 describe('swipes', () => {

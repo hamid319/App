@@ -13,7 +13,6 @@ import '../../../common/models/trip_expense.dart';
 import '../../../common/models/trip_idea.dart';
 import '../../../common/models/trip_plan.dart';
 import '../../../common/models/trip_poll.dart';
-import '../../../common/models/user_model.dart';
 import '../../../common/utils/day_route.dart';
 import '../../../common/utils/expense_split.dart';
 import '../../../common/utils/group_swipes.dart';
@@ -176,10 +175,20 @@ String tripCityKey(GroupModel group) => group.location == null
     ? ''
     : PlacesRepository.curatedCityId(group.location!);
 
-/// A member's public profile, for their PayPal handle.
-final memberProfileProvider =
-    FutureProvider.autoDispose.family<UserModel, String>((ref, uid) {
-  return ref.watch(profileRepositoryProvider).getPublicProfile(uid);
+/// PayPal handle shared with current members of this trip.
+final tripPaymentHandleProvider = FutureProvider.autoDispose
+    .family<String?, ({String groupId, String uid})>((ref, key) async {
+  final me = ref.watch(authControllerProvider).value;
+  final members = ref.watch(tripProvider(key.groupId)).value?.members;
+  if (me == null ||
+      members == null ||
+      !members.contains(me.uid) ||
+      !members.contains(key.uid)) {
+    return null;
+  }
+  return ref
+      .watch(profileRepositoryProvider)
+      .getTripPaymentHandle(key.groupId, key.uid);
 });
 
 /// Number of open polls of a trip, for the trips list.

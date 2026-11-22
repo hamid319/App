@@ -109,9 +109,19 @@ Session votes live under `/groups/{groupId}/sessions/{sessionId}/votes/{placeId}
 
 Matches are calculated from completed session votes. The MVP outcome is threshold-qualified places sorted by like count.
 
+## Trip Access And Cleanup
+
+- Trip creation reserves a new ID and its invite code in one Firestore transaction. A collision generates another code.
+- An invite lets a user add only their own UID. A member can remove only their own UID. The owner may remove members or transfer ownership to a member who stays.
+- Deleting a trip replaces it with a tombstone that removes access and reserves the ID. The `cleanupDeletedTrip` Cloud Function deletes descendant documents and journal files, then retires the invite. New trips use a separate ID format so the app's original IDs cannot be created again.
+- The journal loads media only from the entry's own files in the app's Storage bucket. The trips, polls, expenses and journal streams isolate malformed legacy documents.
+- Roll out the cleanup and payment Cloud Functions before the Firestore rules. Coordinate the app update because older builds cannot create or delete trips under the new rules. After the rules are live, run the public-profile backfill to remove old PayPal fields and restore public name and photo reads for those profiles.
+
 ## Profile And Images
 
 Profile data uses Firestore user documents. Profile images use Firebase Storage through the profile image service. Keep profile updates consistent with current auth UID, and preserve favorites arrays unless a change intentionally modifies favorites.
+
+PayPal handles live in private user documents. The `getTripPaymentHandle` Cloud Function returns a handle only when the caller and the recipient are current members of the requested trip.
 
 Risk: profile updates often combine UI optimistic state, Firestore persistence, and Storage URLs. Preserve previous state on failure where controller logic already does so.
 

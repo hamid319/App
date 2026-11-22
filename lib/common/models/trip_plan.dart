@@ -61,16 +61,24 @@ class TripPlan {
   }
 
   // Firestore has no nested arrays, so each day is a map.
-  factory TripPlan.fromJson(Map<String, dynamic> json) => TripPlan(
-        days: [
-          for (final day in json['days'] as List? ?? const [])
-            if (day is Map)
-              [for (final id in day['placeIds'] as List? ?? const []) '$id'],
-        ],
-        updatedAt: json['updatedAt'] is Timestamp
-            ? (json['updatedAt'] as Timestamp).toDate()
-            : null,
-      );
+  factory TripPlan.fromJson(Map<String, dynamic> json) {
+    final rawDays = json['days'];
+    final updatedAt = json['updatedAt'];
+    return TripPlan(
+      days: [
+        if (rawDays is List)
+          for (final day in rawDays.take(14))
+            if (day case {'placeIds': final List ids})
+              ids
+                  .whereType<String>()
+                  .where((id) => id.isNotEmpty && !id.contains('/'))
+                  .toList()
+            else
+              <String>[],
+      ],
+      updatedAt: updatedAt is Timestamp ? updatedAt.toDate() : null,
+    );
+  }
 
   /// Without [updatedAt] the server time is written.
   Map<String, dynamic> toJson() => {

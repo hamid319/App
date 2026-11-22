@@ -17,12 +17,39 @@ class JournalPhoto {
     required this.height,
   });
 
-  factory JournalPhoto.fromJson(Map<String, dynamic> json) => JournalPhoto(
-        path: json['path'] as String? ?? '',
-        url: json['url'] as String? ?? '',
-        width: (json['width'] as num?)?.toInt() ?? 0,
-        height: (json['height'] as num?)?.toInt() ?? 0,
-      );
+  static bool isPathForEntry(Object? path, String groupId, String entryId) {
+    if (path is! String) return false;
+    final prefix = 'trips/$groupId/journal/$entryId/';
+    return path.startsWith(prefix) &&
+        RegExp(r'^[0-5]\.jpg$').hasMatch(path.substring(prefix.length));
+  }
+
+  /// Only load media from this entry's own object in our Storage bucket.
+  static JournalPhoto? fromStorage(
+      Object? json, String groupId, String entryId, String bucket) {
+    if (json is! Map) return null;
+    final path = json['path'];
+    final url = json['url'];
+    final width = json['width'];
+    final height = json['height'];
+    if (path is! String ||
+        !isPathForEntry(path, groupId, entryId) ||
+        url is! String ||
+        width is! int ||
+        width <= 0 ||
+        height is! int ||
+        height <= 0) {
+      return null;
+    }
+    final expected = 'https://firebasestorage.googleapis.com/v0/b/$bucket/o/'
+        '${Uri.encodeComponent(path)}?alt=media&token=';
+    if (!url.startsWith(expected) ||
+        !RegExp(r'^[a-zA-Z0-9_-]{1,128}$')
+            .hasMatch(url.substring(expected.length))) {
+      return null;
+    }
+    return JournalPhoto(path: path, url: url, width: width, height: height);
+  }
 
   Map<String, dynamic> toJson() =>
       {'path': path, 'url': url, 'width': width, 'height': height};
@@ -51,15 +78,19 @@ class JournalEntry {
     this.createdAt,
   });
 
-  factory JournalEntry.fromJson(String id, Map<String, dynamic> json) =>
+  factory JournalEntry.fromJson(String id, Map<String, dynamic> json,
+          {required String groupId, required String storageBucket}) =>
       JournalEntry(
         id: id,
         authorUid: json['authorUid'] as String? ?? '',
         day: json['day'] as String? ?? '',
         text: json['text'] as String? ?? '',
         photos: [
-          for (final p in json['photos'] as List? ?? const [])
-            if (p is Map) JournalPhoto.fromJson(Map<String, dynamic>.from(p)),
+          if (json['photos'] case final List photos)
+            for (final p in photos.take(maxPhotos))
+              if (JournalPhoto.fromStorage(p, groupId, id, storageBucket)
+                  case final photo?)
+                photo,
         ],
         createdAt: json['createdAt'] is Timestamp
             ? (json['createdAt'] as Timestamp).toDate()

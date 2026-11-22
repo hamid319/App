@@ -17,6 +17,43 @@ void main() {
     });
   });
 
+  test('a bad legacy day plan does not hide the trip or other trips', () async {
+    await db.doc('groups/bad-plan').set({
+      'groupId': 'bad-plan',
+      'members': ['a'],
+      'tripPlan': {
+        'days': [
+          {'placeIds': 'broken'},
+          {'placeIds': ['p1', 17, 'invalid/path']},
+        ],
+      },
+    });
+    final trips = await repo.streamUserTrips('a').first;
+    expect(trips.map((g) => g.groupId), unorderedEquals(['g', 'bad-plan']));
+    expect(trips.singleWhere((g) => g.groupId == 'bad-plan').tripPlan!.days,
+        [<String>[], ['p1']]);
+  });
+
+  test('malformed legacy receipt items and options cannot hide valid records',
+      () async {
+    const expense = TripExpense(
+        id: '', title: 'Meal', amountCents: 100, paidBy: 'a',
+        participants: ['a'], createdBy: 'a');
+    final expenseId = await repo.addExpense('g', expense);
+    await db.doc('groups/g/expenses/malformed').set({
+      ...expense.toJson(),
+      'items': [{'id': 'i0', 'name': 42, 'amountCents': 100}],
+    });
+    final pollId = await repo.createPoll('g',
+        question: 'Where?', options: ['Market', 'Park'], uid: 'a');
+    await db.doc('groups/g/polls/malformed').set({
+      'question': 'Bad option',
+      'options': [{'id': 'o0', 'label': 17}],
+    });
+    expect((await repo.streamExpenses('g').first).single.id, expenseId);
+    expect((await repo.streamPolls('g').first).single.id, pollId);
+  });
+
   test('ideas: the author likes their idea, likes toggle per uid', () async {
     final id = await repo.addIdea('g', title: '  Oceanário ', uid: 'a', placeId: 'p1');
     var ideas = await repo.streamIdeas('g').first;

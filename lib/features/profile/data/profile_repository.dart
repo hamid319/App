@@ -1,5 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:http/http.dart' as http;
 import '../../../core/services/firestore_service.dart';
 import '../../../common/models/user_model.dart';
 
@@ -29,9 +34,9 @@ class ProfileRepository {
   /// Fields other trip members may see. They live in
   /// `publicProfiles/{uid}`; `users/{uid}` (email, favorites, push token)
   /// is readable only by its owner.
-  static const publicFields = {'displayName', 'photoUrl', 'paypalHandle'};
+  static const publicFields = {'displayName', 'photoUrl'};
 
-  /// Name, photo and PayPal handle of another user, for trip screens. The
+  /// Name and photo of another user, for trip screens. The
   /// other fields of the returned model are empty.
   Future<UserModel> getPublicProfile(String uid) async {
     try {
@@ -42,7 +47,6 @@ class ProfileRepository {
         email: '',
         displayName: data['displayName'] as String?,
         photoUrl: data['photoUrl'] as String?,
-        paypalHandle: data['paypalHandle'] as String?,
       );
     } catch (e) {
       debugPrint('Reading public profile $uid failed: $e');
@@ -55,7 +59,6 @@ class ProfileRepository {
   Future<void> syncPublicProfile(UserModel user) => _mirrorPublic(user.uid, {
         'displayName': user.displayName,
         'photoUrl': user.photoUrl,
-        'paypalHandle': user.paypalHandle,
       });
 
   /// Copies the public fields in [data], if any, to `publicProfiles/{uid}`.
@@ -65,8 +68,39 @@ class ProfileRepository {
         if (publicFields.contains(e.key)) e.key: e.value,
     };
     if (public.isEmpty) return;
-    await _firestoreService.setDocument('publicProfiles', uid, public,
-        merge: true);
+    await _firestoreService.setDocument('publicProfiles', uid, {
+      ...public,
+      'paypalHandle': FieldValue.delete(),
+    }, merge: true);
+  }
+
+  /// Reads a payment handle through the server's trip membership check.
+  Future<String?> getTripPaymentHandle(String groupId, String uid) async {
+    final user = FirebaseAuth.instance.currentUser;
+    final token = await user?.getIdToken();
+    if (token == null) return null;
+    final projectId = Firebase.app().options.projectId;
+    final uri = Uri.https('europe-west3-$projectId.cloudfunctions.net',
+        '/getTripPaymentHandle');
+    final request = http.Request('POST', uri)
+      ..followRedirects = false
+      ..headers['Authorization'] = 'Bearer $token'
+      ..headers['Content-Type'] = 'application/json'
+      ..body = jsonEncode({'data': {'groupId': groupId, 'uid': uid}});
+    final client = http.Client();
+    try {
+      final response = await client.send(request)
+          .then(http.Response.fromStream)
+          .timeout(const Duration(seconds: 10));
+      if (response.statusCode != 200) return null;
+      final payload = jsonDecode(response.body);
+      return switch (payload) {
+        {'result': final String handle} => handle,
+        _ => null,
+      };
+    } finally {
+      client.close();
+    }
   }
 
   /// Creates the profile only if it is missing, so a returning guest keeps

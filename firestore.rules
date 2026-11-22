@@ -63,10 +63,21 @@ service cloud.firestore {
              && data.keys().hasAll(['question', 'options', 'votes', 'createdBy', 'createdAt', 'closed'])
              && data.question is string && data.question.size() > 0 && data.question.size() <= 140
              && data.options is list && data.options.size() >= 2 && data.options.size() <= 6
+             && validPollOption(data.options, 0) && validPollOption(data.options, 1)
+             && validPollOption(data.options, 2) && validPollOption(data.options, 3)
+             && validPollOption(data.options, 4) && validPollOption(data.options, 5)
              && data.votes is map
              && data.createdBy is string
              && data.closed is bool
              && data.createdAt == request.time;
+    }
+
+    function validPollOption(options, i) {
+      return options.size() <= i || (
+        options[i] is map && options[i].keys().hasOnly(['id', 'label'])
+        && options[i].id is string && options[i].id.size() > 0
+        && options[i].label is string && options[i].label.size() > 0
+      );
     }
 
     function isValidExpense(data, group) {
@@ -87,15 +98,65 @@ service cloud.firestore {
     }
 
     // Journal entry: text and/or up to 6 photos ({path, url, width, height}).
-    function isValidJournalEntry(data) {
+    function isValidJournalEntry(data, groupId, entryId) {
+      let folder = 'trips/' + groupId + '/journal/' + entryId + '/';
       return data.keys().hasOnly(['authorUid', 'day', 'text', 'photos', 'createdAt', 'updatedAt'])
              && data.keys().hasAll(['authorUid', 'day', 'text', 'photos', 'createdAt', 'updatedAt'])
              && data.authorUid is string
              && data.day is string && data.day.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
              && data.text is string && data.text.size() <= 500
              && data.photos is list && data.photos.size() <= 6
+             && validJournalPhotoAt(data.photos, 0, folder + '0.jpg')
+             && validJournalPhotoAt(data.photos, 1, folder + '1.jpg')
+             && validJournalPhotoAt(data.photos, 2, folder + '2.jpg')
+             && validJournalPhotoAt(data.photos, 3, folder + '3.jpg')
+             && validJournalPhotoAt(data.photos, 4, folder + '4.jpg')
+             && validJournalPhotoAt(data.photos, 5, folder + '5.jpg')
              && (data.text.size() > 0 || data.photos.size() > 0)
              && data.updatedAt == request.time;
+    }
+
+    function validJournalPhotoAt(photos, i, path) {
+      return photos.size() <= i || validJournalPhoto(photos[i], path);
+    }
+
+    function validJournalPhoto(photo, path) {
+      return photo is map && photo.keys().hasOnly(['path', 'url', 'width', 'height'])
+        && photo.width is int && photo.width > 0
+        && photo.height is int && photo.height > 0
+        && photo.path == path && validJournalPhotoUrl(photo.url, path);
+    }
+
+    function validJournalPhotoUrl(url, path) {
+      let parts = url.split('[?]');
+      return parts.size() == 2
+        && parts[0] == 'https://firebasestorage.googleapis.com/v0/b/travelapp-31255.firebasestorage.app/o/'
+          + path.replace('/', '%2F')
+        && parts[1].matches('alt=media&token=[a-zA-Z0-9_-]{1,128}');
+    }
+
+    function validPlanDay(days, i) {
+      return days.size() <= i || (
+        days[i] is map && days[i].keys().hasOnly(['placeIds'])
+        && days[i].placeIds is list
+      );
+    }
+
+    function validTripPlan(plan) {
+      return plan is map && plan.keys().hasOnly(['days', 'updatedAt'])
+        && plan.updatedAt is timestamp && plan.days is list && plan.days.size() <= 14
+        && validPlanDay(plan.days, 0) && validPlanDay(plan.days, 1)
+        && validPlanDay(plan.days, 2) && validPlanDay(plan.days, 3)
+        && validPlanDay(plan.days, 4) && validPlanDay(plan.days, 5)
+        && validPlanDay(plan.days, 6) && validPlanDay(plan.days, 7)
+        && validPlanDay(plan.days, 8) && validPlanDay(plan.days, 9)
+        && validPlanDay(plan.days, 10) && validPlanDay(plan.days, 11)
+        && validPlanDay(plan.days, 12) && validPlanDay(plan.days, 13);
+    }
+
+    function validTripTombstone(data) {
+      return data.keys().hasOnly(['deleted', 'members'])
+        && data.deleted == true && data.members == [];
     }
 
     function groupData(groupId) {
@@ -109,16 +170,19 @@ service cloud.firestore {
       return isOwner(group) && group.members.size() == 1;
     }
 
-    // What trip members see of each other: name, photo, PayPal handle.
-    // Get only (no listing); only the owner writes, with these fields only.
+    // Public name and photo. Legacy documents containing a PayPal handle
+    // are readable only by their owner until the field is removed.
     match /publicProfiles/{userId} {
-      allow get: if isAuthenticated();
+      allow get: if isAuthenticated() && (
+        request.auth.uid == userId || resource == null
+        || resource.data.get('paypalHandle', null) == null
+      );
       allow create, update: if isAuthenticated()
                             && request.auth.uid == userId
                             && request.resource.data.keys().hasOnly(['displayName', 'photoUrl', 'paypalHandle'])
                             && optionalString(request.resource.data, 'displayName', 100)
                             && optionalString(request.resource.data, 'photoUrl', 2048)
-                            && optionalString(request.resource.data, 'paypalHandle', 64);
+                            && request.resource.data.get('paypalHandle', null) == null;
       allow delete: if isAuthenticated() && request.auth.uid == userId;
     }
 
@@ -258,28 +322,64 @@ service cloud.firestore {
     match /swipeResults/{resultId} {
       allow read, delete: if isAuthenticated()
                           && request.auth.uid == resource.data.userId;
-      allow create, update: if isAuthenticated()
-                            && request.auth.uid == request.resource.data.userId;
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
+      allow update: if isAuthenticated()
+                    && request.auth.uid == resource.data.userId
+                    && request.resource.data.userId == resource.data.userId;
     }
 
     // Invite code -> group, plus the trip name, city and owner's first name
     // for the web invite preview. Anyone signed in may look up a code they
     // know (get), nobody may list codes. Only the group's owner writes the entry,
     // and only for the group's current code.
-    match /inviteCodes/{code} {
-      allow get: if isAuthenticated();
-      allow list: if false;
-      allow create, update: if isAuthenticated()
-        && request.resource.data.keys().hasOnly(['groupId', 'createdAt', 'title', 'cityName', 'ownerName'])
-        && request.resource.data.groupId is string
+    function validInviteEntry(code, data) {
+      let group = getAfter(/databases/$(database)/documents/groups/$(data.groupId)).data;
+      return data.keys().hasOnly(['groupId', 'createdAt', 'title', 'cityName', 'ownerName'])
+        && data.groupId is string
         // Shown on the web invite before joining; short plain strings only.
-        && (!('title' in request.resource.data) || (request.resource.data.title is string && request.resource.data.title.size() <= 80))
-        && (!('cityName' in request.resource.data) || (request.resource.data.cityName is string && request.resource.data.cityName.size() <= 80))
-        && (!('ownerName' in request.resource.data) || (request.resource.data.ownerName is string && request.resource.data.ownerName.size() <= 60))
-        && get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.ownerUid == request.auth.uid
-        && get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.invite.code == code;
-      allow delete: if isAuthenticated()
-        && get(/databases/$(database)/documents/groups/$(resource.data.groupId)).data.ownerUid == request.auth.uid;
+        && optionalString(data, 'title', 80)
+        && optionalString(data, 'cityName', 80)
+        && optionalString(data, 'ownerName', 60)
+        && isOwner(group) && group.invite.code == code;
+    }
+
+    match /inviteCodes/{code} {
+      allow get: if isAuthenticated() && (
+        resource == null || resource.data.get('retired', false)
+        || groupData(resource.data.groupId).invite.code == code
+      );
+      allow create: if isAuthenticated() && validInviteEntry(code, request.resource.data);
+      allow update: if isAuthenticated()
+        && request.resource.data.groupId == resource.data.groupId
+        && validInviteEntry(code, request.resource.data);
+      allow list, delete: if false;
+    }
+
+    function newTripId(groupId) {
+      // Legacy IDs were 20 alphanumeric characters. Retire that namespace
+      // because a hard-deleted legacy trip can still have child documents.
+      return groupId.matches('trip~[A-Za-z0-9]{20}');
+    }
+
+    function hasNewInvite(code, groupId) {
+      let path = /databases/$(database)/documents/inviteCodes/$(code);
+      return code is string && code.matches('[A-Z0-9]{6}')
+        && !exists(path) && getAfter(path).data.groupId == groupId;
+    }
+
+    function inviteMatchesTrip(code, groupId) {
+      let path = /databases/$(database)/documents/inviteCodes/$(code);
+      // Older direct links may predate the lookup entry.
+      return !exists(path) || get(path).data.get('groupId', '') == groupId;
+    }
+
+    function preservesTripAccess(before, after) {
+      let changed = after.diff(before).affectedKeys();
+      return !changed.hasAny(['deleted', 'groupId', 'invite', 'joinCode'])
+        && (!changed.hasAny(['tripPlan']) || !('tripPlan' in after) || validTripPlan(after.tripPlan))
+        && after.members is list && before.members.hasAll(after.members)
+        && after.members.size() == after.members.toSet().size()
+        && after.ownerUid in after.members;
     }
 
     match /groups/{groupId} {
@@ -289,40 +389,47 @@ service cloud.firestore {
 
       // A creator may only create a group containing themselves.
       allow create: if isAuthenticated()
+                    && newTripId(groupId)
+                    && request.resource.data.groupId == groupId
                     && request.auth.uid == request.resource.data.ownerUid
-                    && request.resource.data.members.size() == 1
-                    && request.auth.uid in request.resource.data.members;
+                    && request.resource.data.members == [request.auth.uid]
+                    && !('deleted' in request.resource.data)
+                    && (!('tripPlan' in request.resource.data)
+                        || validTripPlan(request.resource.data.tripPlan))
+                    && hasNewInvite(request.resource.data.invite.code, groupId);
 
       allow update: if isAuthenticated() && (
-        // Owner can update anything (name, dates, location, invite, ...)
-        isOwner(resource.data) ||
+        (isOwner(resource.data)
+          && (validTripTombstone(request.resource.data)
+              || preservesTripAccess(resource.data, request.resource.data))) ||
         // Joining: only the caller may be appended, and only themselves,
         // only with the group's invite code (sent as joinCode). Any time:
         // the swipe deck stays open, so there is no round to wait for.
         (
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'joinCode']) &&
+          !isMember(resource.data) &&
           request.resource.data.get('joinCode', '') == resource.data.invite.code &&
-          request.resource.data.members.hasAll(resource.data.members) &&
-          request.resource.data.members.size() == resource.data.members.size() + 1 &&
-          request.auth.uid in request.resource.data.members
+          request.resource.data.joinCode.matches('[A-Z0-9]{6}') &&
+          inviteMatchesTrip(request.resource.data.joinCode, groupId) &&
+          request.resource.data.members == resource.data.members.concat([request.auth.uid])
         ) ||
         // Any member may (re)build the trip's day plan from the wishlist.
         (
           isMember(resource.data) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['tripPlan']) &&
-          request.resource.data.tripPlan.days is list &&
-          request.resource.data.tripPlan.days.size() <= 14
+          validTripPlan(request.resource.data.tripPlan)
         ) ||
         // Leaving: the caller may only remove themselves.
         (
           isMember(resource.data) &&
+          !isOwner(resource.data) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members']) &&
-          !request.resource.data.members.hasAny([request.auth.uid]) &&
-          resource.data.members.hasAll(request.resource.data.members)
+          request.resource.data.members == resource.data.members.removeAll([request.auth.uid])
         )
       );
 
-      allow delete: if isOwner(resource.data);
+      // Server cleanup removes the contents and leaves this ID reserved.
+      allow delete: if false;
 
       // --- Trip planning (ideas, polls, expenses) ---
 
@@ -405,13 +512,18 @@ service cloud.firestore {
       match /journal/{entryId} {
         allow read: if isMember(groupData(groupId));
         allow create: if isMember(groupData(groupId))
-                      && isValidJournalEntry(request.resource.data)
+                      && isValidJournalEntry(request.resource.data, groupId, entryId)
                       && request.resource.data.authorUid == request.auth.uid
                       && request.resource.data.createdAt == request.time;
         allow update: if isMember(groupData(groupId))
                       && resource.data.authorUid == request.auth.uid
                       && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'photos', 'updatedAt'])
-                      && isValidJournalEntry(request.resource.data);
+                      && (request.resource.data.diff(resource.data).affectedKeys().hasAny(['photos'])
+                          ? isValidJournalEntry(request.resource.data, groupId, entryId)
+                          : request.resource.data.text is string
+                            && request.resource.data.text.size() <= 500
+                            && (request.resource.data.text.size() > 0 || resource.data.photos.size() > 0)
+                            && request.resource.data.updatedAt == request.time);
         allow delete: if isMember(groupData(groupId))
                       && (resource.data.authorUid == request.auth.uid
                           || isOwner(groupData(groupId)));

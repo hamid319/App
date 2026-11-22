@@ -2,6 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../common/models/journal_entry.dart';
+import '../../group/data/group_repository.dart' show tripTombstone;
+
 /// Removes everything a user stored, before their Firebase Auth user is
 /// deleted (the security rules need the signed-in user for every step).
 ///
@@ -48,15 +51,17 @@ class AccountDeletionRepository {
         .where('members', arrayContains: uid)
         .get();
     for (final doc in groups.docs) {
-      final members = List<String>.from(doc.data()['members'] as List? ?? []);
-      final others = members.where((m) => m != uid).toList();
-      if (others.isEmpty && doc.data()['ownerUid'] == uid) {
-        await _deleteTrip(doc.reference, doc.data());
-      } else {
-        // Also covers a lone member who is not the owner (the rules let
-        // only the owner delete a trip), which just leaves it.
-        await _leaveTrip(doc.reference, doc.data(), uid);
-      }
+      final deleted = await _db.runTransaction((transaction) async {
+        final current = (await transaction.get(doc.reference)).data();
+        if (current == null || current['ownerUid'] != uid) return false;
+        final members = current['members'];
+        if (members is! List || members.length != 1 || members.single != uid) {
+          return false;
+        }
+        transaction.set(doc.reference, tripTombstone);
+        return true;
+      });
+      if (!deleted) await _leaveTrip(doc.reference, doc.data(), uid);
     }
   }
 
@@ -94,35 +99,6 @@ class AccountDeletionRepository {
     });
   }
 
-  /// Deletes a trip whose only member is the user. Children go first: their
-  /// rules read the group document to check membership.
-  Future<void> _deleteTrip(
-    DocumentReference<Map<String, dynamic>> groupRef,
-    Map<String, dynamic> group,
-  ) async {
-    await _deleteJournal(groupRef);
-    for (final name in const [
-      'ideas',
-      'polls',
-      'expenses',
-      'claims',
-      'swipes',
-      'packingProgress',
-      'packingShared',
-    ]) {
-      await _deleteDocs(await groupRef.collection(name).get());
-    }
-    // Swipe rounds of earlier versions.
-    final sessions = await groupRef.collection('sessions').get();
-    for (final session in sessions.docs) {
-      await _deleteDocs(await session.reference.collection('votes').get());
-      await _deleteDocs(await session.reference.collection('userSwipes').get());
-    }
-    await _deleteDocs(sessions);
-    await _withInviteEntry(groupRef.id, group, (ref) => ref.delete());
-    await groupRef.delete();
-  }
-
   /// Journal entries of a trip (only [authorUid]'s when given) with their
   /// photos in Storage. The paths come from the entries, so no Storage
   /// listing (and no list rule) is needed.
@@ -136,9 +112,13 @@ class AccountDeletionRepository {
     }
     final entries = await query.get();
     for (final doc in entries.docs) {
-      for (final photo in doc.data()['photos'] as List? ?? const []) {
+      final photos = doc.data()['photos'];
+      if (photos is! List) continue;
+      for (final photo in photos) {
         final path = photo is Map ? photo['path'] : null;
-        if (path is String && path.isNotEmpty) await _deleteFile(path);
+        if (JournalPhoto.isPathForEntry(path, groupRef.id, doc.id)) {
+          await _deleteFile(path as String);
+        }
       }
     }
     await _deleteDocs(entries);

@@ -3,7 +3,9 @@
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const { getMessaging } = require('firebase-admin/messaging');
+const { getStorage } = require('firebase-admin/storage');
 const { setGlobalOptions } = require('firebase-functions/v2');
+const { HttpsError, onCall } = require('firebase-functions/v2/https');
 const {
   onDocumentCreated,
   onDocumentUpdated,
@@ -11,6 +13,7 @@ const {
 } = require('firebase-functions/v2/firestore');
 
 const push = require('./push');
+const { lookupPaymentHandle, cleanDeletedTrip } = require('./trip-security');
 
 initializeApp();
 // Caps a runaway trigger loop's bill; pushes need no more.
@@ -24,6 +27,25 @@ const db = () => getFirestore();
 // database's region (europe-west3). The sender is never notified.
 
 const TRIGGER_REGION = 'europe-west3';
+
+exports.getTripPaymentHandle = onCall({ region: TRIGGER_REGION }, async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Sign-in required.');
+  const { groupId, uid } = request.data ?? {};
+  const validId = (id) => typeof id === 'string' && /^[A-Za-z0-9_~-]{1,128}$/.test(id);
+  if (!validId(groupId) || !validId(uid)) {
+    throw new HttpsError('invalid-argument', 'A trip and member are required.');
+  }
+  return lookupPaymentHandle(db(), groupId, request.auth.uid, uid);
+});
+
+exports.cleanupDeletedTrip = onDocumentUpdated(
+  { document: 'groups/{groupId}', region: TRIGGER_REGION, retry: true },
+  async (event) => {
+    if (event.data.before.get('deleted') === true ||
+        event.data.after.get('deleted') !== true) return;
+    await cleanDeletedTrip(db(), getStorage().bucket(), event.data.after.ref);
+  }
+);
 
 async function tripMembers(groupId) {
   const doc = await db().collection('groups').doc(groupId).get();

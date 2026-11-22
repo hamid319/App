@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../common/models/group_model.dart';
@@ -70,13 +69,6 @@ class GroupController extends AsyncNotifier<GroupModel?> {
     return group.ownerUid == currentUser.uid;
   }
 
-  String _generateInviteCode() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final rnd = math.Random();
-    return String.fromCharCodes(Iterable.generate(
-        6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
-  }
-
   Future<void> createGroupWithSettings({
     required String groupName,
     required GroupLocation location,
@@ -88,15 +80,14 @@ class GroupController extends AsyncNotifier<GroupModel?> {
 
     state = const AsyncLoading();
     try {
-      final groupId = FirebaseFirestore.instance.collection('groups').doc().id;
+      final suffix = FirebaseFirestore.instance.collection('groups').doc().id;
+      final groupId = 'trip~$suffix';
       final group = GroupModel(
         groupId: groupId,
         groupName: groupName,
         members: [currentUser.uid],
         ownerUid: currentUser.uid,
         location: location,
-        invite:
-            GroupInvite(code: _generateInviteCode(), createdAt: DateTime.now()),
         createdAt: DateTime.now(),
         tripStart: tripStart,
         tripEnd: tripEnd,

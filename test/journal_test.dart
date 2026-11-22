@@ -21,7 +21,9 @@ class _FakeStore implements JournalPhotoStore {
       {required String authorUid}) async {
     if (uploads++ == failAt) throw Exception('network');
     files.add(path);
-    return 'https://example.test/$path';
+    return 'https://firebasestorage.googleapis.com/v0/b/'
+        'travelapp-31255.firebasestorage.app/o/${Uri.encodeComponent(path)}'
+        '?alt=media&token=fake';
   }
 
   @override
@@ -96,6 +98,26 @@ void main() {
           () =>
               repo.addEntry('g', authorUid: 'a', day: '2026-10-30', text: ' '),
           throwsArgumentError);
+    });
+
+    test('legacy external photos are never emitted to the UI', () async {
+      await db.doc('groups/g/journal/e').set({
+        'authorUid': 'a',
+        'day': '2026-10-30',
+        'text': 'a',
+        'photos': [
+          {
+            'path': 'trips/g/journal/e/0.jpg',
+            'url': 'https://example.test/p.jpg',
+            'width': 10,
+            'height': 10
+          },
+          {'path': 42},
+        ],
+      });
+      final entry = (await repo.streamEntries('g').first).single;
+      expect(entry.text, 'a');
+      expect(entry.photos, isEmpty);
     });
 
     test('edit text, delete removes the photos and the entry', () async {

@@ -23,13 +23,29 @@ class ReceiptItem {
     this.forAll = false,
   });
 
-  factory ReceiptItem.fromJson(Map<String, dynamic> json) => ReceiptItem(
-        id: '${json['id'] ?? ''}',
-        name: json['name'] as String? ?? '',
-        original: json['original'] as String?,
-        amountCents: (json['amountCents'] as num?)?.toInt() ?? 0,
-        forAll: json['forAll'] as bool? ?? false,
-      );
+  factory ReceiptItem.fromJson(Object? json) {
+    if (json is! Map) throw const FormatException('Invalid receipt item');
+    final id = json['id'];
+    final name = json['name'];
+    final original = json['original'];
+    final amount = json['amountCents'];
+    final forAll = json['forAll'];
+    if (id is! String ||
+        name is! String ||
+        amount is! num ||
+        !amount.isFinite ||
+        (original != null && original is! String) ||
+        (forAll != null && forAll is! bool)) {
+      throw const FormatException('Invalid receipt item');
+    }
+    return ReceiptItem(
+      id: id,
+      name: name,
+      original: original as String?,
+      amountCents: amount.toInt(),
+      forAll: forAll as bool? ?? false,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -105,8 +121,7 @@ class TripExpense {
             : null,
         items: [
           for (final item in json['items'] as List? ?? const [])
-            if (item is Map)
-              ReceiptItem.fromJson(Map<String, dynamic>.from(item)),
+            ReceiptItem.fromJson(item),
         ],
         tipCents: (json['tipCents'] as num?)?.toInt() ?? 0,
       );

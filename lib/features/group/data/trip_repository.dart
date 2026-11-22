@@ -8,6 +8,7 @@ import '../../../common/models/trip_expense.dart';
 import '../../../common/models/trip_idea.dart';
 import '../../../common/models/trip_plan.dart';
 import '../../../common/models/trip_poll.dart';
+import '../../../common/utils/decode_firestore_documents.dart';
 import '../../../common/utils/expense_split.dart';
 import '../../../common/utils/group_swipes.dart';
 
@@ -42,8 +43,8 @@ class TripRepository {
       .collection('groups')
       .where('members', arrayContains: uid)
       .snapshots()
-      .map((snap) =>
-          snap.docs.map((doc) => GroupModel.fromJson(doc.data())).toList());
+      .map((snap) => decodeFirestoreDocuments(
+          snap.docs, (doc) => GroupModel.fromJson(doc.data())));
 
   // --- Passport check-ins ---
 
@@ -218,8 +219,8 @@ class TripRepository {
   /// Open polls first, newest first within each.
   Stream<List<TripPoll>> streamPolls(String groupId) =>
       _polls(groupId).snapshots().map((snap) {
-        final polls =
-            snap.docs.map((d) => TripPoll.fromJson(d.id, d.data())).toList();
+        final polls = decodeFirestoreDocuments(
+            snap.docs, (d) => TripPoll.fromJson(d.id, d.data()));
         final epoch = DateTime.fromMillisecondsSinceEpoch(0);
         polls.sort((a, b) {
           if (a.closed != b.closed) return a.closed ? 1 : -1;
@@ -273,8 +274,8 @@ class TripRepository {
   /// Newest first.
   Stream<List<TripExpense>> streamExpenses(String groupId) =>
       _expenses(groupId).snapshots().map((snap) {
-        final list =
-            snap.docs.map((d) => TripExpense.fromJson(d.id, d.data())).toList();
+        final list = decodeFirestoreDocuments(
+            snap.docs, (d) => TripExpense.fromJson(d.id, d.data()));
         final far = DateTime(9999);
         // Pending server timestamps (null) are the newest.
         list.sort((a, b) => (b.createdAt ?? far).compareTo(a.createdAt ?? far));
