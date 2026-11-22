@@ -269,6 +269,9 @@ class FakeData implements DataStore {
   async existingPlaces(cityId: string) {
     return new Map([...this.places.values()].filter((p) => p.cityId === cityId).map((p) => [p.id, p.status]));
   }
+  async storedCityIds(ids: string[]) {
+    return new Map(ids.filter((id) => this.places.has(id)).map((id) => [id, this.places.get(id)!.cityId]));
+  }
   async writePlaces(places: PlaceDoc[]) {
     for (const p of places) this.places.set(p.id, p);
   }

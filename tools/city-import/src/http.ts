@@ -18,7 +18,12 @@ const MEDIA_HOSTS = new Set(["upload.wikimedia.org", "thumb.wikimedia.org"]);
 const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export class HttpError extends Error {
-  constructor(message: string, readonly status?: number) {
+  constructor(
+    message: string,
+    readonly status?: number,
+    /** Worth retrying later (rate limit, server or network error), not a broken file. */
+    readonly temporary = status === 429 || (status ?? 0) >= 500,
+  ) {
     super(message);
   }
 }
@@ -84,7 +89,7 @@ export class WikimediaHttp {
           await this.sleep(backoffMs(attempt));
           continue;
         }
-        throw new HttpError(`Network error for ${url.hostname}: ${(error as Error).message}`);
+        throw new HttpError(`Network error for ${url.hostname}: ${(error as Error).message}`, undefined, true);
       }
       if (response.ok) return response;
       const retryable = response.status === 429 || response.status >= 500;

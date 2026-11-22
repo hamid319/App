@@ -2,7 +2,8 @@ import type { SearchDoc } from "../src/search.js";
 import type { TileDoc } from "../src/tiles.js";
 import { describe, expect, it } from "vitest";
 import { collectCity, type CollectSources } from "../src/collect.js";
-import type { CatalogAttraction, CityCollection, CityDoc, PlaceDoc } from "../src/model.js";
+import type { CatalogAttraction, CityCollection, CityDoc, PlaceDoc, PlaceDraft } from "../src/model.js";
+import { HttpError } from "../src/http.js";
 import type { OsmPlace } from "../src/osm.js";
 import { BudgetExceeded, UploadBudget } from "../src/budget.js";
 import { publishCity } from "../src/publish.js";
@@ -204,6 +205,9 @@ class FakeData implements DataStore {
   async existingPlaces(cityId: string) {
     return new Map([...this.places.values()].filter((p) => p.cityId === cityId).map((p) => [p.id, p.status]));
   }
+  async storedCityIds(ids: string[]) {
+    return new Map(ids.filter((id) => this.places.has(id)).map((id) => [id, this.places.get(id)!.cityId]));
+  }
   async writePlaces(places: PlaceDoc[]) {
     for (const p of places) this.places.set(p.id, p);
   }
@@ -277,6 +281,48 @@ describe("publishCity", () => {
       },
     });
     expect(result).toMatchObject({ published: 0, placesWithoutPhotos: 3 });
+  });
+
+  it("stops before writing when photos of published places fail temporarily", async () => {
+    const collection = await collectCity(city, catalog, fakeSources());
+    const data = new FakeData();
+    await publishCity(collection, new Set(), "run1", deps(new FakePhotos(), data));
+    const before = structuredClone([...data.places.values()]);
+
+    // Empty photo store, so every photo is downloaded again and fails.
+    const failWith = (error: Error) => ({
+      ...deps(new FakePhotos(), data),
+      download: async () => {
+        throw error;
+      },
+    });
+    await expect(publishCity(collection, new Set(), "run2", failWith(new HttpError("x returned 503", 503))))
+      .rejects.toThrow(/failed temporarily .*nothing written/);
+    await expect(publishCity(collection, new Set(), "run2", failWith(new HttpError("Network error", undefined, true))))
+      .rejects.toThrow(/failed temporarily/);
+    expect([...data.places.values()]).toEqual(before);
+
+    // A file that is gone for good does not block the run.
+    const result = await publishCity(collection, new Set(), "run3", failWith(new HttpError("x returned 404", 404)));
+    expect(result.placesWithoutPhotos).toBe(3);
+  });
+
+  it("leaves an id that another city already published alone", async () => {
+    const collection = await collectCity(city, catalog, fakeSources());
+    const data = new FakeData();
+    const first = await publishCity(collection, new Set(), "run1", deps(new FakePhotos(), data));
+
+    const elsewhere = (drafts: PlaceDraft[] = []) => drafts.map((d) => ({ ...d, cityId: "es_madrid" }));
+    const madrid: CityCollection = {
+      ...collection,
+      city: { ...collection.city, id: "es_madrid" },
+      places: elsewhere(collection.places),
+      extras: elsewhere(collection.extras),
+      venues: elsewhere(collection.venues),
+    };
+    const result = await publishCity(madrid, new Set(), "run2", deps(new FakePhotos(), data));
+    expect(result).toMatchObject({ published: 0, otherCity: first.published });
+    expect([...data.places.values()].every((p) => p.cityId === "pt_lisbon" && p.status === "active")).toBe(true);
   });
 
   it("publishes only the photos picked in review, cover first", async () => {
@@ -370,6 +416,14 @@ describe("free-tier budget", () => {
     expect(() => budget.reserve(1)).toThrow(BudgetExceeded);
     expect(budget.usedBytes).toBe(1000);
     expect(() => new UploadBudget(2000, { maxBucketBytes: 1000, maxUploadsPerRun: 5 })).toThrow(BudgetExceeded);
+  });
+
+  it("refuses limits that are not positive numbers", () => {
+    // Number("5GB") is NaN, Number("") is 0.
+    for (const bad of [Number("5GB") * 1024 ** 3, 0, -1, Infinity]) {
+      expect(() => new UploadBudget(0, { maxBucketBytes: bad, maxUploadsPerRun: 5 })).toThrow(/Invalid upload limit/);
+      expect(() => new UploadBudget(0, { maxBucketBytes: 1000, maxUploadsPerRun: bad })).toThrow(/Invalid upload limit/);
+    }
   });
 
   it("stops publishing instead of skipping the photo", async () => {

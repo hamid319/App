@@ -25,6 +25,12 @@ export class UploadBudget {
 
   constructor(bucketBytesNow: number, private readonly limits: UploadBudgetLimits = DEFAULT_LIMITS) {
     this.bytes = bucketBytesNow;
+    // NaN (e.g. R2_MAX_BUCKET_GB=5GB) fails every comparison and would turn the guard off.
+    for (const [name, value] of Object.entries(limits)) {
+      if (!Number.isFinite(value) || value <= 0) {
+        throw new Error(`Invalid upload limit ${name}: ${value} (check R2_MAX_BUCKET_GB and R2_MAX_UPLOADS_PER_RUN in .env)`);
+      }
+    }
     if (bucketBytesNow > limits.maxBucketBytes) {
       throw new BudgetExceeded(`Bucket already holds ${gb(bucketBytesNow)}, above the limit of ${gb(limits.maxBucketBytes)}`);
     }

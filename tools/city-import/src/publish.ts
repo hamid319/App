@@ -1,4 +1,5 @@
 import { BudgetExceeded } from "./budget.js";
+import { HttpError } from "./http.js";
 import { DEFAULTS } from "./config.js";
 import type { ProcessedImage } from "./images.js";
 import type { CityCollection, CityDoc, PlaceDoc, PlaceDraft, StoredPhoto } from "./model.js";
@@ -32,6 +33,8 @@ export interface CityPublishResult {
   venuesWithoutPhotos: number;
   /** placeTiles documents written. */
   tiles: number;
+  /** Drafts skipped because their id is already published for another city. */
+  otherCity: number;
 }
 
 /**
@@ -60,6 +63,7 @@ export async function publishCity(
     venues: 0,
     venuesWithoutPhotos: 0,
     tiles: 0,
+    otherCity: 0,
   };
 
   const docs: PlaceDoc[] = [];
@@ -72,8 +76,21 @@ export async function publishCity(
     // A venue that is also a sight is published once, as the sight.
     ...(collection.venues ?? []).filter((v) => !sightIds.has(v.id) && !extraIds.has(v.id)),
   ];
+  // Ids are wd_<QID> for extras and venues too, and chains share a QID
+  // across cities: the city that published an id first keeps it.
+  const existing = await deps.data.existingPlaces(cityId);
+  const owners = await deps.data.storedCityIds(drafts.map((d) => d.id).filter((id) => !existing.has(id)));
+  // Already published places whose photos failed temporarily; publishing them
+  // now would strip or hide them, so the run stops before writing.
+  const unfinished: string[] = [];
   for (const draft of drafts) {
     if (excludedIds.has(draft.id)) continue;
+    const owner = owners.get(draft.id);
+    if (owner && owner !== cityId) {
+      result.otherCity += 1;
+      log(`  skipped ${draft.id}: already published for ${owner}`);
+      continue;
+    }
     const isVenue = draft.kind === "venue" && venueIds.has(draft.id);
     const photos: StoredPhoto[] = [];
     for (const photo of selectPhotos(draft, deps.picks ?? {})) {
@@ -106,6 +123,8 @@ export async function publishCity(
         });
       } catch (error) {
         if (error instanceof BudgetExceeded) throw error;
+        const permanent = error instanceof HttpError && !error.temporary;
+        if (!permanent && existing.has(draft.id) && !unfinished.includes(draft.id)) unfinished.push(draft.id);
         log(`  photo skipped (${draft.id}, ${photo.fileTitle}): ${(error as Error).message}`);
       }
     }
@@ -120,13 +139,17 @@ export async function publishCity(
     }
     docs.push(toPlaceDoc(draft, photos, importRunId, now));
   }
+  if (unfinished.length > 0) {
+    // Photos uploaded so far stay in R2 and are reused by the rerun.
+    throw new Error(`${cityId}: photos failed temporarily for ${unfinished.length} published places ` +
+      `(${unfinished.slice(0, 5).join(", ")}${unfinished.length > 5 ? ", …" : ""}); nothing written, rerun later`);
+  }
 
   await deps.data.writePlaces(docs);
   result.published = docs.length;
   const sightCount = docs.filter((d) => d.kind === "sight").length;
 
   const keep = new Set(docs.map((doc) => doc.id));
-  const existing = await deps.data.existingPlaces(cityId);
   const toHide = [...existing.entries()]
     .filter(([id, status]) => !keep.has(id) && status !== "hidden")
     .map(([id]) => id);

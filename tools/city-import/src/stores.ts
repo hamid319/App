@@ -23,6 +23,8 @@ export interface PhotoStore {
 export interface DataStore {
   /** Ids and status of the curated places already stored for a city. */
   existingPlaces(cityId: string): Promise<Map<string, PlaceDoc["status"]>>;
+  /** cityId of each of [ids] that is already stored (missing ids are left out). */
+  storedCityIds(ids: string[]): Promise<Map<string, string>>;
   writePlaces(places: PlaceDoc[]): Promise<void>;
   hidePlaces(ids: string[], importRunId: string): Promise<void>;
   writeCity(city: CityDoc): Promise<void>;
@@ -107,6 +109,17 @@ export class FirestoreDataStore implements DataStore {
       .select("status")
       .get();
     return new Map(snapshot.docs.map((doc) => [doc.id, (doc.get("status") as PlaceDoc["status"]) ?? "active"]));
+  }
+
+  async storedCityIds(ids: string[]): Promise<Map<string, string>> {
+    const result = new Map<string, string>();
+    for (let i = 0; i < ids.length; i += 300) {
+      const refs = ids.slice(i, i + 300).map((id) => this.db.collection("places").doc(id));
+      if (refs.length === 0) continue;
+      const docs = await this.db.getAll(...refs, { fieldMask: ["cityId"] });
+      for (const doc of docs) if (doc.exists) result.set(doc.id, doc.get("cityId") as string);
+    }
+    return result;
   }
 
   async writePlaces(places: PlaceDoc[]): Promise<void> {

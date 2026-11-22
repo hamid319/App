@@ -15,6 +15,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseArgs } from "./args.js";
 import { collectCity } from "./collect.js";
 import { WikimediaHttp } from "./http.js";
 import { DEFAULT_LIMITS, UploadBudget, gb } from "./budget.js";
@@ -36,19 +37,6 @@ const OUT = join(ROOT, "out");
 const FIREBASE_PROJECT_ID = "travelapp-31255";
 
 const readJson = <T>(path: string): T => JSON.parse(readFileSync(path, "utf8")) as T;
-
-function args() {
-  const argv = process.argv.slice(2);
-  const command = argv[0];
-  const cityIndex = argv.indexOf("--city");
-  const portIndex = argv.indexOf("--port");
-  return {
-    command,
-    cityIds: cityIndex >= 0 ? (argv[cityIndex + 1] ?? "").split(",").filter(Boolean) : [],
-    dryRun: argv.includes("--dry-run"),
-    port: portIndex >= 0 ? Number(argv[portIndex + 1]) : 4173,
-  };
-}
 
 function selectedCities(cityIds: string[]): CityConfig[] {
   const all = readJson<CityConfig[]>(join(ROOT, "cities.json"));
@@ -215,7 +203,7 @@ async function searchIndex(cities: Array<{ id: string }>) {
 }
 
 async function main() {
-  const { command, cityIds, dryRun, port } = args();
+  const { command, cityIds, dryRun, port } = parseArgs(process.argv.slice(2));
   const cities = selectedCities(cityIds);
   if (command === "collect") await collect(cities);
   else if (command === "report") report(cities);
