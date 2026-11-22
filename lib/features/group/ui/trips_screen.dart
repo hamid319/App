@@ -10,7 +10,7 @@ import '../../../common/utils/trip_days.dart';
 import '../../../common/widgets/error_view.dart';
 import '../../../common/widgets/place_photo.dart';
 import '../../../common/widgets/skeleton.dart';
-import '../../../common/widgets/suitcase_view.dart';
+import '../../../common/widgets/duck_moment.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/popular_cities.dart';
 import '../../../core/errors/user_message.dart';
@@ -62,7 +62,7 @@ class TripsScreen extends ConsumerWidget {
             return RefreshIndicator(
               onRefresh: () async => ref.invalidate(userGroupsProvider),
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
                 children: [
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -88,6 +88,8 @@ class TripsScreen extends ConsumerWidget {
                     ),
                   if (hero != null) _HeroTripCard(group: hero),
                   if (hero != null && !_started(hero)) ...[
+                    const SizedBox(height: 24),
+                    Divider(height: 1, thickness: 1, color: context.pageLine),
                     const SizedBox(height: 24),
                     TripNextSteps(group: hero),
                   ],
@@ -219,9 +221,7 @@ class _AddButton extends StatelessWidget {
       message: context.l10n.tripNewTitle,
       child: Material(
         color: scheme.surface,
-        shape: const CircleBorder(),
-        elevation: 1,
-        shadowColor: const Color(0x14000000),
+        shape: CircleBorder(side: BorderSide(color: scheme.outlineVariant)),
         child: InkWell(
           customBorder: const CircleBorder(),
           onTap: onTap,
@@ -259,89 +259,95 @@ class _HeroTripCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final text = Theme.of(context).textTheme;
-    final scheme = Theme.of(context).colorScheme;
-    final countdown = _countdown(context, group);
     final openPolls = ref.watch(openPollCountProvider(group.groupId));
     final subtitle = [
       tripDatesLabel(context, group) ?? group.location?.cityName,
       l10n.tripPeopleCount(group.members.length),
     ].whereType<String>().join(' · ');
 
-    return Material(
-      color: scheme.surface,
-      borderRadius: BorderRadius.circular(22),
-      clipBehavior: Clip.antiAlias,
-      elevation: 2,
-      shadowColor: const Color(0x0F000000),
-      child: InkWell(
-        onTap: () => context.push('/trip/${group.groupId}'),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              height: 196,
+    // No card: the photo and its caption sit straight on the page.
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: () => context.push('/trip/${group.groupId}'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: SizedBox(
+              height: 232,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
                   TripCover(group: group),
-                  if (countdown != null)
-                    Positioned(
-                      top: 14,
-                      left: 14,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: scheme.surface.withValues(alpha: 0.72),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Text(
-                          countdown,
-                          style: text.labelSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: scheme.onSurface,
-                          ),
+                  Positioned(
+                    top: 14,
+                    left: 14,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 7),
+                      decoration: BoxDecoration(
+                        color: PhotoColors.glass,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Text(
+                        _countdown(context, group) ?? l10n.tripNextTrip,
+                        style: text.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: PhotoColors.onGlass,
                         ),
                       ),
                     ),
+                  ),
+                  Positioned(
+                    right: 14,
+                    bottom: 14,
+                    child: AvatarRow(memberIds: group.members, size: 34),
+                  ),
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    group.groupName ?? l10n.unnamedGroup,
-                    style: text.headlineSmall,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: text.bodyMedium
-                        ?.copyWith(color: scheme.onSurfaceVariant),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      AvatarRow(memberIds: group.members),
-                      const Spacer(),
-                      if (openPolls > 0)
-                        Text(
-                          l10n.tripOpenPolls(openPolls),
-                          style:
-                              text.labelLarge?.copyWith(color: scheme.primary),
-                        ),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      group.groupName ?? l10n.unnamedGroup,
+                      style: text.titleLarge?.copyWith(color: context.onBg),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: text.bodyMedium?.copyWith(color: context.onBg2),
+                    ),
+                    if (openPolls > 0) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        l10n.tripOpenPolls(openPolls),
+                        style:
+                            text.labelLarge?.copyWith(color: context.pageTint),
+                      ),
                     ],
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
+              if (group.tripStart == null) ...[
+                const SizedBox(width: 12),
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: TripTag(l10n.tripDatesOpen),
+                ),
+              ],
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -405,8 +411,7 @@ class _TripRow extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded,
-                color: scheme.onSurfaceVariant.withValues(alpha: 0.6)),
+            Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
           ],
         ),
       ),
@@ -429,28 +434,16 @@ class _EmptyHero extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(22),
       child: ColoredBox(
-        color: BrandColors.navy,
+        color: BrandColors.forest,
         child: Stack(
           children: [
-            Positioned(
-              right: -36,
-              top: -36,
-              child: Container(
-                width: 170,
-                height: 170,
-                decoration: const BoxDecoration(
-                  color: BrandColors.coral,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
             const Positioned(
-              right: 14,
-              top: 14,
-              width: 104,
-              height: 104,
-              child: ExcludeSemantics(
-                child: CustomPaint(painter: SuitcasePainter()),
+              right: 4,
+              top: 4,
+              child: DuckMoment(
+                mood: DuckMood.sleep,
+                size: 120,
+                onDark: true,
               ),
             ),
             Padding(
@@ -484,7 +477,7 @@ class _EmptyHero extends StatelessWidget {
                           label: Text(l10n.tripsPlanTrip),
                           style: FilledButton.styleFrom(
                             backgroundColor: Colors.white,
-                            foregroundColor: BrandColors.navy,
+                            foregroundColor: BrandColors.forest,
                             minimumSize: const Size(0, 48),
                           ),
                         ),
@@ -612,7 +605,7 @@ class _DestinationCard extends ConsumerWidget {
   }
 }
 
-/// The three steps of planning together, for people new to TripFam.
+/// The three steps of planning together, for people new to Out We Go.
 class _HowItWorks extends StatelessWidget {
   const _HowItWorks();
 

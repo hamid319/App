@@ -28,7 +28,7 @@ class RecapShareCard extends StatelessWidget {
   /// Value and label, e.g. (5, 'days').
   final List<(int, String)> stats;
 
-  static const _grey = Color(0xFF6E6E73);
+  static const _grey = Color(0xFF6B6259); // AppPalette ink2
 
   @override
   Widget build(BuildContext context) {
@@ -72,12 +72,12 @@ class RecapShareCard extends StatelessWidget {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: BrandColors.sky,
+                      color: BrandColors.lime,
                       borderRadius: BorderRadius.circular(28),
                     ),
                     child: const Center(
                       child: Icon(Icons.luggage_rounded,
-                          size: 160, color: BrandColors.navy),
+                          size: 160, color: BrandColors.forest),
                     ),
                   ),
                 )
@@ -97,7 +97,7 @@ class RecapShareCard extends StatelessWidget {
                   fontSize: 72,
                   height: 1.1,
                   fontWeight: FontWeight.w800,
-                  color: BrandColors.navy,
+                  color: BrandColors.forest,
                 ),
               ),
               if (subtitle.isNotEmpty) ...[

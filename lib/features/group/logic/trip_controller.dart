@@ -90,6 +90,18 @@ final tripSwipePlacesProvider = FutureProvider.autoDispose
   return pool..sort((a, b) => a.id.compareTo(b.id));
 });
 
+/// The deck for the count on the trip page's swipe button. Waits until
+/// the page has slid in: the count is not worth a stutter in the
+/// transition.
+final tripSwipeBadgePlacesProvider = FutureProvider.autoDispose
+    .family<List<PlaceModel>, String>((ref, groupId) async {
+  final settled = Completer<void>();
+  final timer = Timer(const Duration(milliseconds: 400), settled.complete);
+  ref.onDispose(timer.cancel);
+  await settled.future;
+  return ref.watch(tripSwipePlacesProvider(groupId).future);
+});
+
 final tripPollsProvider = StreamProvider.autoDispose
     .family<List<TripPoll>, String>((ref, groupId) =>
         ref.watch(tripRepositoryProvider).streamPolls(groupId));

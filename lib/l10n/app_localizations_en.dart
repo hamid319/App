@@ -61,7 +61,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get checkInReminderBody => 'Open TripFam and get your stamp.';
+  String get checkInReminderBody => 'Open Out We Go and get your stamp.';
 
   @override
   String get checkInTitle => 'Get your stamp';
@@ -1010,7 +1010,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboarding2Body =>
-      'TripFam turns your favourite places into short walks on the map, day by day.';
+      'Out We Go turns your favourite places into short walks on the map, day by day.';
 
   @override
   String get onboarding3Lead => 'Split costs,';
@@ -1020,7 +1020,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboarding3Body =>
-      'Add who paid for what. TripFam shows who owes whom and how much.';
+      'Add who paid for what. Out We Go shows who owes whom and how much.';
 
   @override
   String get onboardingGuest => 'Just look around as a guest';
@@ -1222,7 +1222,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get calendarPermissionDenied =>
-      'TripFam has no access to your calendar. You can allow it in the iPhone or Android settings.';
+      'Out We Go has no access to your calendar. You can allow it in the iPhone or Android settings.';
 
   @override
   String get errorLoadCalendar => 'Couldn\'t load your calendar.';
@@ -1668,7 +1668,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String tripInviteMessage(String trip, String code, String link) {
-    return 'Join our trip \"$trip\" on TripFam: $link\n\nWith the app: open Trips, tap + and enter the code $code.';
+    return 'Join our trip \"$trip\" on Out We Go: $link\n\nWith the app: open Trips, tap + and enter the code $code.';
   }
 
   @override
@@ -2240,7 +2240,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get passportShareTagline => 'Plan trips together with TripFam';
+  String get passportShareTagline => 'Plan trips together with Out We Go';
 
   @override
   String get passportShareError => 'Couldn\'t create the image.';
@@ -2641,7 +2641,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cityTipSheetHint =>
-      'We check every tip before it shows up in TripFam.';
+      'We check every tip before it shows up in Out We Go.';
 
   @override
   String get cityTipPlaceLabel => 'Place (name or street)';
@@ -2671,6 +2671,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tripCreatedOpen => 'Open trip';
 
   @override
+  String get tripJoinedTitle => 'You\'re in!';
+
+  @override
+  String get tripJoinedBody =>
+      'Your people are already waiting. Swipe together and plan your trip.';
+
+  @override
   String tripPackTitle(int percent) {
     return 'Trip $percent% planned';
   }
@@ -2696,7 +2703,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tripPackDayPlan => 'build the day plan';
 
   @override
-  String get suitcaseTitle => 'Your suitcase';
+  String get suitcaseTitle => 'Your duck';
 
   @override
   String suitcaseLevel(int level) {
@@ -2704,13 +2711,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get suitcaseLevel0 => 'Carry-on';
+  String get suitcaseLevel0 => 'Duckling';
 
   @override
-  String get suitcaseLevel1 => 'Trolley';
+  String get suitcaseLevel1 => 'Young duck';
 
   @override
-  String get suitcaseLevel2 => 'Big suitcase';
+  String get suitcaseLevel2 => 'Hiking duck';
 
   @override
   String get suitcaseLevel3 => 'Wanderer';
@@ -2740,13 +2747,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get suitcaseExtraTag => 'Luggage tag';
 
   @override
-  String get suitcaseExtraStrap => 'Suitcase strap';
+  String get suitcaseExtraStrap => 'Scarf';
 
   @override
-  String get suitcaseExtraGoldWheels => 'Golden wheels';
+  String get suitcaseExtraGoldWheels => 'Golden feet';
 
   @override
-  String get suitcaseExtraGoldHandle => 'Golden handle';
+  String get suitcaseExtraGoldHandle => 'Sunglasses';
 
   @override
   String suitcaseTrips(int count) {
@@ -2782,7 +2789,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get suitcaseHowTitle => 'How your suitcase grows';
+  String get suitcaseHowTitle => 'How your duck grows';
 
   @override
   String get suitcaseEarnHeader => 'Earn miles';
@@ -3103,7 +3110,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileMapTab => 'Map';
 
   @override
-  String get profileIdTitle => 'TripFam travel ID';
+  String get travelMapEmpty =>
+      'Cities you have been to light up in orange here.';
+
+  @override
+  String get profileIdTitle => 'Out We Go travel ID';
 
   @override
   String profileIdNumber(String number) {
@@ -3153,4 +3164,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String placeSearchAdded(String place) {
     return '$place is on the wishlist';
   }
+
+  @override
+  String get tripNextTrip => 'Next trip';
+
+  @override
+  String get tripDatesOpen => 'Dates open';
+
+  @override
+  String get tripStepDone => 'Done';
 }

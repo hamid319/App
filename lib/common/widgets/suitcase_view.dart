@@ -81,14 +81,14 @@ class SuitcasePainter extends CustomPainter {
   static const _palette = [
     BrandColors.coral,
     BrandColors.amber,
-    BrandColors.sky,
+    BrandColors.lime,
     Color(0xFF8FE3BF), // mint
     Color(0xFFFFFFFF),
     Color(0xFFC9B6FF), // lilac
   ];
 
-  static const _dark = Color(0xFF141B4D);
-  static const _groove = Color(0xFF2E3C8C);
+  static const _dark = BrandColors.forestDeep;
+  static const _groove = BrandColors.forestLight;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -129,7 +129,7 @@ class SuitcasePainter extends CustomPainter {
         c,
         c + Offset(math.cos(wheelTurn), math.sin(wheelTurn)) * 2.8,
         Paint()
-          ..color = goldWheels ? BrandColors.navy : const Color(0xFF5A66A8)
+          ..color = goldWheels ? BrandColors.forest : const Color(0xFF5A66A8)
           ..strokeWidth = 1
           ..strokeCap = StrokeCap.round,
       );
@@ -137,7 +137,7 @@ class SuitcasePainter extends CustomPainter {
 
     // Shell with its grooves.
     final shell = RRect.fromLTRBR(_l, _t, _r, _b, const Radius.circular(7));
-    canvas.drawRRect(shell, fill..color = BrandColors.navy);
+    canvas.drawRRect(shell, fill..color = BrandColors.forest);
     canvas.save();
     canvas.clipRRect(shell);
     final groove = Paint()
@@ -199,7 +199,7 @@ class SuitcasePainter extends CustomPainter {
       canvas.drawRRect(tag, fill..color = BrandColors.amber);
       canvas.drawCircle(const Offset(-3.6, 0), 1.1, fill..color = _dark);
       final ink = Paint()
-        ..color = BrandColors.navy
+        ..color = BrandColors.forest
         ..strokeWidth = 0.9;
       canvas.drawLine(const Offset(-0.5, -1.2), const Offset(4.5, -1.2), ink);
       canvas.drawLine(const Offset(-0.5, 1.4), const Offset(3, 1.4), ink);
@@ -240,7 +240,7 @@ class SuitcasePainter extends CustomPainter {
             fontSize: 5.8,
             fontWeight: FontWeight.w900,
             letterSpacing: 0.2,
-            color: BrandColors.navy.withValues(alpha: alpha),
+            color: BrandColors.forest.withValues(alpha: alpha),
           ),
         ),
         textDirection: TextDirection.ltr,

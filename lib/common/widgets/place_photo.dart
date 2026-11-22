@@ -19,9 +19,12 @@ String placePhotoHeroTag(String placeId) => 'place-photo-$placeId';
 /// loads or when there is no photo. Venues without a photo (most of them,
 /// OpenStreetMap has none) get a pastel illustration with their type icon.
 class PlacePhoto extends StatelessWidget {
-  const PlacePhoto({super.key, required this.place});
+  const PlacePhoto({super.key, required this.place, this.placeholder});
 
   final PlaceModel place;
+
+  /// Shown while the photo downloads; the shimmer when null.
+  final Widget? placeholder;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +43,7 @@ class PlacePhoto extends StatelessWidget {
         memCacheWidth: coverCacheWidth(context, box),
         fit: BoxFit.cover,
         fadeInDuration: const Duration(milliseconds: 180),
-        placeholder: (_, __) => const SkeletonImage(),
+        placeholder: (_, __) => placeholder ?? const SkeletonImage(),
         errorWidget: (_, __, ___) => fallback,
       ),
     );

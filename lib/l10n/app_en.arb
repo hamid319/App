@@ -17,7 +17,7 @@
   "pushSettingSubtitle": "Matches, members, costs, journal",
   "checkInReminderTitle": "Arrived in {city}?",
   "@checkInReminderTitle": {"placeholders": {"city": {"type": "String"}}},
-  "checkInReminderBody": "Open TripFam and get your stamp.",
+  "checkInReminderBody": "Open Out We Go and get your stamp.",
   "checkInTitle": "Get your stamp",
   "checkInSubtitle": "In {city}? Check in on site",
   "@checkInSubtitle": {"placeholders": {"city": {"type": "String"}}},
@@ -406,10 +406,10 @@
   "onboarding1Body": "Collect ideas, vote and see right away what everyone likes.",
   "onboarding2Lead": "Ideas become",
   "onboarding2Accent": "a day plan.",
-  "onboarding2Body": "TripFam turns your favourite places into short walks on the map, day by day.",
+  "onboarding2Body": "Out We Go turns your favourite places into short walks on the map, day by day.",
   "onboarding3Lead": "Split costs,",
   "onboarding3Accent": "no maths.",
-  "onboarding3Body": "Add who paid for what. TripFam shows who owes whom and how much.",
+  "onboarding3Body": "Add who paid for what. Out We Go shows who owes whom and how much.",
   "onboardingGuest": "Just look around as a guest",
   "filterAll": "All · {count}",
   "@filterAll": {
@@ -512,7 +512,7 @@
   "fromCalendar": "From calendar",
   "calendarPickTitle": "Pick a trip from your calendar",
   "calendarPickHint": "We use the event's title, place and dates for the group. Nothing else leaves your phone.",
-  "calendarPermissionDenied": "TripFam has no access to your calendar. You can allow it in the iPhone or Android settings.",
+  "calendarPermissionDenied": "Out We Go has no access to your calendar. You can allow it in the iPhone or Android settings.",
   "errorLoadCalendar": "Couldn't load your calendar.",
   "calendarNoEvents": "No upcoming events in your calendar.",
   "calendarCityNotFound": "We couldn't recognise the city. Please pick it.",
@@ -730,7 +730,7 @@
   "tripTabCosts": "Costs",
   "tripInvite": "Invite",
   "tripInviteFriends": "Invite friends",
-  "tripInviteMessage": "Join our trip \"{trip}\" on TripFam: {link}\n\nWith the app: open Trips, tap + and enter the code {code}.",
+  "tripInviteMessage": "Join our trip \"{trip}\" on Out We Go: {link}\n\nWith the app: open Trips, tap + and enter the code {code}.",
   "@tripInviteMessage": {
     "placeholders": {
       "trip": {
@@ -1128,7 +1128,7 @@
       "cities": {"type": "int"}
     }
   },
-  "passportShareTagline": "Plan trips together with TripFam",
+  "passportShareTagline": "Plan trips together with Out We Go",
   "passportShareError": "Couldn't create the image.",
   "passportPageTitle": "STAMPS",
   "superLike": "Super-like",
@@ -1310,7 +1310,7 @@
       "city": {"type": "String"}
     }
   },
-  "cityTipSheetHint": "We check every tip before it shows up in TripFam.",
+  "cityTipSheetHint": "We check every tip before it shows up in Out We Go.",
   "cityTipPlaceLabel": "Place (name or street)",
   "cityTipNoteLabel": "Why is it special? (optional)",
   "cityTipSubmit": "Send tip",
@@ -1322,6 +1322,8 @@
     "placeholders": {"city": {"type": "String"}}
   },
   "tripCreatedOpen": "Open trip",
+  "tripJoinedTitle": "You're in!",
+  "tripJoinedBody": "Your people are already waiting. Swipe together and plan your trip.",
   "tripPackTitle": "Trip {percent}% planned",
   "@tripPackTitle": {
     "placeholders": {"percent": {"type": "int"}}
@@ -1335,14 +1337,14 @@
   "tripPackSwipe": "swipe places",
   "tripPackWishlist": "collect 3 ideas",
   "tripPackDayPlan": "build the day plan",
-  "suitcaseTitle": "Your suitcase",
+  "suitcaseTitle": "Your duck",
   "suitcaseLevel": "Level {level}",
   "@suitcaseLevel": {
     "placeholders": {"level": {"type": "int"}}
   },
-  "suitcaseLevel0": "Carry-on",
-  "suitcaseLevel1": "Trolley",
-  "suitcaseLevel2": "Big suitcase",
+  "suitcaseLevel0": "Duckling",
+  "suitcaseLevel1": "Young duck",
+  "suitcaseLevel2": "Hiking duck",
   "suitcaseLevel3": "Wanderer",
   "suitcaseLevel4": "Globetrotter",
   "suitcaseMiles": "{miles} / {next} miles",
@@ -1359,9 +1361,9 @@
   },
   "suitcaseAllExtras": "All extras collected",
   "suitcaseExtraTag": "Luggage tag",
-  "suitcaseExtraStrap": "Suitcase strap",
-  "suitcaseExtraGoldWheels": "Golden wheels",
-  "suitcaseExtraGoldHandle": "Golden handle",
+  "suitcaseExtraStrap": "Scarf",
+  "suitcaseExtraGoldWheels": "Golden feet",
+  "suitcaseExtraGoldHandle": "Sunglasses",
   "suitcaseTrips": "{count, plural, =1{1 trip} other{{count} trips}}",
   "@suitcaseTrips": {
     "placeholders": {"count": {"type": "int"}}
@@ -1374,7 +1376,7 @@
   "@suitcaseCountries": {
     "placeholders": {"count": {"type": "int"}}
   },
-  "suitcaseHowTitle": "How your suitcase grows",
+  "suitcaseHowTitle": "How your duck grows",
   "suitcaseEarnHeader": "Earn miles",
   "suitcaseEarnTrip": "Trip planned or joined",
   "suitcaseEarnCity": "New city in your Stamps",
@@ -1508,7 +1510,8 @@
     }
   },
   "profileMapTab": "Map",
-  "profileIdTitle": "TripFam travel ID",
+  "travelMapEmpty": "Cities you have been to light up in orange here.",
+  "profileIdTitle": "Out We Go travel ID",
   "profileIdNumber": "No. {number}",
   "@profileIdNumber": {
     "description": "Document number on the profile travel ID.",
@@ -1529,5 +1532,8 @@
   "placeSearchAddTooltip": "Add to wishlist",
   "placeSearchInTrip": "Already on the wishlist",
   "placeSearchAdded": "{place} is on the wishlist",
-  "@placeSearchAdded": {"placeholders": {"place": {"type": "String"}}}
+  "@placeSearchAdded": {"placeholders": {"place": {"type": "String"}}},
+  "tripNextTrip": "Next trip",
+  "tripDatesOpen": "Dates open",
+  "tripStepDone": "Done"
 }

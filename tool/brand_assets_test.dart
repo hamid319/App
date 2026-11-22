@@ -10,10 +10,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:swipetrip/common/widgets/tripfam_mark.dart';
+import 'package:swipetrip/common/widgets/brand_mark.dart';
 import 'package:swipetrip/core/constants/colors.dart';
 
-Future<void> _render(String name, int px, TripFamPainter painter) async {
+Future<void> _render(String name, int px, BrandMarkPainter painter) async {
   final recorder = ui.PictureRecorder();
   final canvas = Canvas(recorder);
   painter.paint(canvas, Size.square(px.toDouble()));
@@ -30,25 +30,25 @@ void main() {
     await _render(
       'app_icon.png',
       1024,
-      const TripFamPainter(background: BrandColors.sky),
+      const BrandMarkPainter(background: BrandColors.lime),
     );
     // Android adaptive icon foreground: the mark inside the 66 % safe zone.
     await _render(
       'app_icon_foreground.png',
       1024,
-      const TripFamPainter(contentScale: 0.6),
+      const BrandMarkPainter(contentScale: 0.6),
     );
     // Splash on the sky ground (iOS, Android < 12): shown at 1/4 size.
     await _render(
       'splash_mark.png',
       768,
-      const TripFamPainter(contentScale: 0.9),
+      const BrandMarkPainter(contentScale: 0.9),
     );
     // Android 12+ splash icon: must fit the 768 px circle of a 1152 px image.
     await _render(
       'splash_android12.png',
       1152,
-      const TripFamPainter(contentScale: 0.6),
+      const BrandMarkPainter(contentScale: 0.6),
     );
   });
 }

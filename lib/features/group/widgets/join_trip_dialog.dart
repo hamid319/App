@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
 import '../logic/group_controller.dart';
+import 'trip_joined_celebration.dart';
 import 'trip_ui.dart';
 
 /// Asks for an invite code and joins that trip. Returns its group id, or
@@ -30,8 +31,9 @@ Future<String?> showJoinTripDialog(BuildContext context, WidgetRef ref) async {
     );
     return null;
   }
-  showTripSnack(context, l10n.joinedGroup);
-  return ref.read(selectedGroupIdProvider);
+  final id = ref.read(selectedGroupIdProvider);
+  await showTripJoinedCelebration(context);
+  return id;
 }
 
 class _JoinDialog extends StatefulWidget {

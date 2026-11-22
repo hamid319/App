@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../common/widgets/duck_moment.dart';
 import '../features/auth/logic/auth_controller.dart';
 import '../l10n/l10n.dart';
 
@@ -51,7 +52,11 @@ class AccountGate extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 72, color: theme.colorScheme.primary),
+              // The trips tab greets guests with the duck, ready to go.
+              if (reason == GateReason.groups)
+                const DuckMoment(mood: DuckMood.idle, size: 150)
+              else
+                Icon(icon, size: 72, color: theme.colorScheme.primary),
               const SizedBox(height: 24),
               Text(
                 _title(context.l10n),

@@ -48,7 +48,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
     return Scaffold(
       appBar: WalletAppBar(
         color: BrandColors.amber,
-        onColor: BrandColors.navy,
+        onColor: BrandColors.forest,
         icon: Icons.favorite_rounded,
         title: l10n.navFavorites,
         actions: [

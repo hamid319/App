@@ -191,7 +191,7 @@ abstract class AppLocalizations {
   /// No description provided for @checkInReminderBody.
   ///
   /// In en, this message translates to:
-  /// **'Open TripFam and get your stamp.'**
+  /// **'Open Out We Go and get your stamp.'**
   String get checkInReminderBody;
 
   /// No description provided for @checkInTitle.
@@ -1961,7 +1961,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding2Body.
   ///
   /// In en, this message translates to:
-  /// **'TripFam turns your favourite places into short walks on the map, day by day.'**
+  /// **'Out We Go turns your favourite places into short walks on the map, day by day.'**
   String get onboarding2Body;
 
   /// No description provided for @onboarding3Lead.
@@ -1979,7 +1979,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding3Body.
   ///
   /// In en, this message translates to:
-  /// **'Add who paid for what. TripFam shows who owes whom and how much.'**
+  /// **'Add who paid for what. Out We Go shows who owes whom and how much.'**
   String get onboarding3Body;
 
   /// No description provided for @onboardingGuest.
@@ -2327,7 +2327,7 @@ abstract class AppLocalizations {
   /// No description provided for @calendarPermissionDenied.
   ///
   /// In en, this message translates to:
-  /// **'TripFam has no access to your calendar. You can allow it in the iPhone or Android settings.'**
+  /// **'Out We Go has no access to your calendar. You can allow it in the iPhone or Android settings.'**
   String get calendarPermissionDenied;
 
   /// No description provided for @errorLoadCalendar.
@@ -3047,7 +3047,7 @@ abstract class AppLocalizations {
   /// No description provided for @tripInviteMessage.
   ///
   /// In en, this message translates to:
-  /// **'Join our trip \"{trip}\" on TripFam: {link}\n\nWith the app: open Trips, tap + and enter the code {code}.'**
+  /// **'Join our trip \"{trip}\" on Out We Go: {link}\n\nWith the app: open Trips, tap + and enter the code {code}.'**
   String tripInviteMessage(String trip, String code, String link);
 
   /// No description provided for @tripInviteCopied.
@@ -3941,7 +3941,7 @@ abstract class AppLocalizations {
   /// No description provided for @passportShareTagline.
   ///
   /// In en, this message translates to:
-  /// **'Plan trips together with TripFam'**
+  /// **'Plan trips together with Out We Go'**
   String get passportShareTagline;
 
   /// No description provided for @passportShareError.
@@ -4553,7 +4553,7 @@ abstract class AppLocalizations {
   /// No description provided for @cityTipSheetHint.
   ///
   /// In en, this message translates to:
-  /// **'We check every tip before it shows up in TripFam.'**
+  /// **'We check every tip before it shows up in Out We Go.'**
   String get cityTipSheetHint;
 
   /// No description provided for @cityTipPlaceLabel.
@@ -4604,6 +4604,18 @@ abstract class AppLocalizations {
   /// **'Open trip'**
   String get tripCreatedOpen;
 
+  /// No description provided for @tripJoinedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re in!'**
+  String get tripJoinedTitle;
+
+  /// No description provided for @tripJoinedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your people are already waiting. Swipe together and plan your trip.'**
+  String get tripJoinedBody;
+
   /// No description provided for @tripPackTitle.
   ///
   /// In en, this message translates to:
@@ -4649,7 +4661,7 @@ abstract class AppLocalizations {
   /// No description provided for @suitcaseTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your suitcase'**
+  /// **'Your duck'**
   String get suitcaseTitle;
 
   /// No description provided for @suitcaseLevel.
@@ -4661,19 +4673,19 @@ abstract class AppLocalizations {
   /// No description provided for @suitcaseLevel0.
   ///
   /// In en, this message translates to:
-  /// **'Carry-on'**
+  /// **'Duckling'**
   String get suitcaseLevel0;
 
   /// No description provided for @suitcaseLevel1.
   ///
   /// In en, this message translates to:
-  /// **'Trolley'**
+  /// **'Young duck'**
   String get suitcaseLevel1;
 
   /// No description provided for @suitcaseLevel2.
   ///
   /// In en, this message translates to:
-  /// **'Big suitcase'**
+  /// **'Hiking duck'**
   String get suitcaseLevel2;
 
   /// No description provided for @suitcaseLevel3.
@@ -4721,19 +4733,19 @@ abstract class AppLocalizations {
   /// No description provided for @suitcaseExtraStrap.
   ///
   /// In en, this message translates to:
-  /// **'Suitcase strap'**
+  /// **'Scarf'**
   String get suitcaseExtraStrap;
 
   /// No description provided for @suitcaseExtraGoldWheels.
   ///
   /// In en, this message translates to:
-  /// **'Golden wheels'**
+  /// **'Golden feet'**
   String get suitcaseExtraGoldWheels;
 
   /// No description provided for @suitcaseExtraGoldHandle.
   ///
   /// In en, this message translates to:
-  /// **'Golden handle'**
+  /// **'Sunglasses'**
   String get suitcaseExtraGoldHandle;
 
   /// No description provided for @suitcaseTrips.
@@ -4757,7 +4769,7 @@ abstract class AppLocalizations {
   /// No description provided for @suitcaseHowTitle.
   ///
   /// In en, this message translates to:
-  /// **'How your suitcase grows'**
+  /// **'How your duck grows'**
   String get suitcaseHowTitle;
 
   /// No description provided for @suitcaseEarnHeader.
@@ -5348,10 +5360,16 @@ abstract class AppLocalizations {
   /// **'Map'**
   String get profileMapTab;
 
+  /// No description provided for @travelMapEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Cities you have been to light up in orange here.'**
+  String get travelMapEmpty;
+
   /// No description provided for @profileIdTitle.
   ///
   /// In en, this message translates to:
-  /// **'TripFam travel ID'**
+  /// **'Out We Go travel ID'**
   String get profileIdTitle;
 
   /// Document number on the profile travel ID.
@@ -5425,6 +5443,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{place} is on the wishlist'**
   String placeSearchAdded(String place);
+
+  /// No description provided for @tripNextTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Next trip'**
+  String get tripNextTrip;
+
+  /// No description provided for @tripDatesOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Dates open'**
+  String get tripDatesOpen;
+
+  /// No description provided for @tripStepDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get tripStepDone;
 }
 
 class _AppLocalizationsDelegate

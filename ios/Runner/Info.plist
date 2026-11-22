@@ -7,7 +7,7 @@
 		<key>MBXAccessToken</key>
 		<string>$(MAPBOX_ACCESS_TOKEN)</string>
 		<key>CFBundleDisplayName</key>
-		<string>TripFam</string>
+		<string>Out We Go</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
-		<string>TripFam</string>
+		<string>Out We Go</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
@@ -48,21 +48,21 @@
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>TripFam uses your photos for your profile picture and for journal entries on your trips.</string>
+		<string>Out We Go uses your photos for your profile picture and for journal entries on your trips.</string>
 		<key>NSPhotoLibraryAddUsageDescription</key>
-		<string>TripFam saves pictures you create, such as your trip recap or a passport page, to your photos.</string>
+		<string>Out We Go saves pictures you create, such as your trip recap or a passport page, to your photos.</string>
 		<key>NSCameraUsageDescription</key>
-		<string>TripFam uses the camera for your profile picture and for journal photos on your trips.</string>
+		<string>Out We Go uses the camera for your profile picture and for journal photos on your trips.</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>TripFam uses your location to show places near you and to check you in on site for your passport stamp.</string>
+		<string>Out We Go uses your location to show places near you and to check you in on site for your passport stamp.</string>
 		<key>LSApplicationQueriesSchemes</key>
 		<array>
 			<string>comgooglemaps</string>
 		</array>
 		<key>NSCalendarsUsageDescription</key>
-		<string>TripFam reads the calendar event you pick to prepare a travel group with its title, place and dates.</string>
+		<string>Out We Go reads the calendar event you pick to prepare a travel group with its title, place and dates.</string>
 		<key>NSCalendarsFullAccessUsageDescription</key>
-		<string>TripFam reads the calendar event you pick to prepare a travel group with its title, place and dates.</string>
+		<string>Out We Go reads the calendar event you pick to prepare a travel group with its title, place and dates.</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
 	</dict>

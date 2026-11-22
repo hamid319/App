@@ -150,8 +150,10 @@ class Ticket extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The hairline tells a white card from the white page.
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(radius),
+      side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
     );
     Widget body = Material(
       color: color ?? Theme.of(context).colorScheme.surface,

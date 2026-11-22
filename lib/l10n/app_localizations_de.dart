@@ -62,7 +62,8 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get checkInReminderBody => 'Öffne TripFam und hol dir deinen Stempel.';
+  String get checkInReminderBody =>
+      'Öffne Out We Go und hol dir deinen Stempel.';
 
   @override
   String get checkInTitle => 'Stempel holen';
@@ -1033,7 +1034,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get onboarding2Body =>
-      'TripFam ordnet eure Lieblingsorte zu kurzen Wegen auf der Karte, Tag für Tag.';
+      'Out We Go ordnet eure Lieblingsorte zu kurzen Wegen auf der Karte, Tag für Tag.';
 
   @override
   String get onboarding3Lead => 'Kosten teilen,';
@@ -1043,7 +1044,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get onboarding3Body =>
-      'Tragt ein, wer was bezahlt hat. TripFam zeigt, wer wem wie viel schuldet.';
+      'Tragt ein, wer was bezahlt hat. Out We Go zeigt, wer wem wie viel schuldet.';
 
   @override
   String get onboardingGuest => 'Erst mal als Gast umsehen';
@@ -1247,7 +1248,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get calendarPermissionDenied =>
-      'TripFam hat keinen Zugriff auf deinen Kalender. Du kannst ihn in den Einstellungen deines iPhones oder Android-Geräts erlauben.';
+      'Out We Go hat keinen Zugriff auf deinen Kalender. Du kannst ihn in den Einstellungen deines iPhones oder Android-Geräts erlauben.';
 
   @override
   String get errorLoadCalendar => 'Dein Kalender konnte nicht geladen werden.';
@@ -1696,7 +1697,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String tripInviteMessage(String trip, String code, String link) {
-    return 'Komm mit auf unsere Reise „$trip“ in TripFam: $link\n\nMit der App: Reisen öffnen, auf + tippen und den Code $code eingeben.';
+    return 'Komm mit auf unsere Reise „$trip“ in Out We Go: $link\n\nMit der App: Reisen öffnen, auf + tippen und den Code $code eingeben.';
   }
 
   @override
@@ -2271,7 +2272,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get passportShareTagline => 'Reisen gemeinsam planen mit TripFam';
+  String get passportShareTagline => 'Reisen gemeinsam planen mit Out We Go';
 
   @override
   String get passportShareError => 'Das Bild konnte nicht erstellt werden.';
@@ -2674,7 +2675,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get cityTipSheetHint =>
-      'Wir prüfen jeden Tipp, bevor er in TripFam erscheint.';
+      'Wir prüfen jeden Tipp, bevor er in Out We Go erscheint.';
 
   @override
   String get cityTipPlaceLabel => 'Ort (Name oder Straße)';
@@ -2704,6 +2705,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get tripCreatedOpen => 'Zur Reise';
 
   @override
+  String get tripJoinedTitle => 'Du bist dabei!';
+
+  @override
+  String get tripJoinedBody =>
+      'Deine Leute warten schon. Swipt zusammen und plant eure Reise.';
+
+  @override
   String tripPackTitle(int percent) {
     return 'Reise zu $percent % geplant';
   }
@@ -2729,7 +2737,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get tripPackDayPlan => 'Tagesplan erstellen';
 
   @override
-  String get suitcaseTitle => 'Dein Koffer';
+  String get suitcaseTitle => 'Deine Ente';
 
   @override
   String suitcaseLevel(int level) {
@@ -2737,19 +2745,19 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get suitcaseLevel0 => 'Handgepäck';
+  String get suitcaseLevel0 => 'Küken';
 
   @override
-  String get suitcaseLevel1 => 'Trolley';
+  String get suitcaseLevel1 => 'Jungente';
 
   @override
-  String get suitcaseLevel2 => 'Reisekoffer';
+  String get suitcaseLevel2 => 'Wanderente';
 
   @override
-  String get suitcaseLevel3 => 'Weltenbummler';
+  String get suitcaseLevel3 => 'Weltenbummlerin';
 
   @override
-  String get suitcaseLevel4 => 'Globetrotter';
+  String get suitcaseLevel4 => 'Zugvogel';
 
   @override
   String suitcaseMiles(int miles, int next) {
@@ -2773,13 +2781,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get suitcaseExtraTag => 'Gepäckanhänger';
 
   @override
-  String get suitcaseExtraStrap => 'Kofferband';
+  String get suitcaseExtraStrap => 'Schal';
 
   @override
-  String get suitcaseExtraGoldWheels => 'Goldene Rollen';
+  String get suitcaseExtraGoldWheels => 'Goldene Füße';
 
   @override
-  String get suitcaseExtraGoldHandle => 'Goldener Griff';
+  String get suitcaseExtraGoldHandle => 'Sonnenbrille';
 
   @override
   String suitcaseTrips(int count) {
@@ -2815,7 +2823,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get suitcaseHowTitle => 'So wächst dein Koffer';
+  String get suitcaseHowTitle => 'So wächst deine Ente';
 
   @override
   String get suitcaseEarnHeader => 'Meilen sammeln';
@@ -3137,7 +3145,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get profileMapTab => 'Karte';
 
   @override
-  String get profileIdTitle => 'TripFam Reiseausweis';
+  String get travelMapEmpty =>
+      'Städte, in denen du warst, leuchten hier orange.';
+
+  @override
+  String get profileIdTitle => 'Out We Go Reiseausweis';
 
   @override
   String profileIdNumber(String number) {
@@ -3187,4 +3199,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String placeSearchAdded(String place) {
     return '$place ist auf der Wunschliste';
   }
+
+  @override
+  String get tripNextTrip => 'Nächste Reise';
+
+  @override
+  String get tripDatesOpen => 'Datum offen';
+
+  @override
+  String get tripStepDone => 'Erledigt';
 }

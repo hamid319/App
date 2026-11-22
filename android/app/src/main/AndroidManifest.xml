@@ -11,7 +11,7 @@
     <!-- Check-in reminders (local notifications) survive a reboot. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <application
-        android:label="TripFam"
+        android:label="Out We Go"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
