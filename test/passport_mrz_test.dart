@@ -15,7 +15,7 @@ void main() {
       uid: 'aB3x9kQ2zz11',
       issued: DateTime(2025, 3, 4),
     );
-    expect(l1, startsWith('P<TFMMUELLER<<JUERGEN<MAX<'));
+    expect(l1, startsWith('P<OWGMUELLER<<JUERGEN<MAX<'));
     expect(l1.length, 44);
     expect(l2.length, 44);
     expect(l2, startsWith('AB3X9KQ2Z'));
@@ -24,7 +24,7 @@ void main() {
 
   test('a name without letters still gives a full line', () {
     final (l1, _) = passportMrz(name: '😀', uid: 'x', issued: DateTime(2026));
-    expect(l1, startsWith('P<TFMTRAVELLER<<'));
+    expect(l1, startsWith('P<OWGTRAVELLER<<'));
     expect(l1.length, 44);
   });
 }

@@ -134,7 +134,7 @@ class SimplifiedProfileScreen extends ConsumerWidget {
               borderRadius: BorderRadius.circular(_walletRadius),
               boxShadow: const [
                 BoxShadow(
-                    color: Color(0x33141B4A),
+                    color: Color(0x33084434),
                     blurRadius: 16,
                     offset: Offset(0, 6)),
               ],
@@ -316,7 +316,7 @@ class SimplifiedProfileScreen extends ConsumerWidget {
                   onTap: () => context.push('/favorites'),
                 ),
                 _WalletCard(
-                  color: BrandColors.orange,
+                  color: BrandColors.lime,
                   onColor: BrandColors.forest,
                   icon: Icons.map_rounded,
                   title: l10n.profileMapTab,

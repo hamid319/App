@@ -4598,6 +4598,18 @@ abstract class AppLocalizations {
   /// **'Open trip'**
   String get tripCreatedOpen;
 
+  /// No description provided for @tripJoinedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re in!'**
+  String get tripJoinedTitle;
+
+  /// No description provided for @tripJoinedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your people are already waiting. Swipe together and plan your trip.'**
+  String get tripJoinedBody;
+
   /// No description provided for @tripPackTitle.
   ///
   /// In en, this message translates to:
@@ -4643,7 +4655,7 @@ abstract class AppLocalizations {
   /// No description provided for @suitcaseTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your suitcase'**
+  /// **'Your duck'**
   String get suitcaseTitle;
 
   /// No description provided for @suitcaseLevel.
@@ -4655,19 +4667,19 @@ abstract class AppLocalizations {
   /// No description provided for @suitcaseLevel0.
   ///
   /// In en, this message translates to:
-  /// **'Carry-on'**
+  /// **'Duckling'**
   String get suitcaseLevel0;
 
   /// No description provided for @suitcaseLevel1.
   ///
   /// In en, this message translates to:
-  /// **'Trolley'**
+  /// **'Young duck'**
   String get suitcaseLevel1;
 
   /// No description provided for @suitcaseLevel2.
   ///
   /// In en, this message translates to:
-  /// **'Big suitcase'**
+  /// **'Hiking duck'**
   String get suitcaseLevel2;
 
   /// No description provided for @suitcaseLevel3.
@@ -4715,19 +4727,19 @@ abstract class AppLocalizations {
   /// No description provided for @suitcaseExtraStrap.
   ///
   /// In en, this message translates to:
-  /// **'Suitcase strap'**
+  /// **'Scarf'**
   String get suitcaseExtraStrap;
 
   /// No description provided for @suitcaseExtraGoldWheels.
   ///
   /// In en, this message translates to:
-  /// **'Golden wheels'**
+  /// **'Golden feet'**
   String get suitcaseExtraGoldWheels;
 
   /// No description provided for @suitcaseExtraGoldHandle.
   ///
   /// In en, this message translates to:
-  /// **'Golden handle'**
+  /// **'Sunglasses'**
   String get suitcaseExtraGoldHandle;
 
   /// No description provided for @suitcaseTrips.
@@ -4751,7 +4763,7 @@ abstract class AppLocalizations {
   /// No description provided for @suitcaseHowTitle.
   ///
   /// In en, this message translates to:
-  /// **'How your suitcase grows'**
+  /// **'How your duck grows'**
   String get suitcaseHowTitle;
 
   /// No description provided for @suitcaseEarnHeader.

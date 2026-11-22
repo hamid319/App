@@ -46,6 +46,15 @@ class _CreateTripSheetState extends ConsumerState<_CreateTripSheet> {
   DateTimeRange? _dates;
   bool _busy = false;
 
+  // Shown above the button: a snackbar would sit behind this sheet.
+  String? _note;
+  bool _noteIsError = false;
+
+  void _show(String message, {bool error = false}) => setState(() {
+        _note = message;
+        _noteIsError = error;
+      });
+
   @override
   void dispose() {
     _name.dispose();
@@ -67,7 +76,7 @@ class _CreateTripSheetState extends ConsumerState<_CreateTripSheet> {
       if (city != null) _city = city;
       _dates = DateTimeRange(start: trip.start, end: trip.end);
     });
-    if (city == null) showTripSnack(context, context.l10n.calendarCityNotFound);
+    if (city == null) _show(context.l10n.calendarCityNotFound);
   }
 
   Future<void> _pickDates() async {
@@ -87,7 +96,7 @@ class _CreateTripSheetState extends ConsumerState<_CreateTripSheet> {
     final name = _name.text.trim();
     final city = _city;
     if (name.isEmpty || city == null) {
-      showTripSnack(context, l10n.enterNameAndLocation);
+      _show(l10n.enterNameAndLocation, error: true);
       return;
     }
     final location = GroupLocation(
@@ -99,7 +108,10 @@ class _CreateTripSheetState extends ConsumerState<_CreateTripSheet> {
       lat: city.lat,
       lng: city.lng,
     );
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+      _note = null;
+    });
     await ref.read(groupControllerProvider.notifier).createGroupWithSettings(
           groupName: name,
           location: location,
@@ -110,8 +122,7 @@ class _CreateTripSheetState extends ConsumerState<_CreateTripSheet> {
     setState(() => _busy = false);
     final state = ref.read(groupControllerProvider);
     if (state.hasError) {
-      showTripSnack(
-        context,
+      _show(
         userMessage(state.error!, fallback: l10n.errorCreateGroup, l10n: l10n),
         error: true,
       );
@@ -145,18 +156,17 @@ class _CreateTripSheetState extends ConsumerState<_CreateTripSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                Expanded(
-                    child: Text(l10n.tripNewTitle, style: text.headlineSmall)),
-                TextButton.icon(
-                  onPressed: _fillFromCalendar,
-                  icon: const Icon(Icons.event_outlined),
-                  label: Text(l10n.fromCalendar),
-                ),
-              ],
+            Text(l10n.tripNewTitle, style: text.headlineSmall),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton.icon(
+                style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                onPressed: _fillFromCalendar,
+                icon: const Icon(Icons.event_outlined),
+                label: Text(l10n.fromCalendar),
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 4),
             InsetGroup(
               children: [
                 Padding(
@@ -196,31 +206,36 @@ class _CreateTripSheetState extends ConsumerState<_CreateTripSheet> {
                 ListTile(
                   leading: const Icon(Icons.date_range_outlined),
                   title: Text(l10n.tripDatesLabel),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (dates != null) ...[
-                        Text(
+                  subtitle: dates == null
+                      ? null
+                      : Text(
                           formatTripDates(dates.start, dates.end,
                               Localizations.localeOf(context).toLanguageTag()),
                           style: muted,
                         ),
-                        IconButton(
+                  trailing: dates != null
+                      ? IconButton(
                           tooltip: l10n.clearTripDates,
                           icon: const Icon(Icons.close_rounded, size: 18),
                           onPressed: () => setState(() => _dates = null),
-                        ),
-                      ] else
-                        Icon(Icons.chevron_right_rounded,
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant),
-                    ],
-                  ),
+                        )
+                      : Icon(Icons.chevron_right_rounded,
+                          color: scheme.onSurfaceVariant),
                   onTap: _pickDates,
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+            if (_note case final note?) ...[
+              Text(
+                note,
+                textAlign: TextAlign.center,
+                style: text.bodyMedium?.copyWith(
+                    color:
+                        _noteIsError ? scheme.error : scheme.onSurfaceVariant),
+              ),
+              const SizedBox(height: 12),
+            ],
             FloatingPrimaryButton(
               label: l10n.tripCreateButton,
               icon: Icons.add_rounded,

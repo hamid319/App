@@ -961,7 +961,7 @@ class _DataPage extends StatelessWidget {
               Row(children: [
                 Text(l10n.passportCoverTitle, style: header),
                 const Spacer(),
-                Text('TFM', style: header),
+                Text('OWG', style: header),
               ]),
               const Divider(color: Color(0x338C8577), height: 16),
               const SizedBox(height: 6),
@@ -1069,7 +1069,7 @@ class _PassportShareCard extends StatelessWidget {
                   child: const BrandMark(size: 96),
                 ),
                 const SizedBox(width: 28),
-                const Text('Out We Go',
+                const Text('Out.We.Go',
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 72,

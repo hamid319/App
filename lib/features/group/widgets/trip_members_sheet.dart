@@ -194,10 +194,13 @@ Future<void> deleteTrip(
   if (!ok || !context.mounted) return;
   final router = GoRouter.of(context);
   final messenger = ScaffoldMessenger.of(context);
+  final repo = ref.read(groupRepositoryProvider);
+  // Leave first: Firestore reports the trip gone locally before the server
+  // confirms, so waiting here would flash "group not found".
+  ref.read(selectedGroupIdProvider.notifier).updateState(null);
+  router.go('/trips');
   try {
-    await ref.read(groupRepositoryProvider).deleteGroup(group.groupId);
-    ref.read(selectedGroupIdProvider.notifier).updateState(null);
-    router.go('/trips');
+    await repo.deleteGroup(group.groupId);
   } catch (e) {
     messenger.showSnackBar(SnackBar(
       content:

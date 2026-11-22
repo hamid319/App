@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/errors/user_message.dart';
 import '../../../l10n/l10n.dart';
 import '../logic/group_controller.dart';
+import '../widgets/trip_joined_celebration.dart';
 
 /// Target of an invite link: joins the trip, then opens it.
 class GroupJoinScreen extends ConsumerStatefulWidget {
@@ -39,15 +40,16 @@ class _GroupJoinScreenState extends ConsumerState<GroupJoinScreen> {
     final messenger = ScaffoldMessenger.of(context);
     if (state.hasError) {
       messenger.showSnackBar(SnackBar(
-        content: Text(
-            userMessage(state.error!, fallback: l10n.errorJoinGroup, l10n: l10n)),
+        content: Text(userMessage(state.error!,
+            fallback: l10n.errorJoinGroup, l10n: l10n)),
         backgroundColor: Theme.of(context).colorScheme.error,
       ));
       context.go('/trips');
       return;
     }
-    messenger.showSnackBar(SnackBar(content: Text(l10n.joinedViaLink)));
-    context.go('/trip/${widget.groupId}');
+    final router = GoRouter.of(context);
+    await showTripJoinedCelebration(context);
+    router.go('/trip/${widget.groupId}');
   }
 
   @override

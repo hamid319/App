@@ -2701,6 +2701,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get tripCreatedOpen => 'Zur Reise';
 
   @override
+  String get tripJoinedTitle => 'Du bist dabei!';
+
+  @override
+  String get tripJoinedBody =>
+      'Deine Leute warten schon. Swipt zusammen und plant eure Reise.';
+
+  @override
   String tripPackTitle(int percent) {
     return 'Reise zu $percent % geplant';
   }
@@ -2726,7 +2733,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get tripPackDayPlan => 'Tagesplan erstellen';
 
   @override
-  String get suitcaseTitle => 'Dein Koffer';
+  String get suitcaseTitle => 'Deine Ente';
 
   @override
   String suitcaseLevel(int level) {
@@ -2734,19 +2741,19 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get suitcaseLevel0 => 'Handgepäck';
+  String get suitcaseLevel0 => 'Küken';
 
   @override
-  String get suitcaseLevel1 => 'Trolley';
+  String get suitcaseLevel1 => 'Jungente';
 
   @override
-  String get suitcaseLevel2 => 'Reisekoffer';
+  String get suitcaseLevel2 => 'Wanderente';
 
   @override
-  String get suitcaseLevel3 => 'Weltenbummler';
+  String get suitcaseLevel3 => 'Weltenbummlerin';
 
   @override
-  String get suitcaseLevel4 => 'Globetrotter';
+  String get suitcaseLevel4 => 'Zugvogel';
 
   @override
   String suitcaseMiles(int miles, int next) {
@@ -2770,13 +2777,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get suitcaseExtraTag => 'Gepäckanhänger';
 
   @override
-  String get suitcaseExtraStrap => 'Kofferband';
+  String get suitcaseExtraStrap => 'Schal';
 
   @override
-  String get suitcaseExtraGoldWheels => 'Goldene Rollen';
+  String get suitcaseExtraGoldWheels => 'Goldene Füße';
 
   @override
-  String get suitcaseExtraGoldHandle => 'Goldener Griff';
+  String get suitcaseExtraGoldHandle => 'Sonnenbrille';
 
   @override
   String suitcaseTrips(int count) {
@@ -2812,7 +2819,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get suitcaseHowTitle => 'So wächst dein Koffer';
+  String get suitcaseHowTitle => 'So wächst deine Ente';
 
   @override
   String get suitcaseEarnHeader => 'Meilen sammeln';

@@ -10,14 +10,14 @@
   final parts = _clean(name).split(' ').where((p) => p.isNotEmpty).toList();
   final surname = parts.isEmpty ? 'TRAVELLER' : parts.last;
   final given = parts.length > 1 ? parts.sublist(0, parts.length - 1) : [];
-  final line1 = _pad('P<TFM$surname<<${given.join('<')}', 44);
+  final line1 = _pad('P<OWG$surname<<${given.join('<')}', 44);
 
   final number = passportNumber(uid);
   // Valid for ten years from the account's creation, like a real passport.
   final expiry = DateTime(issued.year + 10, issued.month, issued.day);
   final expiryText = _yymmdd(expiry);
   const unknownBirth = '<<<<<<';
-  final body = '$number${checkDigit(number)}TFM$unknownBirth<<'
+  final body = '$number${checkDigit(number)}OWG$unknownBirth<<'
       '$expiryText${checkDigit(expiryText)}';
   final last = checkDigit(
       '$number${checkDigit(number)}$expiryText${checkDigit(expiryText)}');

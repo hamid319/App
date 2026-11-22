@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-/// Body text in the platform's system font (San Francisco on iOS, Roboto on
-/// Android): a `null` family lets Flutter pick it. Titles, the logotype and
-/// card names use the rounded Fredoka of the Out We Go design.
+/// The platform's system font everywhere (San Francisco on iOS, Roboto on
+/// Android), as Apple's HIG asks: `null` families let Flutter pick it.
+/// Titles get iOS's large-title weights and tight tracking.
 class AppTypography {
   static const String? bodyFamily = null;
-  static const String displayFamily = 'Fredoka';
+  static const String? displayFamily = null;
 
   static TextStyle _display(double size, double height, FontWeight weight) =>
       TextStyle(

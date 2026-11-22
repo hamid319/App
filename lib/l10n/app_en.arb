@@ -1322,6 +1322,8 @@
     "placeholders": {"city": {"type": "String"}}
   },
   "tripCreatedOpen": "Open trip",
+  "tripJoinedTitle": "You're in!",
+  "tripJoinedBody": "Your people are already waiting. Swipe together and plan your trip.",
   "tripPackTitle": "Trip {percent}% planned",
   "@tripPackTitle": {
     "placeholders": {"percent": {"type": "int"}}
@@ -1335,14 +1337,14 @@
   "tripPackSwipe": "swipe places",
   "tripPackWishlist": "collect 3 ideas",
   "tripPackDayPlan": "build the day plan",
-  "suitcaseTitle": "Your suitcase",
+  "suitcaseTitle": "Your duck",
   "suitcaseLevel": "Level {level}",
   "@suitcaseLevel": {
     "placeholders": {"level": {"type": "int"}}
   },
-  "suitcaseLevel0": "Carry-on",
-  "suitcaseLevel1": "Trolley",
-  "suitcaseLevel2": "Big suitcase",
+  "suitcaseLevel0": "Duckling",
+  "suitcaseLevel1": "Young duck",
+  "suitcaseLevel2": "Hiking duck",
   "suitcaseLevel3": "Wanderer",
   "suitcaseLevel4": "Globetrotter",
   "suitcaseMiles": "{miles} / {next} miles",
@@ -1359,9 +1361,9 @@
   },
   "suitcaseAllExtras": "All extras collected",
   "suitcaseExtraTag": "Luggage tag",
-  "suitcaseExtraStrap": "Suitcase strap",
-  "suitcaseExtraGoldWheels": "Golden wheels",
-  "suitcaseExtraGoldHandle": "Golden handle",
+  "suitcaseExtraStrap": "Scarf",
+  "suitcaseExtraGoldWheels": "Golden feet",
+  "suitcaseExtraGoldHandle": "Sunglasses",
   "suitcaseTrips": "{count, plural, =1{1 trip} other{{count} trips}}",
   "@suitcaseTrips": {
     "placeholders": {"count": {"type": "int"}}
@@ -1374,7 +1376,7 @@
   "@suitcaseCountries": {
     "placeholders": {"count": {"type": "int"}}
   },
-  "suitcaseHowTitle": "How your suitcase grows",
+  "suitcaseHowTitle": "How your duck grows",
   "suitcaseEarnHeader": "Earn miles",
   "suitcaseEarnTrip": "Trip planned or joined",
   "suitcaseEarnCity": "New city in your Stamps",

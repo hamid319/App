@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../common/utils/suitcase_progress.dart';
-import '../../../common/widgets/suitcase_3d.dart';
+import '../../../common/widgets/duck_3d.dart';
 import '../../../common/widgets/suitcase_view.dart';
 import '../../../core/constants/sizes.dart';
 import '../../../l10n/l10n.dart';
@@ -30,8 +30,8 @@ String _goalCount(AppLocalizations l10n, SuitcaseGoal goal, int n) =>
       SuitcaseGoal.countries => l10n.suitcaseCountries(n),
     };
 
-/// The suitcase stage at the top of the profile: level, the suitcase with
-/// its city stickers, the next extra still locked, miles to the next level
+/// The duck stage in the profile: level, the 3D duck that grows with it
+/// (city stickers on its backpack), the next extra still locked, miles to the next level
 /// and how to earn more. Tap explains how it grows.
 class SuitcaseCard extends ConsumerWidget {
   const SuitcaseCard({super.key});
@@ -89,8 +89,9 @@ class SuitcaseCard extends ConsumerWidget {
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      Suitcase3D(
+                      Duck3D(
                         size: 152,
+                        level: p.level,
                         stickers: [
                           for (final s in p.stickers)
                             SuitcaseSticker.fromStamp(s)
@@ -223,7 +224,7 @@ class SuitcaseCard extends ConsumerWidget {
   }
 }
 
-/// The next extra, still locked, hanging beside the suitcase.
+/// The next extra, still locked, beside the duck.
 class _LockedExtra extends StatelessWidget {
   const _LockedExtra({required this.name, required this.missing});
 

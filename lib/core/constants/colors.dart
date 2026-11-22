@@ -93,7 +93,7 @@ class AppPalette {
     danger: Color(0xFFD70015),
     mint: Color(0xFFDDF3E4),
     peach: Color(0xFFFCE4D2),
-    sky: Color(0xFFDCE6F7),
+    sky: Color(0xFFEEF3C4),
     sheet: Color(0xFFFFFDF7),
     darkTabs: false,
   );
@@ -117,7 +117,7 @@ class AppPalette {
     danger: Color(0xFFD70015),
     mint: Color(0xFFDDF3E4),
     peach: Color(0xFFFCE4D2),
-    sky: Color(0xFFDCE6F7),
+    sky: Color(0xFFEEF3C4),
     sheet: Color(0xFFFFFDF7),
     darkTabs: true,
   );

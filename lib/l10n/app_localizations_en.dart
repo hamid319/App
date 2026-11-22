@@ -2666,6 +2666,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tripCreatedOpen => 'Open trip';
 
   @override
+  String get tripJoinedTitle => 'You\'re in!';
+
+  @override
+  String get tripJoinedBody =>
+      'Your people are already waiting. Swipe together and plan your trip.';
+
+  @override
   String tripPackTitle(int percent) {
     return 'Trip $percent% planned';
   }
@@ -2691,7 +2698,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tripPackDayPlan => 'build the day plan';
 
   @override
-  String get suitcaseTitle => 'Your suitcase';
+  String get suitcaseTitle => 'Your duck';
 
   @override
   String suitcaseLevel(int level) {
@@ -2699,13 +2706,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get suitcaseLevel0 => 'Carry-on';
+  String get suitcaseLevel0 => 'Duckling';
 
   @override
-  String get suitcaseLevel1 => 'Trolley';
+  String get suitcaseLevel1 => 'Young duck';
 
   @override
-  String get suitcaseLevel2 => 'Big suitcase';
+  String get suitcaseLevel2 => 'Hiking duck';
 
   @override
   String get suitcaseLevel3 => 'Wanderer';
@@ -2735,13 +2742,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get suitcaseExtraTag => 'Luggage tag';
 
   @override
-  String get suitcaseExtraStrap => 'Suitcase strap';
+  String get suitcaseExtraStrap => 'Scarf';
 
   @override
-  String get suitcaseExtraGoldWheels => 'Golden wheels';
+  String get suitcaseExtraGoldWheels => 'Golden feet';
 
   @override
-  String get suitcaseExtraGoldHandle => 'Golden handle';
+  String get suitcaseExtraGoldHandle => 'Sunglasses';
 
   @override
   String suitcaseTrips(int count) {
@@ -2777,7 +2784,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get suitcaseHowTitle => 'How your suitcase grows';
+  String get suitcaseHowTitle => 'How your duck grows';
 
   @override
   String get suitcaseEarnHeader => 'Earn miles';

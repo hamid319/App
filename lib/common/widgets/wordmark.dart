@@ -3,7 +3,7 @@ import '../../app/theme.dart';
 import '../../core/constants/typography.dart';
 import 'brand_mark.dart';
 
-/// Out We Go logo: the duck mark followed by the "Out We Go" logotype in the
+/// Out We Go logo: the duck mark followed by the "Out.We.Go" logotype in the
 /// tint (forest, lime in dark mode).
 class Wordmark extends StatelessWidget {
   const Wordmark({super.key, this.size = 24, this.showMark = true});
@@ -29,11 +29,8 @@ class Wordmark extends StatelessWidget {
               SizedBox(width: size * 0.35),
             ],
             Text(
-              'Out We Go',
-              style: style.copyWith(
-                color: context.pageTint,
-                letterSpacing: 0,
-              ),
+              'Out.We.Go',
+              style: style.copyWith(color: context.pageTint),
             ),
           ],
         ),

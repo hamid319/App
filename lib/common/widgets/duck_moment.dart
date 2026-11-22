@@ -327,7 +327,6 @@ class DuckPainter extends CustomPainter {
         text: TextSpan(
           text: 'z',
           style: TextStyle(
-            fontFamily: 'Fredoka',
             fontWeight: FontWeight.w700,
             fontSize: size,
             color: zColor.withValues(alpha: opacity.clamp(0, 1)),
