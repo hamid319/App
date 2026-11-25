@@ -49,7 +49,11 @@ em { color: var(--ink2); }
 .top nav a { color: var(--ink); text-decoration: none; padding: 8px 12px; border-radius: 999px; }
 .top nav a:hover { background: var(--soft); }
 .top nav a[aria-current] { background: var(--soft); }
-.top nav .lang { border: 1px solid var(--line); }
+.langtoggle { display: inline-flex; gap: 2px; padding: 3px; margin-left: 6px; border: 1px solid var(--line); border-radius: 999px; background: #fff; }
+.top nav .langtoggle a { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; font-size: 14px; color: var(--ink2); }
+.top nav .langtoggle a:hover { background: var(--soft); color: var(--ink); }
+.top nav .langtoggle a[aria-current] { background: var(--forest); color: #fff; }
+.flag { width: 18px; height: 12px; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.12); }
 
 main { padding: 32px 0 72px; }
 .meta { color: var(--ink2); font-size: 15px; }
@@ -58,13 +62,11 @@ section:first-child { margin-top: 0; }
 .kicker { color: var(--ink2); margin: 0 0 24px; font-size: 18px; }
 
 /* Hero: a big rounded photo with the message on it */
-.hero { position: relative; border-radius: 28px; overflow: hidden; min-height: 520px; display: flex; align-items: flex-end; color: #fff; box-shadow: var(--shadow); }
-.hero > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;  }
-.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0.05) 85%), linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.35) 100%); }
-.hero .copy { position: relative; z-index: 1; padding: 40px; max-width: 680px; }
-.hero h1 { color: #fff; text-shadow: 0 2px 16px rgba(0,0,0,.35); }
-.hero .lead { font-size: 20px; line-height: 1.5; margin: 0 0 22px; color: rgba(255,255,255,0.92); }
-.hero .credit { position: absolute; z-index: 1; right: 14px; bottom: 10px; font-size: 11px; color: rgba(255,255,255,0.7); text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+.hero { display: grid; grid-template-columns: 1.05fr 1fr; align-items: end; gap: 8px; background: var(--forest); color: #fff; border-radius: 28px; overflow: hidden; box-shadow: var(--shadow); }
+.hero .copy { padding: 48px 8px 48px 48px; align-self: center; }
+.hero-art { display: block; width: 100%; height: auto; }
+.hero h1 { color: #fff; }
+.hero .lead { font-size: 20px; line-height: 1.5; margin: 0 0 24px; color: rgba(255,255,255,0.88); }
 
 .pill { display: inline-flex; align-items: center; gap: 8px; background: var(--coral); color: var(--ink); padding: 12px 20px; border-radius: 999px; font-weight: 600; font-size: 16px; text-decoration: none; }
 .steps { display: inline-flex; flex-wrap: wrap; background: #fff; color: var(--ink); border-radius: 999px; box-shadow: var(--shadow); margin: 0 0 18px; padding: 6px; font-size: 15px; }
@@ -129,15 +131,18 @@ footer .legalline { grid-column: 1 / -1; border-top: 1px solid var(--line); padd
   .tiles { grid-template-columns: repeat(2, 1fr); }
   .tile img { aspect-ratio: 4 / 3; }
   .features { grid-template-columns: repeat(2, 1fr); }
+  .hero { grid-template-columns: 1fr; }
+  .hero .copy { padding: 40px 40px 4px; }
+  .hero-art { max-width: 440px; margin: 0 auto; }
 }
 @media (max-width: 640px) {
-  .hero { min-height: 460px; border-radius: 20px; }
-  .hero .copy { padding: 24px; }
+  .hero { grid-template-columns: 1fr; border-radius: 20px; }
+  .hero .copy { padding: 28px 24px 4px; }
+  .hero-art { max-width: 380px; margin: 0 auto; }
   .hero .lead { font-size: 17px; }
   .steps { display: flex; font-size: 13px; }
   .steps span { flex: 1 1 0; padding: 5px 10px; }
   .steps b { font-size: 10px; }
-  .hero .credit { font-size: 10px; right: 12px; bottom: 8px; }
   .pill { font-size: 14px; padding: 10px 16px; }
   .features { grid-template-columns: 1fr; }
   .band { grid-template-columns: 1fr; padding: 28px; }
@@ -146,4 +151,6 @@ footer .legalline { grid-column: 1 / -1; border-top: 1px solid var(--line); padd
   footer .wrap { grid-template-columns: 1fr 1fr; }
   .top .wrap { min-height: 60px; padding-top: 8px; padding-bottom: 8px; }
   .top nav a { padding: 6px 9px; }
+  .top .wrap { position: relative; }
+  .langtoggle { position: absolute; top: 12px; right: 16px; margin: 0; }
 }
