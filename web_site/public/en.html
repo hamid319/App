@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Out We Go · Group trips</title>
   <meta name="description" content="Out We Go is the app for group trips: plan together, swipe places, day plans on a map, split costs and a stamp for every city.">
+  <meta property="og:title" content="Out We Go · Group trips">
+  <meta property="og:description" content="Out We Go is the app for group trips: plan together, swipe places, day plans on a map, split costs and a stamp for every city.">
+  <meta property="og:image" content="https://outwego.de/img/copenhagen.jpg">
   <link rel="alternate" hreflang="de" href="https://outwego.de/">
   <link rel="icon" href="/icon.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -13,34 +16,81 @@
 <body>
 <header class="top"><div class="wrap">
   <a class="brand" href="/en"><img src="/icon.png" alt="">Out We Go</a>
-  <nav><a href="/support">Support</a><a href="/privacy">Privacy</a><a href="/imprint">Imprint</a><a href="/" hreflang="de" lang="de">Deutsch</a></nav>
+  <nav><a href="/support">Support</a><a href="/privacy">Privacy</a><a href="/imprint">Imprint</a><a class="lang" href="/" hreflang="de" lang="de">Deutsch</a></nav>
 </div></header>
 
 <main><div class="wrap">
   <section class="hero">
-    <img src="/icon.png" alt="Out We Go app icon">
-    <h1>Group trips, without the chaos in the chat.</h1>
-    <p class="lead">Out We Go helps you plan a trip together: swipe places, sort the days on a map, split costs fairly and collect memories on the way.</p>
-    <p><span class="badge">Coming soon to the App Store and Google Play</span></p>
+    <img src="/img/copenhagen.jpg" alt="Colourful houses at Nyhavn in Copenhagen" width="1920" height="1280" fetchpriority="high">
+    <span class="credit">Nyhavn, Copenhagen · kallerna, CC BY-SA 4.0</span>
+    <div class="copy">
+      <div class="steps"><span><b>City</b>pick a place</span><span><b>Friends</b>invite them</span><span><b>Swipe</b>and go</span></div>
+      <h1>The best trip is the one you plan together.</h1>
+      <p class="lead">Out We Go turns "we should go away again" into a plan: swipe places, sort the days on a map, split costs fairly.</p>
+      <span class="pill">Coming soon to the App Store and Google Play</span>
+    </div>
   </section>
 
-  <ul class="cards">
-    <li><strong>Swipe together</strong><span>Everyone swipes through the city's places. What you all like goes on your wishlist.</span></li>
-    <li><strong>Days on a map</strong><span>Your favourite places become short routes, day by day.</span></li>
-    <li><strong>Split costs</strong><span>Scan receipts, share out the items and see who owes whom.</span></li>
-    <li><strong>Journal and stamps</strong><span>Photos and notes for each day, and a stamp for every city you visit.</span></li>
-  </ul>
+  <section>
+    <h2>Where to next?</h2>
+    <p class="kicker">Thousands of places, with photos and facts from open sources.</p>
+    <ul class="tiles">
+    <li class="tile"><img src="/img/barcelona.jpg" alt="Sagrada Família, Barcelona" loading="lazy" width="960" height="663"><strong>Barcelona</strong><span>Sagrada Família</span></li>
+    <li class="tile"><img src="/img/rome.jpg" alt="Colosseum, Rome" loading="lazy" width="960" height="673"><strong>Rome</strong><span>Colosseum</span></li>
+    <li class="tile"><img src="/img/paris.jpg" alt="Pont Alexandre III, Paris" loading="lazy" width="960" height="408"><strong>Paris</strong><span>Pont Alexandre III</span></li>
+    <li class="tile"><img src="/img/lisbon.jpg" alt="Belém Tower, Lisbon" loading="lazy" width="960" height="720"><strong>Lisbon</strong><span>Belém Tower</span></li>
+    <li class="tile"><img src="/img/amsterdam.jpg" alt="Rijksmuseum, Amsterdam" loading="lazy" width="960" height="595"><strong>Amsterdam</strong><span>Rijksmuseum</span></li>
+    <li class="tile"><img src="/img/tokyo.jpg" alt="Meiji Jingū, Tokyo" loading="lazy" width="960" height="641"><strong>Tokyo</strong><span>Meiji Jingū</span></li>
+    <li class="tile"><img src="/img/vienna.jpg" alt="Schönbrunn Palace, Vienna" loading="lazy" width="960" height="656"><strong>Vienna</strong><span>Schönbrunn Palace</span></li>
+    <li class="tile"><img src="/img/athens.jpg" alt="Acropolis, Athens" loading="lazy" width="960" height="600"><strong>Athens</strong><span>Acropolis</span></li>
+    </ul>
+  </section>
 
-  <h2>About Hozan Studio</h2>
-  <p>Out We Go is made by Hamid Ebrahimi and Ozan Ermis from Hamburg, Germany. As Hozan Studio we build apps we like to use on our own trips: no ads, no selling data, with place data from open sources such as OpenStreetMap and Wikipedia.</p>
+  <section>
+    <h2>Everything for your trip, in one place</h2>
+    <p class="kicker">No more ten apps, three spreadsheets and a group chat where everything gets lost.</p>
+    <ul class="features">
+      <li><span class="icon" aria-hidden="true">🃏</span><strong>Swipe together</strong><span>Everyone swipes through the places. What you all like goes on your wishlist.</span></li>
+      <li><span class="icon" aria-hidden="true">🗺️</span><strong>Days on a map</strong><span>Your favourite places become short routes, day by day.</span></li>
+      <li><span class="icon" aria-hidden="true">💸</span><strong>Split costs</strong><span>Scan receipts, share out the items, see who owes whom.</span></li>
+      <li><span class="icon" aria-hidden="true">📍</span><strong>Places nearby</strong><span>On the way, the app shows what is just around the corner.</span></li>
+      <li><span class="icon" aria-hidden="true">📔</span><strong>Travel journal</strong><span>Photos and thoughts for each day, shared with everyone who was there.</span></li>
+      <li><span class="icon" aria-hidden="true">🛂</span><strong>Stamps</strong><span>A stamp for every city. Check in on site and it shines in full colour.</span></li>
+    </ul>
+  </section>
 
-  <h2>Contact</h2>
-  <p>Questions, ideas or a bug in the app? Write to <a href="mailto:hozanstudio@gmail.com">hozanstudio@gmail.com</a> or see <a href="/support">Support</a>.</p>
+  <section class="band">
+    <div><h2>Less planning stress. More memories together.</h2><p>Our goose has already packed its backpack. Out We Go is coming soon for iPhone and Android.</p></div>
+    <img src="/img/goose.png" alt="" width="360" height="360" loading="lazy">
+  </section>
+
+  <section class="about">
+    <div class="card"><h2>About Hozan Studio</h2><p>Out We Go is made by Hamid Ebrahimi and Ozan Ermis from Hamburg, Germany. We build apps we like to use on our own trips: no ads, no selling data, with place data from open sources such as OpenStreetMap and Wikipedia.</p></div>
+    <div class="card"><h2>Say hello</h2><p>Questions, ideas or a bug in the app? Write to <a href="mailto:hozanstudio@gmail.com">hozanstudio@gmail.com</a> or see <a href="/support">Support</a>.</p></div>
+  </section>
+
+  <details class="credits">
+    <summary>Photo credits</summary>
+    <p>Photos from Wikimedia Commons, resized:</p>
+    <ul>
+      <li>Nyhavn, Copenhagen: <a href="https://commons.wikimedia.org/wiki/File%3ANyhavn_Copenhagen_2.jpg">kallerna</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+      <li>Sagrada Família, Barcelona: <a href="https://commons.wikimedia.org/wiki/File%3ASF_maig_2026.jpg">Canaan</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+      <li>Colosseum, Rome: <a href="https://commons.wikimedia.org/wiki/File%3AColosseo_2020.jpg">FeaturedPics</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+      <li>Pont Alexandre III, Paris: <a href="https://commons.wikimedia.org/wiki/File%3APont-Alexandre-III-et-Invalides.jpg">Dimitri Destugues</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0">CC BY-SA 3.0</a></li>
+      <li>Belém Tower, Lisbon: <a href="https://commons.wikimedia.org/wiki/File%3ABelem_Tower_-_April_2019_(2).jpg">Rehman Abubakr</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+      <li>Rijksmuseum, Amsterdam: <a href="https://commons.wikimedia.org/wiki/File%3ARijksmuseum_in_Amsterdam.jpg">Marco Almbauer</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0">CC BY-SA 3.0</a></li>
+      <li>Meiji Jingū, Tokyo: <a href="https://commons.wikimedia.org/wiki/File%3ACourtyard_of_Meiji_Shrine_20190717.jpg">Tokuzo in Edomura</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+      <li>Schönbrunn Palace, Vienna: <a href="https://commons.wikimedia.org/wiki/File%3AWien_-_Schloss_Sch%C3%B6nbrunn.JPG">C.Stadler/Bwag</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+      <li>Acropolis, Athens: <a href="https://commons.wikimedia.org/wiki/File%3AAttica_06-13_Athens_50_View_from_Philopappos_-_Acropolis_Hill.jpg">A.Savin</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0">CC BY-SA 3.0</a></li>
+    </ul>
+  </details>
 </div></main>
 
 <footer><div class="wrap">
-  <span>© 2026 Hozan Studio</span>
-  <a href="/support">Support</a><a href="/delete-account">Delete account</a><a href="/privacy">Privacy</a><a href="/imprint">Imprint</a>
+  <div><h4>Out We Go</h4><ul><li><a href="/en">About us</a></li><li><a href="mailto:hozanstudio@gmail.com">Contact</a></li></ul></div>
+  <div><h4>Help</h4><ul><li><a href="/support">Support</a></li><li><a href="/delete-account">Delete account</a></li></ul></div>
+  <div><h4>Legal</h4><ul><li><a href="/privacy">Privacy</a></li><li><a href="/imprint">Imprint</a></li></ul></div>
+  <p class="legalline">© 2026 Hozan Studio · Hamburg, Germany · No ads, no selling data</p>
 </div></footer>
 </body>
 </html>
