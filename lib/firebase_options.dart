@@ -51,28 +51,28 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCeiu539Qs6-V2Hsc4h-Zby5ARu3OkBX6w',
-    appId: '1:531891096536:android:d15391c4766a4ea7d880ad',
+    appId: '1:531891096536:android:e9afdd38e890557ad880ad',
     messagingSenderId: '531891096536',
     projectId: 'travelapp-31255',
     storageBucket: 'travelapp-31255.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAf8lc2QQiw63rzEJtl3ev82boDpPmgS7s',
-    appId: '1:531891096536:ios:34641153670335add880ad',
+    apiKey: 'AIzaSyA8BF0TB1DYSXbiipu8KauG1HzZ0ALmRks',
+    appId: '1:531891096536:ios:4bf09a651d560dcbd880ad',
     messagingSenderId: '531891096536',
     projectId: 'travelapp-31255',
     storageBucket: 'travelapp-31255.firebasestorage.app',
-    iosBundleId: 'com.swipetrip.app',
+    iosBundleId: 'com.hozanstudio.outwego',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyAf8lc2QQiw63rzEJtl3ev82boDpPmgS7s',
-    appId: '1:531891096536:ios:34641153670335add880ad',
+    apiKey: 'AIzaSyA8BF0TB1DYSXbiipu8KauG1HzZ0ALmRks',
+    appId: '1:531891096536:ios:4bf09a651d560dcbd880ad',
     messagingSenderId: '531891096536',
     projectId: 'travelapp-31255',
     storageBucket: 'travelapp-31255.firebasestorage.app',
-    iosBundleId: 'com.swipetrip.app',
+    iosBundleId: 'com.hozanstudio.outwego',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

@@ -23,7 +23,7 @@
       "android": {
         "default": {
           "projectId": "travelapp-31255",
-          "appId": "1:531891096536:android:d15391c4766a4ea7d880ad",
+          "appId": "1:531891096536:android:e9afdd38e890557ad880ad",
           "fileOutput": "android/app/google-services.json"
         }
       },
@@ -31,9 +31,9 @@
         "lib/firebase_options.dart": {
           "projectId": "travelapp-31255",
           "configurations": {
-            "android": "1:531891096536:android:d15391c4766a4ea7d880ad",
-            "ios": "1:531891096536:ios:34641153670335add880ad",
-            "macos": "1:531891096536:ios:34641153670335add880ad",
+            "android": "1:531891096536:android:e9afdd38e890557ad880ad",
+            "ios": "1:531891096536:ios:4bf09a651d560dcbd880ad",
+            "macos": "1:531891096536:ios:4bf09a651d560dcbd880ad",
             "web": "1:531891096536:web:87028a0fda90d1aad880ad",
             "windows": "1:531891096536:web:e0b7a17ad2edb379d880ad"
           }

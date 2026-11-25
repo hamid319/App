@@ -182,6 +182,14 @@ the registration looks done; confirm it in the console. The **final** bundle
 ID is still open (the local Xcode project may use another one for signing;
 never commit `project.pbxproj`).
 
+**Update 2026-11-25:** final ID is `com.hozanstudio.outwego` (iOS bundle ID and
+Android `applicationId`; the Kotlin package/namespace stays `com.swipetrip.app`).
+Registered as an App ID in Apple team `NT99B7745X` and as new Firebase iOS and
+Android apps ("Out We Go"); `firebase_options.dart`, `google-services.json` and
+`firebase.json` point to them. The old Firebase iOS/Android apps (`mobileapp`, `com.example.mobileapp`) were removed; the web apps kept their IDs and were renamed "Out We Go (web/windows)".
+`project.pbxproj` is not committed, so each developer sets the bundle ID and
+team in Xcode (Runner → Signing & Capabilities).
+
 ---
 
 ## 9. Before launch: remove development shortcuts
