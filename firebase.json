@@ -106,11 +106,20 @@
       ],
       "headers": [
         {
-          "source": "**/*.@(css|ttf|png)",
+          "source": "**/*.@(ttf|png|jpg)",
           "headers": [
             {
               "key": "Cache-Control",
               "value": "public, max-age=86400"
+            }
+          ]
+        },
+        {
+          "source": "**/*.css",
+          "headers": [
+            {
+              "key": "Cache-Control",
+              "value": "public, max-age=300"
             }
           ]
         },
