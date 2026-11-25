@@ -1,8 +1,8 @@
 /* outwego.de: Hozan Studio and Out We Go. Light only, brand colors from
    lib/core/constants/colors.dart. */
-@font-face { font-family: "Bricolage"; src: url("/fonts/BricolageGrotesque-ExtraBold.ttf") format("truetype"); font-weight: 800; font-display: swap; }
-@font-face { font-family: "Figtree"; src: url("/fonts/Figtree-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "Figtree"; src: url("/fonts/Figtree-SemiBold.ttf") format("truetype"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Bricolage"; src: url("/fonts/BricolageGrotesque-ExtraBold.woff2") format("woff2"); font-weight: 800; font-display: swap; }
+@font-face { font-family: "Figtree"; src: url("/fonts/Figtree-Regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Figtree"; src: url("/fonts/Figtree-SemiBold.woff2") format("woff2"); font-weight: 600; font-display: swap; }
 
 :root {
   --bg: #FFFFFF;
@@ -40,7 +40,7 @@ em { color: var(--ink2); }
 .narrow { max-width: 760px; }
 
 /* Header */
-.top { position: sticky; top: 0; z-index: 10; background: rgba(255, 255, 255, 0.92); backdrop-filter: saturate(180%) blur(12px); -webkit-backdrop-filter: saturate(180%) blur(12px); border-bottom: 1px solid var(--line); }
+.top { position: sticky; top: 0; z-index: 10; background: #fff; border-bottom: 1px solid var(--line); }
 .top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 72px; flex-wrap: wrap; }
 .brand { display: flex; align-items: center; gap: 10px; color: var(--forest); text-decoration: none; font-size: 22px; }
 .brand img { width: 36px; height: 36px; border-radius: 9px; }
@@ -117,7 +117,7 @@ section:first-child { margin-top: 0; }
 /* Footer */
 footer { background: var(--soft); border-top: 1px solid var(--line); color: var(--ink2); font-size: 15px; }
 footer .wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding-top: 40px; padding-bottom: 24px; }
-footer h4 { color: var(--ink); margin: 0 0 10px; font-size: 15px; }
+footer h3 { color: var(--ink); margin: 0 0 10px; font-size: 15px; }
 footer ul { list-style: none; padding: 0; margin: 0; }
 footer li { margin: 0 0 8px; }
 footer a { color: var(--ink2); text-decoration: none; }
@@ -133,8 +133,11 @@ footer .legalline { grid-column: 1 / -1; border-top: 1px solid var(--line); padd
   .hero { min-height: 460px; border-radius: 20px; }
   .hero .copy { padding: 24px; }
   .hero .lead { font-size: 17px; }
-  .steps { border-radius: 18px; }
-  .steps span { border-right: 0; flex: 1 1 100%; padding: 6px 12px; }
+  .steps { display: flex; font-size: 13px; }
+  .steps span { flex: 1 1 0; padding: 5px 10px; }
+  .steps b { font-size: 10px; }
+  .hero .credit { top: auto; bottom: 8px; right: 12px; font-size: 10px; }
+  .pill { font-size: 14px; padding: 10px 16px; }
   .features { grid-template-columns: 1fr; }
   .band { grid-template-columns: 1fr; padding: 28px; }
   .band img { max-width: 180px; }
