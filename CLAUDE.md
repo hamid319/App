@@ -148,7 +148,8 @@ Not started or open:
 - Untested by the owner: account deletion (throwaway account), offline mode,
   a real web-invite join with a second account, sound and haptics on a real
   iPhone, the Android runtime
-- Release: domain, trademark check (bundle id `com.hozanstudio.outwego`, Apple Developer account and Play Console account "Hozan Studio" exist)
+- Website outwego.de (Hosting site `outwego`, `web_site/public`): studio page, privacy, imprint, support, account deletion, DE and EN. Deploy: `firebase deploy --only hosting:outwego`.
+- Release: trademark check (bundle id `com.hozanstudio.outwego`, Apple Developer account and Play Console account "Hozan Studio" exist)
 
 ## House rules (read before changing anything)
 - **Line endings:** many Dart files use CRLF. Keep them (check with

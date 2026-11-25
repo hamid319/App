@@ -6,12 +6,10 @@ class AppConfig {
   /// domain once it is connected to Hosting.
   static const String inviteBaseUrl = 'https://travelapp-31255.web.app/join';
 
-  /// Full privacy policy, served by Firebase Hosting from web_invite/public
-  /// (datenschutz.html, privacy.html). Settings → Privacy links to it.
-  static const String privacyPolicyUrlDe =
-      'https://travelapp-31255.web.app/datenschutz';
-  static const String privacyPolicyUrlEn =
-      'https://travelapp-31255.web.app/privacy';
+  /// Full privacy policy on outwego.de (Firebase Hosting site `outwego`,
+  /// web_site/public). Settings → Privacy links to it.
+  static const String privacyPolicyUrlDe = 'https://outwego.de/datenschutz';
+  static const String privacyPolicyUrlEn = 'https://outwego.de/privacy';
 
   /// Google Translate's photo mode (menus, labels); the phrasebook adds the
   /// target language as `tl`. On phones it can hand over to the app.
