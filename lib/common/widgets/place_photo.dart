@@ -19,12 +19,21 @@ String placePhotoHeroTag(String placeId) => 'place-photo-$placeId';
 /// loads or when there is no photo. Venues without a photo (most of them,
 /// OpenStreetMap has none) get a pastel illustration with their type icon.
 class PlacePhoto extends StatelessWidget {
-  const PlacePhoto({super.key, required this.place, this.placeholder});
+  const PlacePhoto(
+      {super.key,
+      required this.place,
+      this.placeholder,
+      this.fullSize = false});
 
   final PlaceModel place;
 
   /// Shown while the photo downloads; the shimmer when null.
   final Widget? placeholder;
+
+  /// Decodes the photo at its own size instead of the box's. For boxes that
+  /// resize every frame (a stretching header): a new decode width is a new
+  /// cache key, so the photo would reload and flicker.
+  final bool fullSize;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +49,7 @@ class PlacePhoto extends StatelessWidget {
       builder: (context, box) => CachedNetworkImage(
         imageUrl: urls.first,
         cacheManager: imageCacheManager,
-        memCacheWidth: coverCacheWidth(context, box),
+        memCacheWidth: fullSize ? null : coverCacheWidth(context, box),
         fit: BoxFit.cover,
         fadeInDuration: const Duration(milliseconds: 180),
         placeholder: (_, __) => placeholder ?? const SkeletonImage(),

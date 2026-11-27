@@ -216,7 +216,7 @@ class _PlaceDetailContentState extends ConsumerState<_PlaceDetailContent> {
                   children: [
                     Hero(
                       tag: placePhotoHeroTag(place.id),
-                      child: PlacePhoto(place: place),
+                      child: PlacePhoto(place: place, fullSize: true),
                     ),
                     if (place.photoCredits.isNotEmpty)
                       Positioned(
