@@ -58,7 +58,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyA8BF0TB1DYSXbiipu8KauG1HzZ0ALmRks',
+    apiKey: 'AIzaSyAf8lc2QQiw63rzEJtl3ev82boDpPmgS7s',
     appId: '1:531891096536:ios:4bf09a651d560dcbd880ad',
     messagingSenderId: '531891096536',
     projectId: 'travelapp-31255',
@@ -67,7 +67,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyA8BF0TB1DYSXbiipu8KauG1HzZ0ALmRks',
+    apiKey: 'AIzaSyAf8lc2QQiw63rzEJtl3ev82boDpPmgS7s',
     appId: '1:531891096536:ios:4bf09a651d560dcbd880ad',
     messagingSenderId: '531891096536',
     projectId: 'travelapp-31255',
