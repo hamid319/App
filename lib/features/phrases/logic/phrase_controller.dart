@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../common/models/phrase_book.dart';
 import '../../../core/services/speech_service.dart';
+import '../../../main_providers.dart';
 import '../data/phrase_repository.dart';
 
 final phraseRepositoryProvider =
@@ -11,6 +12,16 @@ final speechServiceProvider = Provider<SpeechService>((ref) {
   final speech = SpeechService();
   ref.onDispose(speech.stop);
   return speech;
+});
+
+/// The signed-in user's profile name (the one trip members see), or null.
+/// The auth account's displayName can hold the email, so it is not used.
+final myDisplayNameProvider = FutureProvider<String?>((ref) async {
+  final uid = ref.watch(currentAccountProvider).value?.uid;
+  if (uid == null) return null;
+  final profile =
+      await ref.watch(profileRepositoryProvider).getPublicProfile(uid);
+  return profile.displayName;
 });
 
 /// The bundled phrasebook, loaded once.

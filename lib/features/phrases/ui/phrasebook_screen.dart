@@ -52,8 +52,11 @@ String appLanguage(BuildContext context) =>
 
 /// The signed-in user's first name for "My name is …", or null.
 String? userFirstName(WidgetRef ref) {
-  final name = ref.read(authServiceProvider).currentUser?.displayName?.trim();
-  return name == null || name.isEmpty ? null : name.split(' ').first;
+  final name = (ref.read(myDisplayNameProvider).value ??
+          ref.read(authServiceProvider).currentUser?.displayName)
+      ?.trim();
+  if (name == null || name.isEmpty || name.contains('@')) return null;
+  return name.split(' ').first;
 }
 
 /// Reads [text] aloud; tells the user when the device has no such voice.
@@ -101,6 +104,7 @@ class _Phrasebook extends ConsumerWidget {
     final known =
         ref.watch(knownPhrasesProvider(lang.code)).value ?? const <String>{};
     final learned = phrases.where((p) => known.contains(p.id)).length;
+    ref.watch(myDisplayNameProvider); // rebuild once the name has loaded
     final name = userFirstName(ref);
 
     return Scaffold(
